@@ -1,0 +1,111 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { socket } from '../utils/socket';
+import { generateSudoku } from '../utils/sudoku';
+
+export default function MultiplayerLobby() {
+    const navigate = useNavigate();
+    const [roomId, setRoomId] = useState('');
+    const [difficulty, setDifficulty] = useState('Medium');
+    const [inRoom, setInRoom] = useState(false);
+    const [myRoom, setMyRoom] = useState('');
+    const [playerCount, setPlayerCount] = useState(1);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        const handlePlayerJoined = ({ players }) => {
+            setPlayerCount(players);
+            if (players === 2) {
+                // Host generates the board
+                const { puzzle, solution } = generateSudoku(difficulty);
+                socket.emit('startGame', { puzzle, solution });
+            }
+        };
+
+        const handleGameStarted = ({ puzzle, solution }) => {
+            navigate('/multiplayer-game', { state: { puzzle, solution, roomId: myRoom, difficulty } });
+        };
+
+        socket.on('playerJoined', handlePlayerJoined);
+        socket.on('gameStarted', handleGameStarted);
+
+        return () => {
+            socket.off('playerJoined', handlePlayerJoined);
+            socket.off('gameStarted', handleGameStarted);
+        };
+    }, [difficulty, navigate, myRoom]);
+
+    const handleCreateRoom = () => {
+        socket.emit('createRoom', { difficulty }, (res) => {
+            setMyRoom(res.roomId);
+            setInRoom(true);
+            setPlayerCount(1);
+        });
+    };
+
+    const handleJoinRoom = () => {
+        if (!roomId) return;
+        setError('');
+        socket.emit('joinRoom', { roomId }, (res) => {
+            if (res.success) {
+                setMyRoom(roomId);
+                setDifficulty(res.difficulty);
+                setInRoom(true);
+                setPlayerCount(2);
+            } else {
+                setError(res.message);
+            }
+        });
+    };
+
+    if (inRoom) {
+        return (
+            <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
+                <h2>Room: {myRoom}</h2>
+                <p>Difficulty: {difficulty}</p>
+                <p>Players: {playerCount}/2</p>
+                {playerCount < 2 ? (
+                    <p style={{ color: 'var(--accent-color)', fontWeight: 600 }}>Waiting for opponent to join...</p>
+                ) : (
+                    <p style={{ color: 'var(--success-color)', fontWeight: 600 }}>Starting game...</p>
+                )}
+                <button className="btn-secondary" style={{ marginTop: '20px' }} onClick={() => {
+                    setInRoom(false);
+                    setMyRoom('');
+                    // Emit disconnect/leave room if server supported it, else just go back
+                    navigate('/');
+                }}>Leave Room</button>
+            </div>
+        );
+    }
+
+    return (
+        <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
+            <h2>Multiplayer</h2>
+            <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+                <h3 style={{ marginTop: 0 }}>Create match</h3>
+                <select value={difficulty} onChange={e => setDifficulty(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', marginBottom: '10px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid gray' }}>
+                    <option value="Easy" style={{ color: 'black' }}>Easy</option>
+                    <option value="Medium" style={{ color: 'black' }}>Medium</option>
+                    <option value="Hard" style={{ color: 'black' }}>Hard</option>
+                    <option value="Expert" style={{ color: 'black' }}>Expert</option>
+                </select>
+                <button className="btn-primary" onClick={handleCreateRoom}>Create Room</button>
+            </div>
+            <div style={{ borderTop: '1px solid var(--border-color)', margin: '20px 0' }}></div>
+            <div style={{ textAlign: 'left' }}>
+                <h3 style={{ marginTop: 0 }}>Join match</h3>
+                <input
+                    type="text"
+                    placeholder="Room Code"
+                    value={roomId}
+                    onChange={e => setRoomId(e.target.value.toUpperCase())}
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', marginBottom: '10px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid gray', textTransform: 'uppercase' }}
+                />
+                {error && <p style={{ color: 'var(--error-color)', fontSize: '0.9rem' }}>{error}</p>}
+                <button className="btn-primary" onClick={handleJoinRoom}>Join Room</button>
+            </div>
+            <button className="btn-secondary" style={{ marginTop: '20px' }} onClick={() => navigate('/')}>Back</button>
+        </div>
+    );
+}
