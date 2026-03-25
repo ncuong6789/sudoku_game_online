@@ -1,23 +1,23 @@
 :root {
-  --bg-color: #ffffff;
-  --panel-bg: #ffffff;
-  --border-color: #e2e8f0;
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
+  --bg-color: #0f172a;
+  --panel-bg: #1e293b;
+  --border-color: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
   --accent-color: #3b82f6;
-  --accent-hover: #2563eb;
-  --error-color: #ef4444;
-  --success-color: #22c55e;
-  --cell-bg: #ffffff;
-  --cell-selected: rgba(59, 130, 246, 0.4);
+  --accent-hover: #60a5fa;
+  --error-color: #f87171;
+  --success-color: #4ade80;
+  --cell-bg: #1e293b;
+  --cell-selected: #0369a1; /* Deep blue for selected */
   /* Vùng chọn nổi bật hơn */
-  --cell-highlighted-region: rgba(59, 130, 246, 0.1);
+  --cell-highlighted-region: #334155; /* Slate 700 */
   /* Vùng liên quan màu nhạt */
-  --cell-highlighted-same: rgba(59, 130, 246, 0.25);
+  --cell-highlighted-same: #475569; /* Slate 600 */
   /* Số giống nhau màu trung bình */
-  --cell-error: rgba(239, 68, 68, 0.15);
+  --cell-error: rgba(248, 113, 113, 0.2);
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 body {
@@ -26,7 +26,7 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #f8fafc;
+  background-color: var(--bg-color);
   color: var(--text-primary);
 }
 
@@ -149,7 +149,7 @@ h1 {
   justify-content: center;
   font-size: 1.8rem;
   font-weight: 400;
-  color: #334155;
+  color: var(--text-primary);
   cursor: pointer;
   transition: background-color 0.2s ease;
   user-select: none;
@@ -187,7 +187,7 @@ h1 {
 }
 
 .cell:hover:not(.fixed) {
-  background: #f1f5f9;
+  background: #334155;
 }
 
 .cell.right-border {
@@ -262,8 +262,8 @@ h1 {
 }
 
 .btn-action:hover {
-  background: #f1f5f9;
-  color: var(--text-primary);
+  background: #334155;
+  color: #fff;
 }
 
 .btn-action.active {

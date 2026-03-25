@@ -11,6 +11,20 @@ export default function MultiplayerLobby() {
     const [myRoom, setMyRoom] = useState('');
     const [playerCount, setPlayerCount] = useState(1);
     const [error, setError] = useState('');
+    const [isConnected, setIsConnected] = useState(socket.connected);
+
+    useEffect(() => {
+        function onConnect() { setIsConnected(true); }
+        function onDisconnect() { setIsConnected(false); }
+
+        socket.on('connect', onConnect);
+        socket.on('disconnect', onDisconnect);
+
+        return () => {
+            socket.off('connect', onConnect);
+            socket.off('disconnect', onDisconnect);
+        };
+    }, []);
 
     useEffect(() => {
         const handlePlayerJoined = ({ players }) => {
@@ -82,9 +96,15 @@ export default function MultiplayerLobby() {
     return (
         <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
             <h2>Multiplayer</h2>
+            
+            {!isConnected && (
+                <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--error-color)', padding: '10px', borderRadius: '8px', marginBottom: '20px', border: '1px solid var(--error-color)', fontSize: '0.9rem' }}>
+                    ⚠️ Server chưa kết nối. Bạn cần triển khai Backend (Node.js) lên một server (như Render) để chơi Online.
+                </div>
+            )}
             <div style={{ marginBottom: '20px', textAlign: 'left' }}>
                 <h3 style={{ marginTop: 0 }}>Create match</h3>
-                <select value={difficulty} onChange={e => setDifficulty(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', marginBottom: '10px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid gray' }}>
+                <select value={difficulty} onChange={e => setDifficulty(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', marginBottom: '10px', background: 'var(--bg-color)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}>
                     <option value="Easy" style={{ color: 'black' }}>Easy</option>
                     <option value="Medium" style={{ color: 'black' }}>Medium</option>
                     <option value="Hard" style={{ color: 'black' }}>Hard</option>
@@ -100,7 +120,7 @@ export default function MultiplayerLobby() {
                     placeholder="Room Code"
                     value={roomId}
                     onChange={e => setRoomId(e.target.value.toUpperCase())}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', marginBottom: '10px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid gray', textTransform: 'uppercase' }}
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', marginBottom: '10px', background: 'var(--bg-color)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', textTransform: 'uppercase' }}
                 />
                 {error && <p style={{ color: 'var(--error-color)', fontSize: '0.9rem' }}>{error}</p>}
                 <button className="btn-primary" onClick={handleJoinRoom}>Join Room</button>
