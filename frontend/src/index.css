@@ -107,9 +107,10 @@ h1 {
 @media (min-width: 768px) {
   .game-container {
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start; /* Aligns board and numpad at the top */
     justify-content: center;
-    gap: 40px;
+    gap: 30px;
+    padding: 20px;
   }
 }
 
@@ -121,10 +122,9 @@ h1 {
 
 .header-info {
   display: flex;
-  justify-content: space-around;
-  align-items: center;
-  flex-wrap: wrap; /* Tránh bị méo trên màn hình nhỏ */
-  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center; /* More centered */
+  gap: 15px;
   width: 100%;
   max-width: 500px;
   min-height: 40px;
@@ -148,10 +148,11 @@ h1 {
   grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(9, 1fr);
   gap: 1px;
-  background: #475569; /* Slate 600 - subtle inner lines */
-  border: 4px solid #ffffff; /* Thick white outside border */
-  max-width: 500px;
+  background: #475569;
+  border: 4px solid #ffffff;
   width: 100%;
+  max-width: 500px;
+  min-width: 300px; /* Prevevent squashing */
   margin: 0 auto;
   aspect-ratio: 1 / 1;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);

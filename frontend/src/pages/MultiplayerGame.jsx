@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Board from '../components/Board';
 import Controls from '../components/Controls';
 import { socket } from '../utils/socket';
+import { useRef } from 'react';
 
 export default function MultiplayerGame() {
     const { state } = useLocation();
@@ -29,6 +30,7 @@ export default function MultiplayerGame() {
     const [opponentErrors, setOpponentErrors] = useState(0);
     const [opponentHints, setOpponentHints] = useState(0);
     const [completedNumbers, setCompletedNumbers] = useState([]);
+    const audioRef = useRef(null);
 
     useEffect(() => {
         if (!initialPuzzle) {
@@ -40,14 +42,15 @@ export default function MultiplayerGame() {
 
         // Listen to opponent updates
         const handleOpponentProgress = (stats) => {
+            console.log("Opponent Stats Received:", stats);
             if (stats.progress !== undefined) setOpponentProgress(stats.progress);
             if (stats.errors !== undefined) setOpponentErrors(stats.errors);
             if (stats.hints !== undefined) setOpponentHints(stats.hints);
         };
-        const handleOpponentGameOver = ({ won }) => {
+        const handleOpponentGameOver = ({ won: opponentWon }) => {
             setIsGameOver(true);
-            setWon(false);
-            if (!won) playLoseSound(); // Opponent lost (error limit), but technically I win
+            setWon(!opponentWon); // If opponent won, I lost. If opponent lost, I won.
+            if (opponentWon) playLoseSound(); // Opponent won means I lost -> play sad sound
         };
         const handleDisconnect = () => {
             // Opponent left
@@ -55,7 +58,6 @@ export default function MultiplayerGame() {
                 setOpponentDisconnected(true);
                 setIsGameOver(true);
                 setWon(true);
-                playLoseSound();
             }
         };
 
@@ -67,6 +69,10 @@ export default function MultiplayerGame() {
             socket.off('opponentProgress', handleOpponentProgress);
             socket.off('opponentGameOver', handleOpponentGameOver);
             socket.off('opponentDisconnected', handleDisconnect);
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
         };
     }, [initialPuzzle, navigate, isGameOver]);
 
@@ -131,7 +137,7 @@ export default function MultiplayerGame() {
                     setIsGameOver(true);
                     setWon(false);
                     socket.emit('gameOver', { won: false });
-                    playLoseSound();
+                    playLoseSound(); // I lost (reached mistake limit)
                 }
 
                 setTimeout(() => {
@@ -162,8 +168,18 @@ export default function MultiplayerGame() {
                     }
                 }
                 setNotes(newNotes);
+                
+                const totalEmpty = initialPuzzle.flat().filter(c => c === 0).length;
+                let emptyCountNum = 0;
+                for (let r2 = 0; r2 < 9; r2++) {
+                    for (let c2 = 0; c2 < 9; c2++) {
+                        if (initialPuzzle[r2][c2] === 0 && newAnswers[r2][c2] === 0) emptyCountNum++;
+                    }
+                }
+                const currentProgress = Math.round(((totalEmpty - emptyCountNum) / totalEmpty) * 100);
+                socket.emit('updateProgress', { progress: currentProgress, errors: errorCount, hints: hintsUsed });
 
-                checkWin(newAnswers);
+                checkWin(newAnswers, errorCount, hintsUsed);
             }
         }
     }, [selectedCell, isGameOver, notesMode, initialPuzzle, solution, userAnswers, notes, checkWin]);
@@ -195,8 +211,17 @@ export default function MultiplayerGame() {
     }, [selectedCell, isGameOver, notesMode, initialPuzzle, userAnswers, handleNumberClick, solution]);
 
     const playLoseSound = () => {
+        if (audioRef.current) audioRef.current.pause();
         const audio = new Audio(import.meta.env.BASE_URL + 'lose.mp3');
+        audioRef.current = audio;
         audio.play().catch(e => console.log("Audio play failed:", e));
+        
+        // Stop after 30s
+        setTimeout(() => {
+            if (audioRef.current === audio) {
+                audio.pause();
+            }
+        }, 30000);
     };
 
     useEffect(() => {
@@ -231,6 +256,10 @@ export default function MultiplayerGame() {
             setWon(false);
             playLoseSound();
         } else {
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
             navigate('/');
         }
     };
