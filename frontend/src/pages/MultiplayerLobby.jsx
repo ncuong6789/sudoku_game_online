@@ -104,7 +104,22 @@ export default function MultiplayerLobby() {
             )}
             <div style={{ marginBottom: '20px', textAlign: 'left' }}>
                 <h3 style={{ marginTop: 0 }}>Create match</h3>
-                <select value={difficulty} onChange={e => setDifficulty(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '8px', marginBottom: '15px', background: '#2d3748', color: 'white', border: '1px solid #4a5568', appearance: 'none', cursor: 'pointer' }}>
+                <select 
+                    value={difficulty} 
+                    onChange={e => setDifficulty(e.target.value)} 
+                    style={{ 
+                        width: '100%', 
+                        padding: '12px', 
+                        borderRadius: '8px', 
+                        marginBottom: '15px', 
+                        background: '#1e293b', 
+                        color: 'white', 
+                        border: '1px solid var(--border-color)', 
+                        appearance: 'none', 
+                        cursor: 'pointer',
+                        boxSizing: 'border-box'
+                    }}
+                >
                     <option value="Easy">Easy</option>
                     <option value="Medium">Medium</option>
                     <option value="Hard">Hard</option>
@@ -120,7 +135,18 @@ export default function MultiplayerLobby() {
                     placeholder="ENTER ROOM CODE"
                     value={roomId}
                     onChange={e => setRoomId(e.target.value.toUpperCase())}
-                    style={{ width: '100%', padding: '12px', borderRadius: '8px', marginBottom: '15px', background: '#2d3748', color: 'white', border: '1px solid #4a5568', textTransform: 'uppercase', outline: 'none' }}
+                    style={{ 
+                        width: '100%', 
+                        padding: '12px', 
+                        borderRadius: '8px', 
+                        marginBottom: '15px', 
+                        background: '#1e293b', 
+                        color: 'white', 
+                        border: '1px solid var(--border-color)', 
+                        textTransform: 'uppercase', 
+                        outline: 'none',
+                        boxSizing: 'border-box'
+                    }}
                 />
                 {error && <p style={{ color: 'var(--error-color)', fontSize: '0.9rem' }}>{error}</p>}
                 <button className="btn-primary" onClick={handleJoinRoom}>Join Room</button>
