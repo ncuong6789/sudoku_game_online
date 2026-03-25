@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { generateSudoku } from '../utils/sudoku';
 import Board from '../components/Board';
 import Controls from '../components/Controls';
@@ -20,6 +20,7 @@ export default function SoloGame() {
     const [time, setTime] = useState(0);
     const [won, setWon] = useState(false);
     const [hintsUsed, setHintsUsed] = useState(0);
+    const audioRef = useRef(null);
 
     const startNewGame = useCallback((diff) => {
         const { puzzle, solution: sol } = generateSudoku(diff);
@@ -46,7 +47,13 @@ export default function SoloGame() {
         if (!isGameOver && initialPuzzle) {
             interval = setInterval(() => setTime(t => t + 1), 1000);
         }
-        return () => clearInterval(interval);
+        return () => {
+            clearInterval(interval);
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
+        };
     }, [isGameOver, initialPuzzle]);
 
     const checkWin = useCallback((answers) => {
@@ -91,9 +98,6 @@ export default function SoloGame() {
             if (solution[r][c] !== num) {
                 setErrors(prev => ({ ...prev, [`${r}-${c}`]: true }));
                 setErrorCount(c => c + 1);
-                if (errorCount + 1 >= 3) {
-                    setIsGameOver(true);
-                }
                 // Remove error highlight after 1s
                 setTimeout(() => {
                     setErrors(prev => {
@@ -129,6 +133,20 @@ export default function SoloGame() {
         }
     }, [selectedCell, isGameOver, initialPuzzle, notesMode, solution, userAnswers, notes, errorCount, checkWin]);
 
+    const playLoseSound = () => {
+        if (audioRef.current) audioRef.current.pause();
+        const audio = new Audio('lose.mp3');
+        audioRef.current = audio;
+        audio.play().catch(e => console.log("Audio play failed:", e));
+        
+        // Stop after 30s
+        setTimeout(() => {
+            if (audioRef.current === audio) {
+                audio.pause();
+            }
+        }, 30000);
+    };
+
     const handleActionClick = useCallback((action) => {
         if (!selectedCell || isGameOver) return;
         const { r, c } = selectedCell;
@@ -142,7 +160,6 @@ export default function SoloGame() {
                 setUserAnswers(newAnswers);
             }
         } else if (action === 'hint') {
-            if (hintsUsed >= 3) return;
             if (initialPuzzle[r][c] === 0 && userAnswers[r][c] === 0) {
                 handleNumberClick(solution[r][c]);
                 setHintsUsed(h => h + 1);
@@ -188,8 +205,8 @@ export default function SoloGame() {
             <div className="sudoku-container glass-panel">
                 <div className="header-info">
                     <span>Difficulty: {difficulty}</span>
-                    <span>Mistakes: {errorCount}/3</span>
-                    <span>Hints: {hintsUsed}/3</span>
+                    <span>Mistakes: {errorCount}</span>
+                    <span>Hints: {hintsUsed}</span>
                     <span>Time: {formatTime(time)}</span>
                 </div>
 
@@ -203,8 +220,8 @@ export default function SoloGame() {
                 />
 
                 {isGameOver && (
-                    <div style={{ marginTop: '20px', color: won ? 'var(--success-color)' : 'var(--error-color)', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                        {won ? 'You Won! Congratulations!' : 'Game Over! Too many mistakes.'}
+                    <div style={{ marginTop: '20px', color: 'var(--success-color)', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                        You Won! Congratulations!
                     </div>
                 )}
             </div>
@@ -229,7 +246,13 @@ export default function SoloGame() {
                     completedNumbers={completedNumbers}
                 />
 
-                <button className="btn-secondary" style={{ marginTop: '20px' }} onClick={() => navigate('/')}>
+                <button className="btn-secondary" style={{ marginTop: '20px' }} onClick={() => {
+                    if (audioRef.current) {
+                        audioRef.current.pause();
+                        audioRef.current = null;
+                    }
+                    navigate('/');
+                }}>
                     Return to Menu
                 </button>
             </div>

@@ -212,7 +212,7 @@ export default function MultiplayerGame() {
 
     const playLoseSound = () => {
         if (audioRef.current) audioRef.current.pause();
-        const audio = new Audio(import.meta.env.BASE_URL + 'lose.mp3');
+        const audio = new Audio('lose.mp3');
         audioRef.current = audio;
         audio.play().catch(e => console.log("Audio play failed:", e));
         
