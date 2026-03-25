@@ -352,8 +352,8 @@ export default function MultiplayerGame() {
                         </div>
 
                         {/* Chat Box */}
-                        <div className="glass-panel chat-box" style={{ marginTop: '20px', padding: '15px' }}>
-                            <div className="chat-messages" style={{ height: '150px', overflowY: 'auto', marginBottom: '10px', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <div className="glass-panel chat-box" style={{ padding: '15px', display: 'flex', flexDirection: 'column' }}>
+                            <div className="chat-messages" style={{ flex: 1, minHeight: '150px', maxHeight: '300px', overflowY: 'auto', marginBottom: '10px', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '5px' }}>
                                 {chatMessages.length === 0 && <span style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No messages yet...</span>}
                                 {chatMessages.map((m, i) => (
                                     <div key={i} style={{ alignSelf: m.sender === 'me' ? 'flex-end' : 'flex-start', background: m.sender === 'me' ? 'var(--accent-color)' : '#334155', padding: '4px 10px', borderRadius: '12px', maxWidth: '80%' }}>
