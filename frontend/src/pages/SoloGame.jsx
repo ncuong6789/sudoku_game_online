@@ -78,6 +78,7 @@ export default function SoloGame() {
         if (emptyCount === 0) {
             setWon(true);
             setIsGameOver(true);
+            playWinSound();
         }
     }, [initialPuzzle]);
 
@@ -142,6 +143,19 @@ export default function SoloGame() {
         audioRef.current = audio;
         audio.play().catch(e => console.log("Audio play failed:", e));
         
+        // Stop after 30s
+        setTimeout(() => {
+            if (audioRef.current === audio) {
+                audio.pause();
+            }
+        }, 30000);
+    };
+
+    const playWinSound = () => {
+        if (audioRef.current) audioRef.current.pause();
+        const audio = new Audio('win.mp3');
+        audioRef.current = audio;
+        audio.play().catch(e => console.log("Win audio play failed:", e));
         // Stop after 30s
         setTimeout(() => {
             if (audioRef.current === audio) {
