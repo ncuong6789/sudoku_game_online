@@ -55,12 +55,14 @@ io.on('connection', (socket) => {
         io.to(roomId).emit('gameStarted', { puzzle, solution });
     });
 
-    socket.on('updateProgress', ({ progress }) => {
+    socket.on('updateProgress', (stats) => {
         const roomId = Array.from(socket.rooms).find(r => r !== socket.id);
         if (!roomId) return;
 
-        rooms[roomId].progress[socket.id] = progress;
-        socket.to(roomId).emit('opponentProgress', progress);
+        if (rooms[roomId]) {
+            rooms[roomId].progress[socket.id] = stats.progress;
+        }
+        socket.to(roomId).emit('opponentProgress', stats);
     });
 
     socket.on('gameOver', ({ won }) => {

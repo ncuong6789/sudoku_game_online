@@ -43,9 +43,13 @@ export default function MultiplayerGame() {
         // Listen to opponent updates
         const handleOpponentProgress = (stats) => {
             console.log("Opponent Stats Received:", stats);
-            if (stats.progress !== undefined) setOpponentProgress(stats.progress);
-            if (stats.errors !== undefined) setOpponentErrors(stats.errors);
-            if (stats.hints !== undefined) setOpponentHints(stats.hints);
+            if (typeof stats === 'number') {
+                setOpponentProgress(stats);
+            } else if (stats && typeof stats === 'object') {
+                if (stats.progress !== undefined) setOpponentProgress(stats.progress);
+                if (stats.errors !== undefined) setOpponentErrors(stats.errors);
+                if (stats.hints !== undefined) setOpponentHints(stats.hints);
+            }
         };
         const handleOpponentGameOver = ({ won: opponentWon }) => {
             setIsGameOver(true);
@@ -284,60 +288,63 @@ export default function MultiplayerGame() {
                         <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
                             <div style={{ width: `${opponentProgress}%`, height: '100%', background: '#a371f7', transition: 'width 0.3s' }} />
                         </div>
-                        <div style={{ fontSize: '0.8rem', marginTop: '2px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                        <div style={{ fontSize: '0.8rem', marginTop: '2px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                             <span>{opponentProgress}%</span>
-                            <span style={{ color: opponentErrors >= 2 ? 'var(--error-color)' : 'inherit' }}>Err: {opponentErrors}/3</span>
-                            <span>Hnt: {opponentHints}/3</span>
+                            <span style={{ color: opponentErrors >= 2 ? 'var(--error-color)' : 'inherit' }}>Errors: {opponentErrors}/3</span>
+                            <span>Hints: {opponentHints}/3</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="header-info" style={{ marginBottom: '10px', width: '100%', maxWidth: 'none' }}>
-                    <span>Room: {roomId}</span>
-                    <span>Diff: {difficulty}</span>
-                    <span>Me: E{errorCount}/3 H{hintsUsed}/3</span>
+                <div className="header-info" style={{ marginBottom: '10px', width: '100%', maxWidth: 'none', justifyContent: 'space-around' }}>
+                    <span>Room ID: {roomId}</span>
+                    <span>Difficulty: {difficulty}</span>
+                    <span>My Mistakes: {errorCount}/3</span>
+                    <span>My Hints: {hintsUsed}/3</span>
                 </div>
 
-                <Board
-                    initialPuzzle={initialPuzzle}
-                    userAnswers={userAnswers}
-                    notes={notes}
-                    selectedCell={selectedCell}
-                    setSelectedCell={setSelectedCell}
-                    errors={errors}
-                />
+                <div className="main-play-area">
+                    <Board
+                        initialPuzzle={initialPuzzle}
+                        userAnswers={userAnswers}
+                        notes={notes}
+                        selectedCell={selectedCell}
+                        setSelectedCell={setSelectedCell}
+                        errors={errors}
+                    />
 
-                {isGameOver && (
-                    <div style={{
-                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                        background: 'rgba(13, 17, 23, 0.85)', backdropFilter: 'blur(4px)',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                        borderRadius: '16px', zIndex: 10
-                    }}>
-                        <h2 style={{ color: won ? 'var(--success-color)' : 'var(--error-color)', fontSize: '2.5rem', margin: 0 }}>
-                            {won ? 'You Won!' : 'You Lost!'}
-                        </h2>
-                        <p style={{ color: 'var(--text-primary)', fontSize: '1.2rem' }}>
-                            {opponentDisconnected && won ? 'Opponent disconnected.' : (won ? 'You solved it first.' : 'Better luck next time!')}
-                        </p>
-                        <button className="btn-primary" style={{ marginTop: '20px', width: 'auto' }} onClick={() => navigate('/multiplayer')}>
-                            Return to Lobby
+                    <div className="glass-panel controls-panel" style={{ background: 'transparent', padding: 0 }}>
+                        <Controls
+                            onNumberClick={handleNumberClick}
+                            onActionClick={handleActionClick}
+                            notesMode={notesMode}
+                            completedNumbers={completedNumbers}
+                        />
+
+                        <button className="btn-secondary" style={{ marginTop: '40px' }} onClick={handleQuit}>
+                            {isGameOver ? 'Back to Menu' : 'Quit Game'}
                         </button>
                     </div>
-                )}
-            </div>
 
-            <div className="glass-panel controls-panel">
-                <Controls
-                    onNumberClick={handleNumberClick}
-                    onActionClick={handleActionClick}
-                    notesMode={notesMode}
-                    completedNumbers={completedNumbers}
-                />
-
-                <button className="btn-secondary" style={{ marginTop: '40px' }} onClick={handleQuit}>
-                    {isGameOver ? 'Back to Menu' : 'Quit Game'}
-                </button>
+                    {isGameOver && (
+                        <div style={{
+                            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                            background: 'rgba(13, 17, 23, 0.85)', backdropFilter: 'blur(4px)',
+                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                            borderRadius: '16px', zIndex: 10
+                        }}>
+                            <h2 style={{ color: won ? 'var(--success-color)' : 'var(--error-color)', fontSize: '2.5rem', margin: 0 }}>
+                                {won ? 'You Won!' : 'You Lost!'}
+                            </h2>
+                            <p style={{ color: 'var(--text-primary)', fontSize: '1.2rem' }}>
+                                {opponentDisconnected && won ? 'Opponent disconnected.' : (won ? 'You solved it first.' : 'Better luck next time!')}
+                            </p>
+                            <button className="btn-primary" style={{ marginTop: '20px', width: 'auto' }} onClick={() => navigate('/multiplayer')}>
+                                Return to Lobby
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

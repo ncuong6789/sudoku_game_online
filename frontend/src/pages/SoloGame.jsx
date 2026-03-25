@@ -210,51 +210,53 @@ export default function SoloGame() {
                     <span>Time: {formatTime(time)}</span>
                 </div>
 
-                <Board
-                    initialPuzzle={initialPuzzle}
-                    userAnswers={userAnswers}
-                    notes={notes}
-                    selectedCell={selectedCell}
-                    setSelectedCell={setSelectedCell}
-                    errors={errors}
-                />
+                <div className="main-play-area">
+                    <Board
+                        initialPuzzle={initialPuzzle}
+                        userAnswers={userAnswers}
+                        notes={notes}
+                        selectedCell={selectedCell}
+                        setSelectedCell={setSelectedCell}
+                        errors={errors}
+                    />
+
+                    <div className="glass-panel controls-panel">
+                        <div className="difficulty-selector">
+                            {['Easy', 'Medium', 'Hard', 'Expert'].map(d => (
+                                <button
+                                    key={d}
+                                    className={`diff-btn ${difficulty === d ? 'active' : ''}`}
+                                    onClick={() => startNewGame(d)}
+                                >
+                                    {d}
+                                </button>
+                            ))}
+                        </div>
+
+                        <Controls
+                            onNumberClick={handleNumberClick}
+                            onActionClick={handleActionClick}
+                            notesMode={notesMode}
+                            completedNumbers={completedNumbers}
+                        />
+
+                        <button className="btn-secondary" style={{ marginTop: '20px' }} onClick={() => {
+                            if (audioRef.current) {
+                                audioRef.current.pause();
+                                audioRef.current = null;
+                            }
+                            navigate('/');
+                        }}>
+                            Return to Menu
+                        </button>
+                    </div>
+                </div>
 
                 {isGameOver && (
                     <div style={{ marginTop: '20px', color: 'var(--success-color)', fontSize: '1.2rem', fontWeight: 'bold' }}>
                         You Won! Congratulations!
                     </div>
                 )}
-            </div>
-
-            <div className="glass-panel controls-panel">
-                <div className="difficulty-selector">
-                    {['Easy', 'Medium', 'Hard', 'Expert'].map(d => (
-                        <button
-                            key={d}
-                            className={`diff-btn ${difficulty === d ? 'active' : ''}`}
-                            onClick={() => startNewGame(d)}
-                        >
-                            {d}
-                        </button>
-                    ))}
-                </div>
-
-                <Controls
-                    onNumberClick={handleNumberClick}
-                    onActionClick={handleActionClick}
-                    notesMode={notesMode}
-                    completedNumbers={completedNumbers}
-                />
-
-                <button className="btn-secondary" style={{ marginTop: '20px' }} onClick={() => {
-                    if (audioRef.current) {
-                        audioRef.current.pause();
-                        audioRef.current = null;
-                    }
-                    navigate('/');
-                }}>
-                    Return to Menu
-                </button>
             </div>
         </div>
     );
