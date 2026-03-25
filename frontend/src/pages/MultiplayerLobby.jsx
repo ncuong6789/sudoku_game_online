@@ -104,11 +104,11 @@ export default function MultiplayerLobby() {
             )}
             <div style={{ marginBottom: '20px', textAlign: 'left' }}>
                 <h3 style={{ marginTop: 0 }}>Create match</h3>
-                <select value={difficulty} onChange={e => setDifficulty(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', marginBottom: '10px', background: 'var(--bg-color)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}>
-                    <option value="Easy" style={{ color: 'black' }}>Easy</option>
-                    <option value="Medium" style={{ color: 'black' }}>Medium</option>
-                    <option value="Hard" style={{ color: 'black' }}>Hard</option>
-                    <option value="Expert" style={{ color: 'black' }}>Expert</option>
+                <select value={difficulty} onChange={e => setDifficulty(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '8px', marginBottom: '15px', background: '#2d3748', color: 'white', border: '1px solid #4a5568', appearance: 'none', cursor: 'pointer' }}>
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                    <option value="Expert">Expert</option>
                 </select>
                 <button className="btn-primary" onClick={handleCreateRoom}>Create Room</button>
             </div>
@@ -117,10 +117,10 @@ export default function MultiplayerLobby() {
                 <h3 style={{ marginTop: 0 }}>Join match</h3>
                 <input
                     type="text"
-                    placeholder="Room Code"
+                    placeholder="ENTER ROOM CODE"
                     value={roomId}
                     onChange={e => setRoomId(e.target.value.toUpperCase())}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', marginBottom: '10px', background: 'var(--bg-color)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', textTransform: 'uppercase' }}
+                    style={{ width: '100%', padding: '12px', borderRadius: '8px', marginBottom: '15px', background: '#2d3748', color: 'white', border: '1px solid #4a5568', textTransform: 'uppercase', outline: 'none' }}
                 />
                 {error && <p style={{ color: 'var(--error-color)', fontSize: '0.9rem' }}>{error}</p>}
                 <button className="btn-primary" onClick={handleJoinRoom}>Join Room</button>

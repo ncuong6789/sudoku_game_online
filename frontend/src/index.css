@@ -121,25 +121,33 @@ h1 {
 
 .header-info {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
+  gap: 10px;
   width: 100%;
-  max-width: 450px;
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: var(--text-secondary);
+  max-width: 500px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 15px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sudoku-board {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
   gap: 1px;
-  background: var(--text-primary);
-  border: 2px solid var(--text-primary);
-  max-width: 450px;
+  background: #475569; /* Slate 600 - subtle inner lines */
+  border: 4px solid #ffffff; /* Thick white outside border */
+  max-width: 500px;
   width: 100%;
   margin: 0 auto;
-  aspect-ratio: 1;
+  aspect-ratio: 1 / 1;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
 }
 
 .cell {
@@ -191,11 +199,11 @@ h1 {
 }
 
 .cell.right-border {
-  border-right: 2px solid var(--text-primary);
+  border-right: 4px solid #ffffff;
 }
 
 .cell.bottom-border {
-  border-bottom: 2px solid var(--text-primary);
+  border-bottom: 4px solid #ffffff;
 }
 
 .notes-grid {

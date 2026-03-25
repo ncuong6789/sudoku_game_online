@@ -14,10 +14,8 @@ export default function SoloGame() {
     const [selectedCell, setSelectedCell] = useState(null);
     const [notesMode, setNotesMode] = useState(false);
     const [errors, setErrors] = useState({});
-    const [errorCount, setErrorCount] = useState(0);
-    const [time, setTime] = useState(0);
-    const [isGameOver, setIsGameOver] = useState(false);
     const [won, setWon] = useState(false);
+    const [hintsUsed, setHintsUsed] = useState(0);
 
     const startNewGame = useCallback((diff) => {
         const { puzzle, solution: sol } = generateSudoku(diff);
@@ -32,6 +30,7 @@ export default function SoloGame() {
         setIsGameOver(false);
         setWon(false);
         setDifficulty(diff);
+        setHintsUsed(0);
     }, []);
 
     useEffect(() => {
@@ -117,8 +116,10 @@ export default function SoloGame() {
                 setUserAnswers(newAnswers);
             }
         } else if (action === 'hint') {
+            if (hintsUsed >= 3) return;
             if (initialPuzzle[r][c] === 0 && userAnswers[r][c] === 0) {
                 handleNumberClick(solution[r][c]);
+                setHintsUsed(h => h + 1);
             }
         }
     }, [selectedCell, isGameOver, notesMode, initialPuzzle, userAnswers, solution, handleNumberClick]);
@@ -172,6 +173,7 @@ export default function SoloGame() {
                 <div className="header-info">
                     <span>Difficulty: {difficulty}</span>
                     <span>Mistakes: {errorCount}/3</span>
+                    <span>Hints: {hintsUsed}/3</span>
                     <span>Time: {formatTime(time)}</span>
                 </div>
 

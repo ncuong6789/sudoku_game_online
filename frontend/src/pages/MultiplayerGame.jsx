@@ -19,6 +19,7 @@ export default function MultiplayerGame() {
     const [notesMode, setNotesMode] = useState(false);
     const [errors, setErrors] = useState({});
     const [errorCount, setErrorCount] = useState(0);
+    const [hintsUsed, setHintsUsed] = useState(0);
 
     const [myProgress, setMyProgress] = useState(0);
     const [opponentProgress, setOpponentProgress] = useState(0);
@@ -103,7 +104,15 @@ export default function MultiplayerGame() {
             // Check if correct
             if (solution[r][c] !== num) {
                 setErrors(prev => ({ ...prev, [`${r}-${c}`]: true }));
-                setErrorCount(c => c + 1);
+                const newErrorCount = errorCount + 1;
+                setErrorCount(newErrorCount);
+
+                if (newErrorCount >= 3) {
+                    setIsGameOver(true);
+                    setWon(false);
+                    socket.emit('gameOver', { won: false });
+                }
+
                 setTimeout(() => {
                     setErrors(prev => {
                         const next = { ...prev };
@@ -150,7 +159,11 @@ export default function MultiplayerGame() {
                 setUserAnswers(newAnswers);
             }
         } else if (action === 'hint') {
-            if (initialPuzzle[r][c] === 0 && userAnswers[r][c] === 0) handleNumberClick(solution[r][c]);
+            if (hintsUsed >= 3) return;
+            if (initialPuzzle[r][c] === 0 && userAnswers[r][c] === 0) {
+                handleNumberClick(solution[r][c]);
+                setHintsUsed(h => h + 1);
+            }
         }
     }, [selectedCell, isGameOver, notesMode, initialPuzzle, userAnswers, handleNumberClick, solution]);
 
@@ -206,7 +219,8 @@ export default function MultiplayerGame() {
                 <div className="header-info" style={{ marginBottom: '10px' }}>
                     <span>Room: {roomId}</span>
                     <span>Diff: {difficulty}</span>
-                    <span>Errors: {errorCount}</span>
+                    <span>Errors: {errorCount}/3</span>
+                    <span>Hints: {hintsUsed}/3</span>
                 </div>
 
                 <Board
