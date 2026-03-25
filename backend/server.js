@@ -72,6 +72,16 @@ io.on('connection', (socket) => {
         socket.to(roomId).emit('opponentGameOver', { won });
     });
 
+    socket.on('sendMessage', ({ message }) => {
+        const roomId = Array.from(socket.rooms).find(r => r !== socket.id);
+        if (!roomId) return;
+
+        socket.to(roomId).emit('receiveMessage', { 
+            message, 
+            sender: socket.id 
+        });
+    });
+
     socket.on('disconnect', () => {
         for (const roomId in rooms) {
             const index = rooms[roomId].players.indexOf(socket.id);

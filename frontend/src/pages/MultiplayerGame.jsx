@@ -30,6 +30,8 @@ export default function MultiplayerGame() {
     const [opponentErrors, setOpponentErrors] = useState(0);
     const [opponentHints, setOpponentHints] = useState(0);
     const [completedNumbers, setCompletedNumbers] = useState([]);
+    const [chatMessages, setChatMessages] = useState([]);
+    const [msgInput, setMsgInput] = useState('');
     const audioRef = useRef(null);
 
     useEffect(() => {
@@ -65,20 +67,32 @@ export default function MultiplayerGame() {
             }
         };
 
+        const handleReceiveMessage = (data) => {
+            setChatMessages(prev => [...prev.slice(-10), { text: data.message, sender: 'opponent' }]);
+        };
+
         socket.on('opponentProgress', handleOpponentProgress);
         socket.on('opponentGameOver', handleOpponentGameOver);
         socket.on('opponentDisconnected', handleDisconnect);
+        socket.on('receiveMessage', handleReceiveMessage);
 
         return () => {
             socket.off('opponentProgress', handleOpponentProgress);
             socket.off('opponentGameOver', handleOpponentGameOver);
             socket.off('opponentDisconnected', handleDisconnect);
+            socket.off('receiveMessage', handleReceiveMessage);
+        };
+    }, [initialPuzzle, navigate]);
+
+    // Separate useEffect for audio cleanup ON UNMOUNT only
+    useEffect(() => {
+        return () => {
             if (audioRef.current) {
                 audioRef.current.pause();
                 audioRef.current = null;
             }
         };
-    }, [initialPuzzle, navigate, isGameOver]);
+    }, []);
 
     const checkWin = useCallback((answers, currentErrors, currentHints) => {
         let emptyCount = 0;
@@ -132,17 +146,19 @@ export default function MultiplayerGame() {
             // Check if correct
             if (solution[r][c] !== num) {
                 setErrors(prev => ({ ...prev, [`${r}-${c}`]: true }));
-                const newErrorCount = errorCount + 1;
-                setErrorCount(newErrorCount);
-
-                socket.emit('updateProgress', { progress: myProgress, errors: newErrorCount, hints: hintsUsed });
-
-                if (newErrorCount >= 3) {
-                    setIsGameOver(true);
-                    setWon(false);
-                    socket.emit('gameOver', { won: false });
-                    playLoseSound(); // I lost (reached mistake limit)
-                }
+                
+                setErrorCount(prev => {
+                    const next = prev + 1;
+                    socket.emit('updateProgress', { progress: myProgress, errors: next, hints: hintsUsed });
+                    
+                    if (next >= 3) {
+                        setIsGameOver(true);
+                        setWon(false);
+                        socket.emit('gameOver', { won: false });
+                        playLoseSound();
+                    }
+                    return next;
+                });
 
                 setTimeout(() => {
                     setErrors(prev => {
@@ -253,6 +269,14 @@ export default function MultiplayerGame() {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [selectedCell, handleNumberClick, handleActionClick]);
 
+    const handleSendMessage = (e) => {
+        if (e) e.preventDefault();
+        if (!msgInput.trim()) return;
+        socket.emit('sendMessage', { message: msgInput });
+        setChatMessages(prev => [...prev.slice(-10), { text: msgInput, sender: 'me' }]);
+        setMsgInput('');
+    };
+
     const handleQuit = () => {
         if (!isGameOver) {
             socket.emit('gameOver', { won: false });
@@ -313,17 +337,41 @@ export default function MultiplayerGame() {
                         errors={errors}
                     />
 
-                    <div className="glass-panel controls-panel" style={{ background: 'transparent', padding: 0 }}>
-                        <Controls
-                            onNumberClick={handleNumberClick}
-                            onActionClick={handleActionClick}
-                            notesMode={notesMode}
-                            completedNumbers={completedNumbers}
-                        />
+                    <div className="side-panel">
+                        <div className="glass-panel controls-panel" style={{ background: 'transparent', padding: 0 }}>
+                            <Controls
+                                onNumberClick={handleNumberClick}
+                                onActionClick={handleActionClick}
+                                notesMode={notesMode}
+                                completedNumbers={completedNumbers}
+                            />
 
-                        <button className="btn-secondary" style={{ marginTop: '40px' }} onClick={handleQuit}>
-                            {isGameOver ? 'Back to Menu' : 'Quit Game'}
-                        </button>
+                            <button className="btn-secondary" style={{ marginTop: '20px' }} onClick={handleQuit}>
+                                {isGameOver ? 'Back to Menu' : 'Quit Game'}
+                            </button>
+                        </div>
+
+                        {/* Chat Box */}
+                        <div className="glass-panel chat-box" style={{ marginTop: '20px', padding: '15px' }}>
+                            <div className="chat-messages" style={{ height: '150px', overflowY: 'auto', marginBottom: '10px', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                                {chatMessages.length === 0 && <span style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No messages yet...</span>}
+                                {chatMessages.map((m, i) => (
+                                    <div key={i} style={{ alignSelf: m.sender === 'me' ? 'flex-end' : 'flex-start', background: m.sender === 'me' ? 'var(--accent-color)' : '#334155', padding: '4px 10px', borderRadius: '12px', maxWidth: '80%' }}>
+                                        {m.text}
+                                    </div>
+                                ))}
+                            </div>
+                            <form onSubmit={handleSendMessage} style={{ display: 'flex', gap: '5px' }}>
+                                <input 
+                                    type="text" 
+                                    value={msgInput} 
+                                    onChange={e => setMsgInput(e.target.value)}
+                                    placeholder="Chat..."
+                                    style={{ flex: 1, padding: '8px', borderRadius: '6px', background: '#2d3748', border: '1px solid #4a5568', color: '#fff', fontSize: '0.85rem' }}
+                                />
+                                <button type="submit" className="btn-primary" style={{ padding: '8px 12px', width: 'auto', fontSize: '0.85rem' }}>Send</button>
+                            </form>
+                        </div>
                     </div>
 
                     {isGameOver && (

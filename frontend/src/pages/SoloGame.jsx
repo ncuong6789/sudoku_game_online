@@ -47,14 +47,17 @@ export default function SoloGame() {
         if (!isGameOver && initialPuzzle) {
             interval = setInterval(() => setTime(t => t + 1), 1000);
         }
+        return () => clearInterval(interval);
+    }, [isGameOver, initialPuzzle]);
+
+    useEffect(() => {
         return () => {
-            clearInterval(interval);
             if (audioRef.current) {
                 audioRef.current.pause();
                 audioRef.current = null;
             }
         };
-    }, [isGameOver, initialPuzzle]);
+    }, []);
 
     const checkWin = useCallback((answers) => {
         let emptyCount = 0;
@@ -97,7 +100,7 @@ export default function SoloGame() {
             // Check if correct
             if (solution[r][c] !== num) {
                 setErrors(prev => ({ ...prev, [`${r}-${c}`]: true }));
-                setErrorCount(c => c + 1);
+                setErrorCount(prev => prev + 1);
                 // Remove error highlight after 1s
                 setTimeout(() => {
                     setErrors(prev => {
