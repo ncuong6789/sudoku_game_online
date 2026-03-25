@@ -246,6 +246,10 @@ export default function MultiplayerGame() {
 
     useEffect(() => {
         const handleKeyDown = (e) => {
+            // If the user is typing in chat (or any input), ignore ALL game shortcuts
+            const tag = document.activeElement?.tagName?.toLowerCase();
+            if (tag === 'input' || tag === 'textarea') return;
+
             if (e.key >= '1' && e.key <= '9') {
                 handleNumberClick(parseInt(e.key));
             } else if (e.key === 'Backspace' || e.key === 'Delete') {
