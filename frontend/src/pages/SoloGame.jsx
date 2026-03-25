@@ -14,6 +14,10 @@ export default function SoloGame() {
     const [selectedCell, setSelectedCell] = useState(null);
     const [notesMode, setNotesMode] = useState(false);
     const [errors, setErrors] = useState({});
+    const [completedNumbers, setCompletedNumbers] = useState([]);
+    const [isGameOver, setIsGameOver] = useState(false);
+    const [errorCount, setErrorCount] = useState(0);
+    const [time, setTime] = useState(0);
     const [won, setWon] = useState(false);
     const [hintsUsed, setHintsUsed] = useState(0);
 
@@ -44,6 +48,28 @@ export default function SoloGame() {
         }
         return () => clearInterval(interval);
     }, [isGameOver, initialPuzzle]);
+
+    const checkWin = useCallback((answers) => {
+        let emptyCount = 0;
+        const counts = Array(10).fill(0);
+
+        for (let r = 0; r < 9; r++) {
+            for (let c = 0; c < 9; c++) {
+                const val = initialPuzzle[r][c] || answers[r][c];
+                if (val !== 0) counts[val]++;
+                if (initialPuzzle[r][c] === 0 && answers[r][c] === 0) emptyCount++;
+            }
+        }
+
+        const completed = [];
+        for (let i = 1; i <= 9; i++) if (counts[i] === 9) completed.push(i);
+        setCompletedNumbers(completed);
+
+        if (emptyCount === 0) {
+            setWon(true);
+            setIsGameOver(true);
+        }
+    }, [initialPuzzle]);
 
     const handleNumberClick = useCallback((num) => {
         if (!selectedCell || isGameOver) return;
@@ -101,7 +127,7 @@ export default function SoloGame() {
                 checkWin(newAnswers);
             }
         }
-    }, [selectedCell, isGameOver, initialPuzzle, notesMode, solution, userAnswers, notes, errorCount]);
+    }, [selectedCell, isGameOver, initialPuzzle, notesMode, solution, userAnswers, notes, errorCount, checkWin]);
 
     const handleActionClick = useCallback((action) => {
         if (!selectedCell || isGameOver) return;
@@ -122,17 +148,7 @@ export default function SoloGame() {
                 setHintsUsed(h => h + 1);
             }
         }
-    }, [selectedCell, isGameOver, notesMode, initialPuzzle, userAnswers, solution, handleNumberClick]);
-
-    const checkWin = (answers) => {
-        for (let r = 0; r < 9; r++) {
-            for (let c = 0; c < 9; c++) {
-                if (initialPuzzle[r][c] === 0 && answers[r][c] === 0) return;
-            }
-        }
-        setWon(true);
-        setIsGameOver(true);
-    };
+    }, [selectedCell, isGameOver, notesMode, initialPuzzle, userAnswers, solution, handleNumberClick, hintsUsed]);
 
     useEffect(() => {
         const handleKeyDown = (e) => {
@@ -210,6 +226,7 @@ export default function SoloGame() {
                     onNumberClick={handleNumberClick}
                     onActionClick={handleActionClick}
                     notesMode={notesMode}
+                    completedNumbers={completedNumbers}
                 />
 
                 <button className="btn-secondary" style={{ marginTop: '20px' }} onClick={() => navigate('/')}>

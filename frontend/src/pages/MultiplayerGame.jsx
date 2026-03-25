@@ -26,6 +26,9 @@ export default function MultiplayerGame() {
     const [isGameOver, setIsGameOver] = useState(false);
     const [won, setWon] = useState(false);
     const [opponentDisconnected, setOpponentDisconnected] = useState(false);
+    const [opponentErrors, setOpponentErrors] = useState(0);
+    const [opponentHints, setOpponentHints] = useState(0);
+    const [completedNumbers, setCompletedNumbers] = useState([]);
 
     useEffect(() => {
         if (!initialPuzzle) {
@@ -36,10 +39,15 @@ export default function MultiplayerGame() {
         const totalEmpty = initialPuzzle.flat().filter(c => c === 0).length;
 
         // Listen to opponent updates
-        const handleOpponentProgress = (prog) => setOpponentProgress(prog);
+        const handleOpponentProgress = (stats) => {
+            if (stats.progress !== undefined) setOpponentProgress(stats.progress);
+            if (stats.errors !== undefined) setOpponentErrors(stats.errors);
+            if (stats.hints !== undefined) setOpponentHints(stats.hints);
+        };
         const handleOpponentGameOver = ({ won }) => {
             setIsGameOver(true);
             setWon(false);
+            if (!won) playLoseSound(); // Opponent lost (error limit), but technically I win
         };
         const handleDisconnect = () => {
             // Opponent left
@@ -47,6 +55,7 @@ export default function MultiplayerGame() {
                 setOpponentDisconnected(true);
                 setIsGameOver(true);
                 setWon(true);
+                playLoseSound();
             }
         };
 
@@ -61,13 +70,21 @@ export default function MultiplayerGame() {
         };
     }, [initialPuzzle, navigate, isGameOver]);
 
-    const checkWin = useCallback((answers) => {
+    const checkWin = useCallback((answers, currentErrors, currentHints) => {
         let emptyCount = 0;
+        const counts = Array(10).fill(0);
+        
         for (let r = 0; r < 9; r++) {
             for (let c = 0; c < 9; c++) {
+                const val = initialPuzzle[r][c] || answers[r][c];
+                if (val !== 0) counts[val]++;
                 if (initialPuzzle[r][c] === 0 && answers[r][c] === 0) emptyCount++;
             }
         }
+
+        const completed = [];
+        for (let i = 1; i <= 9; i++) if (counts[i] === 9) completed.push(i);
+        setCompletedNumbers(completed);
 
         // Calculate progress %
         const totalEmpty = initialPuzzle.flat().filter(val => val === 0).length;
@@ -75,12 +92,13 @@ export default function MultiplayerGame() {
         const progress = Math.round((filled / totalEmpty) * 100);
 
         setMyProgress(progress);
-        socket.emit('updateProgress', { progress });
+        socket.emit('updateProgress', { progress, errors: currentErrors, hints: currentHints });
 
         if (emptyCount === 0) {
             setWon(true);
             setIsGameOver(true);
             socket.emit('gameOver', { won: true });
+            playLoseSound(); // I won, so opponent "lost"
             return;
         }
     }, [initialPuzzle]);
@@ -106,6 +124,8 @@ export default function MultiplayerGame() {
                 setErrors(prev => ({ ...prev, [`${r}-${c}`]: true }));
                 const newErrorCount = errorCount + 1;
                 setErrorCount(newErrorCount);
+
+                socket.emit('updateProgress', { progress: myProgress, errors: newErrorCount, hints: hintsUsed });
 
                 if (newErrorCount >= 3) {
                     setIsGameOver(true);
@@ -161,11 +181,22 @@ export default function MultiplayerGame() {
         } else if (action === 'hint') {
             if (hintsUsed >= 3) return;
             if (initialPuzzle[r][c] === 0 && userAnswers[r][c] === 0) {
-                handleNumberClick(solution[r][c]);
-                setHintsUsed(h => h + 1);
+                const corrNum = solution[r][c];
+                const newAnswers = userAnswers.map(row => [...row]);
+                newAnswers[r][c] = corrNum;
+                setUserAnswers(newAnswers);
+                
+                const newHints = hintsUsed + 1;
+                setHintsUsed(newHints);
+                checkWin(newAnswers, errorCount, newHints);
             }
         }
     }, [selectedCell, isGameOver, notesMode, initialPuzzle, userAnswers, handleNumberClick, solution]);
+
+    const playLoseSound = () => {
+        const audio = new Audio(import.meta.env.BASE_URL + 'lose.mp3');
+        audio.play().catch(e => console.log("Audio play failed:", e));
+    };
 
     useEffect(() => {
         const handleKeyDown = (e) => {
@@ -212,15 +243,18 @@ export default function MultiplayerGame() {
                         <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
                             <div style={{ width: `${opponentProgress}%`, height: '100%', background: '#a371f7', transition: 'width 0.3s' }} />
                         </div>
-                        <div style={{ fontSize: '0.8rem', marginTop: '2px' }}>{opponentProgress}%</div>
+                        <div style={{ fontSize: '0.8rem', marginTop: '2px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                            <span>{opponentProgress}%</span>
+                            <span style={{ color: opponentErrors >= 2 ? 'var(--error-color)' : 'inherit' }}>Err: {opponentErrors}/3</span>
+                            <span>Hnt: {opponentHints}/3</span>
+                        </div>
                     </div>
                 </div>
 
-                <div className="header-info" style={{ marginBottom: '10px' }}>
+                <div className="header-info" style={{ marginBottom: '10px', width: '100%', maxWidth: 'none' }}>
                     <span>Room: {roomId}</span>
                     <span>Diff: {difficulty}</span>
-                    <span>Errors: {errorCount}/3</span>
-                    <span>Hints: {hintsUsed}/3</span>
+                    <span>Me: E{errorCount}/3 H{hintsUsed}/3</span>
                 </div>
 
                 <Board
@@ -257,6 +291,7 @@ export default function MultiplayerGame() {
                     onNumberClick={handleNumberClick}
                     onActionClick={handleActionClick}
                     notesMode={notesMode}
+                    completedNumbers={completedNumbers}
                 />
 
                 <button className="btn-secondary" style={{ marginTop: '40px' }} onClick={() => {

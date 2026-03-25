@@ -1,7 +1,7 @@
 import React from 'react';
 import { Eraser, Lightbulb, Pencil } from 'lucide-react';
 
-export default function Controls({ onNumberClick, onActionClick, notesMode }) {
+export default function Controls({ onNumberClick, onActionClick, notesMode, completedNumbers = [] }) {
     return (
         <>
             <div className="action-buttons">
@@ -20,7 +20,12 @@ export default function Controls({ onNumberClick, onActionClick, notesMode }) {
             </div>
             <div className="numpad">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-                    <button key={n} className="btn-num" onClick={() => onNumberClick(n)}>
+                    <button
+                        key={n}
+                        className="btn-num"
+                        onClick={() => onNumberClick(n)}
+                        style={{ visibility: completedNumbers.includes(n) ? 'hidden' : 'visible' }}
+                    >
                         {n}
                     </button>
                 ))}
