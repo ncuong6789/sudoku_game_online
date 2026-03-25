@@ -98,6 +98,23 @@ export default function MultiplayerGame() {
         };
     }, []);
 
+    // Define sound functions BEFORE useCallback so they are accessible inside it
+    const playLoseSound = () => {
+        if (audioRef.current) audioRef.current.pause();
+        const audio = new Audio('lose.mp3');
+        audioRef.current = audio;
+        audio.play().catch(e => console.log("Audio play failed:", e));
+        setTimeout(() => { if (audioRef.current === audio) audio.pause(); }, 30000);
+    };
+
+    const playWinSound = () => {
+        if (audioRef.current) audioRef.current.pause();
+        const audio = new Audio('win.mp3');
+        audioRef.current = audio;
+        audio.play().catch(e => console.log("Win audio play failed:", e));
+        setTimeout(() => { if (audioRef.current === audio) audio.pause(); }, 30000);
+    };
+
     const checkWin = useCallback((answers, currentErrors, currentHints) => {
         let emptyCount = 0;
         const counts = Array(10).fill(0);
@@ -237,32 +254,6 @@ export default function MultiplayerGame() {
         }
     }, [selectedCell, isGameOver, notesMode, initialPuzzle, userAnswers, handleNumberClick, solution]);
 
-    const playLoseSound = () => {
-        if (audioRef.current) audioRef.current.pause();
-        const audio = new Audio('lose.mp3');
-        audioRef.current = audio;
-        audio.play().catch(e => console.log("Audio play failed:", e));
-        
-        // Stop after 30s
-        setTimeout(() => {
-            if (audioRef.current === audio) {
-                audio.pause();
-            }
-        }, 30000);
-    };
-
-    const playWinSound = () => {
-        if (audioRef.current) audioRef.current.pause();
-        const audio = new Audio('win.mp3');
-        audioRef.current = audio;
-        audio.play().catch(e => console.log("Win audio play failed:", e));
-        // Stop after 30s
-        setTimeout(() => {
-            if (audioRef.current === audio) {
-                audio.pause();
-            }
-        }, 30000);
-    };
 
     useEffect(() => {
         const handleKeyDown = (e) => {
