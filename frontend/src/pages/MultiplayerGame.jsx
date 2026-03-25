@@ -131,6 +131,7 @@ export default function MultiplayerGame() {
                     setIsGameOver(true);
                     setWon(false);
                     socket.emit('gameOver', { won: false });
+                    playLoseSound();
                 }
 
                 setTimeout(() => {
@@ -223,6 +224,17 @@ export default function MultiplayerGame() {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [selectedCell, handleNumberClick, handleActionClick]);
 
+    const handleQuit = () => {
+        if (!isGameOver) {
+            socket.emit('gameOver', { won: false });
+            setIsGameOver(true);
+            setWon(false);
+            playLoseSound();
+        } else {
+            navigate('/');
+        }
+    };
+
     if (!initialPuzzle) return null;
 
     return (
@@ -277,7 +289,7 @@ export default function MultiplayerGame() {
                             {won ? 'You Won!' : 'You Lost!'}
                         </h2>
                         <p style={{ color: 'var(--text-primary)', fontSize: '1.2rem' }}>
-                            {opponentDisconnected && won ? 'Opponent disconnected.' : (won ? 'You solved it first.' : 'Your opponent finished first.')}
+                            {opponentDisconnected && won ? 'Opponent disconnected.' : (won ? 'You solved it first.' : 'Better luck next time!')}
                         </p>
                         <button className="btn-primary" style={{ marginTop: '20px', width: 'auto' }} onClick={() => navigate('/multiplayer')}>
                             Return to Lobby
@@ -294,11 +306,8 @@ export default function MultiplayerGame() {
                     completedNumbers={completedNumbers}
                 />
 
-                <button className="btn-secondary" style={{ marginTop: '40px' }} onClick={() => {
-                    // Might need to disconnect properly later
-                    navigate('/');
-                }}>
-                    Quit Game
+                <button className="btn-secondary" style={{ marginTop: '40px' }} onClick={handleQuit}>
+                    {isGameOver ? 'Back to Menu' : 'Quit Game'}
                 </button>
             </div>
         </div>
