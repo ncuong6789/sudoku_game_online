@@ -33,6 +33,10 @@ export default function MultiplayerGame() {
     const [chatMessages, setChatMessages] = useState([]);
     const [msgInput, setMsgInput] = useState('');
     const audioRef = useRef(null);
+    // Refs to always have the latest values inside callbacks (avoid stale closure)
+    const errorCountRef = useRef(0);
+    const hintsUsedRef = useRef(0);
+    const myProgressRef = useRef(0);
 
     useEffect(() => {
         if (!initialPuzzle) {
@@ -146,19 +150,19 @@ export default function MultiplayerGame() {
             // Check if correct
             if (solution[r][c] !== num) {
                 setErrors(prev => ({ ...prev, [`${r}-${c}`]: true }));
-                
-                setErrorCount(prev => {
-                    const next = prev + 1;
-                    socket.emit('updateProgress', { progress: myProgress, errors: next, hints: hintsUsed });
-                    
-                    if (next >= 3) {
-                        setIsGameOver(true);
-                        setWon(false);
-                        socket.emit('gameOver', { won: false });
-                        playLoseSound();
-                    }
-                    return next;
-                });
+
+                const nextErrors = errorCountRef.current + 1;
+                errorCountRef.current = nextErrors;
+                setErrorCount(nextErrors);
+
+                socket.emit('updateProgress', { progress: myProgressRef.current, errors: nextErrors, hints: hintsUsedRef.current });
+
+                if (nextErrors >= 3) {
+                    setIsGameOver(true);
+                    setWon(false);
+                    socket.emit('gameOver', { won: false });
+                    playLoseSound();
+                }
 
                 setTimeout(() => {
                     setErrors(prev => {
@@ -197,9 +201,11 @@ export default function MultiplayerGame() {
                     }
                 }
                 const currentProgress = Math.round(((totalEmpty - emptyCountNum) / totalEmpty) * 100);
-                socket.emit('updateProgress', { progress: currentProgress, errors: errorCount, hints: hintsUsed });
+                myProgressRef.current = currentProgress;
+                setMyProgress(currentProgress);
+                socket.emit('updateProgress', { progress: currentProgress, errors: errorCountRef.current, hints: hintsUsedRef.current });
 
-                checkWin(newAnswers, errorCount, hintsUsed);
+                checkWin(newAnswers, errorCountRef.current, hintsUsedRef.current);
             }
         }
     }, [selectedCell, isGameOver, notesMode, initialPuzzle, solution, userAnswers, notes, checkWin]);
@@ -224,8 +230,9 @@ export default function MultiplayerGame() {
                 setUserAnswers(newAnswers);
                 
                 const newHints = hintsUsed + 1;
+                hintsUsedRef.current = newHints;
                 setHintsUsed(newHints);
-                checkWin(newAnswers, errorCount, newHints);
+                checkWin(newAnswers, errorCountRef.current, newHints);
             }
         }
     }, [selectedCell, isGameOver, notesMode, initialPuzzle, userAnswers, handleNumberClick, solution]);
