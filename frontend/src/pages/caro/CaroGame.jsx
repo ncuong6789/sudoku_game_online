@@ -223,10 +223,10 @@ export default function CaroGame() {
     }, [messages]);
 
     return (
-        <div className="game-container" style={{ maxWidth: '1400px', padding: '1rem' }}>
-            <div className="main-play-area" style={{ gap: '2rem' }}>
+        <div className="game-container" style={{ maxWidth: '1400px', padding: '0', margin: '0 1rem' }}>
+            <div className="main-play-area" style={{ gap: '1rem' }}>
                 {/* Board Column */}
-                <div className="glass-panel" style={{ padding: '1rem', flex: 'none' }}>
+                <div className="glass-panel" style={{ padding: '0.8rem', flex: 'none' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <div className={`nav-item active`} style={{ padding: '8px 15px' }}>
@@ -241,19 +241,20 @@ export default function CaroGame() {
                         </div>
                     </div>
 
-                    <div style={{ 
-                        display: 'grid', 
-                        gridTemplateColumns: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
-                        gridTemplateRows: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
-                        gap: BOARD_SIZE >= 30 ? '0' : (BOARD_SIZE > 15 ? '1px' : '2px'),
-                        background: 'rgba(255, 255, 255, 0.1)',
-                        padding: '1px',
-                        borderRadius: '4px',
-                        width: '100%',
-                        maxWidth: BOARD_SIZE >= 30 ? '800px' : '600px',
-                        aspectRatio: '1 / 1',
-                        margin: '0 auto'
-                    }}>
+                        <div style={{ 
+                            display: 'grid', 
+                            gridTemplateColumns: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
+                            gridTemplateRows: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
+                            gap: BOARD_SIZE >= 30 ? '0' : (BOARD_SIZE > 15 ? '1px' : '2px'),
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            padding: '1px',
+                            borderRadius: '4px',
+                            width: '100%',
+                            maxHeight: '70vh',
+                            maxWidth: '70vh',
+                            aspectRatio: '1 / 1',
+                            margin: '0 auto'
+                        }}>
                         {board.map((row, r) => row.map((cell, c) => {
                             const isWinCell = winningLine?.some(coord => coord.r === r && coord.c === c);
                             return (
@@ -311,7 +312,7 @@ export default function CaroGame() {
                     </div>
 
                     {/* Chat Box */}
-                    <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '1rem', maxHeight: '500px' }}>
+                    <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '1rem', maxHeight: '350px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
                             <MessageSquare size={18} />
                             <span style={{ fontWeight: 'bold' }}>Trò chuyện</span>

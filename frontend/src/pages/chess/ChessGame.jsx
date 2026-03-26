@@ -239,9 +239,8 @@ export default function ChessGame() {
     }, [game, myColor, selectedSquare, possibleMoves, moveHistory]);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 0', minHeight: '100vh', width: '100%' }}>
-            
-            <div className="glass-panel" style={{ width: '100%', maxWidth: '1000px', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1rem' }}>
+            <div className="glass-panel" style={{ width: '100%', maxWidth: '1000px', display: 'flex', flexDirection: 'column', padding: '1rem' }}>
                 
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center' }}>
@@ -279,7 +278,8 @@ export default function ChessGame() {
                             borderRadius: '8px',
                             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
                             width: '100%',
-                            maxWidth: '600px',
+                            maxHeight: '70vh',
+                            maxWidth: '70vh',
                             aspectRatio: '1 / 1',
                             overflow: 'hidden'
                         }}>
@@ -290,7 +290,7 @@ export default function ChessGame() {
                     {/* Bảng trạng thái bên phải */}
                     <div style={{ flex: '1 1 250px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         
-                        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', flex: 1, display: 'flex', flexDirection: 'column' }}>
                             <h3 style={{ margin: '0 0 1rem 0' }}>Trạng thái</h3>
                             
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1rem' }}>
@@ -298,18 +298,19 @@ export default function ChessGame() {
                                     width: '24px', height: '24px', borderRadius: '50%', 
                                     background: game.turn() === 'w' ? '#f8f9fa' : '#212529',
                                     border: '2px solid rgba(255,255,255,0.5)',
-                                    boxShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                                    flexShrink: 0
                                 }}></div>
-                                <span style={{ fontWeight: 'bold', fontSize: '1.1rem', color: gameOver ? 'var(--error-color)' : game.turn() === myColor ? 'var(--primary-color)' : 'white' }}>
+                                <span style={{ fontWeight: 'bold', fontSize: '1.05rem', color: gameOver ? 'var(--error-color)' : game.turn() === myColor ? 'var(--primary-color)' : 'white' }}>
                                     {statusMessage}
                                 </span>
                             </div>
 
-                            <div style={{ paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: '0 0 0.5rem 0' }}>Phe của bạn:</p>
+                            <div style={{ paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', marginBottom: '1rem' }}>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 0.5rem 0' }}>Phe của bạn:</p>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <div style={{ 
-                                        width: '30px', height: '30px', borderRadius: '4px', 
+                                        width: '28px', height: '28px', borderRadius: '4px', 
                                         background: myColor === 'w' ? '#f8f9fa' : '#212529',
                                         border: '1px solid rgba(255,255,255,0.3)',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -317,12 +318,32 @@ export default function ChessGame() {
                                     }}>
                                         {myColor === 'w' ? '♔' : '♚'}
                                     </div>
-                                    <span style={{ fontWeight: 'bold' }}>{myColor === 'w' ? 'Trắng (Đi trước)' : 'Đen'}</span>
+                                    <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{myColor === 'w' ? 'Trắng (Đi trước)' : 'Đen'}</span>
+                                </div>
+                            </div>
+                            
+                            {/* Lịch sử di chuyển */}
+                            <div style={{ paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                                <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem' }}>Lịch sử giao tranh</h4>
+                                <div style={{ 
+                                    flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)', 
+                                    borderRadius: '8px', padding: '0.5rem', maxHeight: '150px'
+                                }}>
+                                    {moveHistory.length === 0 && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textAlign: 'center', margin: '40px 0' }}>Chưa có nước đi nào</p>}
+                                    {Array.from({ length: Math.ceil(moveHistory.length / 2) }).map((_, i) => (
+                                        <div key={i} style={{ display: 'flex', fontSize: '0.85rem', padding: '4px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <span style={{ width: '30px', color: 'var(--text-secondary)', fontWeight: 'bold' }}>{i + 1}.</span>
+                                            <span style={{ flex: 1, color: '#f8f9fa' }}>{moveHistory[i * 2]}</span>
+                                            <span style={{ flex: 1, color: '#aaa' }}>{moveHistory[i * 2 + 1] || ''}</span>
+                                        </div>
+                                    ))}
+                                    <div ref={el => el && el.scrollIntoView({ behavior: 'smooth' })} />
                                 </div>
                             </div>
                         </div>
 
                     </div>
+
                 </div>
 
             </div>

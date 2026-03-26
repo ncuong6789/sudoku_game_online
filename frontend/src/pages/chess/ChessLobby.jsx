@@ -109,22 +109,22 @@ export default function ChessLobby() {
             <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
                 <h2 style={{ textAlign: 'center', margin: '0 0 1rem 0' }}>Trạng thái Bàn cờ</h2>
 
-                <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                <div style={{ textAlign: 'center', marginBottom: '0.8rem' }}>
                     <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Mã phòng:</p>
-                    <h1 style={{ letterSpacing: '4px', color: 'var(--primary-color)', margin: '0.5rem 0' }}>{myRoom}</h1>
+                    <h1 style={{ letterSpacing: '4px', color: 'var(--primary-color)', margin: '0.3rem 0' }}>{myRoom}</h1>
                 </div>
 
                 {/* Opponent Selection */}
-                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><User size={16}/> Đối thủ</span>
-                        <span style={{ fontSize: '0.8rem', padding: '2px 8px', borderRadius: '12px', background: isOpponentReady ? 'var(--success-color)' : 'rgba(255,255,255,0.2)' }}>
+                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.8rem', borderRadius: '12px', marginBottom: '0.8rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}><User size={16}/> Đối thủ</span>
+                        <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '12px', background: isOpponentReady ? 'var(--success-color)' : 'rgba(255,255,255,0.2)' }}>
                             {isOpponentReady ? 'SẴN SÀNG' : 'CHỜ...'}
                         </span>
                     </div>
-                    <div style={{ display: 'flex', gap: '10px' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
                         {['w', 'b', 'random'].map(c => (
-                            <div key={c} style={{ flex: 1, padding: '8px', textAlign: 'center', borderRadius: '8px', fontSize: '0.85rem',
+                            <div key={c} style={{ flex: 1, padding: '6px', textAlign: 'center', borderRadius: '8px', fontSize: '0.8rem',
                                 background: opponentColor === c ? 'rgba(79, 172, 254, 0.3)' : 'rgba(255,255,255,0.05)',
                                 border: opponentColor === c ? '1px solid var(--primary-color)' : '1px solid transparent',
                                 opacity: 0.8
@@ -136,19 +136,19 @@ export default function ChessLobby() {
                 </div>
 
                 {/* VS divider */}
-                <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontWeight: 'bold', margin: '1rem 0', position: 'relative' }}>
+                <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontWeight: 'bold', margin: '0.5rem 0', position: 'relative' }}>
                     <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
-                    <span style={{ background: 'var(--bg-color)', padding: '0 10px', position: 'relative' }}>V S</span>
+                    <span style={{ background: 'var(--bg-color)', padding: '0 10px', position: 'relative', fontSize: '0.9rem' }}>V S</span>
                 </div>
 
                 {/* My Selection */}
-                <div style={{ background: 'rgba(255,255,255,0.08)', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', border: hasConflict ? '1px solid var(--error-color)' : '1px solid transparent' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <div style={{ background: 'rgba(255,255,255,0.08)', padding: '0.8rem', borderRadius: '12px', marginBottom: '1rem', border: hasConflict ? '1px solid var(--error-color)' : '1px solid transparent' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', fontSize: '0.9rem' }}>
                         <span>👉 Bạn chọn phe:</span>
                     </div>
-                    <div style={{ display: 'flex', gap: '10px' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
                         {['w', 'b', 'random'].map(c => (
-                            <button key={c} onClick={() => updateMyColor(c)} style={{ flex: 1, padding: '8px', textAlign: 'center', borderRadius: '8px', fontSize: '0.85rem',
+                            <button key={c} onClick={() => updateMyColor(c)} style={{ flex: 1, padding: '6px', textAlign: 'center', borderRadius: '8px', fontSize: '0.8rem',
                                 background: myColor === c ? 'var(--primary-color)' : 'rgba(255,255,255,0.05)',
                                 border: 'none', color: 'white', cursor: 'pointer', transition: 'all 0.2s',
                                 boxShadow: myColor === c ? '0 0 10px rgba(79, 172, 254, 0.5)' : 'none'

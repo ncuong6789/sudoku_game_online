@@ -96,41 +96,41 @@ export default function CaroLobby() {
             )}
 
             <div style={{ textAlign: 'left', width: '100%' }}>
-                <h3 style={{ marginTop: 0, marginBottom: '0.8rem' }}>Tạo phòng</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '12px' }}>
+                <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Tạo phòng</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '8px' }}>
                     {sizes.map((s) => (
                         <button 
                             key={s.label}
                             className={gridSize === s.value ? 'btn-primary' : 'btn-secondary'}
                             onClick={() => setGridSize(s.value)}
-                            style={{ padding: '12px 10px', fontSize: '0.8rem' }}
+                            style={{ padding: '8px', fontSize: '0.8rem' }}
                         >
                             {s.label}
                         </button>
                     ))}
                 </div>
-                <button className="btn-primary" style={{ width: '100%' }} onClick={handleCreateRoom}>Tạo phòng mới</button>
+                <button className="btn-primary" style={{ width: '100%', padding: '10px' }} onClick={handleCreateRoom}>Tạo phòng</button>
             </div>
 
-            <div style={{ borderTop: '1px solid var(--border-color)', margin: '1.5rem 0', width: '100%' }}></div>
+            <div style={{ borderTop: '1px solid var(--border-color)', margin: '1rem 0', width: '100%' }}></div>
 
             <div style={{ textAlign: 'left', width: '100%' }}>
-                <h3 style={{ marginTop: 0, marginBottom: '0.8rem' }}>Tham gia phòng</h3>
+                <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Tham gia phòng</h3>
                 <input
                     type="text"
-                    placeholder="NHẬP MÃ PHÒNG"
+                    placeholder="MÃ PHÒNG"
                     value={roomId}
                     onChange={e => setRoomId(e.target.value.toUpperCase())}
                     className="glass-input"
                     style={{ 
-                        width: '100%', padding: '12px', borderRadius: '8px', marginBottom: '12px', background: '#1e293b', color: 'white', border: '1px solid var(--border-color)', 
+                        width: '100%', padding: '10px', borderRadius: '8px', marginBottom: '8px', background: '#1e293b', color: 'white', border: '1px solid var(--border-color)', 
                         textTransform: 'uppercase', outline: 'none', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '2px' 
                     }}
                 />
-                {error && <p style={{ color: 'var(--error-color)', fontSize: '0.85rem', marginBottom: '0.8rem' }}>{error}</p>}
-                <button className="btn-primary" style={{ width: '100%' }} onClick={handleJoinRoom}>Tham gia ngay</button>
+                {error && <p style={{ color: 'var(--error-color)', fontSize: '0.85rem', marginBottom: '0.5rem' }}>{error}</p>}
+                <button className="btn-primary" style={{ width: '100%', padding: '10px' }} onClick={handleJoinRoom}>Tham gia ngay</button>
             </div>
-            <button className="btn-secondary" style={{ marginTop: '1.5rem', width: '100%' }} onClick={() => navigate('/caro')}>Quay lại</button>
+            <button className="btn-secondary" style={{ marginTop: '1rem', width: '100%', padding: '10px' }} onClick={() => navigate('/caro')}>Quay lại</button>
         </div>
     );
 }

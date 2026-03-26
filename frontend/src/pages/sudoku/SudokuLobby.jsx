@@ -102,22 +102,15 @@ export default function SudokuLobby() {
                     ⚠️ Server chưa kết nối. Bạn cần triển khai Backend (Node.js) lên một server (như Render) để chơi Online.
                 </div>
             )}
-            <div style={{ marginBottom: '20px', textAlign: 'left' }}>
-                <h3 style={{ marginTop: 0 }}>Create match</h3>
+            <div style={{ marginBottom: '10px', textAlign: 'left' }}>
+                <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Create match</h3>
                 <select 
                     value={difficulty} 
                     onChange={e => setDifficulty(e.target.value)} 
                     style={{ 
-                        width: '100%', 
-                        padding: '12px', 
-                        borderRadius: '8px', 
-                        marginBottom: '15px', 
-                        background: '#1e293b', 
-                        color: 'white', 
-                        border: '1px solid var(--border-color)', 
-                        appearance: 'none', 
-                        cursor: 'pointer',
-                        boxSizing: 'border-box'
+                        width: '100%', padding: '10px', borderRadius: '8px', marginBottom: '8px', 
+                        background: '#1e293b', color: 'white', border: '1px solid var(--border-color)', 
+                        appearance: 'none', cursor: 'pointer', boxSizing: 'border-box'
                     }}
                 >
                     <option value="Easy">Easy</option>
@@ -125,33 +118,26 @@ export default function SudokuLobby() {
                     <option value="Hard">Hard</option>
                     <option value="Expert">Expert</option>
                 </select>
-                <button className="btn-primary" onClick={handleCreateRoom}>Create Room</button>
+                <button className="btn-primary" style={{ padding: '10px' }} onClick={handleCreateRoom}>Create Room</button>
             </div>
-            <div style={{ borderTop: '1px solid var(--border-color)', margin: '20px 0' }}></div>
+            <div style={{ borderTop: '1px solid var(--border-color)', margin: '1rem 0' }}></div>
             <div style={{ textAlign: 'left' }}>
-                <h3 style={{ marginTop: 0 }}>Join match</h3>
+                <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Join match</h3>
                 <input
                     type="text"
                     placeholder="ENTER ROOM CODE"
                     value={roomId}
                     onChange={e => setRoomId(e.target.value.toUpperCase())}
                     style={{ 
-                        width: '100%', 
-                        padding: '12px', 
-                        borderRadius: '8px', 
-                        marginBottom: '15px', 
-                        background: '#1e293b', 
-                        color: 'white', 
-                        border: '1px solid var(--border-color)', 
-                        textTransform: 'uppercase', 
-                        outline: 'none',
-                        boxSizing: 'border-box'
+                        width: '100%', padding: '10px', borderRadius: '8px', marginBottom: '8px', 
+                        background: '#1e293b', color: 'white', border: '1px solid var(--border-color)', 
+                        textTransform: 'uppercase', outline: 'none', boxSizing: 'border-box'
                     }}
                 />
                 {error && <p style={{ color: 'var(--error-color)', fontSize: '0.9rem' }}>{error}</p>}
-                <button className="btn-primary" onClick={handleJoinRoom}>Join Room</button>
+                <button className="btn-primary" style={{ padding: '10px' }} onClick={handleJoinRoom}>Join Room</button>
             </div>
-            <button className="btn-secondary" style={{ marginTop: '20px' }} onClick={() => navigate('/sudoku')}>Back to Menu</button>
+            <button className="btn-secondary" style={{ marginTop: '1rem', padding: '10px' }} onClick={() => navigate('/sudoku')}>Back to Menu</button>
         </div>
     );
 }
