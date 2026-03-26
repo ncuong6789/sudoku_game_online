@@ -55,7 +55,16 @@ function CustomChessboard({
     };
 
     return (
-        <div className="relative w-full h-full aspect-square bg-gray-900 rounded-lg shadow-lg overflow-hidden">
+        <div style={{
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            aspectRatio: '1 / 1',
+            backgroundColor: 'rgba(20, 20, 30, 0.8)',
+            borderRadius: '8px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+            overflow: 'hidden'
+        }}>
             <div
                 className="grid"
                 style={{
@@ -89,18 +98,26 @@ function CustomChessboard({
                             <div
                                 key={square}
                                 id={square}
-                                className={`relative flex items-center justify-center text-4xl font-bold select-none`}
-                                style={squareStyle}
+                                style={{
+                                    ...squareStyle,
+                                    position: 'relative',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    userSelect: 'none'
+                                }}
                                 onClick={() => onSquareClick(square)}
                                 onDragOver={handleDragOver}
                                 onDrop={(e) => handleDrop(e, square)}
                             >
                                 {piece && (
                                     <div
-                                        className="piece text-6xl cursor-grab active:cursor-grabbing"
                                         draggable={piece.color === myColor && !gameOver}
                                         onDragStart={(e) => handleDragStart(e, square, piece)}
                                         style={{
+                                            fontSize: 'min(7vh, 7vw)',
+                                            lineHeight: 1,
+                                            cursor: piece.color === myColor && !gameOver ? 'grab' : 'default',
                                             color: piece.color === 'w' ? '#f0f0f0' : '#303030',
                                             textShadow: piece.color === 'w'
                                                 ? '2px 2px 4px rgba(0, 0, 0, 0.7), -2px -2px 4px rgba(255, 255, 255, 0.3)'
@@ -114,12 +131,12 @@ function CustomChessboard({
                                 )}
                                 {/* Rank and File Labels */}
                                 {file === displayFiles[0] && (
-                                    <span className="absolute left-1 top-0 text-xs text-gray-400 opacity-70">
+                                    <span style={{ position: 'absolute', left: '4px', top: '0px', fontSize: '0.75rem', opacity: 0.7, color: isLight ? '#5f8099' : '#d1dee6', fontWeight: 'bold' }}>
                                         {rank}
                                     </span>
                                 )}
                                 {rank === displayRanks[displayRanks.length - 1] && (
-                                    <span className="absolute bottom-0 right-1 text-xs text-gray-400 opacity-70">
+                                    <span style={{ position: 'absolute', right: '4px', bottom: '0px', fontSize: '0.75rem', opacity: 0.7, color: isLight ? '#5f8099' : '#d1dee6', fontWeight: 'bold' }}>
                                         {file}
                                     </span>
                                 )}
