@@ -73,7 +73,8 @@ export default function ChessHome() {
                             style={{ 
                                 flex: 1, padding: '10px 5px', fontSize: '0.85rem', fontWeight: 'bold',
                                 background: '#f8f9fa', color: '#212529',
-                                border: soloColor === 'w' ? '2px solid var(--primary-color)' : '1px solid rgba(255,255,255,0.1)',
+                                border: soloColor === 'w' ? '2px solid var(--primary-color)' : '2px solid transparent',
+                                outline: 'none',
                                 borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s',
                                 opacity: soloColor === 'w' ? 1 : 0.6,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px'
@@ -88,7 +89,8 @@ export default function ChessHome() {
                             style={{ 
                                 flex: 1, padding: '10px 5px', fontSize: '0.85rem', fontWeight: 'bold',
                                 background: '#212529', color: '#f8f9fa',
-                                border: soloColor === 'b' ? '2px solid var(--primary-color)' : '1px solid rgba(255,255,255,0.1)',
+                                border: soloColor === 'b' ? '2px solid var(--primary-color)' : '2px solid transparent',
+                                outline: 'none',
                                 borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s',
                                 opacity: soloColor === 'b' ? 1 : 0.6,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px'
@@ -101,16 +103,17 @@ export default function ChessHome() {
                             onClick={() => setSoloColor('random')}
                             disabled={isFlipping}
                             style={{ 
-                                flex: 1, padding: '10px 5px', fontSize: '0.85rem', fontWeight: 'bold',
+                                width: '50px', flexShrink: 0, padding: '10px 0', fontSize: '0.85rem', fontWeight: 'bold',
                                 background: soloColor === 'random' ? 'var(--primary-color)' : 'rgba(255,255,255,0.05)', 
                                 color: '#fff',
-                                border: soloColor === 'random' ? '2px solid var(--primary-color)' : '1px solid rgba(255,255,255,0.1)',
+                                outline: 'none',
+                                border: soloColor === 'random' ? '2px solid var(--primary-color)' : '2px solid transparent',
                                 borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 opacity: soloColor === 'random' ? 1 : 0.6
                             }}
                         >
-                            <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>🎲</span> N.Nhiên
+                            <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>🎲</span>
                         </button>
                     </div>
                 </div>

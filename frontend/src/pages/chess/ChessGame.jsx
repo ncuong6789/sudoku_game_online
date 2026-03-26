@@ -3,12 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Chess } from 'chess.js';
 import { socket } from '../../utils/socket';
 import { ArrowLeft, RotateCcw, Swords, Crown } from 'lucide-react';
-
-// Unicode Chess Pieces
-const PIECE_SYMBOLS = {
-    p: '♟', n: '♞', b: '♝', r: '♜', q: '♛', k: '♚',
-    P: '♙', N: '♘', B: '♗', R: '♖', Q: '♕', K: '♔'
-};
+import { Chessboard } from 'react-chessboard';
 
 export default function ChessGame() {
     const location = useLocation();
@@ -23,8 +18,8 @@ export default function ChessGame() {
     const [moveHistory, setMoveHistory] = useState([]); // for triggering re-renders safely
     
     // UI State
-    const [selectedSquare, setSelectedSquare] = useState(null);
-    const [possibleMoves, setPossibleMoves] = useState([]); // array of 'to' squares
+    const [moveFrom, setMoveFrom] = useState(null);
+    const [optionSquares, setOptionSquares] = useState({});
 
     const [gameOver, setGameOver] = useState(false);
     const [statusMessage, setStatusMessage] = useState('Ván đấu bắt đầu!');
@@ -49,7 +44,7 @@ export default function ChessGame() {
             }
         }
         setStatusMessage(status);
-        setMoveHistory([...game.history()]);
+        setMoveHistory([...game.history({ verbose: true })]);
     }, [game, myColor, mode]);
 
     // Lắng nghe Socket cho Multiplayer
@@ -101,164 +96,114 @@ export default function ChessGame() {
         } catch (e) { console.error('AI move error', e); }
     };
 
-    const handleSquareClick = (square) => {
+    function onDrop(sourceSquare, targetSquare, piece) {
+        if (gameOver || game.turn() !== myColor) return false;
+
+        try {
+            const move = game.move({
+                from: sourceSquare,
+                to: targetSquare,
+                promotion: piece[1]?.toLowerCase() ?? 'q',
+            });
+
+            if (move === null) return false;
+
+            updateGameState();
+            if (mode === 'multiplayer') {
+                socket.emit('chessMove', { roomId, fen: game.fen() });
+            }
+            setMoveFrom(null);
+            setOptionSquares({});
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function onSquareClick(square) {
         if (gameOver || game.turn() !== myColor) return;
 
-        // Nếu click vào ô có quân của mình (khi đã hoặc chưa chọn quân)
-        const targetPiece = game.get(square);
-        
-        // Hỗ trợ Nhập thành: Click Vua đang chọn -> Click Xe cùng màu
-        let effectiveSquare = square;
-        if (selectedSquare) {
-            const selectedPiece = game.get(selectedSquare);
-            if (selectedPiece && selectedPiece.type === 'k' && selectedPiece.color === myColor &&
-                targetPiece && targetPiece.type === 'r' && targetPiece.color === myColor) {
-                // Ánh xạ ô Xe (h1/a1/h8/a8) thành ô đích chuẩn của nhập thành (g1/c1/g8/c8)
-                if (myColor === 'w') {
-                    if (square === 'h1') effectiveSquare = 'g1';
-                    if (square === 'a1') effectiveSquare = 'c1';
-                } else {
-                    if (square === 'h8') effectiveSquare = 'g8';
-                    if (square === 'a8') effectiveSquare = 'c8';
-                }
+        function resetFirstMove(sq) {
+            const hasPiece = game.get(sq);
+            if (hasPiece && hasPiece.color === myColor) {
+                setMoveFrom(sq);
+                return getMoveOptions(sq);
             }
+            setMoveFrom(null);
+            setOptionSquares({});
+            return false;
         }
 
-        if (targetPiece && targetPiece.color === myColor && effectiveSquare === square) {
-            setSelectedSquare(square);
-            const moves = game.moves({ square, verbose: true });
-            
-            // Highlight các ô target.
-            // Nếu Vua có thể nhập thành, moves.to sẽ là 'g1'/'c1'. Để giúp người dùng dễ hiểu, 
-            // có thể tô sáng cả vị trí đó (mặc định đã làm).
-            setPossibleMoves(moves.map(m => m.to));
-            return;
-        }
-
-        // Nếu đã chọn quân và click vào ô hợp lệ (hoặc ô effectiveSquare do nhập thành) -> Đi quân
-        if (selectedSquare && possibleMoves.includes(effectiveSquare)) {
-            try {
-                game.move({
-                    from: selectedSquare,
-                    to: effectiveSquare,
-                    promotion: 'q' // Luôn tự động phong cấp thành Hậu cho đơn giản
-                });
-                
-                setSelectedSquare(null);
-                setPossibleMoves([]);
-                updateGameState();
-
-                if (mode === 'multiplayer') {
-                    socket.emit('chessMove', { roomId, fen: game.fen() });
-                }
-            } catch (e) {
-                console.error("Move error:", e);
-                setSelectedSquare(null);
-                setPossibleMoves([]);
+        function getMoveOptions(sq) {
+            const moves = game.moves({ square: sq, verbose: true });
+            if (moves.length === 0) {
+                setOptionSquares({});
+                return false;
             }
-        } else {
-            // Click ra ngoài hoặc ô không hợp lệ -> Bỏ chọn
-            setSelectedSquare(null);
-            setPossibleMoves([]);
+
+            const newSquares = {};
+            moves.map((move) => {
+                newSquares[move.to] = {
+                    background: game.get(move.to) && game.get(move.to).color !== game.get(sq).color
+                        ? 'radial-gradient(circle, rgba(239, 68, 68, 0.4) 85%, transparent 85%)'
+                        : 'radial-gradient(circle, rgba(79, 172, 254, 0.6) 25%, transparent 25%)',
+                    borderRadius: '50%'
+                };
+            });
+            newSquares[sq] = { background: 'rgba(79, 172, 254, 0.5)' }; // highlighted selected
+            setOptionSquares(newSquares);
+            return true;
         }
-    };
+
+        if (!moveFrom) {
+            return resetFirstMove(square);
+        }
+
+        // Đã có từ moveFrom, thử đi quân
+        try {
+            const move = game.move({
+                from: moveFrom,
+                to: square,
+                promotion: 'q'
+            });
+
+            if (move === null) return resetFirstMove(square);
+
+            updateGameState();
+            if (mode === 'multiplayer') {
+                socket.emit('chessMove', { roomId, fen: game.fen() });
+            }
+            setMoveFrom(null);
+            setOptionSquares({});
+            return true;
+        } catch (e) {
+            return resetFirstMove(square);
+        }
+    }
 
     const handleReset = () => {
         if (mode === 'solo') {
             game.reset();
             updateGameState();
             setGameOver(false);
-            setSelectedSquare(null);
-            setPossibleMoves([]);
+            setMoveFrom(null);
+            setOptionSquares({});
             if (myColor === 'b') {
-                setTimeout(makeAIMove, 600); // Nếu chơi quân Đen, AI (Trắng) đi trước
+                setTimeout(makeAIMove, 600); 
             }
         }
     };
 
-    // Chuẩn bị bàn cờ để render (xoay bàn nếu chơi quân Đen)
-    const renderBoard = useMemo(() => {
-        const ranks = ['8', '7', '6', '5', '4', '3', '2', '1'];
-        const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-        
-        // Nếu chơi quân đen, lật ngược bàn cờ để quân đen nằm dưới
-        const renderRanks = myColor === 'b' ? [...ranks].reverse() : ranks;
-        const renderFiles = myColor === 'b' ? [...files].reverse() : files;
-
-        return renderRanks.map((r, rowIndex) => (
-            renderFiles.map((f, colIndex) => {
-                const square = `${f}${r}`;
-                const piece = game.get(square);
-                
-                // Kẻ caro xen kẽ
-                const isLightSquare = (rowIndex + colIndex) % 2 === 0;
-                const isSelected = selectedSquare === square;
-                const isPossibleMove = possibleMoves.includes(square);
-                const isLastMove = false; // Có thể làm tính năng highlight nước đi cuối sau
-
-                let bgColor = isLightSquare ? 'rgba(255,255,255, 0.15)' : 'rgba(0,0,0, 0.3)';
-                if (isSelected) bgColor = 'rgba(79, 172, 254, 0.5)';
-                else if (isPossibleMove && piece) bgColor = 'rgba(239, 68, 68, 0.4)'; // Ô có thể ăn quân địch
-
-                return (
-                    <div 
-                        key={square}
-                        onClick={() => handleSquareClick(square)}
-                        style={{
-                            background: bgColor,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            position: 'relative',
-                            cursor: game.turn() === myColor && (!piece || piece.color === myColor || possibleMoves.includes(square)) ? 'pointer' : 'default',
-                            transition: 'background 0.2s',
-                        }}
-                    >
-                        {/* Dấu chấm báo hiệu nước đi hợp lệ */}
-                        {isPossibleMove && !piece && (
-                            <div style={{
-                                position: 'absolute',
-                                width: '25%', height: '25%',
-                                background: 'rgba(79, 172, 254, 0.6)',
-                                borderRadius: '50%'
-                            }} />
-                        )}
-
-                        {/* Quân cờ */}
-                        {piece && (
-                            <span style={{
-                                fontSize: '2.5rem',
-                                lineHeight: 1,
-                                cursor: 'pointer',
-                                filter: piece.color === 'w' 
-                                    ? 'drop-shadow(0px 2px 2px rgba(0,0,0,0.5))' 
-                                    : 'drop-shadow(0px 1px 1px rgba(255,255,255,0.3))',
-                                color: piece.color === 'w' ? '#f8f9fa' : '#212529',
-                                // Dùng text-shadow để tạo viền
-                                textShadow: piece.color === 'w' 
-                                    ? '0 0 1px #000, 0 0 2px #000' 
-                                    : '0 0 1px #fff, 0 0 2px #fff'
-                            }}>
-                                {PIECE_SYMBOLS[piece.color === 'w' ? piece.type.toUpperCase() : piece.type]}
-                            </span>
-                        )}
-                        
-                        {/* Tọa độ (chỉ hiện ngoài mép) */}
-                        {colIndex === 0 && (
-                            <span style={{ position: 'absolute', top: '2px', left: '2px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'bold' }}>
-                                {r}
-                            </span>
-                        )}
-                        {rowIndex === 7 && (
-                            <span style={{ position: 'absolute', bottom: '2px', right: '2px', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'bold' }}>
-                                {f}
-                            </span>
-                        )}
-                    </div>
-                );
-            })
-        ));
-    }, [game, myColor, selectedSquare, possibleMoves, moveHistory]);
+    const customSquareStyles = useMemo(() => {
+        const styles = { ...optionSquares };
+        if (moveHistory.length > 0) {
+            const lastMove = moveHistory[moveHistory.length - 1];
+            // Highlight background cho From và To của nước cờ vừa rồi
+            styles[lastMove.from] = { ...styles[lastMove.from], backgroundColor: 'rgba(255, 235, 59, 0.4)' };
+            styles[lastMove.to] = { ...styles[lastMove.to], backgroundColor: 'rgba(255, 235, 59, 0.4)' };
+        }
+        return styles;
+    }, [optionSquares, moveHistory]);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1rem' }}>
@@ -277,11 +222,11 @@ export default function ChessGame() {
                     
                     <div style={{ display: 'flex', gap: '10px' }}>
                         {mode === 'solo' && (
-                            <button className="btn-secondary" onClick={handleReset} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <button className="btn-secondary" onClick={handleReset} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}>
                                 <RotateCcw size={16} /> Chơi lại
                             </button>
                         )}
-                        <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/chess/multiplayer' : '/chess')} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/chess/multiplayer' : '/chess')} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}>
                             <ArrowLeft size={16} /> Thoát
                         </button>
                     </div>
@@ -289,23 +234,30 @@ export default function ChessGame() {
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', marginTop: '1rem' }}>
                     
-                    {/* Bàn cờ */}
-                    <div style={{ flex: '1 1 500px', display: 'flex', justifyContent: 'center' }}>
+                    {/* Bàn cờ bằng react-chessboard */}
+                    <div style={{ flex: '1 1 500px', display: 'flex', justifyContent: 'center', width: '100%' }}>
                         <div style={{ 
-                            display: 'grid', 
-                            gridTemplateColumns: `repeat(8, minmax(0, 1fr))`,
-                            gridTemplateRows: `repeat(8, minmax(0, 1fr))`,
-                            background: 'rgba(255, 255, 255, 0.1)',
+                            width: '100%',
+                            maxWidth: '70vh',
+                            maxHeight: '70vh',
+                            aspectRatio: '1 / 1',
                             border: '4px solid rgba(20, 20, 30, 0.8)',
                             borderRadius: '8px',
                             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-                            width: '100%',
-                            maxHeight: '70vh',
-                            maxWidth: '70vh',
-                            aspectRatio: '1 / 1',
-                            overflow: 'hidden'
+                            overflow: 'hidden',
+                            background: 'rgba(255, 255, 255, 0.1)',
                         }}>
-                            {renderBoard}
+                            <Chessboard 
+                                position={game.fen()} 
+                                onPieceDrop={onDrop}
+                                onSquareClick={onSquareClick}
+                                boardOrientation={myColor === 'w' ? 'white' : 'black'}
+                                customSquareStyles={customSquareStyles}
+                                animationDuration={200}
+                                customDropSquareStyle={{ boxShadow: 'inset 0 0 1px 4px rgba(79, 172, 254, 0.8)' }}
+                                customDarkSquareStyle={{ backgroundColor: '#5f8099' }}
+                                customLightSquareStyle={{ backgroundColor: '#d1dee6' }}
+                            />
                         </div>
                     </div>
 
@@ -355,8 +307,8 @@ export default function ChessGame() {
                                     {Array.from({ length: Math.ceil(moveHistory.length / 2) }).map((_, i) => (
                                         <div key={i} style={{ display: 'flex', fontSize: '0.85rem', padding: '4px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                             <span style={{ width: '30px', color: 'var(--text-secondary)', fontWeight: 'bold' }}>{i + 1}.</span>
-                                            <span style={{ flex: 1, color: '#f8f9fa' }}>{moveHistory[i * 2]}</span>
-                                            <span style={{ flex: 1, color: '#aaa' }}>{moveHistory[i * 2 + 1] || ''}</span>
+                                            <span style={{ flex: 1, color: '#f8f9fa' }}>{moveHistory[i * 2]?.san}</span>
+                                            <span style={{ flex: 1, color: '#aaa' }}>{moveHistory[i * 2 + 1]?.san || ''}</span>
                                         </div>
                                     ))}
                                     <div ref={el => el && el.scrollIntoView({ behavior: 'smooth' })} />
