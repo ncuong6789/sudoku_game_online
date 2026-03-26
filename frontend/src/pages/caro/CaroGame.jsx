@@ -248,35 +248,35 @@ export default function CaroGame() {
         <div className="game-container" style={{ maxWidth: '1400px', padding: '0', margin: '0 1rem' }}>
             <div className="main-play-area" style={{ gap: '1rem' }}>
                 {/* Board Column */}
-                <div className="glass-panel" style={{ padding: '0.8rem', flex: 'none' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center' }}>
+                <div className="glass-panel" style={{ padding: '0.8rem', flex: '1 1 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center', width: '100%', maxWidth: '85vh' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <div className={`nav-item active`} style={{ padding: '8px 15px' }}>
                                 <Swords size={18} /> Caro {BOARD_SIZE}x{BOARD_SIZE}
                             </div>
-                            <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                            <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
                                 {mode === 'solo' ? 'Thách đấu AI' : `Phòng: ${roomId}`}
                             </span>
                         </div>
-                        <div style={{ fontWeight: 'bold', color: isXNext ? 'var(--primary-color)' : '#ff4757' }}>
+                        <div style={{ fontWeight: 'bold', color: isXNext ? 'var(--primary-color)' : '#ff4757', whiteSpace: 'nowrap', minWidth: '100px', textAlign: 'right' }}>
                             Lượt: {isXNext ? 'X (Đỏ)' : 'O (Xanh)'}
                         </div>
                     </div>
 
-                        <div style={{ 
-                            display: 'grid', 
-                            gridTemplateColumns: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
-                            gridTemplateRows: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
-                            gap: BOARD_SIZE >= 30 ? '0' : (BOARD_SIZE > 15 ? '1px' : '2px'),
-                            background: 'rgba(255, 255, 255, 0.1)',
-                            padding: '1px',
-                            borderRadius: '4px',
-                            width: '100%',
-                            maxHeight: BOARD_SIZE === 3 ? '300px' : (BOARD_SIZE === 15 ? '600px' : '85vh'),
-                            maxWidth: BOARD_SIZE === 3 ? '300px' : (BOARD_SIZE === 15 ? '600px' : '85vh'),
-                            aspectRatio: '1 / 1',
-                            margin: '0 auto'
-                        }}>
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
+                        gridTemplateRows: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
+                        gap: BOARD_SIZE >= 30 ? '0' : (BOARD_SIZE > 15 ? '1px' : '2px'),
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        padding: '1px',
+                        borderRadius: '4px',
+                        width: '100%',
+                        maxHeight: '85vh',
+                        maxWidth: '85vh',
+                        aspectRatio: '1 / 1',
+                        margin: '0 auto'
+                    }}>
                         {board.map((row, r) => row.map((cell, c) => {
                             const isWinCell = winningLine?.some(coord => coord.r === r && coord.c === c);
                             return (
@@ -289,16 +289,18 @@ export default function CaroGame() {
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        fontSize: BOARD_SIZE >= 30 ? '0.5rem' : (BOARD_SIZE > 15 ? '0.8rem' : '1.2rem'),
+                                        fontSize: BOARD_SIZE >= 30 ? '0.6rem' : (BOARD_SIZE > 15 ? '0.9rem' : '1.5rem'),
                                         fontWeight: 'bold',
                                         cursor: cell === 0 && !isGameOver ? 'pointer' : 'default',
                                         color: cell === 1 ? 'var(--primary-color)' : '#ff4757',
-                                        transition: 'all 0.2s',
-                                        border: BOARD_SIZE >= 30 ? '0.1px solid rgba(255,255,255,0.05)' : 'none',
-                                        boxSizing: 'border-box'
+                                        transition: 'background 0.2s',
+                                        border: BOARD_SIZE >= 30 ? '1px solid rgba(255,255,255,0.02)' : 'none',
+                                        boxSizing: 'border-box',
+                                        lineHeight: 1,
+                                        overflow: 'hidden'
                                     }}
                                 >
-                                    {cell === 1 ? 'X' : cell === 2 ? 'O' : ''}
+                                    {cell === 1 ? 'X' : cell === 2 ? 'O' : '\u00A0'}
                                 </div>
                             );
                         }))}
@@ -306,31 +308,31 @@ export default function CaroGame() {
                 </div>
 
                 {/* Info & Chat Column */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem', minWidth: '350px' }}>
+                <div style={{ flex: '0 1 250px', display: 'flex', flexDirection: 'column', gap: '1.5rem', minWidth: '200px' }}>
                     {/* Status & Actions */}
                     <div className="glass-panel" style={{ padding: '1.5rem' }}>
                         {isGameOver ? (
                             <div style={{ textAlign: 'center' }}>
-                                <h2 style={{ color: winner === 1 ? 'var(--primary-color)' : '#ff4757' }}>
+                                <h2 style={{ color: winner === 1 ? 'var(--primary-color)' : '#ff4757', margin: '0 0 1rem 0', fontSize: '1.2rem' }}>
                                     {winner === 1 ? 'X CHIẾN THẮNG!' : 'O CHIẾN THẮNG!'}
                                 </h2>
-                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                                    <button className="btn-primary" style={{ flex: 1 }} onClick={resetGame}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                    <button className="btn-primary" style={{ width: '100%', padding: '10px' }} onClick={resetGame}>
                                         Chơi ván mới
                                     </button>
-                                    <button className="btn-secondary" style={{ flex: 1 }} onClick={handleExit}>
+                                    <button className="btn-secondary" style={{ width: '100%', padding: '10px' }} onClick={handleExit}>
                                         Thoát
                                     </button>
                                 </div>
                             </div>
                         ) : (
                             <div>
-                                <h3 style={{ marginBottom: '1rem' }}>Bảng điều khiển</h3>
-                                <div style={{ display: 'flex', gap: '1rem' }}>
-                                    <button className="btn-secondary" style={{ flex: 1 }} onClick={resetGame}>
+                                <h3 style={{ marginBottom: '1rem', marginTop: 0 }}>Bảng điều khiển</h3>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                    <button className="btn-secondary" style={{ width: '100%', padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }} onClick={resetGame}>
                                         <RotateCcw size={18} /> Reset
                                     </button>
-                                    <button className="btn-secondary" style={{ flex: 1 }} onClick={handleExit}>
+                                    <button className="btn-secondary" style={{ width: '100%', padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }} onClick={handleExit}>
                                         Thoát
                                     </button>
                                 </div>

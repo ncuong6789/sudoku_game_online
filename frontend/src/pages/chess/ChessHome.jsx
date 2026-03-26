@@ -67,17 +67,51 @@ export default function ChessHome() {
                 <div style={{ textAlign: 'left', marginTop: '0.2rem' }}>
                     <p style={{ fontSize: '0.8rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Phe của bạn (Solo):</p>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                        {['w', 'b', 'random'].map((c) => (
-                            <button 
-                                key={c}
-                                className={soloColor === c ? 'btn-primary' : 'btn-secondary'}
-                                onClick={() => setSoloColor(c)}
-                                disabled={isFlipping}
-                                style={{ flex: 1, padding: '10px', fontSize: '0.8rem', ...(soloColor === c ? { background: 'var(--primary-color)' } : {}) }}
-                            >
-                                {c === 'w' ? 'Trắng' : c === 'b' ? 'Đen' : 'N.Nhiên'}
-                            </button>
-                        ))}
+                        <button 
+                            onClick={() => setSoloColor('w')}
+                            disabled={isFlipping}
+                            style={{ 
+                                flex: 1, padding: '10px 5px', fontSize: '0.85rem', fontWeight: 'bold',
+                                background: '#f8f9fa', color: '#212529',
+                                border: soloColor === 'w' ? '2px solid var(--primary-color)' : '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s',
+                                opacity: soloColor === 'w' ? 1 : 0.6,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px'
+                            }}
+                        >
+                            <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>♔</span> Trắng
+                        </button>
+                        
+                        <button 
+                            onClick={() => setSoloColor('b')}
+                            disabled={isFlipping}
+                            style={{ 
+                                flex: 1, padding: '10px 5px', fontSize: '0.85rem', fontWeight: 'bold',
+                                background: '#212529', color: '#f8f9fa',
+                                border: soloColor === 'b' ? '2px solid var(--primary-color)' : '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s',
+                                opacity: soloColor === 'b' ? 1 : 0.6,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px'
+                            }}
+                        >
+                            <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>♚</span> Đen
+                        </button>
+
+                        <button 
+                            onClick={() => setSoloColor('random')}
+                            disabled={isFlipping}
+                            style={{ 
+                                flex: 1, padding: '10px 5px', fontSize: '0.85rem', fontWeight: 'bold',
+                                background: soloColor === 'random' ? 'var(--primary-color)' : 'rgba(255,255,255,0.05)', 
+                                color: '#fff',
+                                border: soloColor === 'random' ? '2px solid var(--primary-color)' : '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
+                                opacity: soloColor === 'random' ? 1 : 0.6
+                            }}
+                        >
+                            <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>🎲</span> N.Nhiên
+                        </button>
                     </div>
                 </div>
 
