@@ -39,7 +39,7 @@ export default function ChessHome() {
 
     return (
         <div className="glass-panel menu-container" style={{ maxWidth: '400px', position: 'relative' }}>
-            <h1 style={{ margin: '0 0 0.5rem 0', padding: 0 }}>Cờ vua</h1>
+            <h1 style={{ margin: '0 0 0.5rem 0', padding: 0, whiteSpace: 'nowrap', userSelect: 'none' }}>Cờ vua</h1>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Đấu trí chiến thuật</p>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%', opacity: isFlipping ? 0.3 : 1, transition: 'opacity 0.3s' }}>
@@ -122,7 +122,7 @@ export default function ChessHome() {
                 <button className="btn-secondary" style={{ padding: '14px' }} onClick={() => navigate('/chess/multiplayer')} disabled={isFlipping}>
                     Chế độ Multiplayer
                 </button>
-                <button className="btn-secondary" style={{ marginTop: '0.5rem', padding: '14px', opacity: 0.7 }} onClick={() => navigate('/')} disabled={isFlipping}>
+                <button className="btn-secondary" style={{ marginTop: '0.5rem', padding: '14px', opacity: 0.7, width: 'auto' }} onClick={() => navigate('/')} disabled={isFlipping}>
                     Quay lại Hub
                 </button>
             </div>

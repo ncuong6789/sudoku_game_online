@@ -78,7 +78,8 @@ const broadcastStats = () => {
     const stats = {
         sudoku: { online: 0, rooms: 0 },
         caro: { online: 0, rooms: 0 },
-        chess: { online: 0, rooms: 0 }
+        chess: { online: 0, rooms: 0 },
+        snake: { online: 0, rooms: 0 }
     };
     for (const roomId in rooms) {
         const room = rooms[roomId];
@@ -130,15 +131,16 @@ io.on('connection', (socket) => {
 
     socket.on('startGame', ({ puzzle, solution }) => {
         const roomId = Array.from(socket.rooms).find(r => r !== socket.id);
-        if (!roomId && !rooms[roomId]) return;
+        if (!roomId || !rooms[roomId]) return;
         rooms[roomId].gameState = { puzzle, solution };
         io.to(roomId).emit('gameStarted', { puzzle, solution });
     });
 
     socket.on('startCaroGame', ({ roomId }) => {
         const room = rooms[roomId];
-        if (room) {
-            io.to(roomId).emit('caroGameStarted', { gridSize: room.gridSize });
+        if (room && room.players.length >= 2) {
+            io.to(room.players[0]).emit('caroGameStarted', { gridSize: room.gridSize, playerSymbol: 'X' });
+            io.to(room.players[1]).emit('caroGameStarted', { gridSize: room.gridSize, playerSymbol: 'O' });
         }
     });
 
@@ -149,9 +151,6 @@ io.on('connection', (socket) => {
     // --- CHESS MULTIPLAYER LOGIC ---
 
     // Chat trong phòng chờ (Dùng chung cho cả Caro nếu muốn sau này)
-    socket.on('sendMessage', ({ roomId, text }) => {
-        socket.to(roomId).emit('receiveMessage', { text, sender: 'opponent', id: Date.now() });
-    });
 
     // Cập nhật tùy chọn màu phe
     socket.on('chessColorSelect', ({ roomId, color, ready }) => {
@@ -227,13 +226,13 @@ io.on('connection', (socket) => {
         socket.to(roomId).emit('opponentGameOver', { won });
     });
 
-    socket.on('sendMessage', ({ message }) => {
-        const roomId = Array.from(socket.rooms).find(r => r !== socket.id);
+    socket.on('sendMessage', (data) => {
+        const roomId = data.roomId || Array.from(socket.rooms).find(r => r !== socket.id);
         if (!roomId) return;
 
         socket.to(roomId).emit('receiveMessage', { 
-            message, 
-            sender: socket.id 
+            ...data,
+            sender: data.sender || socket.id 
         });
     });
 
@@ -241,7 +240,8 @@ io.on('connection', (socket) => {
         const stats = {
             sudoku: { online: 0, rooms: 0 },
             caro: { online: 0, rooms: 0 },
-            chess: { online: 0, rooms: 0 }
+            chess: { online: 0, rooms: 0 },
+            snake: { online: 0, rooms: 0 }
         };
 
         for (const roomId in rooms) {

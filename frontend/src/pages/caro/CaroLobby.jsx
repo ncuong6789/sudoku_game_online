@@ -18,11 +18,13 @@ export default function CaroLobby() {
     const [isConnected, setIsConnected] = useState(socket.connected);
 
     useEffect(() => {
-        socket.on('connect', () => setIsConnected(true));
-        socket.on('disconnect', () => setIsConnected(false));
+        const onConnect = () => setIsConnected(true);
+        const onDisconnect = () => setIsConnected(false);
+        socket.on('connect', onConnect);
+        socket.on('disconnect', onDisconnect);
         return () => {
-            socket.off('connect');
-            socket.off('disconnect');
+            socket.off('connect', onConnect);
+            socket.off('disconnect', onDisconnect);
         };
     }, []);
 
@@ -33,8 +35,8 @@ export default function CaroLobby() {
             }
         };
 
-        const handleGameStarted = ({ gridSize: serverGridSize }) => {
-            navigate('/caro/game', { state: { mode: 'multiplayer', roomId: myRoom, gridSize: serverGridSize || gridSize } });
+        const handleGameStarted = ({ gridSize: serverGridSize, playerSymbol }) => {
+            navigate('/caro/game', { state: { mode: 'multiplayer', roomId: myRoom, gridSize: serverGridSize || gridSize, playerSymbol } });
         };
 
         socket.on('playerJoined', handlePlayerJoined);
@@ -76,7 +78,7 @@ export default function CaroLobby() {
                     <h1 style={{ letterSpacing: '4px', color: 'var(--primary-color)', margin: '0.5rem 0' }}>{myRoom}</h1>
                     <p style={{ color: 'var(--accent-color)', fontWeight: 600 }}>Đang chờ đối thủ...</p>
                 </div>
-                <button className="btn-secondary" style={{ width: '100%' }} onClick={() => {
+                <button className="btn-secondary" style={{ width: 'auto' }} onClick={() => {
                     setInRoom(false);
                     setMyRoom('');
                     navigate('/caro');
@@ -130,7 +132,7 @@ export default function CaroLobby() {
                 {error && <p style={{ color: 'var(--error-color)', fontSize: '0.85rem', marginBottom: '0.5rem' }}>{error}</p>}
                 <button className="btn-primary" style={{ width: '100%', padding: '10px' }} onClick={handleJoinRoom}>Tham gia ngay</button>
             </div>
-            <button className="btn-secondary" style={{ marginTop: '1rem', width: '100%', padding: '10px' }} onClick={() => navigate('/caro')}>Quay lại</button>
+            <button className="btn-secondary" style={{ marginTop: '1rem', width: 'auto', padding: '10px' }} onClick={() => navigate('/caro')}>Quay lại</button>
         </div>
     );
 }

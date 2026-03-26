@@ -20,10 +20,10 @@ export default function SnakeHome() {
             <div className="glass-panel" style={{ width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', padding: '2rem' }}>
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                    <h2 style={{ margin: 0, fontSize: '2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <h2 style={{ margin: 0, fontSize: '2rem', display: 'flex', alignItems: 'center', gap: '10px', whiteSpace: 'nowrap', userSelect: 'none' }}>
                         🐍 Rắn Săn Mồi
                     </h2>
-                    <button className="btn-secondary" onClick={() => navigate('/')} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <button className="btn-secondary" onClick={() => navigate('/')} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px', width: 'auto', flexShrink: 0 }}>
                         <ArrowLeft size={16} /> Thoát
                     </button>
                 </div>

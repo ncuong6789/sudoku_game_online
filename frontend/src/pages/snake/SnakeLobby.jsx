@@ -24,11 +24,13 @@ export default function SnakeLobby() {
     const [isConnected, setIsConnected] = useState(socket.connected);
 
     useEffect(() => {
-        socket.on('connect', () => setIsConnected(true));
-        socket.on('disconnect', () => setIsConnected(false));
+        const onConnect = () => setIsConnected(true);
+        const onDisconnect = () => setIsConnected(false);
+        socket.on('connect', onConnect);
+        socket.on('disconnect', onDisconnect);
         return () => {
-            socket.off('connect');
-            socket.off('disconnect');
+            socket.off('connect', onConnect);
+            socket.off('disconnect', onDisconnect);
         };
     }, []);
 
@@ -129,10 +131,10 @@ export default function SnakeLobby() {
                 <div className="glass-panel" style={{ width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column', padding: '2rem', textAlign: 'center' }}>
                     
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                        <h2 style={{ margin: 0, fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <h2 style={{ margin: 0, fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px', whiteSpace: 'nowrap', userSelect: 'none' }}>
                             <Users size={24} /> {lobbyState === 'finding_match' ? 'Tìm trận' : 'Phòng Riêng'}
                         </h2>
-                        <button className="btn-secondary" onClick={handleCancel} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <button className="btn-secondary" onClick={handleCancel} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px', width: 'auto', flexShrink: 0 }}>
                             <ArrowLeft size={16} /> Thoát
                         </button>
                     </div>
@@ -164,8 +166,8 @@ export default function SnakeLobby() {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1rem' }}>
             <div className="glass-panel menu-container" style={{ maxWidth: '450px', width: '100%' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <h2 style={{ margin: 0 }}>Sảnh Chờ Multiplayer</h2>
-                    <button className="btn-secondary" onClick={() => navigate('/snake')} style={{ padding: '8px', border: 'none' }}>
+                    <h2 style={{ margin: 0, whiteSpace: 'nowrap', userSelect: 'none' }}>Sảnh Chờ Multiplayer</h2>
+                    <button className="btn-secondary" onClick={() => navigate('/snake')} style={{ padding: '8px', border: 'none', width: 'auto', flexShrink: 0 }}>
                         <ArrowLeft size={20} />
                     </button>
                 </div>

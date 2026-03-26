@@ -37,7 +37,7 @@ export default function SudokuLobby() {
         };
 
         const handleGameStarted = ({ puzzle, solution }) => {
-            navigate('/sudoku/multiplayer-game', { state: { initialPuzzle: puzzle, roomId: myRoom, difficulty } });
+            navigate('/sudoku/multiplayer-game', { state: { initialPuzzle: puzzle, solution, roomId: myRoom, difficulty } });
         };
 
         socket.on('playerJoined', handlePlayerJoined);
@@ -83,7 +83,7 @@ export default function SudokuLobby() {
                 ) : (
                     <p style={{ color: 'var(--success-color)', fontWeight: 600 }}>Starting game...</p>
                 )}
-                <button className="btn-secondary" style={{ marginTop: '20px' }} onClick={() => {
+                <button className="btn-secondary" style={{ marginTop: '20px', width: 'auto' }} onClick={() => {
                     setInRoom(false);
                     setMyRoom('');
                     // Emit disconnect/leave room if server supported it, else just go back
@@ -137,7 +137,7 @@ export default function SudokuLobby() {
                 {error && <p style={{ color: 'var(--error-color)', fontSize: '0.9rem' }}>{error}</p>}
                 <button className="btn-primary" style={{ padding: '10px' }} onClick={handleJoinRoom}>Join Room</button>
             </div>
-            <button className="btn-secondary" style={{ marginTop: '1rem', padding: '10px' }} onClick={() => navigate('/sudoku')}>Back to Menu</button>
+            <button className="btn-secondary" style={{ marginTop: '1rem', padding: '10px', width: 'auto' }} onClick={() => navigate('/sudoku')}>Back to Menu</button>
         </div>
     );
 }

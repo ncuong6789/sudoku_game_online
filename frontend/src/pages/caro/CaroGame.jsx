@@ -8,7 +8,7 @@ import { ArrowLeft, RotateCcw, MessageSquare, Send, User, Bot, Swords } from 'lu
 export default function CaroGame() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { mode, roomId, difficulty, gridSize } = location.state || { mode: 'solo', difficulty: 'Medium', gridSize: 15 };
+    const { mode, roomId, difficulty, gridSize, playerSymbol: initSymbol } = location.state || { mode: 'solo', difficulty: 'Medium', gridSize: 15 };
 
     const BOARD_SIZE = gridSize || 15;
     const WIN_COUNT = BOARD_SIZE === 3 ? 3 : 5;
@@ -200,7 +200,9 @@ export default function CaroGame() {
         // Multiplayer turn guard
         if (mode === 'multiplayer') {
             const currentSymbol = isXNext ? 'X' : 'O';
-            // Need to know my symbol. For now handle in MultiplayerGame logic pattern
+            if (playerSymbol && currentSymbol !== playerSymbol) {
+                 return;
+            }
         }
 
         const newBoard = board.map(row => [...row]);

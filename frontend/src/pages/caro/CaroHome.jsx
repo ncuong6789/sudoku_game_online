@@ -14,7 +14,7 @@ export default function CaroHome() {
 
     return (
         <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
-            <h1 style={{ margin: '0 0 0.5rem 0', padding: 0 }}>Caro</h1>
+            <h1 style={{ margin: '0 0 0.5rem 0', padding: 0, whiteSpace: 'nowrap', userSelect: 'none' }}>Caro</h1>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Thử thách trí tuệ</p>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
@@ -58,7 +58,7 @@ export default function CaroHome() {
                 <button className="btn-secondary" style={{ padding: '14px' }} onClick={() => navigate('/caro/multiplayer')}>
                     Chế độ Multiplayer
                 </button>
-                <button className="btn-secondary" style={{ marginTop: '0.5rem', padding: '14px', opacity: 0.7 }} onClick={() => navigate('/')}>
+                <button className="btn-secondary" style={{ marginTop: '0.5rem', padding: '14px', opacity: 0.7, width: 'auto' }} onClick={() => navigate('/')}>
                     Quay lại Hub
                 </button>
             </div>

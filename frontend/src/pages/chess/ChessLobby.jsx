@@ -20,11 +20,13 @@ export default function ChessLobby() {
     // Chat state removed
 
     useEffect(() => {
-        socket.on('connect', () => setIsConnected(true));
-        socket.on('disconnect', () => setIsConnected(false));
+        const onConnect = () => setIsConnected(true);
+        const onDisconnect = () => setIsConnected(false);
+        socket.on('connect', onConnect);
+        socket.on('disconnect', onDisconnect);
         return () => {
-            socket.off('connect');
-            socket.off('disconnect');
+            socket.off('connect', onConnect);
+            socket.off('disconnect', onDisconnect);
         };
     }, []);
 
@@ -169,7 +171,7 @@ export default function ChessLobby() {
                 >
                     {isMyReady ? 'HỦY SẴN SÀNG' : 'SẴN SÀNG'}
                 </button>
-                <button className="btn-secondary" style={{ width: '100%', marginTop: '10px', opacity: 0.7 }} onClick={() => {
+                <button className="btn-secondary" style={{ width: 'auto', marginTop: '10px', opacity: 0.7 }} onClick={() => {
                     setInRoom(false); setMyRoom(''); navigate('/chess');
                 }}>Rời phòng</button>
             </div>
@@ -207,7 +209,7 @@ export default function ChessLobby() {
                 {error && <p style={{ color: 'var(--error-color)', fontSize: '0.85rem', marginBottom: '0.8rem' }}>{error}</p>}
                 <button className="btn-primary" style={{ width: '100%' }} onClick={handleJoinRoom}>Tham gia ngay</button>
             </div>
-            <button className="btn-secondary" style={{ marginTop: '1.5rem', width: '100%' }} onClick={() => navigate('/chess')}>Quay lại</button>
+            <button className="btn-secondary" style={{ marginTop: '1.5rem', width: 'auto' }} onClick={() => navigate('/chess')}>Quay lại</button>
         </div>
     );
 }
