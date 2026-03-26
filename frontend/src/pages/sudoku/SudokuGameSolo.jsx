@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { generateSudoku } from '../utils/sudoku';
-import Board from '../components/Board';
-import Controls from '../components/Controls';
+import { generateSudoku } from '../../utils/sudoku';
+import Board from '../../components/Board';
+import Controls from '../../components/Controls';
 import { useNavigate } from 'react-router-dom';
 
 export default function SoloGame() {

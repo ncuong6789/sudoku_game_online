@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { socket } from '../utils/socket';
-import { generateSudoku } from '../utils/sudoku';
+import { socket } from '../../utils/socket';
+import { generateSudoku } from '../../utils/sudoku';
 
-export default function MultiplayerLobby() {
+export default function SudokuLobby() {
     const navigate = useNavigate();
     const [roomId, setRoomId] = useState('');
     const [difficulty, setDifficulty] = useState('Medium');

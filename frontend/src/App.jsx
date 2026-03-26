@@ -1,10 +1,10 @@
 import React from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
-import SudokuHome from './pages/SudokuHome';
-import SoloGame from './pages/SoloGame';
-import MultiplayerLobby from './pages/MultiplayerLobby';
-import MultiplayerGame from './pages/MultiplayerGame';
+import SudokuHome from './pages/sudoku/SudokuHome';
+import SoloGame from './pages/sudoku/SudokuGameSolo';
+import MultiplayerLobby from './pages/sudoku/SudokuLobby';
+import MultiplayerGame from './pages/sudoku/SudokuGameMulti';
 
 // Caro Components
 import CaroHome from './pages/caro/CaroHome';

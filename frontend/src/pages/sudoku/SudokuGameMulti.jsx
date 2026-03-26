@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Board from '../components/Board';
-import Controls from '../components/Controls';
-import { socket } from '../utils/socket';
+import Board from '../../components/Board';
+import Controls from '../../components/Controls';
+import { socket } from '../../utils/socket';
 import { useRef } from 'react';
 
 export default function MultiplayerGame() {
