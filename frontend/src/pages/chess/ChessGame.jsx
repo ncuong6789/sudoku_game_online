@@ -14,16 +14,14 @@ export default function ChessGame() {
     const [fen, setFen] = useState(game.fen());
     const [realPlayerColor, setRealPlayerColor] = useState(() => {
         if (playerColor === 'random') {
-            const randomColor = Math.random() < 0.5 ? 'w' : 'b';
-            console.log('Random color selected immediately:', randomColor);
-            return randomColor;
+            return Math.random() < 0.5 ? 'w' : 'b';
         }
         return playerColor;
     });
     const [moveHistory, setMoveHistory] = useState([]); 
 
     const myColor = realPlayerColor || 'w';
-
+    
     // UI State
     const [moveFrom, setMoveFrom] = useState(null);
     const [optionSquares, setOptionSquares] = useState({});
@@ -31,108 +29,125 @@ export default function ChessGame() {
     const [gameOver, setGameOver] = useState(false);
     const [statusMessage, setStatusMessage] = useState('Ván đấu bắt đầu!');
 
-    // Cập nhật trạng thái
-    const updateGameState = useCallback((gameInstance) => {
-        if (!gameInstance) return;
-
+    // 1. Cập nhật FEN, Status, History mỗi khi `game` thay đổi.
+    useEffect(() => {
+        setFen(game.fen());
+        setMoveHistory(game.history({ verbose: true }));
+        
         let status = '';
-        if (gameInstance.isCheckmate()) {
-            status = `Chiếu Bí! ${gameInstance.turn() === 'w' ? 'Đen' : 'Trắng'} thắng.`;
+        if (game.isCheckmate()) {
+            status = `Chiếu Bí! ${game.turn() === 'w' ? 'Đen' : 'Trắng'} thắng.`;
             setGameOver(true);
-        } else if (gameInstance.isDraw()) {
+        } else if (game.isDraw()) {
             status = 'Hòa cờ!';
             setGameOver(true);
         } else {
-            status = gameInstance.turn() === myColor
-                ? 'Đến lượt bạn.'
+            status = game.turn() === myColor 
+                ? 'Đến lượt bạn.' 
                 : `Đến lượt ${mode === 'solo' ? 'AI' : 'đối thủ'}.`;
-            if (gameInstance.isCheck()) {
+            if (game.isCheck()) {
                 status = `Đang bị chiếu! - ` + status;
             }
         }
         setStatusMessage(status);
-        setMoveHistory([...gameInstance.history({ verbose: true })]);
-        setGame(gameInstance);
-        setFen(gameInstance.fen());
-    }, [myColor, mode]);
+        
+    }, [game, myColor, mode]);
 
     // Lắng nghe Socket cho Multiplayer
     useEffect(() => {
         if (mode === 'multiplayer' && roomId) {
-            const handleOpponentMove = ({ fen }) => {
-                const newGame = new Chess(fen);
-                updateGameState(newGame);
+            const handleOpponentMove = ({ fen: newFen }) => {
+                setGame((g) => {
+                    const newGame = new Chess();
+                    // Load FEN từ đối thủ
+                    try { newGame.load(newFen); } catch (e) { return g; }
+                    return newGame;
+                });
             };
             socket.on('chessMoved', handleOpponentMove);
             return () => socket.off('chessMoved', handleOpponentMove);
         }
-    }, [mode, roomId, game, updateGameState]);
+    }, [mode, roomId]);
 
     // AI Logic cho Solo
+    const makeAIMove = useCallback(() => {
+        setGame((g) => {
+            const moves = g.moves({ verbose: true });
+            if (moves.length === 0) return g;
+
+            let move = null;
+            if (difficulty === 'Easy') {
+                move = moves[Math.floor(Math.random() * moves.length)];
+            } else {
+                const captures = moves.filter(m => m.flags.includes('c'));
+                if (captures.length > 0) {
+                    move = captures[Math.floor(Math.random() * captures.length)];
+                } else {
+                    move = moves[Math.floor(Math.random() * moves.length)];
+                }
+            }
+            
+            try {
+                const gameCopy = new Chess();
+                gameCopy.loadPgn(g.pgn());
+                gameCopy.move(move);
+                return gameCopy;
+            } catch (e) { return g; }
+        });
+    }, [difficulty]);
+
     useEffect(() => {
         if (mode === 'solo' && !gameOver && game.turn() !== myColor) {
             const timer = setTimeout(() => {
                 makeAIMove();
-            }, 600); // AI suy nghĩ 600ms
+            }, 600);
             return () => clearTimeout(timer);
         }
-    }, [moveHistory, mode, gameOver, myColor]);
+    }, [game, mode, gameOver, myColor, makeAIMove]);
 
-    const makeAIMove = () => {
-        const moves = game.moves({ verbose: true });
-        if (moves.length === 0) return;
+    // Hàm an toàn để thực thi nước đi của người chơi
+    function attemptPlayerMove(sourceSquare, targetSquare) {
+        // Validate đồng bộ ngay lập tức để return kết quả cho react-chessboard
+        const gameCopy = new Chess();
+        gameCopy.loadPgn(game.pgn());
 
-        let move = null;
-        if (difficulty === 'Easy') {
-            move = moves[Math.floor(Math.random() * moves.length)];
-        } else {
-            // Medium/Hard: Ưu tiên ăn quân
-            const captures = moves.filter(m => m.flags.includes('c'));
-            if (captures.length > 0) {
-                move = captures[Math.floor(Math.random() * captures.length)];
-            } else {
-                move = moves[Math.floor(Math.random() * moves.length)];
-            }
-        }
+        const legalMoves = gameCopy.moves({ square: sourceSquare, verbose: true });
+        const foundMove = legalMoves.find(m => m.to === targetSquare);
+
+        if (!foundMove) return false;
+
+        const moveObj = { from: sourceSquare, to: targetSquare };
+        if (foundMove.promotion) moveObj.promotion = 'q';
 
         try {
-            const gameCopy = new Chess(game.fen());
-            gameCopy.move(move);
-            updateGameState(gameCopy);
-        } catch (e) { console.error('AI move error', e); }
-    };
+            gameCopy.move(moveObj);
+            const finalFen = gameCopy.fen();
+            
+            // Nước đi hợp lệ, queue React state update
+            setGame((g) => {
+                const updatedGame = new Chess();
+                updatedGame.loadPgn(g.pgn());
+                try {
+                    updatedGame.move(moveObj);
+                    return updatedGame;
+                } catch(e) { return g; }
+            });
+
+            setMoveFrom(null);
+            setOptionSquares({});
+            if (mode === 'multiplayer' && finalFen) {
+                socket.emit('chessMove', { roomId, fen: finalFen });
+            }
+            return true;
+        } catch (e) {
+            console.error('Lỗi di chuyển: ', e);
+            return false;
+        }
+    }
 
     function onDrop(sourceSquare, targetSquare, piece) {
         if (gameOver || game.turn() !== myColor) return false;
-
-        try {
-            const gameCopy = new Chess(game.fen());
-            const legalMoves = gameCopy.moves({ square: sourceSquare, verbose: true });
-            const foundMove = legalMoves.find(m => m.to === targetSquare);
-
-            if (!foundMove) return false;
-
-            const moveObj = {
-                from: sourceSquare,
-                to: targetSquare
-            };
-            if (foundMove.promotion) {
-                moveObj.promotion = 'q';
-            }
-
-            gameCopy.move(moveObj);
-
-            updateGameState(gameCopy);
-            if (mode === 'multiplayer') {
-                socket.emit('chessMove', { roomId, fen: gameCopy.fen() });
-            }
-            setMoveFrom(null);
-            setOptionSquares({});
-            return true;
-        } catch (e) {
-            console.error('Invalid drop', e);
-            return false;
-        }
+        return attemptPlayerMove(sourceSquare, targetSquare);
     }
 
     function onSquareClick(square) {
@@ -175,56 +190,21 @@ export default function ChessGame() {
         }
 
         // Đã có từ moveFrom, thử đi quân
-        try {
-            const gameCopy = new Chess(game.fen());
-            const legalMoves = gameCopy.moves({ square: moveFrom, verbose: true });
-            const foundMove = legalMoves.find(m => m.to === square);
-
-            if (!foundMove) return resetFirstMove(square);
-
-            const moveObj = {
-                from: moveFrom,
-                to: square
-            };
-            if (foundMove.promotion) {
-                moveObj.promotion = 'q';
-            }
-
-            gameCopy.move(moveObj);
-
-            updateGameState(gameCopy);
-            if (mode === 'multiplayer') {
-                socket.emit('chessMove', { roomId, fen: gameCopy.fen() });
-            }
-            setMoveFrom(null);
-            setOptionSquares({});
-            return true;
-        } catch (e) {
-            console.error('Invalid click move', e);
+        const isSuccess = attemptPlayerMove(moveFrom, square);
+        if (!isSuccess) {
             return resetFirstMove(square);
         }
+        return true;
     }
 
     const handleReset = () => {
         if (mode === 'solo') {
-            const newGame = new Chess();
-            updateGameState(newGame);
+            setGame(new Chess());
             setGameOver(false);
             setMoveFrom(null);
             setOptionSquares({});
-            if (myColor === 'b') {
-                setTimeout(() => {
-                    const moves = newGame.moves({ verbose: true });
-                    if (moves.length > 0) {
-                        const move = moves[Math.floor(Math.random() * moves.length)];
-                        newGame.move(move);
-                        updateGameState(newGame);
-                    }
-                }, 600);
-            }
         }
     };
-
     const customSquareStyles = useMemo(() => {
         const styles = { ...optionSquares };
         if (moveHistory.length > 0) {
