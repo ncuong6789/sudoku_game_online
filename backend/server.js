@@ -316,6 +316,35 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('startSnakeGame', ({ roomId, mapSize }) => {
+        const room = rooms[roomId];
+        if (room && room.players.length === 2 && room.gameType === 'snake') {
+            const p1Id = room.players[0];
+            const p2Id = room.players[1];
+            room.mapSize = mapSize || 20;
+
+            room.snakeState = {
+                status: 'playing',
+                intervalId: null,
+                speed: INITIAL_SPEED,
+                deadBodies: [],
+                item: { x: Math.floor(room.mapSize/2), y: Math.floor(room.mapSize/2) },
+                snakes: {
+                    [p1Id]: { id: p1Id, positions: [{x: 5, y: 5}, {x: 4, y: 5}, {x: 3, y: 5}], direction: {x: 1, y: 0}, nextDir: {x: 1, y: 0}, score: 0, isDead: false, color: 'green' },
+                    [p2Id]: { id: p2Id, positions: [{x: room.mapSize-6, y: room.mapSize-6}, {x: room.mapSize-5, y: room.mapSize-6}, {x: room.mapSize-4, y: room.mapSize-6}], direction: {x: -1, y: 0}, nextDir: {x: -1, y: 0}, score: 0, isDead: false, color: 'blue' }
+                }
+            };
+            
+            // Thay vì dùng matchFound (bị trùng logic với Random Queue), ta tạo event riêng
+            io.to(p1Id).emit('snakeGameStarted', { roomId, mapSize: room.mapSize, color: 'green' });
+            io.to(p2Id).emit('snakeGameStarted', { roomId, mapSize: room.mapSize, color: 'blue' });
+
+            setTimeout(() => {
+                startSnakeGameLoop(roomId);
+            }, 2000);
+        }
+    });
+
     const startSnakeGameLoop = (roomId) => {
         const room = rooms[roomId];
         if (!room || !room.snakeState) return;

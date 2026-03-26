@@ -182,8 +182,7 @@ export default function SnakeGame() {
         setScore(0);
         setGameOver(false);
         setStatusMessage('Đang chơi...');
-        // Cố tình không xoá deadBodies để xác lưu cữu map sau (Hardcore mode)
-        // SetDeadBodies([]); // Tuỳ chọn
+        setDeadBodies([]); // Reset map hoàn toàn cho ván mới
     };
 
     // --- MULTIPLAYER LISTENER ---
@@ -339,7 +338,6 @@ export default function SnakeGame() {
                         {renderData.snakes.map((s) => (
                             s.positions.map((segment, idx) => {
                                 const isHead = idx === 0;
-                                const isTail = idx === s.positions.length - 1;
                                 return (
                                     <div key={`${s.id}-${idx}`} style={{
                                         position: 'absolute',
@@ -347,9 +345,9 @@ export default function SnakeGame() {
                                         height: `${100 / mapSize}%`,
                                         left: `${(segment.x / mapSize) * 100}%`,
                                         top: `${(segment.y / mapSize) * 100}%`,
-                                        background: isHead ? '#fff' : s.color, // Đầu rắn màu trắng
-                                        opacity: s.isDead ? 0.3 : 1, // Mờ đi nếu vừa chết (server tick xoá)
-                                        borderRadius: isHead ? '20%' : isTail ? '50%' : '2px', // Bo tròn đầu và đuôi
+                                        background: isHead ? '#ffffff' : s.color, // Đầu trắng tinh / sáng màu
+                                        opacity: s.isDead ? 0.3 : 1, // Mờ đi nếu vừa chết
+                                        borderRadius: isHead ? '50%' : '4px', // Đầu thì tròn 50%, thân và đuôi thì khối vuông bo cong nhẹ 4px
                                         boxShadow: isHead ? `0 0 10px ${s.color}` : 'none',
                                         transform: 'scale(0.95)', // Để hở viền caro
                                         zIndex: isHead ? 10 : 5
@@ -357,6 +355,30 @@ export default function SnakeGame() {
                                 );
                             })
                         ))}
+
+                        {/* GAME OVER OVERLAY */}
+                        {gameOver && (
+                            <div style={{
+                                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                                background: 'rgba(0, 0, 0, 0.7)',
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                zIndex: 50, backdropFilter: 'blur(3px)'
+                            }}>
+                                <h2 style={{ fontSize: '2.5rem', margin: '0 0 10px 0', color: '#f87171' }}>GAME OVER</h2>
+                                <p style={{ fontSize: '1.2rem', marginBottom: '20px' }}>Điểm của bạn: <strong style={{color: '#4ade80'}}>{renderData.score}</strong></p>
+                                
+                                <div style={{ display: 'flex', gap: '15px' }}>
+                                    {mode === 'solo' && (
+                                        <button className="btn-primary" onClick={handleRestartSolo} style={{ padding: '12px 24px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <RotateCcw size={20} /> Chơi lại ngay
+                                        </button>
+                                    )}
+                                    <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/snake/multiplayer' : '/snake')} style={{ padding: '12px 24px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.1)' }}>
+                                        <ArrowLeft size={20} /> Thoát ra
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
