@@ -33,12 +33,28 @@ export default function CaroGame() {
     }, []);
 
     const playSound = (type) => {
-        if (audioRef.current) audioRef.current.pause();
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+        }
         const audio = type === 'win' ? winAudioRef.current : loseAudioRef.current;
         audio.currentTime = 0;
         audioRef.current = audio;
         audio.play().catch(e => console.log('Audio play failed:', e));
     };
+
+    const stopAudio = () => {
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+        }
+    };
+
+    useEffect(() => {
+        return () => {
+            stopAudio();
+        };
+    }, []);
 
     // Win detection
     const checkWinner = (grid, r, c, player) => {
@@ -211,11 +227,17 @@ export default function CaroGame() {
     };
 
     const resetGame = () => {
+        stopAudio();
         setBoard(Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(0)));
         setIsXNext(true);
         setWinner(null);
         setWinningLine(null);
         setIsGameOver(false);
+    };
+
+    const handleExit = () => {
+        stopAudio();
+        navigate(mode === 'multiplayer' ? '/caro/multiplayer' : '/caro');
     };
 
     useEffect(() => {
@@ -250,8 +272,8 @@ export default function CaroGame() {
                             padding: '1px',
                             borderRadius: '4px',
                             width: '100%',
-                            maxHeight: '70vh',
-                            maxWidth: '70vh',
+                            maxHeight: BOARD_SIZE === 3 ? '300px' : (BOARD_SIZE === 15 ? '600px' : '85vh'),
+                            maxWidth: BOARD_SIZE === 3 ? '300px' : (BOARD_SIZE === 15 ? '600px' : '85vh'),
                             aspectRatio: '1 / 1',
                             margin: '0 auto'
                         }}>
@@ -292,9 +314,14 @@ export default function CaroGame() {
                                 <h2 style={{ color: winner === 1 ? 'var(--primary-color)' : '#ff4757' }}>
                                     {winner === 1 ? 'X CHIẾN THẮNG!' : 'O CHIẾN THẮNG!'}
                                 </h2>
-                                <button className="btn-primary" style={{ marginTop: '1rem', width: '100%' }} onClick={resetGame}>
-                                    Chơi ván mới
-                                </button>
+                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                                    <button className="btn-primary" style={{ flex: 1 }} onClick={resetGame}>
+                                        Chơi ván mới
+                                    </button>
+                                    <button className="btn-secondary" style={{ flex: 1 }} onClick={handleExit}>
+                                        Thoát
+                                    </button>
+                                </div>
                             </div>
                         ) : (
                             <div>
@@ -303,7 +330,7 @@ export default function CaroGame() {
                                     <button className="btn-secondary" style={{ flex: 1 }} onClick={resetGame}>
                                         <RotateCcw size={18} /> Reset
                                     </button>
-                                    <button className="btn-secondary" style={{ flex: 1 }} onClick={() => navigate('/caro')}>
+                                    <button className="btn-secondary" style={{ flex: 1 }} onClick={handleExit}>
                                         Thoát
                                     </button>
                                 </div>
@@ -312,56 +339,58 @@ export default function CaroGame() {
                     </div>
 
                     {/* Chat Box */}
-                    <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '1rem', maxHeight: '350px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
-                            <MessageSquare size={18} />
-                            <span style={{ fontWeight: 'bold' }}>Trò chuyện</span>
-                        </div>
-                        
-                        <div style={{ flex: 1, overflowY: 'auto', marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            {messages.length === 0 && <p style={{ color: 'var(--text-secondary)', textAlign: 'center', fontSize: '0.8rem' }}>Hãy gửi lời chào tới đối thủ!</p>}
-                            {messages.map((msg, idx) => (
-                                <div key={idx} style={{ 
-                                    padding: '8px 12px', 
-                                    background: msg.sender === socket.id ? 'rgba(var(--primary-color-rgb), 0.2)' : 'rgba(255,255,255,0.05)',
-                                    borderRadius: '12px',
-                                    alignSelf: msg.sender === socket.id ? 'flex-end' : 'flex-start',
-                                    maxWidth: '80%',
-                                    fontSize: '0.9rem'
-                                }}>
-                                    {msg.message}
-                                </div>
-                            ))}
-                            <div ref={chatEndRef} />
-                        </div>
+                    {mode === 'multiplayer' && (
+                        <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '1rem', maxHeight: '350px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                                <MessageSquare size={18} />
+                                <span style={{ fontWeight: 'bold' }}>Trò chuyện</span>
+                            </div>
+                            
+                            <div style={{ flex: 1, overflowY: 'auto', marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {messages.length === 0 && <p style={{ color: 'var(--text-secondary)', textAlign: 'center', fontSize: '0.8rem' }}>Hãy gửi lời chào tới đối thủ!</p>}
+                                {messages.map((msg, idx) => (
+                                    <div key={idx} style={{ 
+                                        padding: '8px 12px', 
+                                        background: msg.sender === socket.id ? 'rgba(var(--primary-color-rgb), 0.2)' : 'rgba(255,255,255,0.05)',
+                                        borderRadius: '12px',
+                                        alignSelf: msg.sender === socket.id ? 'flex-end' : 'flex-start',
+                                        maxWidth: '80%',
+                                        fontSize: '0.9rem'
+                                    }}>
+                                        {msg.message}
+                                    </div>
+                                ))}
+                                <div ref={chatEndRef} />
+                            </div>
 
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                            <input 
-                                type="text"
-                                className="glass-input"
-                                placeholder="Nhập tin nhắn..."
-                                value={inputMessage}
-                                onChange={(e) => setInputMessage(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && (()=>{
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <input 
+                                    type="text"
+                                    className="glass-input"
+                                    placeholder="Nhập tin nhắn..."
+                                    value={inputMessage}
+                                    onChange={(e) => setInputMessage(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && (()=>{
+                                        if(!inputMessage.trim()) return;
+                                        const msgObj = { message: inputMessage, sender: socket.id };
+                                        socket.emit('sendMessage', { roomId, ...msgObj });
+                                        setMessages(prev => [...prev, msgObj]);
+                                        setInputMessage('');
+                                    })()}
+                                    style={{ flex: 1, padding: '10px' }}
+                                />
+                                <button className="btn-primary" style={{ padding: '10px' }} onClick={()=>{
                                     if(!inputMessage.trim()) return;
                                     const msgObj = { message: inputMessage, sender: socket.id };
                                     socket.emit('sendMessage', { roomId, ...msgObj });
                                     setMessages(prev => [...prev, msgObj]);
                                     setInputMessage('');
-                                })()}
-                                style={{ flex: 1, padding: '10px' }}
-                            />
-                            <button className="btn-primary" style={{ padding: '10px' }} onClick={()=>{
-                                if(!inputMessage.trim()) return;
-                                const msgObj = { message: inputMessage, sender: socket.id };
-                                socket.emit('sendMessage', { roomId, ...msgObj });
-                                setMessages(prev => [...prev, msgObj]);
-                                setInputMessage('');
-                            }}>
-                                <Send size={18} />
-                            </button>
+                                }}>
+                                    <Send size={18} />
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>

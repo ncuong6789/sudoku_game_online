@@ -7,27 +7,37 @@ export default function ChessHome() {
     const [isFlipping, setIsFlipping] = useState(false);
     const [assignedColor, setAssignedColor] = useState(null); // 'w' or 'b'
 
+    const [soloColor, setSoloColor] = useState('random');
+
     const handleStartSolo = () => {
         setIsFlipping(true);
         setAssignedColor(null);
 
-        // Hiệu ứng "lật màu" giả lập trong 1.5 giây
-        let flips = 0;
-        const interval = setInterval(() => {
-            setAssignedColor(flips % 2 === 0 ? 'w' : 'b');
-            flips++;
-        }, 150);
+        if (soloColor === 'random') {
+            // Hiệu ứng "lật màu" giả lập trong 1.5 giây
+            let flips = 0;
+            const interval = setInterval(() => {
+                setAssignedColor(flips % 2 === 0 ? 'w' : 'b');
+                flips++;
+            }, 150);
 
-        setTimeout(() => {
-            clearInterval(interval);
-            const finalColor = Math.random() < 0.5 ? 'w' : 'b';
-            setAssignedColor(finalColor);
-            
-            // Giữ màn hình kết quả lật màu thêm 1 giây trước khi vào game
             setTimeout(() => {
-                navigate('/chess/game', { state: { mode: 'solo', difficulty, playerColor: finalColor } });
-            }, 1000);
-        }, 1500);
+                clearInterval(interval);
+                const finalColor = Math.random() < 0.5 ? 'w' : 'b';
+                setAssignedColor(finalColor);
+                
+                // Giữ màn hình kết quả lật màu thêm 1 giây trước khi vào game
+                setTimeout(() => {
+                    navigate('/chess/game', { state: { mode: 'solo', difficulty, playerColor: finalColor } });
+                }, 1000);
+            }, 1500);
+        } else {
+            // Nếu đã chọn cố định, chuyển thẳng vào game sau một animation ngắn
+            setAssignedColor(soloColor);
+            setTimeout(() => {
+                navigate('/chess/game', { state: { mode: 'solo', difficulty, playerColor: soloColor } });
+            }, 800);
+        }
     };
 
     return (
@@ -53,10 +63,28 @@ export default function ChessHome() {
                         ))}
                     </div>
                 </div>
-                
+                {/* Solo Color Selection */}
+                <div style={{ textAlign: 'left', marginTop: '0.2rem' }}>
+                    <p style={{ fontSize: '0.8rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Phe của bạn (Solo):</p>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        {['w', 'b', 'random'].map((c) => (
+                            <button 
+                                key={c}
+                                className={soloColor === c ? 'btn-primary' : 'btn-secondary'}
+                                onClick={() => setSoloColor(c)}
+                                disabled={isFlipping}
+                                style={{ flex: 1, padding: '10px', fontSize: '0.8rem', ...(soloColor === c ? { background: 'var(--primary-color)' } : {}) }}
+                            >
+                                {c === 'w' ? 'Trắng' : c === 'b' ? 'Đen' : 'N.Nhiên'}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
                 <button className="btn-primary" style={{ padding: '14px', marginTop: '0.5rem' }} onClick={handleStartSolo} disabled={isFlipping}>
-                    Chế độ Solo (Random phe)
+                    Bắt đầu chơi Solo
                 </button>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', margin: '0.2rem 0' }}></div>
                 <button className="btn-secondary" style={{ padding: '14px' }} onClick={() => navigate('/chess/multiplayer')} disabled={isFlipping}>
                     Chế độ Multiplayer
                 </button>

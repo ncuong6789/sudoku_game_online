@@ -104,21 +104,43 @@ export default function ChessGame() {
     const handleSquareClick = (square) => {
         if (gameOver || game.turn() !== myColor) return;
 
-        // Nếu click vào quân của mình -> Chọn quân
-        const piece = game.get(square);
-        if (piece && piece.color === myColor) {
+        // Nếu click vào ô có quân của mình (khi đã hoặc chưa chọn quân)
+        const targetPiece = game.get(square);
+        
+        // Hỗ trợ Nhập thành: Click Vua đang chọn -> Click Xe cùng màu
+        let effectiveSquare = square;
+        if (selectedSquare) {
+            const selectedPiece = game.get(selectedSquare);
+            if (selectedPiece && selectedPiece.type === 'k' && selectedPiece.color === myColor &&
+                targetPiece && targetPiece.type === 'r' && targetPiece.color === myColor) {
+                // Ánh xạ ô Xe (h1/a1/h8/a8) thành ô đích chuẩn của nhập thành (g1/c1/g8/c8)
+                if (myColor === 'w') {
+                    if (square === 'h1') effectiveSquare = 'g1';
+                    if (square === 'a1') effectiveSquare = 'c1';
+                } else {
+                    if (square === 'h8') effectiveSquare = 'g8';
+                    if (square === 'a8') effectiveSquare = 'c8';
+                }
+            }
+        }
+
+        if (targetPiece && targetPiece.color === myColor && effectiveSquare === square) {
             setSelectedSquare(square);
             const moves = game.moves({ square, verbose: true });
+            
+            // Highlight các ô target.
+            // Nếu Vua có thể nhập thành, moves.to sẽ là 'g1'/'c1'. Để giúp người dùng dễ hiểu, 
+            // có thể tô sáng cả vị trí đó (mặc định đã làm).
             setPossibleMoves(moves.map(m => m.to));
             return;
         }
 
-        // Nếu đã chọn quân và click vào ô hợp lệ -> Đi quân
-        if (selectedSquare && possibleMoves.includes(square)) {
+        // Nếu đã chọn quân và click vào ô hợp lệ (hoặc ô effectiveSquare do nhập thành) -> Đi quân
+        if (selectedSquare && possibleMoves.includes(effectiveSquare)) {
             try {
                 game.move({
                     from: selectedSquare,
-                    to: square,
+                    to: effectiveSquare,
                     promotion: 'q' // Luôn tự động phong cấp thành Hậu cho đơn giản
                 });
                 
