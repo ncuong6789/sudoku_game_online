@@ -269,10 +269,12 @@ export const useTetris = (initialPieceSequence = [], difficulty = 'Medium') => {
                         });
                         setIsClearing(false);
                         resetPlayer();
+                        setDropTime(getBaseDropTime() / (level + 1.2)); // Khôi phục hẹn giờ auto-drop
                     }, 400);
                     return newStage;
                 } else {
                     resetPlayer();
+                    setDropTime(getBaseDropTime() / (level + 1.2)); // Khôi phục hẹn giờ auto-drop
                 }
             }
 
