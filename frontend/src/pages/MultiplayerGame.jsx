@@ -79,7 +79,11 @@ export default function MultiplayerGame() {
         const handleOpponentGameOver = ({ won: opponentWon }) => {
             setIsGameOver(true);
             setWon(!opponentWon);
-            if (opponentWon) playLoseSoundRef.current?.(); // Opponent won → I lost
+            if (opponentWon) {
+                playLoseSoundRef.current?.(); // Opponent won → I lost
+            } else {
+                playWinSoundRef.current?.(); // Opponent lost → I won
+            }
         };
         const handleDisconnect = () => {
             // Opponent left
@@ -87,6 +91,7 @@ export default function MultiplayerGame() {
                 setOpponentDisconnected(true);
                 setIsGameOver(true);
                 setWon(true);
+                playWinSoundRef.current?.();
             }
         };
 
