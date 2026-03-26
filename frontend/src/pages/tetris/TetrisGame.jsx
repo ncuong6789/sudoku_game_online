@@ -77,7 +77,14 @@ const NextPiece = ({ type }) => {
 export default function TetrisGame() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { mode, roomId, difficulty, pieceSequence } = location.state || { mode: 'solo', difficulty: 'Medium', pieceSequence: [] };
+    const locationState = location.state || {};
+    const mode = locationState.mode || 'solo';
+    const roomId = locationState.roomId;
+    const difficulty = locationState.difficulty || 'Medium';
+    
+    // Stable reference for empty array to prevent infinite re-renders
+    const defaultSeq = useRef([]);
+    const pieceSequence = locationState.pieceSequence || defaultSeq.current;
 
     // Player hook
     const { 
@@ -134,9 +141,13 @@ export default function TetrisGame() {
     }, [stage, score, isStarted, mode, roomId]);
 
     // Handle initial start
+    const hasStartedRef = useRef(false);
     useEffect(() => {
-        startGame();
-        setIsStarted(true);
+        if (!hasStartedRef.current) {
+            startGame();
+            setIsStarted(true);
+            hasStartedRef.current = true;
+        }
     }, [startGame]);
 
     // Listen to Opponent in Multiplayer
