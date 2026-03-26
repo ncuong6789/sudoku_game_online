@@ -25,10 +25,20 @@ export default function SoloGame() {
     // Sound function refs
     const playWinSoundRef = useRef(null);
     const playLoseSoundRef = useRef(null);
+    const winAudioRef = useRef(new Audio('/win.mp3'));
+    const loseAudioRef = useRef(new Audio('/lose.mp3'));
+
+    // Preload sounds
+    useEffect(() => {
+        winAudioRef.current.load();
+        loseAudioRef.current.load();
+    }, []);
+
     playLoseSoundRef.current = () => {
         console.log('Solo: Triggering Lose Sound...');
         if (audioRef.current) audioRef.current.pause();
-        const audio = new Audio('/lose.mp3');
+        const audio = loseAudioRef.current;
+        audio.currentTime = 0;
         audioRef.current = audio;
         audio.play().catch(e => console.log('Lose sound failed:', e));
         setTimeout(() => { if (audioRef.current === audio) audio.pause(); }, 30000);
@@ -36,7 +46,8 @@ export default function SoloGame() {
     playWinSoundRef.current = () => {
         console.log('Solo: Triggering Win Sound...');
         if (audioRef.current) audioRef.current.pause();
-        const audio = new Audio('/win.mp3');
+        const audio = winAudioRef.current;
+        audio.currentTime = 0;
         audioRef.current = audio;
         audio.play().catch(e => console.log('Win sound failed:', e));
         setTimeout(() => { if (audioRef.current === audio) audio.pause(); }, 30000);

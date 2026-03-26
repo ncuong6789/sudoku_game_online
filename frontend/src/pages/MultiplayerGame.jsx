@@ -40,10 +40,20 @@ export default function MultiplayerGame() {
     // Sound function refs - always call the latest version, never stale
     const playWinSoundRef = useRef(null);
     const playLoseSoundRef = useRef(null);
+    const winAudioRef = useRef(new Audio('/win.mp3'));
+    const loseAudioRef = useRef(new Audio('/lose.mp3'));
+
+    // Preload sounds
+    useEffect(() => {
+        winAudioRef.current.load();
+        loseAudioRef.current.load();
+    }, []);
+
     playLoseSoundRef.current = () => {
         console.log('Triggering Lose Sound...');
         if (audioRef.current) audioRef.current.pause();
-        const audio = new Audio('/lose.mp3');
+        const audio = loseAudioRef.current;
+        audio.currentTime = 0; // Reset to start
         audioRef.current = audio;
         audio.play().catch(e => console.log('Lose sound failed:', e));
         setTimeout(() => { if (audioRef.current === audio) audio.pause(); }, 30000);
@@ -51,7 +61,8 @@ export default function MultiplayerGame() {
     playWinSoundRef.current = () => {
         console.log('Triggering Win Sound...');
         if (audioRef.current) audioRef.current.pause();
-        const audio = new Audio('/win.mp3');
+        const audio = winAudioRef.current;
+        audio.currentTime = 0; // Reset to start
         audioRef.current = audio;
         audio.play().catch(e => console.log('Win sound failed:', e));
         setTimeout(() => { if (audioRef.current === audio) audio.pause(); }, 30000);
