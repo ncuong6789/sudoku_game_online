@@ -101,8 +101,12 @@ export default function TetrisGame() {
     const [isStarted, setIsStarted] = useState(false);
 
     // Keyboard handlers
-    const move = useCallback(({ keyCode }) => {
+    const move = useCallback((e) => {
+        const { keyCode } = e;
         if (!gameOver && isStarted) {
+            if ([37, 38, 39, 40, 32].includes(keyCode)) {
+                e.preventDefault();
+            }
             if (keyCode === 37) {
                 movePlayer(-1);
             } else if (keyCode === 39) {
@@ -117,9 +121,15 @@ export default function TetrisGame() {
         }
     }, [gameOver, isStarted, movePlayer, dropPlayer, playerRotate, stage, hardDrop]);
 
-    const keyUp = useCallback(({ keyCode }) => {
-        if (!gameOver && keyCode === 40) {
-            resumeDrop();
+    const keyUp = useCallback((e) => {
+        const { keyCode } = e;
+        if (!gameOver) {
+            if ([37, 38, 39, 40, 32].includes(keyCode)) {
+                e.preventDefault();
+            }
+            if (keyCode === 40) {
+                resumeDrop();
+            }
         }
     }, [gameOver, resumeDrop]);
 

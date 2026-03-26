@@ -15,7 +15,6 @@ export default function CaroHome() {
     return (
         <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
             <h1 style={{ margin: '0 0 0.5rem 0', padding: 0, whiteSpace: 'nowrap', userSelect: 'none' }}>Caro</h1>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Thử thách trí tuệ</p>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
                 {/* Difficulty */}

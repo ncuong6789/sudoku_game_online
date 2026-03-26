@@ -27,8 +27,9 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
   background-color: var(--bg-color);
   color: var(--text-primary);
   user-select: none;
@@ -583,4 +584,13 @@ h1 {
 
 .chat-messages::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes flashRow {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.5) contrast(1.2); box-shadow: inset 0 0 10px rgba(255,255,255,0.8); }
+}
+.flash-row {
+    animation: flashRow 0.2s ease-in-out infinite;
+    z-index: 10;
 }
