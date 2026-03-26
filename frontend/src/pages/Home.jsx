@@ -115,15 +115,26 @@ export default function Home() {
                     <div className="action-row">
                         {activeGame !== 'chess' ? (
                             <>
-                                <button className="btn-primary" onClick={() => navigate(game.path)}>
+                                <button 
+                                    className={!showHelp ? "btn-primary" : "btn-secondary"} 
+                                    onClick={() => {
+                                        if (showHelp) setShowHelp(false);
+                                        else navigate(game.path);
+                                    }}
+                                    style={{ flex: 1 }}
+                                >
                                     Bắt đầu chơi
                                 </button>
-                                <button className="btn-secondary" onClick={() => setShowHelp(!showHelp)}>
-                                    {showHelp ? 'Đóng hướng dẫn' : 'Hướng dẫn'}
+                                <button 
+                                    className={showHelp ? "btn-primary" : "btn-secondary"} 
+                                    onClick={() => setShowHelp(!showHelp)}
+                                    style={{ flex: 1 }}
+                                >
+                                    Hướng dẫn
                                 </button>
                             </>
                         ) : (
-                            <button className="btn-secondary" disabled>
+                            <button className="btn-secondary" disabled style={{ width: '100%' }}>
                                 Đang phát triển...
                             </button>
                         )}
