@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutGrid, Grid3X3, Swords, Trophy, Users, X } from 'lucide-react';
+import { LayoutGrid, Grid3X3, Swords, Trophy, Users, X, Activity } from 'lucide-react';
 import { socket } from '../utils/socket';
 
 const games = {
@@ -35,6 +35,18 @@ const games = {
         instructions: [
             'Cờ vua là trò chơi chiến thuật giữa hai người chơi.',
             'Mỗi quân cờ có cách di chuyển riêng. Mục tiêu là chiếu bí Vua đối phương.'
+        ]
+    },
+    snake: {
+        id: 'snake',
+        name: 'Rắn Săn Mồi',
+        description: 'Sinh tồn trên bản đồ lưới (20x20 hoặc 30x30). Điều khiển Rắn ăn mồi để tăng kích thước và tốc độ. Đối đầu Multiplayer kịch tính!',
+        path: '/snake',
+        difficulty: 'Tuỳ chỉnh',
+        instructions: [
+            'Sử dụng 4 phím mũi tên (Lên, Xuống, Trái, Phải) để di chuyển hướng đi.',
+            'Ăn mồi sẽ tăng 2 kích thước (đốt) và tăng tốc độ rắn.',
+            'Trong Multiplay, chạm vào tường, vào bản thân hoặc đối thủ sẽ chết. Rắn chết biến thành chướng ngại vật!'
         ]
     }
 };
@@ -72,6 +84,9 @@ export default function Home() {
                     </div>
                     <div className={`nav-item ${activeGame === 'chess' ? 'active' : ''}`} onClick={() => { setActiveGame('chess'); setShowHelp(false); }}>
                         <LayoutGrid size={20} /> Cờ vua
+                    </div>
+                    <div className={`nav-item ${activeGame === 'snake' ? 'active' : ''}`} onClick={() => { setActiveGame('snake'); setShowHelp(false); }}>
+                        <Activity size={20} /> Rắn săn mồi
                     </div>
                 </nav>
                 <div className="nav-group" style={{ marginTop: '1rem', flex: 'none' }}>

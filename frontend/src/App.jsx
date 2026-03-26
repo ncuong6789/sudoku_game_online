@@ -16,6 +16,11 @@ import ChessHome from './pages/chess/ChessHome';
 import ChessLobby from './pages/chess/ChessLobby';
 import ChessGame from './pages/chess/ChessGame';
 
+// Snake Components
+import SnakeHome from './pages/snake/SnakeHome';
+import SnakeLobby from './pages/snake/SnakeLobby';
+import SnakeGame from './pages/snake/SnakeGame';
+
 function App() {
   return (
     <HashRouter>
@@ -37,6 +42,11 @@ function App() {
         <Route path="/chess" element={<ChessHome />} />
         <Route path="/chess/multiplayer" element={<ChessLobby />} />
         <Route path="/chess/game" element={<ChessGame />} />
+
+        {/* Snake Module */}
+        <Route path="/snake" element={<SnakeHome />} />
+        <Route path="/snake/multiplayer" element={<SnakeLobby />} />
+        <Route path="/snake/game" element={<SnakeGame />} />
       </Routes>
     </HashRouter>
   );
