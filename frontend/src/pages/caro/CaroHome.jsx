@@ -1,45 +1,47 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Swords, Users, User, ArrowLeft } from 'lucide-react';
 
 export default function CaroHome() {
     const navigate = useNavigate();
+    const [difficulty, setDifficulty] = useState('Medium');
 
     return (
-        <div className="glass-panel menu-container" style={{ maxWidth: '600px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-                <button className="btn-secondary" onClick={() => navigate('/')} style={{ padding: '10px' }}>
-                    <ArrowLeft size={20} />
+        <div className="glass-panel menu-container">
+            <h1 style={{ margin: '0 0 1rem 0', padding: 0 }}>Caro</h1>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Thử thách trí tuệ (15x15)</p>
+            
+            {/* Solo Mode Section */}
+            <div style={{ width: '100%', marginBottom: '2rem' }}>
+                <h3 style={{ marginBottom: '1rem', textAlign: 'left' }}>Chơi Solo</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                    <select 
+                        className="glass-input" 
+                        value={difficulty} 
+                        onChange={(e) => setDifficulty(e.target.value)}
+                        style={{ padding: '12px', width: '100%', border: '1px solid rgba(255,255,255,0.1)' }}
+                    >
+                        <option value="Easy">Dễ (Học chơi)</option>
+                        <option value="Medium">Vừa (Thử thách)</option>
+                        <option value="Hard">Khó (Chuyên nghiệp)</option>
+                    </select>
+                    <button className="btn-primary" onClick={() => navigate('/caro/game', { state: { mode: 'solo', difficulty } })}>
+                        Bắt đầu Solo
+                    </button>
+                </div>
+            </div>
+
+            <div style={{ width: '100%', height: '1px', background: 'rgba(255,255,255,0.1)', marginBottom: '2rem' }}></div>
+
+            {/* Multiplayer Section */}
+            <div style={{ width: '100%' }}>
+                <button className="btn-secondary" style={{ width: '100%' }} onClick={() => navigate('/caro/multiplayer')}>
+                    Chơi Multiplayer (Online)
                 </button>
-                <h1 style={{ margin: 0 }}>Cờ Caro 15x15</h1>
             </div>
 
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '3rem' }}>
-                Trò chơi trí tuệ kinh điển. Hãy xếp đủ 5 quân để chiến thắng!
-            </p>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                <div className="stat-card" style={{ cursor: 'pointer', border: '1px solid rgba(var(--primary-color-rgb), 0.3)' }} onClick={() => navigate('/caro/game', { state: { mode: 'solo' } })}>
-                    <User size={32} color="var(--primary-color)" />
-                    <h3 style={{ margin: '1rem 0 0.5rem 0' }}>Chơi Solo</h3>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Luyện tập với AI</p>
-                </div>
-
-                <div className="stat-card" style={{ cursor: 'pointer', border: '1px solid rgba(var(--primary-color-rgb), 0.3)' }} onClick={() => navigate('/caro/multiplayer')}>
-                    <Users size={32} color="var(--primary-color)" />
-                    <h3 style={{ margin: '1rem 0 0.5rem 0' }}>Multiplayer</h3>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Thách đấu bạn bè</p>
-                </div>
-            </div>
-
-            <div className="glass-panel" style={{ marginTop: '2rem', padding: '1rem', fontSize: '0.9rem', textAlign: 'left' }}>
-                <h4 style={{ marginBottom: '0.5rem' }}>Luật chơi cơ bản:</h4>
-                <ul style={{ paddingLeft: '1.5rem', color: 'var(--text-secondary)' }}>
-                    <li>Bàn cờ kích thước 15x15.</li>
-                    <li>Người chơi thay phiên nhau đặt quân X và O.</li>
-                    <li>Ai xếp đủ 5 quân liên tiếp (ngang, dọc, chéo) trước sẽ thắng.</li>
-                </ul>
-            </div>
+            <button className="btn-secondary" style={{ marginTop: '2rem', width: '100%', opacity: 0.7 }} onClick={() => navigate('/')}>
+                Quay lại Hub
+            </button>
         </div>
     );
 }

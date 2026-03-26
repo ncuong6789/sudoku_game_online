@@ -17,6 +17,23 @@ const io = new Server(server, {
 
 const rooms = {};
 
+const broadcastStats = () => {
+    const stats = {
+        sudoku: { online: 0, rooms: 0 },
+        caro: { online: 0, rooms: 0 },
+        chess: { online: 0, rooms: 0 }
+    };
+    for (const roomId in rooms) {
+        const room = rooms[roomId];
+        const gameType = room.gameType || 'sudoku';
+        if (stats[gameType]) {
+            stats[gameType].rooms++;
+            stats[gameType].online += room.players.length;
+        }
+    }
+    io.emit('statsUpdate', stats);
+};
+
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
@@ -33,6 +50,7 @@ io.on('connection', (socket) => {
             }
         };
         socket.join(roomId);
+        broadcastStats();
         callback({ roomId });
     });
 
@@ -45,6 +63,7 @@ io.on('connection', (socket) => {
             room.progress[socket.id] = 0;
             socket.join(roomId);
             io.to(roomId).emit('playerJoined', { players: room.players.length });
+            broadcastStats();
             callback({ success: true, difficulty: room.difficulty });
         } else {
             callback({ success: false, message: 'Phòng không tồn tại hoặc đã đầy' });
@@ -97,6 +116,27 @@ io.on('connection', (socket) => {
         });
     });
 
+    socket.on('getStats', () => {
+        const stats = {
+            sudoku: { online: 0, rooms: 0 },
+            caro: { online: 0, rooms: 0 },
+            chess: { online: 0, rooms: 0 }
+        };
+
+        for (const roomId in rooms) {
+            const room = rooms[roomId];
+            const gameType = room.gameType || 'sudoku';
+            if (stats[gameType]) {
+                stats[gameType].rooms++;
+                stats[gameType].online += room.players.length;
+            }
+        }
+        
+        // Also account for solo players or players in lobby if needed, 
+        // but for now, rooms + players in rooms is a good metric.
+        socket.emit('statsUpdate', stats);
+    });
+
     socket.on('disconnect', () => {
         for (const roomId in rooms) {
             const index = rooms[roomId].players.indexOf(socket.id);
@@ -106,6 +146,7 @@ io.on('connection', (socket) => {
                 if (rooms[roomId].players.length === 0) {
                     delete rooms[roomId];
                 }
+                broadcastStats();
             }
         }
         console.log('User disconnected:', socket.id);

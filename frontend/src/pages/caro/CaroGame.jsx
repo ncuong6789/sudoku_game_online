@@ -8,7 +8,7 @@ const BOARD_SIZE = 15;
 export default function CaroGame() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { mode, roomId } = location.state || { mode: 'solo' };
+    const { mode, roomId, difficulty } = location.state || { mode: 'solo', difficulty: 'Medium' };
 
     const [board, setBoard] = useState(Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(0)));
     const [isXNext, setIsXNext] = useState(true); // X moves first
@@ -77,24 +77,44 @@ export default function CaroGame() {
 
     // Simple AI for Solo mode
     const makeAIMove = useCallback((currentBoard) => {
-        // Find best move
+        // Handle Easy mode: make a random move 40% of the time
+        if (difficulty === 'Easy' && Math.random() < 0.4) {
+            const emptyCells = [];
+            for (let r = 0; r < BOARD_SIZE; r++) {
+                for (let c = 0; c < BOARD_SIZE; c++) {
+                    if (currentBoard[r][c] === 0) emptyCells.push({ r, c });
+                }
+            }
+            if (emptyCells.length > 0) {
+                const move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                applyAIMove(currentBoard, move);
+                return;
+            }
+        }
+
+        // Find best move for Medium/Hard
         let bestScore = -1;
         let move = null;
+        const searchRadius = difficulty === 'Hard' ? 2 : 1; 
 
         for (let r = 0; r < BOARD_SIZE; r++) {
             for (let c = 0; c < BOARD_SIZE; c++) {
                 if (currentBoard[r][c] === 0) {
-                    // Score this move (simple heuristic: proximity to existing stones)
                     let score = 0;
-                    for (let dr = -1; dr <= 1; dr++) {
-                        for (let dc = -1; dc <= 1; dc++) {
+                    // Focus search around stones to speed up
+                    let nearStone = false;
+                    for (let dr = -searchRadius; dr <= searchRadius; dr++) {
+                        for (let dc = -searchRadius; dc <= searchRadius; dc++) {
                             const nr = r + dr;
                             const nc = c + dc;
                             if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && currentBoard[nr][nc] !== 0) {
-                                score += currentBoard[nr][nc] === 2 ? 2 : 1; // Prefer attacking
+                                score += currentBoard[nr][nc] === 2 ? 3 : 2; // AI moves/blocking
+                                nearStone = true;
                             }
                         }
                     }
+                    if (!nearStone && difficulty !== 'Easy') continue; 
+                    
                     if (score > bestScore) {
                         bestScore = score;
                         move = { r, c };
@@ -103,21 +123,23 @@ export default function CaroGame() {
             }
         }
 
-        if (move) {
-            const newBoard = currentBoard.map(row => [...row]);
-            newBoard[move.r][move.c] = 2; // AI is O (2)
-            setBoard(newBoard);
-            const win = checkWinner(newBoard, move.r, move.c, 2);
-            if (win) {
-                setWinner(2);
-                setWinningLine(win.line);
-                setIsGameOver(true);
-                playSound('lose');
-            } else {
-                setIsXNext(true);
-            }
+        if (move) applyAIMove(currentBoard, move);
+    }, [difficulty]);
+
+    const applyAIMove = (currentBoard, move) => {
+        const newBoard = currentBoard.map(row => [...row]);
+        newBoard[move.r][move.c] = 2; // AI is O (2)
+        setBoard(newBoard);
+        const win = checkWinner(newBoard, move.r, move.c, 2);
+        if (win) {
+            setWinner(2);
+            setWinningLine(win.line);
+            setIsGameOver(true);
+            playSound('lose');
+        } else {
+            setIsXNext(true);
         }
-    }, []);
+    };
 
     // Multiplayer Socket logic
     useEffect(() => {

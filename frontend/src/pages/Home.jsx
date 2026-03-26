@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutGrid, Binary, Grid3X3, Swords, Trophy, Users, Info } from 'lucide-react';
+import { LayoutGrid, Binary, Grid3X3, Swords, Trophy, Users, Info, X } from 'lucide-react';
+import { socket } from '../utils/socket';
 
 const games = {
     sudoku: {
@@ -8,32 +9,61 @@ const games = {
         name: 'Sudoku',
         description: 'Trò chơi giải đố logic cổ điển. Điền các số từ 1 đến 9 vào lưới sao cho mỗi hàng, mỗi cột và mỗi vùng 3x3 đều chứa đầy đủ các chữ số.',
         path: '/sudoku',
-        status: 'Trực tuyến',
-        stats: { online: 12, played: '1.2k', difficulty: 'Vừa' }
+        difficulty: 'Vừa',
+        instructions: [
+            'Điền các số từ 1 đến 9 vào các ô trống.',
+            'Mỗi hàng ngang phải có đủ các số từ 1 đến 9 không trùng lặp.',
+            'Mỗi cột dọc phải có đủ các số từ 1 đến 9 không trùng lặp.',
+            'Mỗi vùng 3x3 (có viền đậm) phải có đủ các số từ 1 đến 9 không trùng lặp.'
+        ]
     },
     caro: {
         id: 'caro',
-        name: 'Caro (Gomoku)',
+        name: 'Caro',
         description: 'Trận chiến trí tuệ trên bàn cờ 15x15. Xếp đủ 5 quân cờ liên tiếp theo hàng ngang, dọc hoặc chéo để giành chiến thắng.',
         path: '/caro',
-        status: 'Mới',
-        stats: { online: 8, played: '450', difficulty: 'Cao' }
+        difficulty: 'Cao',
+        instructions: [
+            'Người chơi thay phiên nhau đặt quân X và O vào các ô trống trên bàn cờ 15x15.',
+            'Mục tiêu là tạo thành một hàng gồm 5 quân cờ của mình theo hàng ngang, dọc hoặc chéo.',
+            'Người đầu tiên đạt được chuỗi 5 quân liên tiếp sẽ giành chiến thắng.'
+        ]
     },
     chess: {
         id: 'chess',
         name: 'Cờ vua',
         description: 'Đỉnh cao của chiến thuật quân sự trên bàn cờ 8x8. Điều khiển quân đội của bạn để chiếu bí vua đối phương.',
         path: '/chess',
-        status: 'Sắp ra mắt',
-        stats: { online: 0, played: '0', difficulty: 'Rất cao' }
+        difficulty: 'Rất cao',
+        instructions: [
+            'Cờ vua là trò chơi chiến thuật giữa hai người chơi.',
+            'Mỗi loại quân có cách di chuyển riêng (Xe, Mã, Tượng, Hậu, Vua, Tốt).',
+            'Mục tiêu cuối cùng là Chiếu bí (Checkmate) Vua của đối phương.'
+        ]
     }
 };
 
 export default function Home() {
     const navigate = useNavigate();
     const [activeGame, setActiveGame] = useState('sudoku');
+    const [showHelp, setShowHelp] = useState(false);
+    const [stats, setStats] = useState({ online: 0, rooms: 0 });
 
     const game = games[activeGame];
+
+    useEffect(() => {
+        // Request real stats from backend
+        socket.emit('getStats');
+        const handleStats = (data) => {
+            if (data[activeGame]) {
+                setStats(data[activeGame]);
+            } else {
+                setStats({ online: 0, rooms: 0 });
+            }
+        };
+        socket.on('statsUpdate', handleStats);
+        return () => socket.off('statsUpdate', handleStats);
+    }, [activeGame]);
 
     return (
         <div className="dashboard-container">
@@ -44,19 +74,19 @@ export default function Home() {
                 <nav className="nav-group">
                     <div 
                         className={`nav-item ${activeGame === 'sudoku' ? 'active' : ''}`}
-                        onClick={() => setActiveGame('sudoku')}
+                        onClick={() => { setActiveGame('sudoku'); setShowHelp(false); }}
                     >
                         <Grid3X3 size={20} /> Sudoku
                     </div>
                     <div 
                         className={`nav-item ${activeGame === 'caro' ? 'active' : ''}`}
-                        onClick={() => setActiveGame('caro')}
+                        onClick={() => { setActiveGame('caro'); setShowHelp(false); }}
                     >
-                        <Swords size={20} /> Caro 15x15
+                        <Swords size={20} /> Caro
                     </div>
                     <div 
                         className={`nav-item ${activeGame === 'chess' ? 'active' : ''}`}
-                        onClick={() => setActiveGame('chess')}
+                        onClick={() => { setActiveGame('chess'); setShowHelp(false); }}
                     >
                         <LayoutGrid size={20} /> Cờ vua
                     </div>
@@ -68,7 +98,7 @@ export default function Home() {
                 </div>
 
                 <div className="sidebar-footer">
-                    GameOn v1.1 <br/> Platform đa trò chơi
+                    GameOn v1.2 <br/> Platform đa trò chơi
                 </div>
             </aside>
 
@@ -77,19 +107,19 @@ export default function Home() {
                 <div className="game-detail">
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <h1 className="game-title">{game.name}</h1>
-                        {game.status === 'Sắp ra mắt' && <span className="coming-soon-tag">Coming Soon</span>}
+                        {activeGame === 'chess' && <span className="coming-soon-tag">Sắp ra mắt</span>}
                     </div>
                     
                     <p className="game-desc">{game.description}</p>
 
                     <div className="action-row">
-                        {game.status !== 'Sắp ra mắt' ? (
+                        {activeGame !== 'chess' ? (
                             <>
                                 <button className="btn-primary" onClick={() => navigate(game.path)}>
                                     Bắt đầu chơi
                                 </button>
-                                <button className="btn-secondary">
-                                    Hướng dẫn
+                                <button className="btn-secondary" onClick={() => setShowHelp(!showHelp)}>
+                                    {showHelp ? 'Đóng hướng dẫn' : 'Hướng dẫn'}
                                 </button>
                             </>
                         ) : (
@@ -99,24 +129,33 @@ export default function Home() {
                         )}
                     </div>
 
+                    {showHelp && (
+                        <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2rem', animation: 'fadeIn 0.3s ease' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                <h3 style={{ margin: 0 }}>Cách chơi {game.name}</h3>
+                                <X size={20} style={{ cursor: 'pointer' }} onClick={() => setShowHelp(false)} />
+                            </div>
+                            <ul style={{ paddingLeft: '1.2rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                                {game.instructions.map((ins, idx) => (
+                                    <li key={idx} style={{ marginBottom: '0.5rem' }}>{ins}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
                     <div className="stats-grid">
                         <div className="stat-card">
-                            <span className="stat-label">Người chơi đang online</span>
-                            <span className="stat-value">{game.stats.online}</span>
+                            <span className="stat-label">Người chơi Online</span>
+                            <span className="stat-value">{stats.online}</span>
                         </div>
                         <div className="stat-card">
-                            <span className="stat-label">Đã chơi (24h)</span>
-                            <span className="stat-value">{game.stats.played}</span>
-                        </div>
-                        <div className="stat-card">
-                            <span className="stat-label">Độ khó</span>
-                            <span className="stat-value">{game.stats.difficulty}</span>
+                            <span className="stat-label">Phòng đang mở</span>
+                            <span className="stat-value">{stats.rooms}</span>
                         </div>
                     </div>
 
-                    {/* Quick Friends Section Placeholder */}
                     <div className="glass-panel" style={{ marginTop: '3rem', padding: '1.5rem', width: '100%', borderRadius: '16px' }}>
-                        <h3>Bạn bè đang hoạt động</h3>
+                        <h3>Bạn bè đang trực tuyến</h3>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Chưa có bạn bè nào đang chơi.</p>
                     </div>
                 </div>
