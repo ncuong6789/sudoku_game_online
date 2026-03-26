@@ -1,9 +1,137 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { Chess } from 'chess.js';
-import { socket } from '../../utils/socket';
-import { ArrowLeft, RotateCcw, Swords, Crown } from 'lucide-react';
-import { Chessboard } from 'react-chessboard';
+import { Trophy, ArrowLeft, RefreshCw, Handshake, Users, ShieldAlert, RotateCcw } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import socket from '../../socket';
+// Helper function to get Unicode chess piece
+const getPieceUnicode = (piece) => {
+    if (!piece) return '';
+    const pieces = {
+        w: { p: '♙', n: '♘', b: '♗', r: '♖', q: '♕', k: '♔' },
+        b: { p: '♟', n: '♞', b: '♝', r: '♜', q: '♛', k: '♚' },
+    };
+    return pieces[piece.color][piece.type];
+};
+
+// Custom Chessboard Component
+function CustomChessboard({
+    game,
+    myColor,
+    onSquareClick,
+    onDrop,
+    customSquareStyles,
+    moveFrom,
+    optionSquares,
+    gameOver,
+    boardOrientation
+}) {
+    const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    const ranks = ['1', '2', '3', '4', '5', '6', '7', '8'];
+
+    const displayRanks = boardOrientation === 'w' ? ranks.slice().reverse() : ranks;
+    const displayFiles = boardOrientation === 'w' ? files : files.slice().reverse();
+
+    const handleDragStart = (e, sourceSquare, piece) => {
+        if (gameOver || piece.color !== myColor) {
+            e.preventDefault();
+            return;
+        }
+        e.dataTransfer.setData('sourceSquare', sourceSquare);
+        e.dataTransfer.setData('piece', JSON.stringify(piece));
+        e.dataTransfer.effectAllowed = 'move';
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault(); // Allow dropping
+        e.dataTransfer.dropEffect = 'move';
+    };
+
+    const handleDrop = (e, targetSquare) => {
+        e.preventDefault();
+        const sourceSquare = e.dataTransfer.getData('sourceSquare');
+        if (sourceSquare) {
+            onDrop(sourceSquare, targetSquare);
+        }
+    };
+
+    return (
+        <div className="relative w-full h-full aspect-square bg-gray-900 rounded-lg shadow-lg overflow-hidden">
+            <div
+                className="grid"
+                style={{
+                    gridTemplateColumns: `repeat(8, 1fr)`,
+                    gridTemplateRows: `repeat(8, 1fr)`,
+                    width: '100%',
+                    height: '100%',
+                }}
+            >
+                {displayRanks.map((rank) =>
+                    displayFiles.map((file) => {
+                        const square = file + rank;
+                        const isLight = (files.indexOf(file) + ranks.indexOf(rank)) % 2 === 0;
+                        const piece = game.get(square);
+
+                        const squareStyle = {
+                            ...customSquareStyles[square],
+                            ...(optionSquares[square] || {}),
+                            backgroundColor: isLight ? 'rgba(173, 216, 230, 0.1)' : 'rgba(0, 0, 0, 0.3)', // Light blue tint for light squares, darker for dark
+                            backdropFilter: 'blur(5px)',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            position: 'relative',
+                            cursor: gameOver || (piece && piece.color !== myColor) ? 'default' : 'pointer',
+                            boxShadow: (moveFrom === square || optionSquares[square]) ? '0 0 10px 2px rgba(79, 172, 254, 0.8)' : 'none', // Neon glow for selected/option squares
+                            transition: 'box-shadow 0.2s ease-in-out',
+                        };
+
+                        return (
+                            <div
+                                key={square}
+                                id={square}
+                                className={`relative flex items-center justify-center text-4xl font-bold select-none`}
+                                style={squareStyle}
+                                onClick={() => onSquareClick(square)}
+                                onDragOver={handleDragOver}
+                                onDrop={(e) => handleDrop(e, square)}
+                            >
+                                {piece && (
+                                    <div
+                                        className="piece text-6xl cursor-grab active:cursor-grabbing"
+                                        draggable={piece.color === myColor && !gameOver}
+                                        onDragStart={(e) => handleDragStart(e, square, piece)}
+                                        style={{
+                                            color: piece.color === 'w' ? '#f0f0f0' : '#303030',
+                                            textShadow: piece.color === 'w'
+                                                ? '2px 2px 4px rgba(0, 0, 0, 0.7), -2px -2px 4px rgba(255, 255, 255, 0.3)'
+                                                : '2px 2px 4px rgba(255, 255, 255, 0.7), -2px -2px 4px rgba(0, 0, 0, 0.3)',
+                                            filter: 'drop-shadow(0 0 5px rgba(255, 255, 255, 0.5))', // Subtle neon glow for pieces
+                                            zIndex: 10,
+                                        }}
+                                    >
+                                        {getPieceUnicode(piece)}
+                                    </div>
+                                )}
+                                {/* Rank and File Labels */}
+                                {file === displayFiles[0] && (
+                                    <span className="absolute left-1 top-0 text-xs text-gray-400 opacity-70">
+                                        {rank}
+                                    </span>
+                                )}
+                                {rank === displayRanks[displayRanks.length - 1] && (
+                                    <span className="absolute bottom-0 right-1 text-xs text-gray-400 opacity-70">
+                                        {file}
+                                    </span>
+                                )}
+                            </div>
+                        );
+                    })
+                )}
+            </div>
+        </div>
+    );
+}
+
 
 export default function ChessGame() {
     const location = useLocation();
@@ -239,27 +367,110 @@ export default function ChessGame() {
                         <div style={{
                             width: '100%',
                             maxWidth: '70vh',
-                            maxHeight: '70vh',
                             aspectRatio: '1 / 1',
                             border: '4px solid rgba(20, 20, 30, 0.8)',
                             borderRadius: '8px',
                             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
                             overflow: 'hidden',
                             background: 'rgba(255, 255, 255, 0.1)',
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(8, 1fr)',
+                            gridTemplateRows: 'repeat(8, 1fr)'
                         }}>
-                            <Chessboard
-                                key={myColor}
-                                position={game.fen()}
-                                onPieceDrop={onDrop}
-                                onSquareClick={onSquareClick}
-                                isDraggablePiece={({ piece }) => piece[0] === myColor}
-                                boardOrientation={myColor === 'w' ? 'white' : 'black'}
-                                customSquareStyles={customSquareStyles}
-                                animationDuration={200}
-                                customDropSquareStyle={{ boxShadow: 'inset 0 0 1px 4px rgba(79, 172, 254, 0.8)' }}
-                                customDarkSquareStyle={{ backgroundColor: '#5f8099' }}
-                                customLightSquareStyle={{ backgroundColor: '#d1dee6' }}
-                            />
+                            {/* Render Bàn cờ 64 ô tự custom cực chuẩn UI */}
+                            {(() => {
+                                const board = game.board(); // Mảng 2 chiều 8x8 chứa object quân cờ
+                                const ranks = [8,7,6,5,4,3,2,1];
+                                const files = ['a','b','c','d','e','f','g','h'];
+                                
+                                const isFlipped = myColor === 'b';
+                                const displayRanks = isFlipped ? [...ranks].reverse() : ranks;
+                                const displayFiles = isFlipped ? [...files].reverse() : files;
+
+                                const unicodePieces = {
+                                    'w': { 'p': '♙', 'n': '♘', 'b': '♗', 'r': '♖', 'q': '♕', 'k': '♔' },
+                                    'b': { 'p': '♟', 'n': '♞', 'b': '♝', 'r': '♜', 'q': '♛', 'k': '♚' }
+                                };
+
+                                const squares = [];
+                                for (let i = 0; i < 8; i++) {
+                                    for (let j = 0; j < 8; j++) {
+                                        const r = displayRanks[i];
+                                        const f = displayFiles[j];
+                                        const sq = f + r;
+                                        
+                                        // Màu ô kẻ caro
+                                        const isLight = (r + files.indexOf(f)) % 2 !== 0;
+                                        const bgColor = isLight ? '#d1dee6' : '#5f8099';
+                                        
+                                        // Tìm dữ liệu quân cờ tại tọa độ ô chuẩn
+                                        const piece = game.get(sq); 
+                                        
+                                        // Kiểm tra Option Styles cho nước cờ đi được
+                                        const highlightStyle = optionSquares[sq] || {};
+                                        let finalBg = highlightStyle.backgroundColor || bgColor;
+                                        let dotOverlay = highlightStyle.background; // Chấm tròn điểm đến hợp lệ
+
+                                        squares.push(
+                                            <div 
+                                                key={sq}
+                                                onClick={() => onSquareClick(sq)}
+                                                onDragOver={(e) => e.preventDefault()}
+                                                onDrop={(e) => {
+                                                    e.preventDefault();
+                                                    const sourceSq = e.dataTransfer.getData('text/plain');
+                                                    if(sourceSq !== sq) attemptPlayerMove(sourceSq, sq);
+                                                }}
+                                                style={{
+                                                    backgroundColor: finalBg,
+                                                    position: 'relative',
+                                                    display: 'flex',
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center',
+                                                    cursor: game.turn() === myColor ? 'pointer' : 'default',
+                                                    userSelect: 'none'
+                                                }}
+                                            >
+                                                {dotOverlay && (
+                                                    <div style={{
+                                                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                                                        background: dotOverlay, pointerEvents: 'none'
+                                                    }}/>
+                                                )}
+                                                
+                                                {piece && (
+                                                    <span 
+                                                        draggable={piece.color === myColor && game.turn() === myColor}
+                                                        onDragStart={(e) => {
+                                                            e.dataTransfer.setData('text/plain', sq);
+                                                            e.dataTransfer.effectAllowed = 'move';
+                                                            onSquareClick(sq); // Lấy highlight move path ngay khi nhấc
+                                                        }}
+                                                        style={{
+                                                            fontSize: 'min(7vh, 7vw)',
+                                                            lineHeight: 1,
+                                                            color: piece.color === 'w' ? '#fff' : '#1e1e1e',
+                                                            textShadow: piece.color === 'w' 
+                                                                ? '0px 2px 4px rgba(0,0,0,0.8), 0 0 2px #fff'
+                                                                : '0px 2px 4px rgba(255,255,255,0.4), 0 0 4px #000',
+                                                            position: 'relative',
+                                                            zIndex: 2,
+                                                            cursor: piece.color === myColor ? 'grab' : 'default'
+                                                        }}
+                                                    >
+                                                        {unicodePieces[piece.color][piece.type]}
+                                                    </span>
+                                                )}
+
+                                                {/* Hiển thị tên Cột và Hàng mờ ở viền bàn cờ */}
+                                                {i === 7 && <span style={{position:'absolute', bottom: '2px', right: '4px', fontSize:'0.7rem', color: isLight?'#5f8099':'#d1dee6', fontWeight: 'bold'}}>{f}</span>}
+                                                {j === 0 && <span style={{position:'absolute', top: '2px', left: '4px', fontSize:'0.7rem', color: isLight?'#5f8099':'#d1dee6', fontWeight: 'bold'}}>{r}</span>}
+                                            </div>
+                                        );
+                                    }
+                                }
+                                return squares;
+                            })()}
                         </div>
                     </div>
 
