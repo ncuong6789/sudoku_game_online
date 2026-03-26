@@ -32,11 +32,8 @@ export default function ChessHome() {
                 }, 1000);
             }, 1500);
         } else {
-            // Nếu đã chọn cố định, chuyển thẳng vào game sau một animation ngắn
-            setAssignedColor(soloColor);
-            setTimeout(() => {
-                navigate('/chess/game', { state: { mode: 'solo', difficulty, playerColor: soloColor } });
-            }, 800);
+            // Nếu đã chọn cố định, chuyển thẳng vào game luôn
+            navigate('/chess/game', { state: { mode: 'solo', difficulty, playerColor: soloColor } });
         }
     };
 
@@ -73,7 +70,7 @@ export default function ChessHome() {
                             style={{ 
                                 flex: 1, padding: '10px 5px', fontSize: '0.85rem', fontWeight: 'bold',
                                 background: '#f8f9fa', color: '#212529',
-                                border: soloColor === 'w' ? '2px solid var(--primary-color)' : '2px solid transparent',
+                                border: soloColor === 'w' ? '2px solid #212529' : '2px solid transparent',
                                 outline: 'none',
                                 borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s',
                                 opacity: soloColor === 'w' ? 1 : 0.6,
@@ -89,7 +86,7 @@ export default function ChessHome() {
                             style={{ 
                                 flex: 1, padding: '10px 5px', fontSize: '0.85rem', fontWeight: 'bold',
                                 background: '#212529', color: '#f8f9fa',
-                                border: soloColor === 'b' ? '2px solid var(--primary-color)' : '2px solid transparent',
+                                border: soloColor === 'b' ? '2px solid #f8f9fa' : '2px solid transparent',
                                 outline: 'none',
                                 borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s',
                                 opacity: soloColor === 'b' ? 1 : 0.6,

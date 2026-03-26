@@ -12,22 +12,18 @@ export default function ChessGame() {
 
     const [game, setGame] = useState(new Chess());
     const [fen, setFen] = useState(game.fen());
-    const [realPlayerColor, setRealPlayerColor] = useState(null);
-    const [moveHistory, setMoveHistory] = useState([]); 
-    
-    // Khởi tạo màu quân thực tế
-    useEffect(() => {
+    const [realPlayerColor, setRealPlayerColor] = useState(() => {
         if (playerColor === 'random') {
             const randomColor = Math.random() < 0.5 ? 'w' : 'b';
-            setRealPlayerColor(randomColor);
-            console.log('Random color selected:', randomColor);
-        } else {
-            setRealPlayerColor(playerColor);
+            console.log('Random color selected immediately:', randomColor);
+            return randomColor;
         }
-    }, [playerColor]);
+        return playerColor;
+    });
+    const [moveHistory, setMoveHistory] = useState([]); 
 
     const myColor = realPlayerColor || 'w';
-    
+
     // UI State
     const [moveFrom, setMoveFrom] = useState(null);
     const [optionSquares, setOptionSquares] = useState({});
@@ -38,7 +34,7 @@ export default function ChessGame() {
     // Cập nhật trạng thái
     const updateGameState = useCallback((gameInstance) => {
         if (!gameInstance) return;
-        
+
         let status = '';
         if (gameInstance.isCheckmate()) {
             status = `Chiếu Bí! ${gameInstance.turn() === 'w' ? 'Đen' : 'Trắng'} thắng.`;
@@ -47,8 +43,8 @@ export default function ChessGame() {
             status = 'Hòa cờ!';
             setGameOver(true);
         } else {
-            status = gameInstance.turn() === myColor 
-                ? 'Đến lượt bạn.' 
+            status = gameInstance.turn() === myColor
+                ? 'Đến lượt bạn.'
                 : `Đến lượt ${mode === 'solo' ? 'AI' : 'đối thủ'}.`;
             if (gameInstance.isCheck()) {
                 status = `Đang bị chiếu! - ` + status;
@@ -98,7 +94,7 @@ export default function ChessGame() {
                 move = moves[Math.floor(Math.random() * moves.length)];
             }
         }
-        
+
         try {
             const gameCopy = new Chess(game.fen());
             gameCopy.move(move);
@@ -111,13 +107,20 @@ export default function ChessGame() {
 
         try {
             const gameCopy = new Chess(game.fen());
-            const move = gameCopy.move({
-                from: sourceSquare,
-                to: targetSquare,
-                promotion: piece[1]?.toLowerCase() ?? 'q',
-            });
+            const legalMoves = gameCopy.moves({ square: sourceSquare, verbose: true });
+            const foundMove = legalMoves.find(m => m.to === targetSquare);
 
-            if (move === null) return false;
+            if (!foundMove) return false;
+
+            const moveObj = {
+                from: sourceSquare,
+                to: targetSquare
+            };
+            if (foundMove.promotion) {
+                moveObj.promotion = 'q';
+            }
+
+            gameCopy.move(moveObj);
 
             updateGameState(gameCopy);
             if (mode === 'multiplayer') {
@@ -127,6 +130,7 @@ export default function ChessGame() {
             setOptionSquares({});
             return true;
         } catch (e) {
+            console.error('Invalid drop', e);
             return false;
         }
     }
@@ -173,13 +177,20 @@ export default function ChessGame() {
         // Đã có từ moveFrom, thử đi quân
         try {
             const gameCopy = new Chess(game.fen());
-            const move = gameCopy.move({
-                from: moveFrom,
-                to: square,
-                promotion: 'q'
-            });
+            const legalMoves = gameCopy.moves({ square: moveFrom, verbose: true });
+            const foundMove = legalMoves.find(m => m.to === square);
 
-            if (move === null) return resetFirstMove(square);
+            if (!foundMove) return resetFirstMove(square);
+
+            const moveObj = {
+                from: moveFrom,
+                to: square
+            };
+            if (foundMove.promotion) {
+                moveObj.promotion = 'q';
+            }
+
+            gameCopy.move(moveObj);
 
             updateGameState(gameCopy);
             if (mode === 'multiplayer') {
@@ -189,6 +200,7 @@ export default function ChessGame() {
             setOptionSquares({});
             return true;
         } catch (e) {
+            console.error('Invalid click move', e);
             return resetFirstMove(square);
         }
     }
@@ -208,7 +220,7 @@ export default function ChessGame() {
                         newGame.move(move);
                         updateGameState(newGame);
                     }
-                }, 600); 
+                }, 600);
             }
         }
     };
@@ -227,7 +239,7 @@ export default function ChessGame() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1rem' }}>
             <div className="glass-panel" style={{ width: '100%', maxWidth: '1000px', display: 'flex', flexDirection: 'column', padding: '1rem' }}>
-                
+
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -238,7 +250,7 @@ export default function ChessGame() {
                             {mode === 'solo' ? `Thách đấu AI (${difficulty})` : `Phòng: ${roomId}`}
                         </span>
                     </div>
-                    
+
                     <div style={{ display: 'flex', gap: '10px' }}>
                         {mode === 'solo' && (
                             <button className="btn-secondary" onClick={handleReset} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}>
@@ -252,10 +264,10 @@ export default function ChessGame() {
                 </div>
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', marginTop: '1rem' }}>
-                    
+
                     {/* Bàn cờ bằng react-chessboard */}
                     <div style={{ flex: '1 1 500px', display: 'flex', justifyContent: 'center', width: '100%' }}>
-                        <div style={{ 
+                        <div style={{
                             width: '100%',
                             maxWidth: '70vh',
                             maxHeight: '70vh',
@@ -266,10 +278,12 @@ export default function ChessGame() {
                             overflow: 'hidden',
                             background: 'rgba(255, 255, 255, 0.1)',
                         }}>
-                            <Chessboard 
-                                position={fen} 
+                            <Chessboard
+                                key={myColor}
+                                position={fen}
                                 onPieceDrop={onDrop}
                                 onSquareClick={onSquareClick}
+                                isDraggablePiece={({ piece }) => piece[0] === myColor}
                                 boardOrientation={myColor === 'w' ? 'white' : 'black'}
                                 customSquareStyles={customSquareStyles}
                                 animationDuration={200}
@@ -282,13 +296,13 @@ export default function ChessGame() {
 
                     {/* Bảng trạng thái bên phải */}
                     <div style={{ flex: '1 1 250px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        
+
                         <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', flex: 1, display: 'flex', flexDirection: 'column' }}>
                             <h3 style={{ margin: '0 0 1rem 0' }}>Trạng thái</h3>
-                            
+
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1rem' }}>
-                                <div style={{ 
-                                    width: '24px', height: '24px', borderRadius: '50%', 
+                                <div style={{
+                                    width: '24px', height: '24px', borderRadius: '50%',
                                     background: game.turn() === 'w' ? '#f8f9fa' : '#212529',
                                     border: '2px solid rgba(255,255,255,0.5)',
                                     boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
@@ -302,8 +316,8 @@ export default function ChessGame() {
                             <div style={{ paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', marginBottom: '1rem' }}>
                                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 0.5rem 0' }}>Phe của bạn:</p>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <div style={{ 
-                                        width: '28px', height: '28px', borderRadius: '4px', 
+                                    <div style={{
+                                        width: '28px', height: '28px', borderRadius: '4px',
                                         background: myColor === 'w' ? '#f8f9fa' : '#212529',
                                         border: '1px solid rgba(255,255,255,0.3)',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -314,12 +328,12 @@ export default function ChessGame() {
                                     <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{myColor === 'w' ? 'Trắng (Đi trước)' : 'Đen'}</span>
                                 </div>
                             </div>
-                            
+
                             {/* Lịch sử di chuyển */}
                             <div style={{ paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                                 <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem' }}>Lịch sử giao tranh</h4>
-                                <div style={{ 
-                                    flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)', 
+                                <div style={{
+                                    flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)',
                                     borderRadius: '8px', padding: '0.5rem', maxHeight: '150px'
                                 }}>
                                     {moveHistory.length === 0 && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textAlign: 'center', margin: '40px 0' }}>Chưa có nước đi nào</p>}
