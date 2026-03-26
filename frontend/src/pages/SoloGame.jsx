@@ -268,7 +268,7 @@ export default function SoloGame() {
                                 audioRef.current.pause();
                                 audioRef.current = null;
                             }
-                            navigate('/');
+                            navigate('/sudoku');
                         }}>
                             Return to Menu
                         </button>

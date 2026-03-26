@@ -70,7 +70,7 @@ export default function MultiplayerGame() {
 
     useEffect(() => {
         if (!initialPuzzle) {
-            navigate('/multiplayer');
+            navigate('/sudoku');
             return;
         }
 
@@ -322,7 +322,7 @@ export default function MultiplayerGame() {
                 audioRef.current.pause();
                 audioRef.current = null;
             }
-            navigate('/');
+            navigate('/sudoku');
         }
     };
 

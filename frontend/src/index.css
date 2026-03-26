@@ -30,6 +30,91 @@ body {
   color: var(--text-primary);
 }
 
+.game-hub {
+    max-width: 900px;
+    width: 95%;
+    padding: 3rem;
+    text-align: center;
+}
+
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.game-card {
+    position: relative;
+    height: 320px;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background-size: cover;
+    background-position: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.game-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);
+    z-index: 1;
+}
+
+.game-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 20px rgba(var(--primary-color-rgb), 0.3);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.game-card-content {
+    position: relative;
+    z-index: 2;
+    padding: 1.5rem;
+    text-align: left;
+}
+
+.game-card h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.game-card p {
+    margin: 0.5rem 0 0 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.game-card .status-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(var(--primary-color-rgb), 0.8);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    z-index: 2;
+}
+
+.game-card.coming-soon {
+    filter: grayscale(0.5);
+    opacity: 0.8;
+}
+
+.game-card.coming-soon .status-badge {
+    background: rgba(255, 255, 255, 0.2);
+}
+
 #root {
   width: 100%;
   max-width: 1200px;

@@ -37,7 +37,7 @@ export default function MultiplayerLobby() {
         };
 
         const handleGameStarted = ({ puzzle, solution }) => {
-            navigate('/multiplayer-game', { state: { puzzle, solution, roomId: myRoom, difficulty } });
+            navigate('/sudoku/multiplayer-game', { state: { initialPuzzle: puzzle, roomId: myRoom, difficulty } });
         };
 
         socket.on('playerJoined', handlePlayerJoined);
@@ -87,7 +87,7 @@ export default function MultiplayerLobby() {
                     setInRoom(false);
                     setMyRoom('');
                     // Emit disconnect/leave room if server supported it, else just go back
-                    navigate('/');
+                    navigate('/sudoku');
                 }}>Leave Room</button>
             </div>
         );
@@ -151,7 +151,7 @@ export default function MultiplayerLobby() {
                 {error && <p style={{ color: 'var(--error-color)', fontSize: '0.9rem' }}>{error}</p>}
                 <button className="btn-primary" onClick={handleJoinRoom}>Join Room</button>
             </div>
-            <button className="btn-secondary" style={{ marginTop: '20px' }} onClick={() => navigate('/')}>Back</button>
+            <button className="btn-secondary" style={{ marginTop: '20px' }} onClick={() => navigate('/sudoku')}>Back to Menu</button>
         </div>
     );
 }
