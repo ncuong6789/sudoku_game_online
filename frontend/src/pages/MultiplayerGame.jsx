@@ -33,10 +33,27 @@ export default function MultiplayerGame() {
     const [chatMessages, setChatMessages] = useState([]);
     const [msgInput, setMsgInput] = useState('');
     const audioRef = useRef(null);
-    // Refs to always have the latest values inside callbacks (avoid stale closure)
     const errorCountRef = useRef(0);
     const hintsUsedRef = useRef(0);
     const myProgressRef = useRef(0);
+
+    // Sound function refs - always call the latest version, never stale
+    const playWinSoundRef = useRef(null);
+    const playLoseSoundRef = useRef(null);
+    playLoseSoundRef.current = () => {
+        if (audioRef.current) audioRef.current.pause();
+        const audio = new Audio('lose.mp3');
+        audioRef.current = audio;
+        audio.play().catch(e => console.log('Lose sound failed:', e));
+        setTimeout(() => { if (audioRef.current === audio) audio.pause(); }, 30000);
+    };
+    playWinSoundRef.current = () => {
+        if (audioRef.current) audioRef.current.pause();
+        const audio = new Audio('win.mp3');
+        audioRef.current = audio;
+        audio.play().catch(e => console.log('Win sound failed:', e));
+        setTimeout(() => { if (audioRef.current === audio) audio.pause(); }, 30000);
+    };
 
     useEffect(() => {
         if (!initialPuzzle) {
@@ -59,8 +76,8 @@ export default function MultiplayerGame() {
         };
         const handleOpponentGameOver = ({ won: opponentWon }) => {
             setIsGameOver(true);
-            setWon(!opponentWon); // If opponent won, I lost. If opponent lost, I won.
-            if (opponentWon) playLoseSound(); // Opponent won means I lost -> play sad sound
+            setWon(!opponentWon);
+            if (opponentWon) playLoseSoundRef.current?.(); // Opponent won → I lost
         };
         const handleDisconnect = () => {
             // Opponent left
@@ -98,22 +115,6 @@ export default function MultiplayerGame() {
         };
     }, []);
 
-    // Define sound functions BEFORE useCallback so they are accessible inside it
-    const playLoseSound = () => {
-        if (audioRef.current) audioRef.current.pause();
-        const audio = new Audio('lose.mp3');
-        audioRef.current = audio;
-        audio.play().catch(e => console.log("Audio play failed:", e));
-        setTimeout(() => { if (audioRef.current === audio) audio.pause(); }, 30000);
-    };
-
-    const playWinSound = () => {
-        if (audioRef.current) audioRef.current.pause();
-        const audio = new Audio('win.mp3');
-        audioRef.current = audio;
-        audio.play().catch(e => console.log("Win audio play failed:", e));
-        setTimeout(() => { if (audioRef.current === audio) audio.pause(); }, 30000);
-    };
 
     const checkWin = useCallback((answers, currentErrors, currentHints) => {
         let emptyCount = 0;
@@ -143,7 +144,7 @@ export default function MultiplayerGame() {
             setWon(true);
             setIsGameOver(true);
             socket.emit('gameOver', { won: true });
-            playWinSound(); // I won!
+            playWinSoundRef.current?.();
             return;
         }
     }, [initialPuzzle]);
@@ -297,7 +298,7 @@ export default function MultiplayerGame() {
             socket.emit('gameOver', { won: false });
             setIsGameOver(true);
             setWon(false);
-            playLoseSound();
+            playLoseSoundRef.current?.();
         } else {
             if (audioRef.current) {
                 audioRef.current.pause();
