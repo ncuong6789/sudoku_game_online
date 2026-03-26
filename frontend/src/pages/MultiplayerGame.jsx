@@ -186,7 +186,7 @@ export default function MultiplayerGame() {
                     setIsGameOver(true);
                     setWon(false);
                     socket.emit('gameOver', { won: false });
-                    playLoseSound();
+                    playLoseSoundRef.current?.();
                 }
 
                 setTimeout(() => {
