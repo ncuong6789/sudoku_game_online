@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Chess } from 'chess.js';
-import { Trophy, ArrowLeft, RefreshCw, Handshake, Users, ShieldAlert, RotateCcw } from 'lucide-react';
+import { Trophy, ArrowLeft, RefreshCw, Handshake, Users, ShieldAlert, RotateCcw, Swords, Crown } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { socket } from '../../utils/socket';
 // Helper function to get Unicode chess piece
