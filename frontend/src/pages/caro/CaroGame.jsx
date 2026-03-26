@@ -245,151 +245,145 @@ export default function CaroGame() {
     }, [messages]);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1rem' }}>
-            <div className="glass-panel" style={{ width: '100%', maxWidth: BOARD_SIZE >= 30 ? '1600px' : '1000px', display: 'flex', flexDirection: 'column', padding: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '1rem', height: 'calc(100vh - 100px)' }}>
+            <div className="glass-panel" style={{ width: '100%', maxWidth: BOARD_SIZE >= 30 ? '1600px' : '1000px', height: '100%', display: 'flex', flexDirection: 'row', padding: '1.5rem', gap: '2rem' }}>
                 
-                {/* Header: Title, Status, Controls */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <div className="nav-item active" style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Swords size={18} /> Caro {BOARD_SIZE}x{BOARD_SIZE}
-                        </div>
-                        <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                            {mode === 'solo' ? 'Thách đấu AI' : `Phòng: ${roomId}`}
-                        </span>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                        <div style={{ fontWeight: 'bold', color: isXNext ? 'var(--primary-color)' : '#ff4757', paddingRight: '10px' }}>
-                            Lượt: {isXNext ? 'X (Đỏ)' : 'O (Xanh)'}
-                        </div>
-                        <button className="btn-secondary" onClick={resetGame} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                            <RotateCcw size={16} /> Reset
-                        </button>
-                        <button className="btn-secondary" onClick={handleExit} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                            <ArrowLeft size={16} /> Thoát
-                        </button>
+                {/* TRÁI: BÀN CỜ */}
+                <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: 0, height: '100%' }}>
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
+                        gridTemplateRows: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
+                        gap: BOARD_SIZE >= 30 ? '0px' : (BOARD_SIZE > 15 ? '1px' : '2px'),
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                        padding: BOARD_SIZE >= 30 ? '0' : '2px',
+                        borderRadius: '4px',
+                        width: '100%',
+                        height: '100%',
+                        maxWidth: '85vh',
+                        maxHeight: '85vh',
+                        aspectRatio: '1 / 1',
+                        margin: '0 auto'
+                    }}>
+                        {board.map((row, r) => row.map((cell, c) => {
+                            const isWinCell = winningLine?.some(coord => coord.r === r && coord.c === c);
+                            return (
+                                <div 
+                                    key={`${r}-${c}`}
+                                    className="caro-cell"
+                                    onClick={() => handleCellClick(r, c)}
+                                    style={{
+                                        background: isWinCell ? 'rgba(var(--primary-color-rgb), 0.4)' : 'rgba(20, 20, 30, 0.8)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: BOARD_SIZE >= 30 ? '0.9rem' : (BOARD_SIZE > 15 ? '1.5rem' : '2.5rem'),
+                                        fontWeight: 'bold',
+                                        cursor: cell === 0 && !isGameOver ? 'pointer' : 'default',
+                                        color: cell === 1 ? 'var(--primary-color)' : '#ff4757',
+                                        transition: 'background 0.2s',
+                                        border: BOARD_SIZE >= 30 ? '0.5px solid rgba(255,255,255,0.03)' : 'none',
+                                        boxSizing: 'border-box',
+                                        lineHeight: 1,
+                                        overflow: 'hidden'
+                                    }}
+                                >
+                                    {cell === 1 ? 'X' : cell === 2 ? 'O' : '\u00A0'}
+                                </div>
+                            );
+                        }))}
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', marginTop: '0.5rem' }}>
+                {/* PHẢI: ĐIỀU KHIỂN & CHAT */}
+                <div style={{ flex: '0 0 280px', display: 'flex', flexDirection: 'column', gap: '1rem', height: '100%' }}>
                     
-                    {/* Bàn cờ */}
-                    <div style={{ flex: '1 1 auto', display: 'flex', justifyContent: 'center' }}>
-                        <div style={{ 
-                            display: 'grid', 
-                            gridTemplateColumns: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
-                            gridTemplateRows: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
-                            gap: BOARD_SIZE >= 30 ? '0' : (BOARD_SIZE > 15 ? '1px' : '2px'),
-                            background: 'rgba(255, 255, 255, 0.1)',
-                            border: '1px solid rgba(255, 255, 255, 0.05)',
-                            padding: BOARD_SIZE >= 30 ? '0' : '2px',
-                            borderRadius: '4px',
-                            width: '100%',
-                            maxHeight: '75vh',
-                            maxWidth: BOARD_SIZE === 3 ? '400px' : (BOARD_SIZE === 15 ? '700px' : '100%'),
-                            aspectRatio: '1 / 1',
-                            margin: '0 auto'
-                        }}>
-                            {board.map((row, r) => row.map((cell, c) => {
-                                const isWinCell = winningLine?.some(coord => coord.r === r && coord.c === c);
-                                return (
-                                    <div 
-                                        key={`${r}-${c}`}
-                                        className="caro-cell"
-                                        onClick={() => handleCellClick(r, c)}
-                                        style={{
-                                            background: isWinCell ? 'rgba(var(--primary-color-rgb), 0.4)' : 'rgba(20, 20, 30, 0.8)',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            fontSize: BOARD_SIZE >= 30 ? '0.9rem' : (BOARD_SIZE > 15 ? '1.5rem' : '2.5rem'),
-                                            fontWeight: 'bold',
-                                            cursor: cell === 0 && !isGameOver ? 'pointer' : 'default',
-                                            color: cell === 1 ? 'var(--primary-color)' : '#ff4757',
-                                            transition: 'background 0.2s',
-                                            border: BOARD_SIZE >= 30 ? '0.5px solid rgba(255,255,255,0.03)' : 'none',
-                                            boxSizing: 'border-box',
-                                            lineHeight: 1,
-                                            overflow: 'hidden'
-                                        }}
-                                    >
-                                        {cell === 1 ? 'X' : cell === 2 ? 'O' : '\u00A0'}
-                                    </div>
-                                );
-                            }))}
+                    {/* Header Sidebar */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <div className="nav-item active" style={{ padding: '10px', display: 'flex', justifySelf: 'center', alignSelf: 'center', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                            <Swords size={20} /> Caro {BOARD_SIZE}x{BOARD_SIZE}
+                        </div>
+                        <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                            {mode === 'solo' ? 'Thách đấu AI' : `Phòng: ${roomId}`}
+                        </div>
+
+                        {!isGameOver && (
+                            <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.4rem', color: isXNext ? 'var(--primary-color)' : '#ff4757', padding: '15px 0', borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                Lượt {isXNext ? 'X' : 'O'}
+                            </div>
+                        )}
+
+                        {isGameOver && (
+                            <div style={{ textAlign: 'center', padding: '15px 0', borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                <h2 style={{ color: winner === 1 ? 'var(--primary-color)' : '#ff4757', margin: 0, fontSize: '1.6rem' }}>
+                                    {winner === 1 ? 'X THẮNG!' : 'O THẮNG!'}
+                                </h2>
+                            </div>
+                        )}
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '0.5rem' }}>
+                            <button className="btn-primary" onClick={resetGame} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%' }}>
+                                <RotateCcw size={18} /> {isGameOver ? 'Chơi ván mới' : 'Reset'}
+                            </button>
+                            <button className="btn-secondary" onClick={handleExit} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%' }}>
+                                <ArrowLeft size={18} /> Thoát
+                            </button>
                         </div>
                     </div>
 
                     {/* Chat Box HOẶC Status Kết quả */}
-                    {(isGameOver || mode === 'multiplayer') && (
-                        <div style={{ flex: '0 1 300px', display: 'flex', flexDirection: 'column', gap: '1rem', minWidth: '250px' }}>
+                    {mode === 'multiplayer' && (
+                        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                                <MessageSquare size={18} />
+                                <span style={{ fontWeight: 'bold' }}>Trò chuyện</span>
+                            </div>
                             
-                            {isGameOver && (
-                                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                    <h2 style={{ color: winner === 1 ? 'var(--primary-color)' : '#ff4757', margin: '0 0 1rem 0', fontSize: '1.4rem' }}>
-                                        {winner === 1 ? 'X CHIẾN THẮNG!' : 'O CHIẾN THẮNG!'}
-                                    </h2>
-                                    <button className="btn-primary" style={{ width: '100%', padding: '12px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }} onClick={resetGame}>
-                                        <RotateCcw size={18} /> Chơi ván mới
-                                    </button>
-                                </div>
-                            )}
-
-                            {mode === 'multiplayer' && (
-                                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', flex: 1, display: 'flex', flexDirection: 'column', maxHeight: '400px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
-                                        <MessageSquare size={18} />
-                                        <span style={{ fontWeight: 'bold' }}>Trò chuyện</span>
+                            <div style={{ flex: 1, overflowY: 'auto', marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {messages.length === 0 && <p style={{ color: 'var(--text-secondary)', textAlign: 'center', fontSize: '0.8rem', fontStyle: 'italic', margin: 'auto' }}>Gửi lời chào nhau nhé!</p>}
+                                {messages.map((msg, idx) => (
+                                    <div key={idx} style={{ 
+                                        padding: '8px 12px', 
+                                        background: msg.sender === socket.id ? 'rgba(var(--primary-color-rgb), 0.2)' : 'rgba(255,255,255,0.05)',
+                                        borderRadius: '12px',
+                                        alignSelf: msg.sender === socket.id ? 'flex-end' : 'flex-start',
+                                        maxWidth: '90%',
+                                        fontSize: '0.9rem',
+                                        wordWrap: 'break-word'
+                                    }}>
+                                        {msg.message}
                                     </div>
-                                    
-                                    <div style={{ flex: 1, overflowY: 'auto', marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        {messages.length === 0 && <p style={{ color: 'var(--text-secondary)', textAlign: 'center', fontSize: '0.8rem', fontStyle: 'italic', margin: 'auto' }}>Hãy gửi lời chào tới đối thủ!</p>}
-                                        {messages.map((msg, idx) => (
-                                            <div key={idx} style={{ 
-                                                padding: '8px 12px', 
-                                                background: msg.sender === socket.id ? 'rgba(var(--primary-color-rgb), 0.2)' : 'rgba(255,255,255,0.05)',
-                                                borderRadius: '12px',
-                                                alignSelf: msg.sender === socket.id ? 'flex-end' : 'flex-start',
-                                                maxWidth: '85%',
-                                                fontSize: '0.9rem',
-                                                wordWrap: 'break-word'
-                                            }}>
-                                                {msg.message}
-                                            </div>
-                                        ))}
-                                        <div ref={chatEndRef} />
-                                    </div>
+                                ))}
+                                <div ref={chatEndRef} />
+                            </div>
 
-                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                        <input 
-                                            type="text"
-                                            className="glass-input"
-                                            placeholder="Giao tiếp..."
-                                            value={inputMessage}
-                                            onChange={(e) => setInputMessage(e.target.value)}
-                                            onKeyDown={(e) => e.key === 'Enter' && (()=>{
-                                                if(!inputMessage.trim()) return;
-                                                const msgObj = { message: inputMessage, sender: socket.id };
-                                                socket.emit('sendMessage', { roomId, ...msgObj });
-                                                setMessages(prev => [...prev, msgObj]);
-                                                setInputMessage('');
-                                            })()}
-                                            style={{ flex: 1, padding: '10px 12px' }}
-                                        />
-                                        <button className="btn-primary" style={{ padding: '0 15px', borderRadius: '8px' }} onClick={()=>{
-                                            if(!inputMessage.trim()) return;
-                                            const msgObj = { message: inputMessage, sender: socket.id };
-                                            socket.emit('sendMessage', { roomId, ...msgObj });
-                                            setMessages(prev => [...prev, msgObj]);
-                                            setInputMessage('');
-                                        }}>
-                                            <Send size={18} />
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
+                            <div style={{ display: 'flex', gap: '6px' }}>
+                                <input 
+                                    type="text"
+                                    className="glass-input"
+                                    placeholder="Giao tiếp..."
+                                    value={inputMessage}
+                                    onChange={(e) => setInputMessage(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && (()=>{
+                                        if(!inputMessage.trim()) return;
+                                        const msgObj = { message: inputMessage, sender: socket.id };
+                                        socket.emit('sendMessage', { roomId, ...msgObj });
+                                        setMessages(prev => [...prev, msgObj]);
+                                        setInputMessage('');
+                                    })()}
+                                    style={{ flex: 1, padding: '8px 10px', fontSize: '0.9rem' }}
+                                />
+                                <button className="btn-primary" style={{ padding: '0 12px', borderRadius: '8px' }} onClick={()=>{
+                                    if(!inputMessage.trim()) return;
+                                    const msgObj = { message: inputMessage, sender: socket.id };
+                                    socket.emit('sendMessage', { roomId, ...msgObj });
+                                    setMessages(prev => [...prev, msgObj]);
+                                    setInputMessage('');
+                                }}>
+                                    <Send size={16} />
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>
