@@ -148,6 +148,45 @@ io.on('connection', (socket) => {
         socket.to(roomId).emit('caroMoved', { r, c, grid });
     });
 
+    // --- TETRIS LOGIC ---
+    socket.on('startTetrisGame', ({ roomId }) => {
+        const room = rooms[roomId];
+        if (room && room.players.length >= 2) {
+            const types = ['I', 'J', 'L', 'O', 'S', 'T', 'Z'];
+            const sequence = Array.from({length: 500}, () => types[Math.floor(Math.random() * types.length)]);
+            io.to(roomId).emit('tetrisGameStarted', { pieceSequence: sequence });
+        }
+    });
+
+    socket.on('tetrisUpdate', ({ roomId, stage, score }) => {
+        const room = rooms[roomId];
+        if (room) {
+            if (!room.tetrisScores) room.tetrisScores = {};
+            room.tetrisScores[socket.id] = score;
+        }
+        socket.to(roomId).emit('opponentTetrisUpdate', { stage, score });
+    });
+
+    socket.on('tetrisPlayerLost', ({ roomId, score }) => {
+        const room = rooms[roomId];
+        if (!room || room.tetrisGameOverProcessed) return;
+        
+        if (!room.tetrisScores) room.tetrisScores = {};
+        room.tetrisScores[socket.id] = score;
+
+        room.tetrisGameOverProcessed = true;
+        const p1 = room.players[0];
+        const p2 = room.players[1];
+        const s1 = room.tetrisScores[p1] || 0;
+        const s2 = room.tetrisScores[p2] || 0;
+
+        let winner = 'Draw';
+        if (s1 > s2) winner = p1;
+        else if (s2 > s1) winner = p2;
+
+        io.to(roomId).emit('tetrisGameOverResult', { winner, p1Score: s1, p2Score: s2 });
+    });
+
     // --- CHESS MULTIPLAYER LOGIC ---
 
     // Chat trong phòng chờ (Dùng chung cho cả Caro nếu muốn sau này)

@@ -28,6 +28,15 @@ body {
   min-height: 100vh;
   background-color: var(--bg-color);
   color: var(--text-primary);
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+}
+
+input, textarea, .selectable-text {
+  user-select: auto;
+  -webkit-user-select: auto;
+  cursor: text;
 }
 
 .game-hub {
@@ -63,8 +72,9 @@ body {
     font-weight: 900;
     margin-bottom: 3rem;
     background: linear-gradient(135deg, #fff 0%, var(--primary-color) 100%);
-    WebkitBackgroundClip: text;
-    WebkitTextFillColor: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
     letter-spacing: -1px;
 }
 

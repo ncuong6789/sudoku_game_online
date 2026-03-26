@@ -21,6 +21,11 @@ import SnakeHome from './pages/snake/SnakeHome';
 import SnakeLobby from './pages/snake/SnakeLobby';
 import SnakeGame from './pages/snake/SnakeGame';
 
+// Tetris Components
+import TetrisHome from './pages/tetris/TetrisHome';
+import TetrisLobby from './pages/tetris/TetrisLobby';
+import TetrisGame from './pages/tetris/TetrisGame';
+
 function App() {
   return (
     <HashRouter>
@@ -47,6 +52,11 @@ function App() {
         <Route path="/snake" element={<SnakeHome />} />
         <Route path="/snake/multiplayer" element={<SnakeLobby />} />
         <Route path="/snake/game" element={<SnakeGame />} />
+
+        {/* Tetris Module */}
+        <Route path="/tetris" element={<TetrisHome />} />
+        <Route path="/tetris/multiplayer" element={<TetrisLobby />} />
+        <Route path="/tetris/game" element={<TetrisGame />} />
       </Routes>
     </HashRouter>
   );

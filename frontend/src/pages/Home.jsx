@@ -17,7 +17,7 @@ const games = {
     },
     caro: {
         id: 'caro',
-        name: 'Caro',
+        name: 'Tic-Tac-Toe',
         description: 'Trận chiến trí tuệ trên bàn cờ 15x15. Xếp đủ 5 quân cờ liên tiếp theo hàng ngang, dọc hoặc chéo để giành chiến thắng.',
         path: '/caro',
         difficulty: 'Cao',
@@ -28,7 +28,7 @@ const games = {
     },
     chess: {
         id: 'chess',
-        name: 'Cờ vua',
+        name: 'Chess',
         description: 'Đỉnh cao của chiến thuật quân sự trên bàn cờ 8x8. Điều khiển quân đội của bạn để chiếu bí vua đối phương.',
         path: '/chess',
         difficulty: 'Rất cao',
@@ -39,7 +39,7 @@ const games = {
     },
     snake: {
         id: 'snake',
-        name: 'Rắn Săn Mồi',
+        name: 'Snake',
         description: 'Sinh tồn trên bản đồ lưới (20x20 hoặc 30x30). Điều khiển Rắn ăn mồi để tăng kích thước và tốc độ. Đối đầu Multiplayer kịch tính!',
         path: '/snake',
         difficulty: 'Tuỳ chỉnh',
@@ -47,6 +47,18 @@ const games = {
             'Sử dụng 4 phím mũi tên (Lên, Xuống, Trái, Phải) để di chuyển hướng đi.',
             'Ăn mồi sẽ tăng 2 kích thước (đốt) và tăng tốc độ rắn.',
             'Trong Multiplay, chạm vào tường, vào bản thân hoặc đối thủ sẽ chết. Rắn chết biến thành chướng ngại vật!'
+        ]
+    },
+    tetris: {
+        id: 'tetris',
+        name: 'Tetris',
+        description: 'Trò chơi xếp gạch huyền thoại (Block Puzzle). Xoay và xếp các khối gạch rơi xuống để lấp đầy hàng. Đối đầu trực tiếp Multiplayer - Điểm cao nhất thắng!',
+        path: '/tetris',
+        difficulty: 'Vừa',
+        instructions: [
+            'Sử dụng Mũi tên TRÁI/PHẢI để di chuyển khối, XUỐNG để tăng tốc.',
+            'Mũi tên LÊN để xoay khối, Dấu CÁCH (Space) để thả thẳng phi thuyền cứng (Hard Drop).',
+            'Hoàn thành một hàng ngang để ghi điểm. Màn hình đụng trần là Xong!'
         ]
     }
 };
@@ -80,13 +92,16 @@ export default function Home() {
                         <Grid3X3 size={20} /> Sudoku
                     </div>
                     <div className={`nav-item ${activeGame === 'caro' ? 'active' : ''}`} onClick={() => { setActiveGame('caro'); setShowHelp(false); }}>
-                        <Swords size={20} /> Caro
+                        <Swords size={20} /> Tic-Tac-Toe
                     </div>
                     <div className={`nav-item ${activeGame === 'chess' ? 'active' : ''}`} onClick={() => { setActiveGame('chess'); setShowHelp(false); }}>
-                        <LayoutGrid size={20} /> Cờ vua
+                        <LayoutGrid size={20} /> Chess
                     </div>
                     <div className={`nav-item ${activeGame === 'snake' ? 'active' : ''}`} onClick={() => { setActiveGame('snake'); setShowHelp(false); }}>
-                        <Activity size={20} /> Rắn săn mồi
+                        <Activity size={20} /> Snake
+                    </div>
+                    <div className={`nav-item ${activeGame === 'tetris' ? 'active' : ''}`} onClick={() => { setActiveGame('tetris'); setShowHelp(false); }}>
+                        <Grid3X3 size={20} /> Tetris
                     </div>
                 </nav>
                 <div className="nav-group" style={{ marginTop: '1rem', flex: 'none' }}>
