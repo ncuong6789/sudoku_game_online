@@ -10,12 +10,23 @@ export default function ChessGame() {
     const navigate = useNavigate();
     const { mode, roomId, difficulty, playerColor } = location.state || { mode: 'solo', difficulty: 'Medium', playerColor: 'w' };
 
-    // Standardized player color 'w' or 'b'
-    const myColor = playerColor === 'w' ? 'w' : 'b';
+    const [game, setGame] = useState(new Chess());
+    const [fen, setFen] = useState(game.fen());
+    const [realPlayerColor, setRealPlayerColor] = useState(null);
+    const [moveHistory, setMoveHistory] = useState([]); 
+    
+    // Khởi tạo màu quân thực tế
+    useEffect(() => {
+        if (playerColor === 'random') {
+            const randomColor = Math.random() < 0.5 ? 'w' : 'b';
+            setRealPlayerColor(randomColor);
+            console.log('Random color selected:', randomColor);
+        } else {
+            setRealPlayerColor(playerColor);
+        }
+    }, [playerColor]);
 
-    const [game] = useState(new Chess());
-    const [board, setBoard] = useState(game.board());
-    const [moveHistory, setMoveHistory] = useState([]); // for triggering re-renders safely
+    const myColor = realPlayerColor || 'w';
     
     // UI State
     const [moveFrom, setMoveFrom] = useState(null);
@@ -25,38 +36,36 @@ export default function ChessGame() {
     const [statusMessage, setStatusMessage] = useState('Ván đấu bắt đầu!');
 
     // Cập nhật trạng thái
-    const updateGameState = useCallback(() => {
-        setBoard([...game.board()]);
+    const updateGameState = useCallback((gameInstance) => {
+        if (!gameInstance) return;
         
         let status = '';
-        if (game.isCheckmate()) {
-            status = `Chiếu Bí! ${game.turn() === 'w' ? 'Đen' : 'Trắng'} thắng.`;
+        if (gameInstance.isCheckmate()) {
+            status = `Chiếu Bí! ${gameInstance.turn() === 'w' ? 'Đen' : 'Trắng'} thắng.`;
             setGameOver(true);
-        } else if (game.isDraw()) {
+        } else if (gameInstance.isDraw()) {
             status = 'Hòa cờ!';
             setGameOver(true);
         } else {
-            status = game.turn() === myColor 
+            status = gameInstance.turn() === myColor 
                 ? 'Đến lượt bạn.' 
                 : `Đến lượt ${mode === 'solo' ? 'AI' : 'đối thủ'}.`;
-            if (game.isCheck()) {
+            if (gameInstance.isCheck()) {
                 status = `Đang bị chiếu! - ` + status;
             }
         }
         setStatusMessage(status);
-        setMoveHistory([...game.history({ verbose: true })]);
-    }, [game, myColor, mode]);
+        setMoveHistory([...gameInstance.history({ verbose: true })]);
+        setGame(gameInstance);
+        setFen(gameInstance.fen());
+    }, [myColor, mode]);
 
     // Lắng nghe Socket cho Multiplayer
     useEffect(() => {
         if (mode === 'multiplayer' && roomId) {
             const handleOpponentMove = ({ fen }) => {
-                try {
-                    game.load(fen);
-                    updateGameState();
-                } catch (e) {
-                    console.error('Invalid fen received', e);
-                }
+                const newGame = new Chess(fen);
+                updateGameState(newGame);
             };
             socket.on('chessMoved', handleOpponentMove);
             return () => socket.off('chessMoved', handleOpponentMove);
@@ -91,8 +100,9 @@ export default function ChessGame() {
         }
         
         try {
-            game.move(move);
-            updateGameState();
+            const gameCopy = new Chess(game.fen());
+            gameCopy.move(move);
+            updateGameState(gameCopy);
         } catch (e) { console.error('AI move error', e); }
     };
 
@@ -100,7 +110,8 @@ export default function ChessGame() {
         if (gameOver || game.turn() !== myColor) return false;
 
         try {
-            const move = game.move({
+            const gameCopy = new Chess(game.fen());
+            const move = gameCopy.move({
                 from: sourceSquare,
                 to: targetSquare,
                 promotion: piece[1]?.toLowerCase() ?? 'q',
@@ -108,9 +119,9 @@ export default function ChessGame() {
 
             if (move === null) return false;
 
-            updateGameState();
+            updateGameState(gameCopy);
             if (mode === 'multiplayer') {
-                socket.emit('chessMove', { roomId, fen: game.fen() });
+                socket.emit('chessMove', { roomId, fen: gameCopy.fen() });
             }
             setMoveFrom(null);
             setOptionSquares({});
@@ -161,7 +172,8 @@ export default function ChessGame() {
 
         // Đã có từ moveFrom, thử đi quân
         try {
-            const move = game.move({
+            const gameCopy = new Chess(game.fen());
+            const move = gameCopy.move({
                 from: moveFrom,
                 to: square,
                 promotion: 'q'
@@ -169,9 +181,9 @@ export default function ChessGame() {
 
             if (move === null) return resetFirstMove(square);
 
-            updateGameState();
+            updateGameState(gameCopy);
             if (mode === 'multiplayer') {
-                socket.emit('chessMove', { roomId, fen: game.fen() });
+                socket.emit('chessMove', { roomId, fen: gameCopy.fen() });
             }
             setMoveFrom(null);
             setOptionSquares({});
@@ -183,13 +195,20 @@ export default function ChessGame() {
 
     const handleReset = () => {
         if (mode === 'solo') {
-            game.reset();
-            updateGameState();
+            const newGame = new Chess();
+            updateGameState(newGame);
             setGameOver(false);
             setMoveFrom(null);
             setOptionSquares({});
             if (myColor === 'b') {
-                setTimeout(makeAIMove, 600); 
+                setTimeout(() => {
+                    const moves = newGame.moves({ verbose: true });
+                    if (moves.length > 0) {
+                        const move = moves[Math.floor(Math.random() * moves.length)];
+                        newGame.move(move);
+                        updateGameState(newGame);
+                    }
+                }, 600); 
             }
         }
     };
@@ -248,7 +267,7 @@ export default function ChessGame() {
                             background: 'rgba(255, 255, 255, 0.1)',
                         }}>
                             <Chessboard 
-                                position={game.fen()} 
+                                position={fen} 
                                 onPieceDrop={onDrop}
                                 onSquareClick={onSquareClick}
                                 boardOrientation={myColor === 'w' ? 'white' : 'black'}
