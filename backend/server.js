@@ -9,7 +9,7 @@ app.use(cors());
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: '*',
+        origin: '*', // We will restrict this to your Vercel URL once deployed
         methods: ['GET', 'POST']
     }
 });
@@ -97,7 +97,7 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
     console.log(`Socket.IO Server running on port ${PORT}`);
 });
