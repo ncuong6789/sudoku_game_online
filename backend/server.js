@@ -20,12 +20,13 @@ const rooms = {};
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
-    socket.on('createRoom', ({ difficulty }, callback) => {
+    socket.on('createRoom', ({ difficulty, gameType }, callback) => {
         const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
         rooms[roomId] = {
             id: roomId,
             players: [socket.id],
             difficulty,
+            gameType: gameType || 'sudoku',
             gameState: null,
             progress: {
                 [socket.id]: 0
@@ -35,25 +36,38 @@ io.on('connection', (socket) => {
         callback({ roomId });
     });
 
-    socket.on('joinRoom', ({ roomId }, callback) => {
+    socket.on('joinRoom', ({ roomId, gameType }, callback) => {
         roomId = roomId.toUpperCase();
         const room = rooms[roomId];
         if (room && room.players.length < 2) {
+            // Optional: check if gameType matches
             room.players.push(socket.id);
             room.progress[socket.id] = 0;
             socket.join(roomId);
             io.to(roomId).emit('playerJoined', { players: room.players.length });
             callback({ success: true, difficulty: room.difficulty });
         } else {
-            callback({ success: false, message: 'Room not found or full' });
+            callback({ success: false, message: 'Phòng không tồn tại hoặc đã đầy' });
         }
     });
 
     socket.on('startGame', ({ puzzle, solution }) => {
         const roomId = Array.from(socket.rooms).find(r => r !== socket.id);
-        if (!roomId) return;
+        if (!roomId && !rooms[roomId]) return;
         rooms[roomId].gameState = { puzzle, solution };
         io.to(roomId).emit('gameStarted', { puzzle, solution });
+    });
+
+    socket.on('startCaroGame', ({ roomId }) => {
+        io.to(roomId).emit('caroGameStarted');
+    });
+
+    socket.on('caroMove', ({ r, c, roomId, grid }) => {
+        // Send to other player in the room
+        socket.to(roomId).emit('caroUpdateMove', { 
+            r, c, grid, 
+            nextSymbol: grid[r][c] === 1 ? 'O' : 'X' 
+        });
     });
 
     socket.on('updateProgress', (stats) => {
