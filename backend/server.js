@@ -11,7 +11,8 @@ const io = new Server(server, {
     cors: {
         origin: '*', // We will restrict this to your Vercel URL once deployed
         methods: ['GET', 'POST']
-    }
+    },
+    transports: ['websocket']
 });
 
 const rooms = {};

@@ -22,6 +22,26 @@ export default function SoloGame() {
     const [hintsUsed, setHintsUsed] = useState(0);
     const audioRef = useRef(null);
 
+    // Sound function refs
+    const playWinSoundRef = useRef(null);
+    const playLoseSoundRef = useRef(null);
+    playLoseSoundRef.current = () => {
+        console.log('Solo: Triggering Lose Sound...');
+        if (audioRef.current) audioRef.current.pause();
+        const audio = new Audio('/lose.mp3');
+        audioRef.current = audio;
+        audio.play().catch(e => console.log('Lose sound failed:', e));
+        setTimeout(() => { if (audioRef.current === audio) audio.pause(); }, 30000);
+    };
+    playWinSoundRef.current = () => {
+        console.log('Solo: Triggering Win Sound...');
+        if (audioRef.current) audioRef.current.pause();
+        const audio = new Audio('/win.mp3');
+        audioRef.current = audio;
+        audio.play().catch(e => console.log('Win sound failed:', e));
+        setTimeout(() => { if (audioRef.current === audio) audio.pause(); }, 30000);
+    };
+
     const startNewGame = useCallback((diff) => {
         const { puzzle, solution: sol } = generateSudoku(diff);
         setInitialPuzzle(puzzle);
@@ -78,7 +98,7 @@ export default function SoloGame() {
         if (emptyCount === 0) {
             setWon(true);
             setIsGameOver(true);
-            playWinSound();
+            playWinSoundRef.current?.();
         }
     }, [initialPuzzle]);
 
@@ -137,32 +157,7 @@ export default function SoloGame() {
         }
     }, [selectedCell, isGameOver, initialPuzzle, notesMode, solution, userAnswers, notes, errorCount, checkWin]);
 
-    const playLoseSound = () => {
-        if (audioRef.current) audioRef.current.pause();
-        const audio = new Audio('lose.mp3');
-        audioRef.current = audio;
-        audio.play().catch(e => console.log("Audio play failed:", e));
-        
-        // Stop after 30s
-        setTimeout(() => {
-            if (audioRef.current === audio) {
-                audio.pause();
-            }
-        }, 30000);
-    };
 
-    const playWinSound = () => {
-        if (audioRef.current) audioRef.current.pause();
-        const audio = new Audio('win.mp3');
-        audioRef.current = audio;
-        audio.play().catch(e => console.log("Win audio play failed:", e));
-        // Stop after 30s
-        setTimeout(() => {
-            if (audioRef.current === audio) {
-                audio.pause();
-            }
-        }, 30000);
-    };
 
     const handleActionClick = useCallback((action) => {
         if (!selectedCell || isGameOver) return;
