@@ -245,8 +245,8 @@ export default function CaroGame() {
     }, [messages]);
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '1rem', height: 'calc(100vh - 100px)' }}>
-            <div className="glass-panel" style={{ width: '100%', maxWidth: BOARD_SIZE >= 30 ? '1600px' : '1000px', height: '100%', display: 'flex', flexDirection: 'row', padding: '1.5rem', gap: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '0.5rem 1rem', height: 'calc(100vh - 80px)' }}>
+            <div className="glass-panel" style={{ width: '100%', maxWidth: BOARD_SIZE >= 30 ? '1600px' : '1000px', height: '100%', display: 'flex', flexDirection: 'row', padding: '0.5rem 1.5rem', gap: '2rem', alignItems: 'center' }}>
                 
                 {/* TRÁI: BÀN CỜ */}
                 <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: 0, height: '100%' }}>
@@ -259,10 +259,10 @@ export default function CaroGame() {
                         border: '1px solid rgba(255, 255, 255, 0.05)',
                         padding: BOARD_SIZE >= 30 ? '0' : '2px',
                         borderRadius: '4px',
-                        width: '100%',
+                        width: 'auto',
                         height: '100%',
-                        maxWidth: '85vh',
-                        maxHeight: '85vh',
+                        maxWidth: '100%',
+                        maxHeight: '100%',
                         aspectRatio: '1 / 1',
                         margin: '0 auto'
                     }}>
