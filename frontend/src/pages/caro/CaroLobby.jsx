@@ -2,9 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../../utils/socket';
 
+const sizes = [
+    { label: '3x3', value: 3 },
+    { label: '15x15', value: 15 },
+    { label: '30x30', value: 30 }
+];
+
 export default function CaroLobby() {
     const navigate = useNavigate();
     const [roomId, setRoomId] = useState('');
+    const [gridSize, setGridSize] = useState(15);
     const [inRoom, setInRoom] = useState(false);
     const [myRoom, setMyRoom] = useState('');
     const [error, setError] = useState('');
@@ -26,8 +33,8 @@ export default function CaroLobby() {
             }
         };
 
-        const handleGameStarted = () => {
-            navigate('/caro/game', { state: { mode: 'multiplayer', roomId: myRoom } });
+        const handleGameStarted = ({ gridSize: serverGridSize }) => {
+            navigate('/caro/game', { state: { mode: 'multiplayer', roomId: myRoom, gridSize: serverGridSize || gridSize } });
         };
 
         socket.on('playerJoined', handlePlayerJoined);
@@ -37,10 +44,10 @@ export default function CaroLobby() {
             socket.off('playerJoined', handlePlayerJoined);
             socket.off('caroGameStarted', handleGameStarted);
         };
-    }, [myRoom, navigate]);
+    }, [myRoom, navigate, gridSize]);
 
     const handleCreateRoom = () => {
-        socket.emit('createRoom', { difficulty: 'Medium', gameType: 'caro' }, (res) => {
+        socket.emit('createRoom', { difficulty: 'Medium', gameType: 'caro', gridSize }, (res) => {
             setMyRoom(res.roomId);
             setInRoom(true);
         });
@@ -52,6 +59,7 @@ export default function CaroLobby() {
             if (res.success) {
                 setMyRoom(roomId.toUpperCase());
                 setInRoom(true);
+                if (res.gridSize) setGridSize(res.gridSize);
             } else {
                 setError(res.message);
                 setTimeout(() => setError(''), 3000);
@@ -64,7 +72,7 @@ export default function CaroLobby() {
             <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
                 <h2>Multiplayer</h2>
                 <div style={{ textAlign: 'center', margin: '1.5rem 0' }}>
-                    <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Mã phòng:</p>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Mã phòng - Size {gridSize}x{gridSize}:</p>
                     <h1 style={{ letterSpacing: '4px', color: 'var(--primary-color)', margin: '0.5rem 0' }}>{myRoom}</h1>
                     <p style={{ color: 'var(--accent-color)', fontWeight: 600 }}>Đang chờ đối thủ...</p>
                 </div>
@@ -78,7 +86,7 @@ export default function CaroLobby() {
     }
 
     return (
-        <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
+        <div className="glass-panel menu-container" style={{ maxWidth: '450px' }}>
             <h2>Multiplayer</h2>
             
             {!isConnected && (
@@ -89,8 +97,17 @@ export default function CaroLobby() {
 
             <div style={{ textAlign: 'left', width: '100%' }}>
                 <h3 style={{ marginTop: 0, marginBottom: '0.8rem' }}>Tạo phòng</h3>
-                <div className="glass-input" style={{ width: '100%', padding: '12px', borderRadius: '8px', marginBottom: '12px', background: '#1e293b', color: 'white', border: '1px solid var(--border-color)', boxSizing: 'border-box', fontSize: '0.9rem' }}>
-                    Cơ bản (15x15)
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '12px' }}>
+                    {sizes.map((s) => (
+                        <button 
+                            key={s.label}
+                            className={gridSize === s.value ? 'btn-primary' : 'btn-secondary'}
+                            onClick={() => setGridSize(s.value)}
+                            style={{ padding: '12px 10px', fontSize: '0.8rem' }}
+                        >
+                            {s.label}
+                        </button>
+                    ))}
                 </div>
                 <button className="btn-primary" style={{ width: '100%' }} onClick={handleCreateRoom}>Tạo phòng mới</button>
             </div>
@@ -104,19 +121,10 @@ export default function CaroLobby() {
                     placeholder="NHẬP MÃ PHÒNG"
                     value={roomId}
                     onChange={e => setRoomId(e.target.value.toUpperCase())}
+                    className="glass-input"
                     style={{ 
-                        width: '100%', 
-                        padding: '12px', 
-                        borderRadius: '8px', 
-                        marginBottom: '12px', 
-                        background: '#1e293b', 
-                        color: 'white', 
-                        border: '1px solid var(--border-color)', 
-                        textTransform: 'uppercase', 
-                        outline: 'none',
-                        boxSizing: 'border-box',
-                        textAlign: 'center',
-                        letterSpacing: '2px'
+                        width: '100%', padding: '12px', borderRadius: '8px', marginBottom: '12px', background: '#1e293b', color: 'white', border: '1px solid var(--border-color)', 
+                        textTransform: 'uppercase', outline: 'none', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '2px' 
                     }}
                 />
                 {error && <p style={{ color: 'var(--error-color)', fontSize: '0.85rem', marginBottom: '0.8rem' }}>{error}</p>}

@@ -37,13 +37,14 @@ const broadcastStats = () => {
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
-    socket.on('createRoom', ({ difficulty, gameType }, callback) => {
+    socket.on('createRoom', ({ difficulty, gameType, gridSize }, callback) => {
         const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
         rooms[roomId] = {
             id: roomId,
             players: [socket.id],
             difficulty,
             gameType: gameType || 'sudoku',
+            gridSize: gridSize || 15, // Added gridSize here
             gameState: null,
             progress: {
                 [socket.id]: 0
@@ -64,7 +65,7 @@ io.on('connection', (socket) => {
             socket.join(roomId);
             io.to(roomId).emit('playerJoined', { players: room.players.length });
             broadcastStats();
-            callback({ success: true, difficulty: room.difficulty });
+            callback({ success: true, difficulty: room.difficulty, gridSize: room.gridSize });
         } else {
             callback({ success: false, message: 'Phòng không tồn tại hoặc đã đầy' });
         }
@@ -78,15 +79,78 @@ io.on('connection', (socket) => {
     });
 
     socket.on('startCaroGame', ({ roomId }) => {
-        io.to(roomId).emit('caroGameStarted');
+        const room = rooms[roomId];
+        if (room) {
+            io.to(roomId).emit('caroGameStarted', { gridSize: room.gridSize });
+        }
     });
 
     socket.on('caroMove', ({ r, c, roomId, grid }) => {
-        // Send to other player in the room
-        socket.to(roomId).emit('caroUpdateMove', { 
-            r, c, grid, 
-            nextSymbol: grid[r][c] === 1 ? 'O' : 'X' 
-        });
+        socket.to(roomId).emit('caroMoved', { r, c, grid });
+    });
+
+    // --- CHESS MULTIPLAYER LOGIC ---
+
+    // Chat trong phòng chờ (Dùng chung cho cả Caro nếu muốn sau này)
+    socket.on('sendMessage', ({ roomId, text }) => {
+        socket.to(roomId).emit('receiveMessage', { text, sender: 'opponent', id: Date.now() });
+    });
+
+    // Cập nhật tùy chọn màu phe
+    socket.on('chessColorSelect', ({ roomId, color, ready }) => {
+        socket.to(roomId).emit('chessColorUpdate', { color, ready });
+        
+        // Cập nhật trạng thái người chơi trong phòng (tuỳ chọn lưu lại nếu muốn backend quyết định)
+        const room = rooms[roomId];
+        if (room) {
+            if (!room.chessReady) room.chessReady = {};
+            room.chessReady[socket.id] = { color, ready };
+        }
+    });
+
+    socket.on('startChessGame', ({ roomId }) => {
+        const room = rooms[roomId];
+        if (room) {
+            // Xác định màu quân cho từng người
+            const players = room.players;
+            let playerColors = {}; // socket.id -> 'w' or 'b'
+            
+            // Lấy lựa chọn
+            const c1 = room.chessReady?.[players[0]]?.color || 'random';
+            const c2 = room.chessReady?.[players[1]]?.color || 'random';
+
+            // Nếu 1 người chọn W và 1 người chọn B
+            if (c1 === 'w' && c2 === 'b') {
+                playerColors[players[0]] = 'w';
+                playerColors[players[1]] = 'b';
+            } else if (c1 === 'b' && c2 === 'w') {
+                playerColors[players[0]] = 'b';
+                playerColors[players[1]] = 'w';
+            } else if (c1 === 'w' && c2 === 'random') {
+                playerColors[players[0]] = 'w';
+                playerColors[players[1]] = 'b';
+            } else if (c1 === 'b' && c2 === 'random') {
+                playerColors[players[0]] = 'b';
+                playerColors[players[1]] = 'w';
+            } else if (c2 === 'w' && c1 === 'random') {
+                playerColors[players[1]] = 'w';
+                playerColors[players[0]] = 'b';
+            } else if (c2 === 'b' && c1 === 'random') {
+                playerColors[players[1]] = 'b';
+                playerColors[players[0]] = 'w';
+            } else {
+                // Default random phân phát
+                const isP0White = Math.random() < 0.5;
+                playerColors[players[0]] = isP0White ? 'w' : 'b';
+                playerColors[players[1]] = isP0White ? 'b' : 'w';
+            }
+
+            io.to(roomId).emit('chessGameStarted', { playerColors });
+        }
+    });
+
+    socket.on('chessMove', ({ roomId, fen }) => {
+        socket.to(roomId).emit('chessMoved', { fen });
     });
 
     socket.on('updateProgress', (stats) => {

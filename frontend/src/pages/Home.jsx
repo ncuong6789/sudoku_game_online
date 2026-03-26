@@ -85,23 +85,16 @@ export default function Home() {
                 <div className="game-detail" style={{ maxWidth: '700px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
                         <h1 className="game-title" style={{ margin: 0, fontSize: '3rem' }}>{game.name}</h1>
-                        {activeGame === 'chess' && <span className="coming-soon-tag">Sắp ra mắt</span>}
                     </div>
                     <p className="game-desc" style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>{game.description}</p>
 
                     <div className="action-row" style={{ marginBottom: '2rem', gap: '0.8rem' }}>
-                        {activeGame !== 'chess' ? (
-                            <>
-                                <button className={!showHelp ? "btn-primary" : "btn-secondary"} onClick={() => showHelp ? setShowHelp(false) : navigate(game.path)} style={{ flex: 1, padding: '14px' }}>
-                                    Bắt đầu chơi
-                                </button>
-                                <button className={showHelp ? "btn-primary" : "btn-secondary"} onClick={() => setShowHelp(!showHelp)} style={{ flex: 1, padding: '14px' }}>
-                                    Hướng dẫn
-                                </button>
-                            </>
-                        ) : (
-                            <button className="btn-secondary" disabled style={{ width: '100%', padding: '14px' }}>Đang phát triển...</button>
-                        )}
+                        <button className={!showHelp ? "btn-primary" : "btn-secondary"} onClick={() => showHelp ? setShowHelp(false) : navigate(game.path)} style={{ flex: 1, padding: '14px' }}>
+                            Bắt đầu chơi
+                        </button>
+                        <button className={showHelp ? "btn-primary" : "btn-secondary"} onClick={() => setShowHelp(!showHelp)} style={{ flex: 1, padding: '14px' }}>
+                            Hướng dẫn
+                        </button>
                     </div>
 
                     {showHelp && (

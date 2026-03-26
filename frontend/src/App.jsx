@@ -11,6 +11,11 @@ import CaroHome from './pages/caro/CaroHome';
 import CaroGame from './pages/caro/CaroGame';
 import CaroLobby from './pages/caro/CaroLobby';
 
+// Chess Components
+import ChessHome from './pages/chess/ChessHome';
+import ChessLobby from './pages/chess/ChessLobby';
+import ChessGame from './pages/chess/ChessGame';
+
 function App() {
   return (
     <HashRouter>
@@ -27,6 +32,11 @@ function App() {
         <Route path="/caro" element={<CaroHome />} />
         <Route path="/caro/multiplayer" element={<CaroLobby />} />
         <Route path="/caro/game" element={<CaroGame />} />
+
+        {/* Chess Module */}
+        <Route path="/chess" element={<ChessHome />} />
+        <Route path="/chess/multiplayer" element={<ChessLobby />} />
+        <Route path="/chess/game" element={<ChessGame />} />
       </Routes>
     </HashRouter>
   );

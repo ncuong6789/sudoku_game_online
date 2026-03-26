@@ -3,12 +3,15 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { socket } from '../../utils/socket';
 import { ArrowLeft, RotateCcw, MessageSquare, Send, User, Bot, Swords } from 'lucide-react';
 
-const BOARD_SIZE = 15;
+// Remove fixed BOARD_SIZE constant, move inside component for dynamic sizing
 
 export default function CaroGame() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { mode, roomId, difficulty } = location.state || { mode: 'solo', difficulty: 'Medium' };
+    const { mode, roomId, difficulty, gridSize } = location.state || { mode: 'solo', difficulty: 'Medium', gridSize: 15 };
+
+    const BOARD_SIZE = gridSize || 15;
+    const WIN_COUNT = BOARD_SIZE === 3 ? 3 : 5;
 
     const [board, setBoard] = useState(Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(0)));
     const [isXNext, setIsXNext] = useState(true); // X moves first
@@ -48,29 +51,29 @@ export default function CaroGame() {
 
         for (const [dr, dc] of directions) {
             let count = 1;
-            let line = [[r, c]];
+            let line = [{ r, c }];
 
             // Check forward
-            for (let i = 1; i < 5; i++) {
+            for (let i = 1; i < WIN_COUNT; i++) {
                 const nr = r + dr * i;
                 const nc = c + dc * i;
                 if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && grid[nr][nc] === player) {
                     count++;
-                    line.push([nr, nc]);
+                    line.push({ r: nr, c: nc });
                 } else break;
             }
 
             // Check backward
-            for (let i = 1; i < 5; i++) {
+            for (let i = 1; i < WIN_COUNT; i++) {
                 const nr = r - dr * i;
                 const nc = c - dc * i;
                 if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && grid[nr][nc] === player) {
                     count++;
-                    line.push([nr, nc]);
+                    line.push({ r: nr, c: nc });
                 } else break;
             }
 
-            if (count >= 5) return { player, line };
+            if (count >= WIN_COUNT) return { player, line };
         }
         return null;
     };
@@ -124,7 +127,7 @@ export default function CaroGame() {
         }
 
         if (move) applyAIMove(currentBoard, move);
-    }, [difficulty]);
+    }, [difficulty, BOARD_SIZE]);
 
     const applyAIMove = (currentBoard, move) => {
         const newBoard = currentBoard.map(row => [...row]);
@@ -173,7 +176,7 @@ export default function CaroGame() {
                 socket.off('receiveMessage');
             }
         };
-    }, [mode, playerSymbol]);
+    }, [mode, playerSymbol, checkWinner]);
 
     const handleCellClick = (r, c) => {
         if (board[r][c] !== 0 || isGameOver) return;
@@ -227,7 +230,7 @@ export default function CaroGame() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <div className={`nav-item active`} style={{ padding: '8px 15px' }}>
-                                <Swords size={18} /> Caro 15x15
+                                <Swords size={18} /> Caro {BOARD_SIZE}x{BOARD_SIZE}
                             </div>
                             <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                                 {mode === 'solo' ? 'Thách đấu AI' : `Phòng: ${roomId}`}
@@ -240,31 +243,36 @@ export default function CaroGame() {
 
                     <div style={{ 
                         display: 'grid', 
-                        gridTemplateColumns: `repeat(${BOARD_SIZE}, 40px)`,
-                        gridTemplateRows: `repeat(${BOARD_SIZE}, 40px)`,
-                        gap: '1px',
-                        background: 'rgba(255,255,255,0.1)',
+                        gridTemplateColumns: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
+                        gridTemplateRows: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
+                        gap: BOARD_SIZE >= 30 ? '0' : (BOARD_SIZE > 15 ? '1px' : '2px'),
+                        background: 'rgba(255, 255, 255, 0.1)',
                         padding: '1px',
-                        border: '1px solid rgba(255,255,255,0.2)'
+                        borderRadius: '4px',
+                        width: '100%',
+                        maxWidth: BOARD_SIZE >= 30 ? '800px' : '600px',
+                        aspectRatio: '1 / 1',
+                        margin: '0 auto'
                     }}>
                         {board.map((row, r) => row.map((cell, c) => {
-                            const isWinCell = winningLine?.some(([wr, wc]) => wr === r && wc === c);
+                            const isWinCell = winningLine?.some(coord => coord.r === r && coord.c === c);
                             return (
                                 <div 
                                     key={`${r}-${c}`}
+                                    className="caro-cell"
                                     onClick={() => handleCellClick(r, c)}
                                     style={{
-                                        width: '40px',
-                                        height: '40px',
                                         background: isWinCell ? 'rgba(var(--primary-color-rgb), 0.4)' : 'rgba(20, 20, 30, 0.8)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        fontSize: '1.2rem',
+                                        fontSize: BOARD_SIZE >= 30 ? '0.5rem' : (BOARD_SIZE > 15 ? '0.8rem' : '1.2rem'),
                                         fontWeight: 'bold',
                                         cursor: cell === 0 && !isGameOver ? 'pointer' : 'default',
                                         color: cell === 1 ? 'var(--primary-color)' : '#ff4757',
-                                        transition: 'all 0.2s'
+                                        transition: 'all 0.2s',
+                                        border: BOARD_SIZE >= 30 ? '0.1px solid rgba(255,255,255,0.05)' : 'none',
+                                        boxSizing: 'border-box'
                                     }}
                                 >
                                     {cell === 1 ? 'X' : cell === 2 ? 'O' : ''}
