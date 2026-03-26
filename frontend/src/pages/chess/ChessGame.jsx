@@ -207,10 +207,27 @@ export default function ChessGame() {
                     return newGame;
                 });
             };
+            const handleOpponentDisconnect = () => {
+                if (!gameOver) {
+                    setGameOver(true);
+                    setWinner(myColor);
+                    setStatusMessage(`Bạn đã thắng! Đối thủ thoái thác.`);
+                }
+            };
             socket.on('chessMoved', handleOpponentMove);
-            return () => socket.off('chessMoved', handleOpponentMove);
+            socket.on('opponentDisconnected', handleOpponentDisconnect);
+            return () => {
+                socket.off('chessMoved', handleOpponentMove);
+                socket.off('opponentDisconnected', handleOpponentDisconnect);
+            };
         }
-    }, [mode, roomId]);
+    }, [mode, roomId, gameOver, myColor]);
+
+    useEffect(() => {
+        return () => {
+             if (roomId) socket.emit('leaveRoom', roomId);
+        };
+    }, [roomId]);
 
     // AI Logic cho Solo
     const makeAIMove = useCallback(() => {

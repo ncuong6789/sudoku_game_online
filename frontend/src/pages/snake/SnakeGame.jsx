@@ -212,9 +212,25 @@ export default function SnakeGame() {
                 }
             });
 
-            return () => socket.off('snakeGameState');
+            socket.on('opponentDisconnected', () => {
+                if (!gameOver) {
+                    setGameOver(true);
+                    setStatusMessage('Bạn Thắng! Đối thủ đã thoái lui.');
+                }
+            });
+
+            return () => {
+                socket.off('snakeGameState');
+                socket.off('opponentDisconnected');
+            };
         }
-    }, [mode, roomId]);
+    }, [mode, roomId, gameOver]);
+
+    useEffect(() => {
+        return () => {
+            if (roomId) socket.emit('leaveRoom', roomId);
+        };
+    }, [roomId]);
 
     // RENDER HELPER MAPPING
     // Gộp trạng thái để render chung bằng 1 function cho dễ

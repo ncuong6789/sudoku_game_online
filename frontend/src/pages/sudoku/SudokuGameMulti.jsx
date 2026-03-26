@@ -130,8 +130,9 @@ export default function MultiplayerGame() {
                 audioRef.current.pause();
                 audioRef.current = null;
             }
+            if (roomId) socket.emit('leaveRoom', roomId);
         };
-    }, []);
+    }, [roomId]);
 
 
     const checkWin = useCallback((answers, currentErrors, currentHints) => {

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, Trophy } from 'lucide-react';
 import { socket } from '../../utils/socket';
 import { useTetris, STAGE_WIDTH, STAGE_HEIGHT, TETROMINOES } from '../../utils/useTetris';
+import { useAudio } from '../../utils/useAudio';
 
 // A Cell component
 const Cell = ({ type, cellState }) => {
@@ -99,6 +100,7 @@ export default function TetrisGame() {
     const [gameResult, setGameResult] = useState(''); // 'Win', 'Lose', 'Draw'
     
     const [isStarted, setIsStarted] = useState(false);
+    const { playWinSound, playLoseSound } = useAudio();
 
     // Keyboard handlers
     const move = useCallback((e) => {
@@ -169,25 +171,37 @@ export default function TetrisGame() {
             setOpponentScore(data.score);
         });
 
+        socket.on('opponentDisconnected', () => {
+            if (!gameResult && isStarted) {
+                setGameOver(true);
+                setIsStarted(false);
+                setGameResult('Win');
+                playWinSound();
+            }
+        });
+
         socket.on('tetrisGameOverResult', (data) => {
             setGameOver(true);
             setIsStarted(false);
             if (data.winner === socket.id) {
                 setGameResult('Win');
+                playWinSound();
             } else if (data.winner === 'Draw') {
                 setGameResult('Draw');
             } else {
                 setGameResult('Lose');
+                playLoseSound();
             }
         });
 
         return () => {
             socket.off('opponentTetrisUpdate');
+            socket.off('opponentDisconnected');
             socket.off('tetrisGameOverResult');
         };
-    }, [mode, setGameOver]);
+    }, [mode, gameResult, isStarted, playWinSound, playLoseSound, setGameOver]);
 
-    // Emit GameOver state
+    // Emit GameOver state and leave room cleanup
     useEffect(() => {
         if (gameOver && mode === 'multiplayer' && !gameResult && isStarted) {
             // Tell server I topped out, let it judge based on current score
@@ -195,16 +209,23 @@ export default function TetrisGame() {
         }
     }, [gameOver, mode, gameResult, roomId, score, isStarted]);
 
-    return (
-        <div style={{ outline: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', padding: '1rem' }} tabIndex="0">
-            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', maxWidth: '800px', marginBottom: '1rem' }}>
-                <h2 style={{ margin: 0, whiteSpace: 'nowrap', userSelect: 'none' }}>Tetris {mode === 'multiplayer' ? 'PvP' : 'Solo'}</h2>
-                <button className="btn-secondary" onClick={() => navigate('/tetris')} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px', width: 'auto' }}>
-                    <ArrowLeft size={16} /> Thoát
-                </button>
-            </div>
+    useEffect(() => {
+        return () => {
+            if (roomId) socket.emit('leaveRoom', roomId);
+        };
+    }, [roomId]);
 
-            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', flexWrap: 'wrap', justifyContent: 'center' }}>
+    return (
+        <div className="game-container" style={{ outline: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '1rem' }} tabIndex="0">
+            <div className="glass-panel" style={{ width: '100%', maxWidth: '800px', display: 'flex', flexDirection: 'column', padding: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '2rem' }}>
+                    <h2 style={{ margin: 0, whiteSpace: 'nowrap', userSelect: 'none' }}>Tetris {mode === 'multiplayer' ? 'PvP' : 'Solo'}</h2>
+                    <button className="btn-secondary" onClick={() => navigate('/tetris')} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px', width: 'auto' }}>
+                        <ArrowLeft size={16} /> Thoát
+                    </button>
+                </div>
+                
+                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', flexWrap: 'wrap', justifyContent: 'center' }}>
                 
                 {/* PLAYER BOARD */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
@@ -252,6 +273,7 @@ export default function TetrisGame() {
                         <Stage stage={opponentStage} isOpponent={true} />
                     </div>
                 )}
+                </div>
             </div>
 
             {/* GAME OVER BANNER */}

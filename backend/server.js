@@ -489,6 +489,28 @@ io.on('connection', (socket) => {
         room.snakeState.intervalId = setInterval(loop, room.snakeState.speed);
     };
 
+    socket.on('leaveRoom', (roomId) => {
+        if (rooms[roomId]) {
+            const index = rooms[roomId].players.indexOf(socket.id);
+            if (index !== -1) {
+                rooms[roomId].players.splice(index, 1);
+                
+                if (rooms[roomId].gameType === 'snake' && rooms[roomId].snakeState && rooms[roomId].snakeState.status !== 'finished') {
+                    rooms[roomId].snakeState.status = 'finished';
+                    if (rooms[roomId].snakeState.intervalId) clearInterval(rooms[roomId].snakeState.intervalId);
+                }
+
+                socket.to(roomId).emit('opponentDisconnected');
+                socket.leave(roomId);
+                
+                if (rooms[roomId].players.length === 0) {
+                    delete rooms[roomId];
+                }
+                broadcastStats();
+            }
+        }
+    });
+
     socket.on('disconnect', () => {
         snakeWaitingPlayers = snakeWaitingPlayers.filter(p => p.socket.id !== socket.id); // Remove from queue
 

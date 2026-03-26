@@ -181,6 +181,13 @@ export default function CaroGame() {
                 setMessages(prev => [...prev, msg]);
             });
 
+            socket.on('opponentDisconnected', () => {
+                if (!isGameOver) {
+                    setIsGameOver(true);
+                    setWinner(playerSymbol === 'X' ? 1 : 2);
+                }
+            });
+
             // If we are joining, we might need our symbol
             // For simplicity, let's say Creator is X, Joiner is O
             // We'll handle this in the lobby or first join
@@ -190,9 +197,16 @@ export default function CaroGame() {
             if (mode === 'multiplayer') {
                 socket.off('caroUpdateMove');
                 socket.off('receiveMessage');
+                socket.off('opponentDisconnected');
             }
         };
-    }, [mode, playerSymbol, checkWinner]);
+    }, [mode, playerSymbol, isGameOver]);
+
+    useEffect(() => {
+        return () => {
+            if (roomId) socket.emit('leaveRoom', roomId);
+        };
+    }, [roomId]);
 
     const handleCellClick = (r, c) => {
         if (board[r][c] !== 0 || isGameOver) return;
