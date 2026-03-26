@@ -245,11 +245,19 @@ export default function CaroGame() {
     }, [messages]);
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '0.5rem 1rem', height: 'calc(100vh - 80px)' }}>
-            <div className="glass-panel" style={{ width: '100%', maxWidth: BOARD_SIZE >= 30 ? '1600px' : '1000px', height: '100%', display: 'flex', flexDirection: 'row', padding: '0.5rem 1.5rem', gap: '2rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: 'calc(100vh - 80px)', padding: '0.5rem' }}>
+            <div className="glass-panel" style={{ 
+                width: 'fit-content', 
+                height: 'fit-content', 
+                display: 'flex', 
+                flexDirection: 'row', 
+                padding: '1rem', 
+                gap: '1.5rem', 
+                alignItems: 'stretch' 
+            }}>
                 
-                {/* TRÁI: BÀN CỜ */}
-                <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: 0, height: '100%' }}>
+                {/* TRÁI: BÀN CỜ GIGANTIC */}
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 0, margin: 0 }}>
                     <div style={{ 
                         display: 'grid', 
                         gridTemplateColumns: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
@@ -259,12 +267,12 @@ export default function CaroGame() {
                         border: '1px solid rgba(255, 255, 255, 0.05)',
                         padding: BOARD_SIZE >= 30 ? '0' : '2px',
                         borderRadius: '4px',
-                        width: 'auto',
-                        height: '100%',
-                        maxWidth: '100%',
-                        maxHeight: '100%',
-                        aspectRatio: '1 / 1',
-                        margin: '0 auto'
+                        
+                        /* CÔNG THỨC CSS TỐI THƯỢNG CHO HÌNH VUÔNG TRÀN VIỀN */
+                        width: 'min(calc(100vh - 130px), calc(100vw - 400px))',
+                        height: 'min(calc(100vh - 130px), calc(100vw - 400px))',
+                        
+                        margin: 0
                     }}>
                         {board.map((row, r) => row.map((cell, c) => {
                             const isWinCell = winningLine?.some(coord => coord.r === r && coord.c === c);
@@ -297,7 +305,7 @@ export default function CaroGame() {
                 </div>
 
                 {/* PHẢI: ĐIỀU KHIỂN & CHAT */}
-                <div style={{ flex: '0 0 280px', display: 'flex', flexDirection: 'column', gap: '1rem', height: '100%' }}>
+                <div style={{ flex: '0 0 280px', display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: 'min(calc(100vh - 130px), calc(100vw - 400px))' }}>
                     
                     {/* Header Sidebar */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
