@@ -5,13 +5,13 @@ import { socket } from '../../utils/socket';
 import { useTetris, STAGE_WIDTH, STAGE_HEIGHT, TETROMINOES } from '../../utils/useTetris';
 
 // A Cell component
-const Cell = ({ type }) => {
+const Cell = ({ type, cellState }) => {
     let color = 'rgba(255, 255, 255, 0.05)';
     if (type !== 0 && TETROMINOES[type]) {
         color = TETROMINOES[type].color;
     }
     return (
-        <div style={{
+        <div className={cellState === 'completing' ? 'flash-row' : ''} style={{
             width: '100%',
             height: '100%',
             backgroundColor: color,
@@ -35,7 +35,7 @@ const Stage = ({ stage, isOpponent }) => (
         borderRadius: '4px',
         opacity: isOpponent ? 0.7 : 1
     }}>
-        {stage.map(row => row.map((cell, x) => <Cell key={x} type={cell[0]} />))}
+        {stage.map(row => row.map((cell, x) => <Cell key={x} type={cell[0]} cellState={cell[1]} />))}
     </div>
 );
 

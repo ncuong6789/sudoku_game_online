@@ -75,7 +75,7 @@ export default function CaroLobby() {
                 <h2>Multiplayer</h2>
                 <div style={{ textAlign: 'center', margin: '1.5rem 0' }}>
                     <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Mã phòng - Size {gridSize}x{gridSize}:</p>
-                    <h1 style={{ letterSpacing: '4px', color: 'var(--primary-color)', margin: '0.5rem 0' }}>{myRoom}</h1>
+                    <h1 style={{ letterSpacing: '4px', color: 'var(--primary-color)', margin: '0.5rem 0', userSelect: 'text', cursor: 'text' }}>{myRoom}</h1>
                     <p style={{ color: 'var(--accent-color)', fontWeight: 600 }}>Đang chờ đối thủ...</p>
                 </div>
                 <button className="btn-secondary" style={{ width: 'auto' }} onClick={() => {

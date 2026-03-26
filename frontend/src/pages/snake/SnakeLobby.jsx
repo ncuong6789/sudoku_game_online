@@ -143,7 +143,7 @@ export default function SnakeLobby() {
                         {lobbyState === 'hosting' && (
                             <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
                                 <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Mã phòng (Map {mapSize}x{mapSize}):</p>
-                                <h1 style={{ letterSpacing: '4px', color: 'var(--primary-color)', margin: '0.5rem 0', fontSize: '3rem' }}>{myRoom}</h1>
+                                <h1 style={{ letterSpacing: '4px', color: 'var(--primary-color)', margin: '0.5rem 0', fontSize: '3rem', userSelect: 'text', cursor: 'text' }}>{myRoom}</h1>
                                 <p style={{ color: 'var(--accent-color)', fontWeight: 600 }}>Gửi mã này cho bạn bè...</p>
                             </div>
                         )}

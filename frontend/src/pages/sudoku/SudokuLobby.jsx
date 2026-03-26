@@ -75,7 +75,7 @@ export default function SudokuLobby() {
     if (inRoom) {
         return (
             <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
-                <h2>Room: {myRoom}</h2>
+                <h2 style={{ userSelect: 'text', cursor: 'text' }}>Room: {myRoom}</h2>
                 <p>Difficulty: {difficulty}</p>
                 <p>Players: {playerCount}/2</p>
                 {playerCount < 2 ? (

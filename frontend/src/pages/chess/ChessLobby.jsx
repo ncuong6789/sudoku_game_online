@@ -113,7 +113,7 @@ export default function ChessLobby() {
 
                 <div style={{ textAlign: 'center', marginBottom: '0.8rem' }}>
                     <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Mã phòng:</p>
-                    <h1 style={{ letterSpacing: '4px', color: 'var(--primary-color)', margin: '0.3rem 0' }}>{myRoom}</h1>
+                    <h1 style={{ letterSpacing: '4px', color: 'var(--primary-color)', margin: '0.3rem 0', userSelect: 'text', cursor: 'text' }}>{myRoom}</h1>
                 </div>
 
                 {/* Opponent Selection */}

@@ -39,6 +39,7 @@ export const useTetris = (initialPieceSequence = [], difficulty = 'Medium') => {
     const [score, setScore] = useState(0);
     const [rows, setRows] = useState(0);
     const [level, setLevel] = useState(0);
+    const [isClearing, setIsClearing] = useState(false);
 
     const [player, setPlayer] = useState({
         pos: { x: 0, y: 0 },
@@ -151,11 +152,13 @@ export const useTetris = (initialPieceSequence = [], difficulty = 'Medium') => {
     };
 
     const dropPlayer = () => {
+        if (isClearing) return;
         setDropTime(null);
         drop();
     };
 
     const movePlayer = dir => {
+        if (isClearing) return;
         if (!checkCollision(player, stage, { x: dir, y: 0 })) {
             updatePlayerPos({ x: dir, y: 0 });
         }
@@ -170,6 +173,7 @@ export const useTetris = (initialPieceSequence = [], difficulty = 'Medium') => {
     };
 
     const playerRotate = (stage, dir) => {
+        if (isClearing) return;
         const clonedPlayer = JSON.parse(JSON.stringify(player));
         clonedPlayer.tetromino = rotate(clonedPlayer.tetromino, dir);
 
@@ -191,6 +195,7 @@ export const useTetris = (initialPieceSequence = [], difficulty = 'Medium') => {
     };
 
     const hardDrop = () => {
+        if (isClearing) return;
         setDropTime(null);
         let curPlayer = player;
         let dist = 0;
@@ -207,19 +212,7 @@ export const useTetris = (initialPieceSequence = [], difficulty = 'Medium') => {
 
     // Update Stage Hook
     useEffect(() => {
-        let rowsCleared = 0;
-
-        const sweepRows = newStage => {
-            return newStage.reduce((ack, row) => {
-                if (row.findIndex(cell => cell[0] === 0) === -1) {
-                    rowsCleared += 1;
-                    ack.unshift(new Array(STAGE_WIDTH).fill([0, 'clear'])); // Add empty row to top
-                    return ack;
-                }
-                ack.push(row);
-                return ack;
-            }, []);
-        };
+        if (isClearing) return;
 
         const updateStage = prevStage => {
             // First flush the stage from previous player pos
@@ -241,9 +234,46 @@ export const useTetris = (initialPieceSequence = [], difficulty = 'Medium') => {
 
             // Check if collided
             if (player.collided) {
-                resetPlayer();
-                const clearedStage = sweepRows(newStage);
-                return clearedStage;
+                const fullRows = [];
+                for (let i = 0; i < newStage.length; i++) {
+                    if (newStage[i].every(c => c[0] !== 0)) {
+                        fullRows.push(i);
+                    }
+                }
+
+                if (fullRows.length > 0) {
+                    setIsClearing(true);
+                    fullRows.forEach(y => {
+                        newStage[y] = newStage[y].map(c => [c[0], 'completing']);
+                    });
+
+                    setTimeout(() => {
+                        setStage(cur => {
+                            let rowsCleared = 0;
+                            const swept = cur.reduce((ack, row) => {
+                                if (row[0][1] === 'completing') {
+                                    rowsCleared++;
+                                    ack.unshift(new Array(STAGE_WIDTH).fill([0, 'clear']));
+                                    return ack;
+                                }
+                                ack.push(row);
+                                return ack;
+                            }, []);
+                            
+                            if (rowsCleared > 0) {
+                                const linePoints = [40, 100, 300, 1200];
+                                setScore(s => s + linePoints[rowsCleared - 1] * (level + 1));
+                                setRows(r => r + rowsCleared);
+                            }
+                            return swept;
+                        });
+                        setIsClearing(false);
+                        resetPlayer();
+                    }, 400);
+                    return newStage;
+                } else {
+                    resetPlayer();
+                }
             }
 
             return newStage;
@@ -253,12 +283,7 @@ export const useTetris = (initialPieceSequence = [], difficulty = 'Medium') => {
             setStage(prev => updateStage(prev));
         }
 
-        if (rowsCleared > 0) {
-            const linePoints = [40, 100, 300, 1200];
-            setScore(prev => prev + linePoints[rowsCleared - 1] * (level + 1));
-            setRows(prev => prev + rowsCleared);
-        }
-    }, [player, resetPlayer, level]); // Dependency updates stage when player state changes
+    }, [player, level, resetPlayer, isClearing]); // Dependency updates stage when player state changes
 
     // Custom useInterval internally to avoid re-renders resetting it
     const savedDrop = useRef();

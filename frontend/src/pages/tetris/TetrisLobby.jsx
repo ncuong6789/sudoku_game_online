@@ -73,7 +73,7 @@ export default function TetrisLobby() {
     if (inRoom) {
         return (
             <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
-                <h2>Phòng: {myRoom}</h2>
+                <h2 style={{ userSelect: 'text', cursor: 'text' }}>Phòng: {myRoom}</h2>
                 <p>Tốc độ: {difficulty}</p>
                 <p>Người chơi: {playerCount}/2</p>
                 {playerCount < 2 ? (
