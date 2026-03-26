@@ -48,6 +48,8 @@ export const useTetris = (initialPieceSequence = [], difficulty = 'Medium') => {
     
     // Manage piece queue
     const pieceSequenceRef = useRef([...initialPieceSequence]);
+    const nextPiecesRef = useRef([]);
+
     const getNextPieceType = useCallback(() => {
         if (pieceSequenceRef.current.length > 0) {
             return pieceSequenceRef.current.shift();
@@ -57,13 +59,15 @@ export const useTetris = (initialPieceSequence = [], difficulty = 'Medium') => {
 
     const [nextPieces, setNextPieces] = useState([]);
 
-    // Initialize game
-    useEffect(() => {
-        // Init 3 next pieces
-        if (nextPieces.length === 0) {
-            setNextPieces([getNextPieceType(), getNextPieceType(), getNextPieceType()]);
+    const pullNextPiece = useCallback(() => {
+        if (nextPiecesRef.current.length === 0) {
+            nextPiecesRef.current = [getNextPieceType(), getNextPieceType(), getNextPieceType()];
         }
-    }, [getNextPieceType, nextPieces.length]);
+        const type = nextPiecesRef.current.shift();
+        nextPiecesRef.current.push(getNextPieceType());
+        setNextPieces([...nextPiecesRef.current]);
+        return type;
+    }, [getNextPieceType]);
 
     const getBaseDropTime = () => {
         switch(difficulty) {
@@ -74,33 +78,28 @@ export const useTetris = (initialPieceSequence = [], difficulty = 'Medium') => {
     }
 
     const resetPlayer = useCallback(() => {
-        let type = 'I';
-        setNextPieces(prev => {
-            const arr = [...prev];
-            type = arr.length > 0 ? arr.shift() : randomPiece();
-            arr.push(getNextPieceType());
-            return arr;
-        });
-
-        // setTimeout is used here because setNextPieces is async and we need `type` immediately
+        const type = pullNextPiece();
+        // Căn giữa, tuỳ vào shape width
+        const tetroWidth = SHAPES[type][0].length;
         setPlayer({
-            pos: { x: STAGE_WIDTH / 2 - 2, y: 0 },
+            pos: { x: Math.floor((STAGE_WIDTH - tetroWidth) / 2), y: 0 },
             tetromino: SHAPES[type],
             collided: false,
         });
-    }, [getNextPieceType]);
+    }, [pullNextPiece]);
 
     const startGame = useCallback(() => {
         // Reset everything
         setStage(createStage());
         setDropTime(getBaseDropTime());
-        resetPlayer();
         setScore(0);
         setLevel(0);
         setRows(0);
         setGameOver(false);
         pieceSequenceRef.current = [...initialPieceSequence];
-        setNextPieces([getNextPieceType(), getNextPieceType(), getNextPieceType()]);
+        nextPiecesRef.current = [getNextPieceType(), getNextPieceType(), getNextPieceType()];
+        setNextPieces([...nextPiecesRef.current]);
+        resetPlayer();
     }, [initialPieceSequence, getNextPieceType, difficulty, resetPlayer]);
 
     const checkCollision = (player, stage, { x: moveX, y: moveY }) => {
@@ -261,17 +260,22 @@ export const useTetris = (initialPieceSequence = [], difficulty = 'Medium') => {
         }
     }, [player, resetPlayer, level]); // Dependency updates stage when player state changes
 
-    // Interval hook for dropping
+    // Custom useInterval internally to avoid re-renders resetting it
+    const savedDrop = useRef();
+    useEffect(() => {
+        savedDrop.current = drop;
+    }); // update ref on every render!
+    
     useEffect(() => {
         if (dropTime !== null && !gameOver) {
             const id = setInterval(() => {
-                drop();
+                if (savedDrop.current) savedDrop.current();
             }, dropTime);
             return () => {
                 clearInterval(id);
             };
         }
-    }, [dropTime, gameOver, drop]);
+    }, [dropTime, gameOver]);
 
     const resumeDrop = () => {
         if (!gameOver) {

@@ -94,7 +94,7 @@ export default function TetrisGame() {
     const [isStarted, setIsStarted] = useState(false);
 
     // Keyboard handlers
-    const move = ({ keyCode }) => {
+    const move = useCallback(({ keyCode }) => {
         if (!gameOver && isStarted) {
             if (keyCode === 37) {
                 movePlayer(-1);
@@ -108,13 +108,13 @@ export default function TetrisGame() {
                 hardDrop();
             }
         }
-    };
+    }, [gameOver, isStarted, movePlayer, dropPlayer, playerRotate, stage, hardDrop]);
 
-    const keyUp = ({ keyCode }) => {
+    const keyUp = useCallback(({ keyCode }) => {
         if (!gameOver && keyCode === 40) {
             resumeDrop();
         }
-    };
+    }, [gameOver, resumeDrop]);
 
     // Global listener
     useEffect(() => {
@@ -124,7 +124,7 @@ export default function TetrisGame() {
             window.removeEventListener('keydown', move);
             window.removeEventListener('keyup', keyUp);
         };
-    });
+    }, [move, keyUp]);
 
     // Sync to backend periodically or on score change
     useEffect(() => {
