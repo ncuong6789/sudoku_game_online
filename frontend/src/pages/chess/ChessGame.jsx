@@ -11,7 +11,6 @@ export default function ChessGame() {
     const { mode, roomId, difficulty, playerColor } = location.state || { mode: 'solo', difficulty: 'Medium', playerColor: 'w' };
 
     const [game, setGame] = useState(new Chess());
-    const [fen, setFen] = useState(game.fen());
     const [realPlayerColor, setRealPlayerColor] = useState(() => {
         if (playerColor === 'random') {
             return Math.random() < 0.5 ? 'w' : 'b';
@@ -29,9 +28,8 @@ export default function ChessGame() {
     const [gameOver, setGameOver] = useState(false);
     const [statusMessage, setStatusMessage] = useState('Ván đấu bắt đầu!');
 
-    // 1. Cập nhật FEN, Status, History mỗi khi `game` thay đổi.
+    // 1. Cập nhật Status, History mỗi khi `game` thay đổi.
     useEffect(() => {
-        setFen(game.fen());
         setMoveHistory(game.history({ verbose: true }));
         
         let status = '';
@@ -107,7 +105,6 @@ export default function ChessGame() {
 
     // Hàm an toàn để thực thi nước đi của người chơi
     function attemptPlayerMove(sourceSquare, targetSquare) {
-        // Validate đồng bộ ngay lập tức để return kết quả cho react-chessboard
         const gameCopy = new Chess();
         gameCopy.loadPgn(game.pgn());
 
@@ -121,22 +118,14 @@ export default function ChessGame() {
 
         try {
             gameCopy.move(moveObj);
-            const finalFen = gameCopy.fen();
             
-            // Nước đi hợp lệ, queue React state update
-            setGame((g) => {
-                const updatedGame = new Chess();
-                updatedGame.loadPgn(g.pgn());
-                try {
-                    updatedGame.move(moveObj);
-                    return updatedGame;
-                } catch(e) { return g; }
-            });
+            // Cập nhật State tức thì (Synchronous Object Reference Update)
+            setGame(gameCopy);
 
             setMoveFrom(null);
             setOptionSquares({});
-            if (mode === 'multiplayer' && finalFen) {
-                socket.emit('chessMove', { roomId, fen: finalFen });
+            if (mode === 'multiplayer') {
+                socket.emit('chessMove', { roomId, fen: gameCopy.fen() });
             }
             return true;
         } catch (e) {
@@ -260,7 +249,7 @@ export default function ChessGame() {
                         }}>
                             <Chessboard
                                 key={myColor}
-                                position={fen}
+                                position={game.fen()}
                                 onPieceDrop={onDrop}
                                 onSquareClick={onSquareClick}
                                 isDraggablePiece={({ piece }) => piece[0] === myColor}
