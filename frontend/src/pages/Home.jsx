@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutGrid, Grid3X3, Swords, Trophy, Users, X, Activity } from 'lucide-react';
+import { LayoutGrid, Grid3X3, Swords, Trophy, Users, X, Activity, Ghost } from 'lucide-react';
 import { socket } from '../utils/socket';
 
 const games = {
@@ -50,7 +50,6 @@ const games = {
         ]
     },
     tetris: {
-        id: 'tetris',
         name: 'Tetris',
         description: 'Trò chơi xếp gạch huyền thoại (Block Puzzle). Xoay và xếp các khối gạch rơi xuống để lấp đầy hàng. Đối đầu trực tiếp Multiplayer - Điểm cao nhất thắng!',
         path: '/tetris',
@@ -59,6 +58,18 @@ const games = {
             'Sử dụng Mũi tên TRÁI/PHẢI để di chuyển khối, XUỐNG để tăng tốc.',
             'Mũi tên LÊN để xoay khối, Dấu CÁCH (Space) để thả thẳng phi thuyền cứng (Hard Drop).',
             'Hoàn thành một hàng ngang để ghi điểm. Màn hình đụng trần là Xong!'
+        ]
+    },
+    pacman: {
+        id: 'pacman',
+        name: 'Pacman',
+        description: 'Băng qua các mê cung, ăn toàn bộ chấm và trốn thoát khỏi bầy ma. Ăn viên sức mạnh để lật ngược thế cờ chặn đầu bầy ma!',
+        path: '/pacman',
+        difficulty: 'Tuỳ chỉnh',
+        instructions: [
+            'Dùng phím mũi tên để điều hướng Pacman.',
+            'Ăn tất cả các chấm nhỏ để qua màn.',
+            'Ăn viên sức mạnh (Power Pill) để có khả năng ăn lại Ma bá đạo trong thời gian ngắn!'
         ]
     }
 };
@@ -140,6 +151,9 @@ export default function Home() {
                     </div>
                     <div className={`nav-item ${activeGame === 'tetris' ? 'active' : ''}`} onClick={() => { setActiveGame('tetris'); setShowHelp(false); }}>
                         <Grid3X3 size={20} /> Tetris
+                    </div>
+                    <div className={`nav-item ${activeGame === 'pacman' ? 'active' : ''}`} onClick={() => { setActiveGame('pacman'); setShowHelp(false); }}>
+                        <Ghost size={20} /> Pacman
                     </div>
                 </nav>
                 <div className="nav-group" style={{ marginTop: '1rem', flex: 'none' }}>

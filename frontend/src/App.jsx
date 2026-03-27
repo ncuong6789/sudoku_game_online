@@ -26,6 +26,10 @@ import TetrisHome from './pages/tetris/TetrisHome';
 import TetrisLobby from './pages/tetris/TetrisLobby';
 import TetrisGame from './pages/tetris/TetrisGame';
 
+// Pacman Components
+import PacmanHome from './pages/pacman/PacmanHome';
+import PacmanGame from './pages/pacman/PacmanGame';
+
 function App() {
   return (
     <HashRouter>
@@ -57,6 +61,10 @@ function App() {
         <Route path="/tetris" element={<TetrisHome />} />
         <Route path="/tetris/multiplayer" element={<TetrisLobby />} />
         <Route path="/tetris/game" element={<TetrisGame />} />
+        
+        {/* Pacman Module */}
+        <Route path="/pacman" element={<PacmanHome />} />
+        <Route path="/pacman/game" element={<PacmanGame />} />
       </Routes>
     </HashRouter>
   );

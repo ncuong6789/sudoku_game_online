@@ -3,6 +3,23 @@ import { useCallback, useRef } from 'react';
 // Tạo 1 AudioContext chung cho cả app để tiết kiệm bộ nhớ
 let audioCtx;
 
+// Helper function to create and play a tone
+const playTone = (ctx, osc, gainParams, volume, duration) => {
+    const gainNode = ctx.createGain();
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    gainNode.gain.setValueAtTime(volume, ctx.currentTime);
+    if (gainParams.type === 'linear') {
+        gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + gainParams.duration);
+    } else if (gainParams.type === 'exponential') {
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + gainParams.duration); // Avoid 0 for exponential
+    }
+
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+};
+
 export const useAudio = () => {
     const playWinSound = useCallback(() => {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();

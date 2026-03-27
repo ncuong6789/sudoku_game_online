@@ -266,7 +266,12 @@ export default function SnakeGame() {
                     }
                 }
 
-                      // --- 3. RESOLVE COLLISIONS ---
+                bnx = bHead.x + bDir.x;
+                bny = bHead.y + bDir.y;
+                newBHead = { x: bnx, y: bny };
+            }
+
+            // --- 3. RESOLVE COLLISIONS ---
             let pDied = false;
             let bDied = false;
 
@@ -339,9 +344,6 @@ export default function SnakeGame() {
                 return; // Stop processing frame entirely
             }
 
-            // --- 5. EXECUTE MOVEMENT & ITEMS ---          // Do NOT return here. Bot dies but Player can keep playing in Solo Mode.
-            }
-
             // --- 5. EXECUTE MOVEMENT & ITEMS ---
             let newPScore = score;
             let newP = [newPHead, ...snake];
@@ -352,9 +354,9 @@ export default function SnakeGame() {
             if (pnx === item.x && pny === item.y) {
                 newPScore++;
                 newP.push({ ...snake[snake.length - 1] });
-                newItem = spawnItemIntelligently(newP, newDeadBodies, mapSize);
+                newItem = spawnItemIntelligently(newP, deadBodies, mapSize);
                 if (Math.random() < 0.15 && !goldenItem) {
-                    const gPos = spawnItemIntelligently(newP, newDeadBodies, mapSize);
+                    const gPos = spawnItemIntelligently(newP, deadBodies, mapSize);
                     newGolden = { ...gPos, timeLeft: 5 };
                 }
             } else if (goldenItem && pnx === goldenItem.x && pny === goldenItem.y) {
@@ -374,7 +376,7 @@ export default function SnakeGame() {
                 if (bnx === newItem.x && bny === newItem.y) {
                     newBScore++;
                     newB.push({ ...botSnake[botSnake.length - 1] });
-                    newItem = spawnItemIntelligently(newP.concat(newB), newDeadBodies, mapSize);
+                    newItem = spawnItemIntelligently(newP.concat(newB), deadBodies, mapSize);
                 } else if (newGolden && bnx === newGolden.x && bny === newGolden.y) {
                     newBScore += 2;
                     newGolden = null;
