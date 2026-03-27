@@ -1,14 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../../utils/socket';
-import { Send, User } from 'lucide-react';
+import { User } from 'lucide-react';
 
 export default function ChessLobby() {
     const navigate = useNavigate();
-    const [roomId, setRoomId] = useState('');
     const [inRoom, setInRoom] = useState(false);
     const [myRoom, setMyRoom] = useState('');
-    const [error, setError] = useState('');
     const [isConnected, setIsConnected] = useState(socket.connected);
     
     // Negotiation state
@@ -17,8 +15,6 @@ export default function ChessLobby() {
     const [isOpponentReady, setIsOpponentReady] = useState(false);
     const [isMyReady, setIsMyReady] = useState(false);
     
-    // Chat state removed
-
     useEffect(() => {
         const onConnect = () => setIsConnected(true);
         const onDisconnect = () => setIsConnected(false);
@@ -58,9 +54,9 @@ export default function ChessLobby() {
         socket.on('chessGameStarted', handleGameStarted);
 
         return () => {
-            socket.off('playerJoined');
-            socket.off('chessColorUpdate');
-            socket.off('chessGameStarted');
+            socket.off('playerJoined', handlePlayerJoined);
+            socket.off('chessColorUpdate', handleColorUpdate);
+            socket.off('chessGameStarted', handleGameStarted);
         };
     }, [myRoom, myColor, isMyReady, navigate]);
 
@@ -77,7 +73,6 @@ export default function ChessLobby() {
         socket.emit('chessColorSelect', { roomId: myRoom, color: myColor, ready: newReady });
         
         // If both are ready, the server will trigger the game start. 
-        // We also manually emit a check to start game if we know both are ready
         if (newReady && isOpponentReady) {
             socket.emit('startChessGame', { roomId: myRoom });
         }
@@ -87,19 +82,6 @@ export default function ChessLobby() {
         socket.emit('createRoom', { difficulty: 'Medium', gameType: 'chess' }, (res) => {
             setMyRoom(res.roomId);
             setInRoom(true);
-        });
-    };
-
-    const handleJoinRoom = () => {
-        if (!roomId) return;
-        socket.emit('joinRoom', { roomId: roomId.toUpperCase(), gameType: 'chess' }, (res) => {
-            if (res.success) {
-                setMyRoom(roomId.toUpperCase());
-                setInRoom(true);
-            } else {
-                setError(res.message);
-                setTimeout(() => setError(''), 3000);
-            }
         });
     };
 
@@ -178,7 +160,6 @@ export default function ChessLobby() {
         );
     }
 
-    // Default Lobby UI (Same as Caro)
     return (
         <div className="glass-panel menu-container" style={{ maxWidth: '450px' }}>
             <h2>Chess Multiplayer</h2>
@@ -194,21 +175,6 @@ export default function ChessLobby() {
                 <button className="btn-primary" style={{ width: '100%' }} onClick={handleCreateRoom}>Tạo phòng mới</button>
             </div>
 
-            <div style={{ borderTop: '1px solid var(--border-color)', margin: '1.5rem 0', width: '100%' }}></div>
-
-            <div style={{ textAlign: 'left', width: '100%' }}>
-                <h3 style={{ marginTop: 0, marginBottom: '0.8rem' }}>Tham gia phòng</h3>
-                <input
-                    type="text" placeholder="NHẬP MÃ PHÒNG" value={roomId} onChange={e => setRoomId(e.target.value.toUpperCase())}
-                    className="glass-input"
-                    style={{ 
-                        width: '100%', padding: '12px', borderRadius: '8px', marginBottom: '12px', background: '#1e293b', color: 'white', border: '1px solid var(--border-color)', 
-                        textTransform: 'uppercase', outline: 'none', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '2px' 
-                    }}
-                />
-                {error && <p style={{ color: 'var(--error-color)', fontSize: '0.85rem', marginBottom: '0.8rem' }}>{error}</p>}
-                <button className="btn-primary" style={{ width: '100%' }} onClick={handleJoinRoom}>Tham gia ngay</button>
-            </div>
             <button className="btn-secondary" style={{ marginTop: '1.5rem', width: 'auto' }} onClick={() => navigate('/chess')}>Quay lại</button>
         </div>
     );

@@ -14,7 +14,6 @@ export default function SnakeLobby() {
     const initialMapSize = location.state?.mapSize || 20;
 
     const [mapSize, setMapSize] = useState(initialMapSize);
-    const [joinRoomId, setJoinRoomId] = useState('');
     
     // States: 'idle', 'finding_match', 'hosting', 'guest'
     const [lobbyState, setLobbyState] = useState('idle');
@@ -33,6 +32,13 @@ export default function SnakeLobby() {
             socket.off('disconnect', onDisconnect);
         };
     }, []);
+    const handleCreateRoom = () => {
+        socket.emit('createRoom', { difficulty: 'Medium', gameType: 'snake', gridSize: mapSize }, (res) => {
+            setMyRoom(res.roomId);
+            setLobbyState('hosting');
+            setStatus('Đang chờ bạn bè kết nối...');
+        });
+    };
 
     useEffect(() => {
         // MATCH FINDING LOGIC
@@ -91,33 +97,6 @@ export default function SnakeLobby() {
         };
     }, [navigate, mapSize, lobbyState, myRoom]);
 
-    const handleFindMatch = () => {
-        setLobbyState('finding_match');
-        socket.emit('findMatch', { game: 'snake', mapSize });
-    };
-
-    const handleCreateRoom = () => {
-        socket.emit('createRoom', { difficulty: 'Medium', gameType: 'snake', gridSize: mapSize }, (res) => {
-            setMyRoom(res.roomId);
-            setLobbyState('hosting');
-            setStatus('Đang chờ bạn bè kết nối...');
-        });
-    };
-
-    const handleJoinRoom = () => {
-        if (!joinRoomId) return;
-        socket.emit('joinRoom', { roomId: joinRoomId.toUpperCase(), gameType: 'snake' }, (res) => {
-            if (res.success) {
-                setMyRoom(joinRoomId.toUpperCase());
-                setLobbyState('guest');
-                setStatus('Đã vào phòng! Chờ chủ phòng bắt đầu...');
-                if (res.gridSize) setMapSize(res.gridSize);
-            } else {
-                setError(res.message);
-                setTimeout(() => setError(''), 3000);
-            }
-        });
-    };
 
     const handleCancel = () => {
         if (lobbyState === 'finding_match') socket.emit('leaveMatchmaking');
@@ -178,54 +157,13 @@ export default function SnakeLobby() {
                     </div>
                 )}
 
-                {/* RANDOM MATCHMAKING */}
-                <div style={{ background: 'rgba(79, 172, 254, 0.1)', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem', border: '1px solid rgba(79, 172, 254, 0.3)' }}>
-                    <h3 style={{ margin: '0 0 10px 0', color: '#4facfe', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Play size={20} /> Tìm Trận Nhanh (Auto Match)
-                    </h3>
-                    <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '15px' }}>Ghép cặp ngẫu nhiên với người chơi khác trên toàn thế giới.</p>
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '15px' }}>
-                        {sizes.map((s) => (
-                            <button 
-                                key={s.label}
-                                className={mapSize === s.value ? 'btn-primary' : 'btn-secondary'}
-                                onClick={() => setMapSize(s.value)}
-                                style={{ flex: 1, padding: '10px' }}
-                            >
-                                {s.label}
-                            </button>
-                        ))}
-                    </div>
-                    <button className="btn-primary" style={{ width: '100%', padding: '12px', fontSize: '1.1rem' }} onClick={handleFindMatch}>
-                        Bắt Đầu Tìm Xếp Hạng
-                    </button>
-                </div>
-
-                <div style={{ borderTop: '1px solid var(--border-color)', margin: '1rem 0' }}></div>
-
                 {/* PRIVATE ROOMS */}
                 <div style={{ textAlign: 'left', width: '100%' }}>
                     <h3 style={{ marginTop: 0, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Users size={20} /> Tạo phòng riêng
                     </h3>
-                    <button className="btn-secondary" style={{ width: '100%', padding: '12px', marginBottom: '1rem', border: '1px solid var(--primary-color)', color: 'var(--primary-color)' }} onClick={handleCreateRoom}>
+                    <button className="btn-secondary" style={{ width: '100%', padding: '12px', border: '1px solid var(--primary-color)', color: 'var(--primary-color)' }} onClick={handleCreateRoom}>
                         + Tạo Mã Phòng Mới
-                    </button>
-                    
-                    <h3 style={{ marginTop: 0, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Hash size={20} /> Tham gia phòng
-                    </h3>
-                    <input
-                        type="text"
-                        placeholder="NHẬP MÃ PHÒNG VÀO ĐÂY"
-                        value={joinRoomId}
-                        onChange={e => setJoinRoomId(e.target.value.toUpperCase())}
-                        className="glass-input"
-                        style={{ width: '100%', padding: '12px', borderRadius: '8px', marginBottom: '8px', background: 'rgba(0,0,0,0.3)', color: 'white', border: '1px solid var(--border-color)', textTransform: 'uppercase', outline: 'none', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '2px', fontSize: '1.2rem' }}
-                    />
-                    {error && <p style={{ color: 'var(--error-color)', fontSize: '0.85rem', marginBottom: '0.5rem' }}>{error}</p>}
-                    <button className="btn-primary" style={{ width: '100%', padding: '12px' }} onClick={handleJoinRoom}>
-                        Vào Phòng
                     </button>
                 </div>
             </div>

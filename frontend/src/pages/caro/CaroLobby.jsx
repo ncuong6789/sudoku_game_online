@@ -10,11 +10,9 @@ const sizes = [
 
 export default function CaroLobby() {
     const navigate = useNavigate();
-    const [roomId, setRoomId] = useState('');
     const [gridSize, setGridSize] = useState(15);
     const [inRoom, setInRoom] = useState(false);
     const [myRoom, setMyRoom] = useState('');
-    const [error, setError] = useState('');
     const [isConnected, setIsConnected] = useState(socket.connected);
 
     useEffect(() => {
@@ -52,20 +50,6 @@ export default function CaroLobby() {
         socket.emit('createRoom', { difficulty: 'Medium', gameType: 'caro', gridSize }, (res) => {
             setMyRoom(res.roomId);
             setInRoom(true);
-        });
-    };
-
-    const handleJoinRoom = () => {
-        if (!roomId) return;
-        socket.emit('joinRoom', { roomId: roomId.toUpperCase(), gameType: 'caro' }, (res) => {
-            if (res.success) {
-                setMyRoom(roomId.toUpperCase());
-                setInRoom(true);
-                if (res.gridSize) setGridSize(res.gridSize);
-            } else {
-                setError(res.message);
-                setTimeout(() => setError(''), 3000);
-            }
         });
     };
 
@@ -114,24 +98,6 @@ export default function CaroLobby() {
                 <button className="btn-primary" style={{ width: '100%', padding: '10px' }} onClick={handleCreateRoom}>Tạo phòng</button>
             </div>
 
-            <div style={{ borderTop: '1px solid var(--border-color)', margin: '1rem 0', width: '100%' }}></div>
-
-            <div style={{ textAlign: 'left', width: '100%' }}>
-                <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Tham gia phòng</h3>
-                <input
-                    type="text"
-                    placeholder="MÃ PHÒNG"
-                    value={roomId}
-                    onChange={e => setRoomId(e.target.value.toUpperCase())}
-                    className="glass-input"
-                    style={{ 
-                        width: '100%', padding: '10px', borderRadius: '8px', marginBottom: '8px', background: '#1e293b', color: 'white', border: '1px solid var(--border-color)', 
-                        textTransform: 'uppercase', outline: 'none', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '2px' 
-                    }}
-                />
-                {error && <p style={{ color: 'var(--error-color)', fontSize: '0.85rem', marginBottom: '0.5rem' }}>{error}</p>}
-                <button className="btn-primary" style={{ width: '100%', padding: '10px' }} onClick={handleJoinRoom}>Tham gia ngay</button>
-            </div>
             <button className="btn-secondary" style={{ marginTop: '1rem', width: 'auto', padding: '10px' }} onClick={() => navigate('/caro')}>Quay lại</button>
         </div>
     );

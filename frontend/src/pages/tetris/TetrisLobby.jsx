@@ -4,12 +4,10 @@ import { socket } from '../../utils/socket';
 
 export default function TetrisLobby() {
     const navigate = useNavigate();
-    const [roomId, setRoomId] = useState('');
     const [difficulty, setDifficulty] = useState('Medium');
     const [inRoom, setInRoom] = useState(false);
     const [myRoom, setMyRoom] = useState('');
     const [playerCount, setPlayerCount] = useState(1);
-    const [error, setError] = useState('');
     const [isConnected, setIsConnected] = useState(socket.connected);
 
     useEffect(() => {
@@ -55,20 +53,6 @@ export default function TetrisLobby() {
         });
     };
 
-    const handleJoinRoom = () => {
-        if (!roomId) return;
-        setError('');
-        socket.emit('joinRoom', { roomId: roomId.toUpperCase(), gameType: 'tetris' }, (res) => {
-            if (res.success) {
-                setMyRoom(roomId.toUpperCase());
-                setDifficulty(res.difficulty);
-                setInRoom(true);
-                setPlayerCount(2);
-            } else {
-                setError(res.message);
-            }
-        });
-    };
 
     if (inRoom) {
         return (
@@ -115,23 +99,6 @@ export default function TetrisLobby() {
                     ))}
                 </div>
                 <button className="btn-primary" style={{ padding: '10px', width: '100%' }} onClick={handleCreateRoom}>Tạo phòng</button>
-            </div>
-            <div style={{ borderTop: '1px solid var(--border-color)', margin: '1rem 0' }}></div>
-            <div style={{ textAlign: 'left' }}>
-                <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Vào phòng đã có</h3>
-                <input
-                    type="text"
-                    placeholder="NHẬP MÃ PHÒNG"
-                    value={roomId}
-                    onChange={e => setRoomId(e.target.value.toUpperCase())}
-                    style={{ 
-                        width: '100%', padding: '10px', borderRadius: '8px', marginBottom: '8px', 
-                        background: '#1e293b', color: 'white', border: '1px solid var(--border-color)', 
-                        textTransform: 'uppercase', outline: 'none', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '2px'
-                    }}
-                />
-                {error && <p style={{ color: 'var(--error-color)', fontSize: '0.9rem' }}>{error}</p>}
-                <button className="btn-primary" style={{ padding: '10px', width: '100%' }} onClick={handleJoinRoom}>Tham gia</button>
             </div>
             <button className="btn-secondary" style={{ marginTop: '1rem', padding: '10px', width: 'auto' }} onClick={() => navigate('/tetris')}>Quay lại Menu</button>
         </div>

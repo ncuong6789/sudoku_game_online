@@ -5,12 +5,10 @@ import { generateSudoku } from '../../utils/sudoku';
 
 export default function SudokuLobby() {
     const navigate = useNavigate();
-    const [roomId, setRoomId] = useState('');
     const [difficulty, setDifficulty] = useState('Medium');
     const [inRoom, setInRoom] = useState(false);
     const [myRoom, setMyRoom] = useState('');
     const [playerCount, setPlayerCount] = useState(1);
-    const [error, setError] = useState('');
     const [isConnected, setIsConnected] = useState(socket.connected);
 
     useEffect(() => {
@@ -57,20 +55,6 @@ export default function SudokuLobby() {
         });
     };
 
-    const handleJoinRoom = () => {
-        if (!roomId) return;
-        setError('');
-        socket.emit('joinRoom', { roomId }, (res) => {
-            if (res.success) {
-                setMyRoom(roomId);
-                setDifficulty(res.difficulty);
-                setInRoom(true);
-                setPlayerCount(2);
-            } else {
-                setError(res.message);
-            }
-        });
-    };
 
     if (inRoom) {
         return (
@@ -118,23 +102,6 @@ export default function SudokuLobby() {
                     ))}
                 </div>
                 <button className="btn-primary" style={{ padding: '10px', width: '100%' }} onClick={handleCreateRoom}>Tạo phòng & chờ đối thủ</button>
-            </div>
-            <div style={{ borderTop: '1px solid var(--border-color)', margin: '1rem 0' }}></div>
-            <div style={{ textAlign: 'left' }}>
-                <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Join match</h3>
-                <input
-                    type="text"
-                    placeholder="ENTER ROOM CODE"
-                    value={roomId}
-                    onChange={e => setRoomId(e.target.value.toUpperCase())}
-                    style={{ 
-                        width: '100%', padding: '10px', borderRadius: '8px', marginBottom: '8px', 
-                        background: '#1e293b', color: 'white', border: '1px solid var(--border-color)', 
-                        textTransform: 'uppercase', outline: 'none', boxSizing: 'border-box'
-                    }}
-                />
-                {error && <p style={{ color: 'var(--error-color)', fontSize: '0.9rem' }}>{error}</p>}
-                <button className="btn-primary" style={{ padding: '10px' }} onClick={handleJoinRoom}>Join Room</button>
             </div>
             <button className="btn-secondary" style={{ marginTop: '1rem', padding: '10px', width: 'auto' }} onClick={() => navigate('/sudoku')}>Back to Menu</button>
         </div>
