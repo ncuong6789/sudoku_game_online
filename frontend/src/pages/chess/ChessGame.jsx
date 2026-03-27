@@ -266,27 +266,26 @@ export default function ChessGame() {
     }, [optionSquares, moveHistory]);
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: 'calc(100vh - 80px)', padding: '0.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100vh', padding: '0.5rem', boxSizing: 'border-box', overflow: 'hidden' }}>
             <div className="glass-panel" style={{ 
                 position: 'relative',
                 overflow: 'hidden',
-                width: 'fit-content', 
-                height: 'fit-content', 
                 display: 'flex', 
                 flexDirection: 'row', 
                 padding: '1rem', 
                 gap: '1.5rem', 
                 alignItems: 'stretch',
-                flexWrap: 'wrap',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                maxHeight: '100%',
+                maxWidth: '100%',
             }}>
                 
                 {/* TRÁI: BÀN CỜ TỐI ƯU KÍCH THƯỚC */}
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 0, margin: 0, position: 'relative' }}>
                     <div style={{
                         position: 'relative', 
-                        width: 'min(calc(100vh - 120px), 650px)', 
-                        height: 'min(calc(100vh - 120px), 650px)',
+                        width: 'min(calc(100vh - 32px), calc(100vw - 360px), 640px)', 
+                        height: 'min(calc(100vh - 32px), calc(100vw - 360px), 640px)',
                         border: '6px solid rgba(20, 20, 30, 0.9)', 
                         borderRadius: '12px',
                         boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)', 
@@ -364,7 +363,7 @@ export default function ChessGame() {
                 </div>
 
                 {/* PHẢI: BẢNG ĐIỀU KHIỂN ĐỒNG BỘ */}
-                <div style={{ flex: '1 1 280px', maxWidth: '320px', display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: 'min(calc(100vh - 120px), 650px)' }}>
+                <div style={{ flex: '0 0 300px', width: '300px', display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '100%', overflow: 'hidden' }}>
                     
                     {/* Header Sidebar */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>

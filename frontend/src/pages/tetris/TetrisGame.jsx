@@ -27,8 +27,8 @@ const Cell = ({ type, cellState }) => {
 const Stage = ({ stage, isOpponent }) => (
     <div style={{
         display: 'grid',
-        gridTemplateRows: `repeat(${STAGE_HEIGHT}, calc((min(70vh, 500px)) / ${STAGE_HEIGHT}))`,
-        gridTemplateColumns: `repeat(${STAGE_WIDTH}, calc((min(70vh, 500px) * 0.5) / ${STAGE_WIDTH}))`,
+        gridTemplateRows: `repeat(${STAGE_HEIGHT}, min(calc((100vh - 32px) / ${STAGE_HEIGHT}), 28px))`,
+        gridTemplateColumns: `repeat(${STAGE_WIDTH}, min(calc((100vh - 32px) / ${STAGE_HEIGHT}), 28px))`,
         gridGap: '1px',
         border: '2px solid rgba(255, 255, 255, 0.1)',
         background: 'rgba(0, 0, 0, 0.6)',
@@ -228,34 +228,31 @@ export default function TetrisGame() {
     }, [roomId]);
 
     return (
-        <div className="game-container" style={{ outline: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 80px)', padding: '0.5rem' }} tabIndex="0">
+        <div className="game-container" style={{ outline: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', overflow: 'hidden', padding: '0', boxSizing: 'border-box' }} tabIndex="0">
             <div className="glass-panel" style={{ 
                 position: 'relative', overflow: 'hidden',
-                width: 'fit-content', height: 'fit-content', display: 'flex', flexDirection: 'row', 
-                padding: '1rem', gap: '1.5rem', alignItems: 'stretch', flexWrap: 'wrap', justifyContent: 'center' 
+                display: 'flex', flexDirection: 'row', 
+                padding: '1rem', gap: '1.5rem', alignItems: 'center', justifyContent: 'center',
+                maxHeight: '100vh', maxWidth: '100vw',
             }}>
                 
                 {/* TRÁI: KHU VỰC BÀN CỜ (CẢ CỦA MÌNH & ĐỐI THỦ) */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px', alignItems: 'center' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
                         <h3 style={{ margin: 0, color: '#4ade80', fontSize: '1.1rem' }}>Bạn ({score})</h3>
-                        <div style={{ width: 'min(calc(100vh - 190px), 320px)' }}>
-                            <Stage stage={stage} />
-                        </div>
+                        <Stage stage={stage} />
                     </div>
                     
                     {mode === 'multiplayer' && (
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
                             <h3 style={{ margin: 0, color: '#f87171', fontSize: '1.1rem' }}>Đối thủ ({opponentScore})</h3>
-                            <div style={{ width: 'min(calc(100vh - 190px), 320px)' }}>
-                                <Stage stage={opponentStage} isOpponent={true} />
-                            </div>
+                            <Stage stage={opponentStage} isOpponent={true} />
                         </div>
                     )}
                 </div>
 
                 {/* PHẢI: BẢNG ĐIỀU KHIỂN ĐỒNG BỘ */}
-                <div style={{ flex: '1 1 280px', maxWidth: '320px', display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: 'min(calc(100vh - 120px), 650px)' }}>
+                <div style={{ flex: '0 0 260px', width: '260px', display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '100vh', overflow: 'hidden' }}>
                     
                     {/* Header Sidebar */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
