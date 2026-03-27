@@ -10,7 +10,7 @@ export default function PacmanHome() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1rem' }}>
             <div className="glass-panel" style={{ position: 'relative', overflow: 'hidden', padding: '2.5rem', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                
+
                 {/* Header */}
                 <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
                     <button className="btn-secondary" onClick={() => navigate('/')} style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -21,7 +21,7 @@ export default function PacmanHome() {
                 <div style={{ width: '80px', height: '80px', background: 'var(--accent-color)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', boxShadow: '0 0 30px rgba(74, 222, 128, 0.3)', marginTop: '2rem' }}>
                     <Ghost size={45} color="#000" />
                 </div>
-                
+
                 <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', background: 'linear-gradient(135deg, #fbbf24, #f59e0b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                     PAC-MAN
                 </h1>
@@ -81,23 +81,23 @@ export default function PacmanHome() {
 
                 {/* Play Buttons */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
-                    <button 
-                        className="btn-primary" 
+                    <button
+                        className="btn-primary"
                         onClick={() => navigate('/pacman/game', { state: { difficulty, mapType, mode: 'solo' } })}
                         style={{ padding: '16px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 6px 20px rgba(74, 222, 128, 0.3)' }}
                     >
                         <Gamepad size={24} /> Chơi Ngay (Solo)
                     </button>
-                    
+
                     {/* Fake Multiplayer Button */}
-                    <button 
+                    <button
                         disabled
-                        style={{ 
-                            padding: '16px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', 
-                            background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.3)', border: '1px outset rgba(255,255,255,0.1)', cursor: 'not-allowed', borderRadius: '12px' 
+                        style={{
+                            padding: '16px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                            background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.3)', border: '1px outset rgba(255,255,255,0.1)', cursor: 'not-allowed', borderRadius: '12px'
                         }}
                     >
-                        <Lock size={20} /> Đối kháng Multiplayer (Coming Soon)
+                        <Lock size={20} /> Multiplayer (Coming Soon)
                     </button>
                 </div>
             </div>
