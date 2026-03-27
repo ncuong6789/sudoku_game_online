@@ -75,15 +75,23 @@ export default function SnakeGame() {
     const [gameOver, setGameOver] = useState(false);
     const [gameWon, setGameWon] = useState(false); // Chưa dùng trong snake nhưng giữ chuẩn
     const [statusMessage, setStatusMessage] = useState('Đang chơi...');
+    const [showArrow, setShowArrow] = useState(true);
+    const [goldenItem, setGoldenItem] = useState(null); // {x, y, timer}
     
     // --- MULTIPLAYER STATE ---
     const [gameState, setGameState] = useState(null); 
-    // gameState = { snakes: { id1: {...}, id2: {...} }, deadBodies: [], item: {x,y}, status: 'playing' }
+    // gameState = { snakes: { id1: {...}, id2: {...} }, deadBodies: [], item: {x,y}, goldenItem: {x,y}, status: 'playing' }
 
+    // --- INDICATOR ARROW TIMER ---
+    useEffect(() => {
+        const timer = setTimeout(() => setShowArrow(false), 3000);
+        return () => clearTimeout(timer);
+    }, [gameOver]); // Reset khi chơi lại
+    
     // --- COUNTDOWN STATE ---
     const [countdown, setCountdown] = useState(mode === 'multiplayer' ? 3 : null); // null = không đếm
     const myColor = playerColor === 'green' ? '#4ade80' : '#60a5fa';
-    const myColorLabel = playerColor === 'green' ? 'Xanh Lá 💚' : 'Xanh Dương 💙';
+    const myColorLabel = playerColor === 'green' ? 'Xanh' : 'Lam';
 
 
     // --- COUNTDOWN EFFECT (chỉ dùng cho Multiplayer) ---
@@ -136,33 +144,25 @@ export default function SnakeGame() {
 
     // --- SOLO GAME LOOP ---
     useEffect(() => {
-        if (mode !== 'solo' || gameOver || countdown !== null) return; // Không chạy game khi đang đếm ngược
+        if (mode !== 'solo' || gameOver || countdown !== null) return;
 
-        const currentSpeed = Math.max(MAX_SPEED, INITIAL_SPEED - score * 5); // Càng ăn càng nhanh
+        // Tốc độ: Nếu có Item Vàng đang hoạt động hoặc hiệu ứng Item Vàng? 
+        // Thay vì biến speed toàn cục, ta dùng bonus.
+        const baseSpeed = Math.max(MAX_SPEED, INITIAL_SPEED - score * 5);
+        const currentSpeed = goldenItem ? baseSpeed + 40 : baseSpeed; // Golden Item làm rắn đi chậm lại (dễ ăn hơn)
 
         const moveSnake = () => {
             setSnake(prevSnake => {
                 const head = prevSnake[0];
                 const dir = nextDirRef.current;
-                setDirection(dir); // Sync for next turn check
+                setDirection(dir);
 
                 const nx = head.x + dir.x;
                 const ny = head.y + dir.y;
 
-                // 1. Va chạm tường
-                if (nx < 0 || nx >= mapSize || ny < 0 || ny >= mapSize) {
-                    handleDeath(prevSnake);
-                    return prevSnake;
-                }
-
-                // 2. Va chạm bản thân (Trừ đuôi vì đuôi sẽ di chuyển đi)
-                if (prevSnake.some((segment, idx) => idx !== prevSnake.length - 1 && segment.x === nx && segment.y === ny)) {
-                    handleDeath(prevSnake);
-                    return prevSnake;
-                }
-
-                // 3. Va chạm xác chết
-                if (deadBodies.some(body => body.x === nx && body.y === ny)) {
+                if (nx < 0 || nx >= mapSize || ny < 0 || ny >= mapSize || 
+                    prevSnake.some((segment, idx) => idx !== prevSnake.length - 1 && segment.x === nx && segment.y === ny) ||
+                    deadBodies.some(body => body.x === nx && body.y === ny)) {
                     handleDeath(prevSnake);
                     return prevSnake;
                 }
@@ -170,18 +170,29 @@ export default function SnakeGame() {
                 const newHead = { x: nx, y: ny };
                 const newSnake = [newHead, ...prevSnake];
 
-                // 4. Ăn mồi
-                setItem(prevItem => {
-                    if (nx === prevItem.x && ny === prevItem.y) {
-                        setScore(s => s + 1);
-                        // Rắn tăng 2 đốt khi ăn (Luật: không pop đuôi 2 lần liên tiếp, ta dùng thủ thuật add thêm đuôi ảo)
-                        newSnake.push({ ...prevSnake[prevSnake.length - 1] }); // Đốt được cộng thêm ngay lập tức
-                        return spawnItemIntelligently(newSnake, deadBodies, mapSize);
-                    } else {
-                        newSnake.pop(); // Không ăn thì xoá đuôi để di chuyển
-                        return prevItem;
+                // Kiểm tra ăn Item thường
+                if (nx === item.x && ny === item.y) {
+                    setScore(s => s + 1);
+                    newSnake.push({ ...prevSnake[prevSnake.length - 1] }); // Tăng 2 đốt
+                    setItem(spawnItemIntelligently(newSnake, deadBodies, mapSize));
+                    
+                    // Tỉ lệ xuất hiện Item Vàng (15%)
+                    if (Math.random() < 0.15 && !goldenItem) {
+                        const gPos = spawnItemIntelligently(newSnake, deadBodies, mapSize);
+                        setGoldenItem({ ...gPos, timeLeft: 5 }); // Tồn tại 5 giây
                     }
-                });
+                } 
+                // Kiểm tra ăn Item Vàng
+                else if (goldenItem && nx === goldenItem.x && ny === goldenItem.y) {
+                    setScore(s => s + 2); // x2 điểm
+                    setGoldenItem(null); 
+                    // Giảm 1 đốt (rút ngắn rắn)
+                    newSnake.pop(); 
+                    if (newSnake.length > 3) newSnake.pop(); // Rút ngắn thêm 1 đốt nếu đủ dài
+                }
+                else {
+                    newSnake.pop();
+                }
 
                 return newSnake;
             });
@@ -189,7 +200,21 @@ export default function SnakeGame() {
 
         const interval = setInterval(moveSnake, currentSpeed);
         return () => clearInterval(interval);
-    }, [mode, gameOver, mapSize, deadBodies, score]);
+    }, [mode, gameOver, mapSize, deadBodies, score, item, goldenItem]);
+
+    // Timer cho Item Vàng biến mất
+    useEffect(() => {
+        if (mode === 'solo' && goldenItem) {
+            const timer = setInterval(() => {
+                setGoldenItem(prev => {
+                    if (!prev) return null;
+                    if (prev.timeLeft <= 1) return null;
+                    return { ...prev, timeLeft: prev.timeLeft - 1 };
+                });
+            }, 1000);
+            return () => clearInterval(timer);
+        }
+    }, [goldenItem, mode]);
 
     const handleDeath = (finalSnakeRef) => {
         setGameOver(true);
@@ -287,47 +312,45 @@ export default function SnakeGame() {
             <div className="glass-panel" style={{ width: '100%', maxWidth: '800px', display: 'flex', flexDirection: 'column', padding: '1.5rem' }}>
                 
                 {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                        <div className="nav-item active" style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Activity size={18} /> Snake {mapSize}x{mapSize}
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem', alignItems: 'center', flexWrap: 'nowrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
+                        <div className="nav-item active" style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+                            <Activity size={16} /> Snake {mapSize}
                         </div>
-                        <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                            {mode === 'solo' ? 'Thực chiến Sinh Tồn' : `Phòng PvP: ${roomId}`}
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {mode === 'solo' ? 'Thực chiến' : `${roomId}`}
                         </span>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '10px' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
                         {mode === 'solo' && (
-                            <button className="btn-secondary" onClick={handleRestartSolo} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                <RotateCcw size={16} /> Chơi lại
+                            <button className="btn-secondary" onClick={handleRestartSolo} style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '5px', width: 'auto', whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
+                                <RotateCcw size={14} /> Chơi lại
                             </button>
                         )}
-                        <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/snake/multiplayer' : '/snake')} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                            <ArrowLeft size={16} /> Thoát
+                        <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/snake/multiplayer' : '/snake')} style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '5px', width: 'auto', whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
+                            <ArrowLeft size={14} /> Thoát
                         </button>
                     </div>
                 </div>
 
                 {/* Status Bar */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <Trophy size={20} color="#fbbf24" />
-                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Bạn: <span style={{ color: '#4ade80' }}>{renderData.score}</span></span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem', background: 'rgba(0,0,0,0.2)', padding: '0.8rem 1rem', borderRadius: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                        <Trophy size={18} color="#fbbf24" />
+                        <span style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>Bạn: <span style={{ color: '#4ade80' }}>{renderData.score}</span></span>
                     </div>
                     {mode === 'multiplayer' && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                            {/* Player color badge */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', padding: '6px 14px', borderRadius: '20px', border: `1px solid ${myColor}44` }}>
-                                <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: myColor, boxShadow: `0 0 6px ${myColor}` }} />
-                                <span style={{ fontSize: '0.9rem', color: myColor, fontWeight: 600 }}>{myColorLabel}</span>
-                                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>(Bạn)</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '20px', border: `1px solid ${myColor}44` }}>
+                                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: myColor }} />
+                                <span style={{ fontSize: '0.8rem', color: myColor, fontWeight: 600 }}>{playerColor === 'green' ? 'Xanh' : 'Lam'}</span>
                             </div>
-                            <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Địch: <span style={{ color: '#60a5fa' }}>{getOpponentInfo()}</span></span>
-                            <Skull size={20} color="#f87171" />
+                            <span style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>Địch: <span style={{ color: '#60a5fa' }}>{getOpponentInfo()}</span></span>
+                            <Skull size={18} color="#f87171" />
                         </div>
                     )}
-                    <span style={{ fontWeight: 'bold', color: gameOver ? 'var(--error-color)' : 'var(--text-primary)' }}>
+                    <span style={{ fontWeight: 'bold', fontSize: '0.9rem', color: gameOver ? 'var(--error-color)' : 'var(--text-primary)' }}>
                         {statusMessage}
                     </span>
                 </div>
@@ -352,7 +375,7 @@ export default function SnakeGame() {
                             overflow: 'hidden'
                         }}
                     >
-                        {/* 1. Mồi (Item) */}
+                        {/* 1. Mồi Thường */}
                         <div style={{
                             position: 'absolute',
                             width: `${100 / mapSize}%`,
@@ -362,10 +385,30 @@ export default function SnakeGame() {
                             background: 'radial-gradient(circle, #f87171 20%, #dc2626 80%)',
                             borderRadius: '50%',
                             boxShadow: '0 0 10px #f87171',
-                            transform: 'scale(0.8)'
+                            transform: 'scale(0.8)',
+                            zIndex: 15
                         }} />
 
-                        {/* 2. Xác rắn (Dead Bodies Obstacles) */}
+                        {/* 2. Item Vàng (Đặc biệt) */}
+                        {(goldenItem || (mode === 'multiplayer' && gameState?.goldenItem)) && (
+                            <div style={{
+                                position: 'absolute',
+                                width: `${100 / mapSize}%`,
+                                height: `${100 / mapSize}%`,
+                                left: `${((goldenItem ? goldenItem.x : gameState.goldenItem.x) / mapSize) * 100}%`,
+                                top: `${((goldenItem ? goldenItem.y : gameState.goldenItem.y) / mapSize) * 100}%`,
+                                background: 'radial-gradient(circle, #fbbf24 20%, #d97706 80%)',
+                                borderRadius: '50%',
+                                boxShadow: '0 0 15px #fbbf24',
+                                transform: 'scale(0.9)',
+                                zIndex: 16,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontSize: '10px', fontWeight: 'bold'
+                            }}>
+                                {goldenItem?.timeLeft || ''}
+                            </div>
+                        )}
+
+                        {/* 3. Xác rắn (Dead Bodies Obstacles) */}
                         {renderData.deadBodies.map((body, i) => (
                             <div key={`dead-${i}`} style={{
                                 position: 'absolute',
@@ -380,7 +423,7 @@ export default function SnakeGame() {
                             }} />
                         ))}
 
-                        {/* 3. Các con Rắn sống + mũi tên chỉ vào rắn của mình */}
+                        {/* 4. Các con Rắn sống + mũi tên chỉ vào rắn của mình */}
                         {renderData.snakes.map((s) => (
                             s.positions.map((segment, idx) => {
                                 const isHead = idx === 0;
@@ -399,8 +442,8 @@ export default function SnakeGame() {
                                             transform: 'scale(0.95)',
                                             zIndex: isHead ? 10 : 5
                                         }} />
-                                        {/* Mũi tên chỉ xuống đầu rắn của mình */}
-                                        {isHead && s.isMe && !s.isDead && (
+                                        {/* Mũi tên chỉ xuống đầu rắn của mình - Chỉ hiện lúc đầu */}
+                                        {isHead && s.isMe && !s.isDead && showArrow && (
                                             <div style={{
                                                 position: 'absolute',
                                                 left: `${(segment.x / mapSize) * 100}%`,

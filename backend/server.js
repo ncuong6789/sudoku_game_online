@@ -363,6 +363,7 @@ io.on('connection', (socket) => {
                     speed: INITIAL_SPEED,
                     deadBodies: [],
                     item: { x: Math.floor(mapSize/2), y: Math.floor(mapSize/2) },
+                    goldenItem: null,
                     snakes: {
                         [opponent.socket.id]: { id: opponent.socket.id, positions: [{x: 5, y: 5}, {x: 4, y: 5}, {x: 3, y: 5}], direction: {x: 1, y: 0}, nextDir: {x: 1, y: 0}, score: 0, isDead: false, color: 'green' },
                         [socket.id]: { id: socket.id, positions: [{x: mapSize-6, y: mapSize-6}, {x: mapSize-5, y: mapSize-6}, {x: mapSize-4, y: mapSize-6}], direction: {x: -1, y: 0}, nextDir: {x: -1, y: 0}, score: 0, isDead: false, color: 'blue' }
@@ -409,6 +410,7 @@ io.on('connection', (socket) => {
                 speed: INITIAL_SPEED,
                 deadBodies: [],
                 item: { x: Math.floor(room.mapSize/2), y: Math.floor(room.mapSize/2) },
+                goldenItem: null,
                 snakes: {
                     [p1Id]: { id: p1Id, positions: [{x: 5, y: 5}, {x: 4, y: 5}, {x: 3, y: 5}], direction: {x: 1, y: 0}, nextDir: {x: 1, y: 0}, score: 0, isDead: false, color: 'green' },
                     [p2Id]: { id: p2Id, positions: [{x: room.mapSize-6, y: room.mapSize-6}, {x: room.mapSize-5, y: room.mapSize-6}, {x: room.mapSize-4, y: room.mapSize-6}], direction: {x: -1, y: 0}, nextDir: {x: -1, y: 0}, score: 0, isDead: false, color: 'blue' }
@@ -450,18 +452,14 @@ io.on('connection', (socket) => {
                 const ny = head.y + s.direction.y;
 
                 let died = false;
-                // Wall collision
                 if (nx < 0 || nx >= room.mapSize || ny < 0 || ny >= room.mapSize) died = true;
-                
-                // Dead body collision
                 if (!died && state.deadBodies.some(b => b.x === nx && b.y === ny)) died = true;
 
-                // Self / Other snake collision (excluding tails that will move, but simply check all for now)
                 if (!died) {
                     for (const otherId in state.snakes) {
                         const otherS = state.snakes[otherId];
                         if (otherS.positions.some((seg, idx) => {
-                            if (otherId === id && idx === otherS.positions.length - 1) return false; // Thả đuôi
+                            if (otherId === id && idx === otherS.positions.length - 1) return false; 
                             return seg.x === nx && seg.y === ny;
                         })) {
                             died = true;
@@ -474,15 +472,32 @@ io.on('connection', (socket) => {
                     diedThisTurn.push(id);
                 } else {
                     const newHead = { x: nx, y: ny };
-                    s.positions.unshift(newHead); // Push new head
+                    s.positions.unshift(newHead);
                     
                     if (nx === state.item.x && ny === state.item.y) {
                         s.score += 1;
-                        s.positions.push({ ...s.positions[s.positions.length - 1] }); // Add virtual tail to grow by 2!
+                        s.positions.push({ ...s.positions[s.positions.length - 1] }); 
                         someoneAte = true;
-                    } else {
-                        s.positions.pop(); // Remove tail
+                    } 
+                    else if (state.goldenItem && nx === state.goldenItem.x && ny === state.goldenItem.y) {
+                        s.score += 2;
+                        state.goldenItem = null;
+                        // Rút ngắn rắn: pop đuôi 2 lần (vì đầu vừa thêm vào, nên pop 1 lần là giữ nguyên độ dài, pop 2 lần là ngắn lại)
+                        s.positions.pop(); 
+                        if (s.positions.length > 3) s.positions.pop();
                     }
+                    else {
+                        s.positions.pop();
+                    }
+                }
+            }
+
+            // Expiration check for Golden Item
+            if (state.goldenItem) {
+                if (Date.now() > state.goldenItem.expireAt) {
+                    state.goldenItem = null;
+                } else {
+                    state.goldenItem.timeLeft = Math.ceil((state.goldenItem.expireAt - Date.now()) / 1000);
                 }
             }
 
@@ -490,28 +505,29 @@ io.on('connection', (socket) => {
             diedThisTurn.forEach(id => {
                 const s = state.snakes[id];
                 s.isDead = true;
-                state.deadBodies.push(...s.positions); // Hóa thành vật cản vĩnh viễn
+                state.deadBodies.push(...s.positions);
             });
 
-            // Process Item Spawn & Speed Up
             if (someoneAte) {
-                // Find living snakes positions
                 const livingPositions = [];
                 for (const id in state.snakes) {
                     if (!state.snakes[id].isDead) livingPositions.push(...state.snakes[id].positions);
                 }
                 state.item = spawnItemIntelligently(livingPositions, state.deadBodies, room.mapSize);
                 
-                // Tăng tốc
+                // Spawn Golden Item with 15% chance
+                if (Math.random() < 0.15 && !state.goldenItem) {
+                    const gPos = spawnItemIntelligently(livingPositions, state.deadBodies, room.mapSize);
+                    state.goldenItem = { ...gPos, expireAt: Date.now() + 5000, timeLeft: 5 };
+                }
+
                 let maxScore = Math.max(...Object.values(state.snakes).map(s => s.score));
                 state.speed = Math.max(MAX_SPEED, INITIAL_SPEED - maxScore * 5);
                 
-                // Reset interval with new speed
                 clearInterval(state.intervalId);
                 state.intervalId = setInterval(loop, state.speed);
             }
 
-            // Check game over
             const deadCount = Object.values(state.snakes).filter(s => s.isDead).length;
             const totalSnakes = Object.values(state.snakes).length;
             if (deadCount > 0 || totalSnakes < 2) {
@@ -523,6 +539,7 @@ io.on('connection', (socket) => {
                 snakes: state.snakes,
                 deadBodies: state.deadBodies,
                 item: state.item,
+                goldenItem: state.goldenItem,
                 status: state.status
             });
         };
