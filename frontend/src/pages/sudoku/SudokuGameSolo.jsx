@@ -276,8 +276,29 @@ export default function SoloGame() {
                 </div>
 
                 {isGameOver && (
-                    <div style={{ marginTop: '20px', color: 'var(--success-color)', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                        You Won! Congratulations!
+                    <div style={{
+                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(13, 17, 23, 0.9)', backdropFilter: 'blur(4px)',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                        borderRadius: '16px', zIndex: 10, gap: '12px'
+                    }}>
+                        <div style={{ fontSize: '4rem' }}>{won ? '🏆' : '💔'}</div>
+                        <h2 style={{ color: won ? 'var(--success-color)' : 'var(--error-color)', fontSize: '2.5rem', margin: 0 }}>
+                            {won ? 'Xuất Sắc!' : 'Đã Mắc 3 Lỗi!'}
+                        </h2>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', margin: 0 }}>
+                            {won ? `Hoàn thành ${difficulty} trong ${Math.floor(time/60)}:${String(time%60).padStart(2,'0')}` : 'Bạn đã sai quá 3 lần. Thử lại nhé!'}
+                        </p>
+                        <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                            <button className="btn-primary" style={{ padding: '12px 24px', fontSize: '1rem' }}
+                                onClick={() => startNewGame(difficulty)}>
+                                🔄 Chơi lại
+                            </button>
+                            <button className="btn-secondary" style={{ padding: '12px 24px', fontSize: '1rem' }}
+                                onClick={() => { if(audioRef.current) { audioRef.current.pause(); audioRef.current = null; } navigate('/sudoku'); }}>
+                                🏠 Thoát
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>

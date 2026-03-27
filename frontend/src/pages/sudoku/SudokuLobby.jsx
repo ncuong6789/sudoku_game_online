@@ -104,21 +104,20 @@ export default function SudokuLobby() {
             )}
             <div style={{ marginBottom: '10px', textAlign: 'left' }}>
                 <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Create match</h3>
-                <select 
-                    value={difficulty} 
-                    onChange={e => setDifficulty(e.target.value)} 
-                    style={{ 
-                        width: '100%', padding: '10px', borderRadius: '8px', marginBottom: '8px', 
-                        background: '#1e293b', color: 'white', border: '1px solid var(--border-color)', 
-                        appearance: 'none', cursor: 'pointer', boxSizing: 'border-box'
-                    }}
-                >
-                    <option value="Easy">Easy</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Hard">Hard</option>
-                    <option value="Expert">Expert</option>
-                </select>
-                <button className="btn-primary" style={{ padding: '10px' }} onClick={handleCreateRoom}>Create Room</button>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Độ khó:</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
+                    {['Easy', 'Medium', 'Hard', 'Expert'].map(d => (
+                        <button
+                            key={d}
+                            className={difficulty === d ? 'btn-primary' : 'btn-secondary'}
+                            onClick={() => setDifficulty(d)}
+                            style={{ padding: '10px', fontSize: '0.9rem' }}
+                        >
+                            {d === 'Easy' ? '😊 Dễ' : d === 'Medium' ? '🤔 Vừa' : d === 'Hard' ? '😤 Khó' : '🔥 Expert'}
+                        </button>
+                    ))}
+                </div>
+                <button className="btn-primary" style={{ padding: '10px', width: '100%' }} onClick={handleCreateRoom}>Tạo phòng & chờ đối thủ</button>
             </div>
             <div style={{ borderTop: '1px solid var(--border-color)', margin: '1rem 0' }}></div>
             <div style={{ textAlign: 'left' }}>

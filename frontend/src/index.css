@@ -594,3 +594,8 @@ h1 {
     animation: flashRow 0.2s ease-in-out infinite;
     z-index: 10;
 }
+
+@keyframes arrow-bounce {
+    from { transform: translateY(-100%) scale(0.95) translateY(0); }
+    to   { transform: translateY(-130%) scale(0.95) translateY(0); }
+}

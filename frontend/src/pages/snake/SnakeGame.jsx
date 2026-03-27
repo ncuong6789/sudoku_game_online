@@ -80,6 +80,30 @@ export default function SnakeGame() {
     const [gameState, setGameState] = useState(null); 
     // gameState = { snakes: { id1: {...}, id2: {...} }, deadBodies: [], item: {x,y}, status: 'playing' }
 
+    // --- COUNTDOWN STATE ---
+    const [countdown, setCountdown] = useState(mode === 'multiplayer' ? 3 : null); // null = không đếm
+    const myColor = playerColor === 'green' ? '#4ade80' : '#60a5fa';
+    const myColorLabel = playerColor === 'green' ? 'Xanh Lá 💚' : 'Xanh Dương 💙';
+
+
+    // --- COUNTDOWN EFFECT (chỉ dùng cho Multiplayer) ---
+    useEffect(() => {
+        if (mode !== 'multiplayer') return;
+        if (countdown === null || countdown <= 0) return;
+        const timer = setTimeout(() => {
+            setCountdown(prev => prev - 1);
+        }, 1000);
+        return () => clearTimeout(timer);
+    }, [countdown, mode]);
+
+    // Khi countdown về 0 thì countdown = 0 và game bắt đầu (lưu ý: 0 vẫn hiển thị "BẮt đầu!")
+    useEffect(() => {
+        if (countdown === 0) {
+            const timer = setTimeout(() => setCountdown(null), 800);
+            return () => clearTimeout(timer);
+        }
+    }, [countdown]);
+
     // --- KEYBOARD LISTENER ---
     useEffect(() => {
         const handleKeyDown = (e) => {
@@ -112,7 +136,7 @@ export default function SnakeGame() {
 
     // --- SOLO GAME LOOP ---
     useEffect(() => {
-        if (mode !== 'solo' || gameOver) return;
+        if (mode !== 'solo' || gameOver || countdown !== null) return; // Không chạy game khi đang đếm ngược
 
         const currentSpeed = Math.max(MAX_SPEED, INITIAL_SPEED - score * 5); // Càng ăn càng nhanh
 
@@ -232,10 +256,10 @@ export default function SnakeGame() {
         };
     }, [roomId]);
 
-    // RENDER HELPER MAPPING
-    // Gộp trạng thái để render chung bằng 1 function cho dễ
+    const mySnakeData = mode === 'multiplayer' && gameState ? gameState.snakes[socket.id] : null;
+
     const renderData = mode === 'solo' ? {
-        snakes: [{ id: 'me', positions: snake, color: '#4ade80', isDead: gameOver }],
+        snakes: [{ id: 'me', positions: snake, color: '#4ade80', isDead: gameOver, isMe: true }],
         deadBodies,
         item,
         score
@@ -289,10 +313,16 @@ export default function SnakeGame() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <Trophy size={20} color="#fbbf24" />
-                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Điểm: <span style={{ color: '#4ade80' }}>{renderData.score}</span></span>
+                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Bạn: <span style={{ color: '#4ade80' }}>{renderData.score}</span></span>
                     </div>
                     {mode === 'multiplayer' && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                            {/* Player color badge */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', padding: '6px 14px', borderRadius: '20px', border: `1px solid ${myColor}44` }}>
+                                <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: myColor, boxShadow: `0 0 6px ${myColor}` }} />
+                                <span style={{ fontSize: '0.9rem', color: myColor, fontWeight: 600 }}>{myColorLabel}</span>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>(Bạn)</span>
+                            </div>
                             <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Địch: <span style={{ color: '#60a5fa' }}>{getOpponentInfo()}</span></span>
                             <Skull size={20} color="#f87171" />
                         </div>
@@ -350,27 +380,69 @@ export default function SnakeGame() {
                             }} />
                         ))}
 
-                        {/* 3. Các con Rắn sống */}
+                        {/* 3. Các con Rắn sống + mũi tên chỉ vào rắn của mình */}
                         {renderData.snakes.map((s) => (
                             s.positions.map((segment, idx) => {
                                 const isHead = idx === 0;
                                 return (
-                                    <div key={`${s.id}-${idx}`} style={{
-                                        position: 'absolute',
-                                        width: `${100 / mapSize}%`,
-                                        height: `${100 / mapSize}%`,
-                                        left: `${(segment.x / mapSize) * 100}%`,
-                                        top: `${(segment.y / mapSize) * 100}%`,
-                                        background: isHead ? '#ffffff' : s.color, // Đầu trắng tinh / sáng màu
-                                        opacity: s.isDead ? 0.3 : 1, // Mờ đi nếu vừa chết
-                                        borderRadius: isHead ? '50%' : '4px', // Đầu thì tròn 50%, thân và đuôi thì khối vuông bo cong nhẹ 4px
-                                        boxShadow: isHead ? `0 0 10px ${s.color}` : 'none',
-                                        transform: 'scale(0.95)', // Để hở viền caro
-                                        zIndex: isHead ? 10 : 5
-                                    }} />
+                                    <React.Fragment key={`${s.id}-${idx}`}>
+                                        <div style={{
+                                            position: 'absolute',
+                                            width: `${100 / mapSize}%`,
+                                            height: `${100 / mapSize}%`,
+                                            left: `${(segment.x / mapSize) * 100}%`,
+                                            top: `${(segment.y / mapSize) * 100}%`,
+                                            background: isHead ? '#ffffff' : s.color,
+                                            opacity: s.isDead ? 0.3 : 1,
+                                            borderRadius: isHead ? '50%' : '4px',
+                                            boxShadow: isHead ? `0 0 10px ${s.color}` : 'none',
+                                            transform: 'scale(0.95)',
+                                            zIndex: isHead ? 10 : 5
+                                        }} />
+                                        {/* Mũi tên chỉ xuống đầu rắn của mình */}
+                                        {isHead && s.isMe && !s.isDead && (
+                                            <div style={{
+                                                position: 'absolute',
+                                                left: `${(segment.x / mapSize) * 100}%`,
+                                                top: `${(segment.y / mapSize) * 100}%`,
+                                                width: `${100 / mapSize}%`,
+                                                height: `${100 / mapSize}%`,
+                                                display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+                                                zIndex: 20,
+                                                transform: 'translateY(-100%) scale(0.95)',
+                                                pointerEvents: 'none',
+                                                fontSize: `min(${100/mapSize * 0.8}vw, ${100/mapSize * 0.8}vh)`,
+                                                animation: 'arrow-bounce 0.8s ease-in-out infinite alternate'
+                                            }}>
+                                                ▼
+                                            </div>
+                                        )}
+                                    </React.Fragment>
                                 );
                             })
                         ))}
+
+                        {/* COUNTDOWN OVERLAY */}
+                        {mode === 'multiplayer' && countdown !== null && (
+                            <div style={{
+                                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                                background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)',
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                zIndex: 60, gap: '16px'
+                            }}>
+                                <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+                                    <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-secondary)' }}>Rắn của bạn:</p>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginTop: '6px' }}>
+                                        <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: myColor, boxShadow: `0 0 10px ${myColor}` }} />
+                                        <span style={{ fontWeight: 700, fontSize: '1.2rem', color: myColor }}>{myColorLabel}</span>
+                                    </div>
+                                </div>
+                                <div style={{ fontSize: countdown === 0 ? '2.5rem' : '6rem', fontWeight: 900, color: countdown === 0 ? '#4ade80' : '#ffffff', textShadow: '0 0 20px currentColor', transition: 'all 0.3s' }}>
+                                    {countdown === 0 ? 'BẮt đầu!' : countdown}
+                                </div>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>Đối thủ đã sẵn sàng!</p>
+                            </div>
+                        )}
 
                         {/* GAME OVER OVERLAY */}
                         {gameOver && (

@@ -414,19 +414,27 @@ export default function MultiplayerGame() {
                     {isGameOver && (
                         <div style={{
                             position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                            background: 'rgba(13, 17, 23, 0.85)', backdropFilter: 'blur(4px)',
+                            background: 'rgba(13, 17, 23, 0.9)', backdropFilter: 'blur(4px)',
                             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                            borderRadius: '16px', zIndex: 10
+                            borderRadius: '16px', zIndex: 10, gap: '12px'
                         }}>
+                            <div style={{ fontSize: '4rem' }}>{won ? '🏆' : '💀'}</div>
                             <h2 style={{ color: won ? 'var(--success-color)' : 'var(--error-color)', fontSize: '2.5rem', margin: 0 }}>
-                                {won ? 'You Won!' : 'You Lost!'}
+                                {won ? 'Bạn Thắng!' : 'Bạn Thua!'}
                             </h2>
-                            <p style={{ color: 'var(--text-primary)', fontSize: '1.2rem' }}>
-                                {opponentDisconnected && won ? 'Opponent disconnected.' : (won ? 'You solved it first.' : 'Better luck next time!')}
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', margin: 0 }}>
+                                {opponentDisconnected && won ? 'Đối thủ đã thoát khỏi phòng.' : (won ? 'Xuất sắc! Bạn giải nhanh hơn đối thủ.' : 'Chúc may mắn lần sau!')}
                             </p>
-                            <button className="btn-primary" style={{ marginTop: '20px', width: 'auto' }} onClick={() => navigate('/multiplayer')}>
-                                Return to Lobby
-                            </button>
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                                <button className="btn-primary" style={{ padding: '12px 24px', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                    onClick={() => navigate('/sudoku/multiplayer')}>
+                                    🔄 Thử lại
+                                </button>
+                                <button className="btn-secondary" style={{ padding: '12px 24px', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                    onClick={() => navigate('/')}>
+                                    🏠 Trang chủ
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>

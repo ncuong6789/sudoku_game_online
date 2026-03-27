@@ -17,8 +17,16 @@ const io = new Server(server, {
 
 const rooms = {};
 
-// --- MULTIPLAYER SNAKE QUEUE & STATE ---
-let snakeWaitingPlayers = []; // { socket, mapSize }
+// --- MULTIPLAYER MATCHMAKING QUEUES ---
+const matchmakingQueues = {
+    sudoku: [],
+    caro: [],
+    chess: [],
+    snake: [],
+    tetris: [],
+    random: []
+};
+
 const INITIAL_SPEED = 180;
 const MAX_SPEED = 60;
 
@@ -123,9 +131,19 @@ io.on('connection', (socket) => {
             socket.join(roomId);
             io.to(roomId).emit('playerJoined', { players: room.players.length });
             broadcastStats();
-            callback({ success: true, difficulty: room.difficulty, gridSize: room.gridSize });
+            callback({ success: true, difficulty: room.difficulty, gridSize: room.gridSize, gameType: room.gameType });
         } else {
             callback({ success: false, message: 'Phòng không tồn tại hoặc đã đầy' });
+        }
+    });
+
+    // Tra cứu phòng để Home Hub điều hướng đúng game
+    socket.on('lookupRoom', ({ roomId }, callback) => {
+        const room = rooms[roomId?.toUpperCase()];
+        if (room) {
+            callback({ success: true, gameType: room.gameType, gridSize: room.gridSize, difficulty: room.difficulty });
+        } else {
+            callback({ success: false, message: 'Mã phòng không hợp lệ hoặc đã hết hạn.' });
         }
     });
 
@@ -297,55 +315,78 @@ io.on('connection', (socket) => {
         socket.emit('statsUpdate', stats);
     });
 
-    // --- SNAKE MULTIPLAYER LOGIC ---
-    socket.on('findMatch', ({ game, mapSize }) => {
-        if (game === 'snake') {
-            socket.emit('waitingForMatch');
-            // Check if there is someone waiting for the same mapSize
-            const index = snakeWaitingPlayers.findIndex(p => p.mapSize === mapSize && p.socket.id !== socket.id);
-            if (index !== -1) {
-                const p1 = snakeWaitingPlayers.splice(index, 1)[0];
-                const p2 = { socket, mapSize };
-                const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
-                
-                rooms[roomId] = {
-                    id: roomId,
-                    players: [p1.socket.id, p2.socket.id],
-                    gameType: 'snake',
-                    mapSize: mapSize,
-                    snakeState: {
-                        status: 'playing',
-                        intervalId: null,
-                        speed: INITIAL_SPEED,
-                        deadBodies: [],
-                        item: { x: Math.floor(mapSize/2), y: Math.floor(mapSize/2) },
-                        snakes: {
-                            [p1.socket.id]: { id: p1.socket.id, positions: [{x: 5, y: 5}, {x: 4, y: 5}, {x: 3, y: 5}], direction: {x: 1, y: 0}, nextDir: {x: 1, y: 0}, score: 0, isDead: false, color: 'green' },
-                            [p2.socket.id]: { id: p2.socket.id, positions: [{x: mapSize-6, y: mapSize-6}, {x: mapSize-5, y: mapSize-6}, {x: mapSize-4, y: mapSize-6}], direction: {x: -1, y: 0}, nextDir: {x: -1, y: 0}, score: 0, isDead: false, color: 'blue' }
-                        }
+    // --- GENERAL MATCHMAKING LOGIC ---
+    socket.on('findMatch', ({ gameType, ...params }) => {
+        // 1. Loại bỏ khỏi tất cả các hàng đợi khác để tránh trùng lặp
+        for (const q in matchmakingQueues) {
+            matchmakingQueues[q] = matchmakingQueues[q].filter(p => p.socket.id !== socket.id);
+        }
+
+        const queue = matchmakingQueues[gameType];
+        if (!queue) return;
+
+        if (queue.length > 0) {
+            // TÌM THẤY ĐỐI THỦ
+            const opponent = queue.shift();
+            const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+            
+            let finalGameType = gameType;
+            if (gameType === 'random') {
+                const types = ['sudoku', 'caro', 'chess', 'snake', 'tetris'];
+                finalGameType = types[Math.floor(Math.random() * types.length)];
+            }
+
+            // Khởi tạo phòng dựa trên gameType cuối cùng
+            rooms[roomId] = {
+                id: roomId,
+                players: [opponent.socket.id, socket.id],
+                gameType: finalGameType,
+                difficulty: params.difficulty || 'Medium',
+                gridSize: params.gridSize || 15,
+                mapSize: params.mapSize || 20,
+                gameState: null,
+                progress: { [opponent.socket.id]: 0, [socket.id]: 0 }
+            };
+
+            opponent.socket.join(roomId);
+            socket.join(roomId);
+
+            // Báo cho cả 2 người chơi đã tìm thấy trận
+            // Gửi cấu hình cụ thể cho từng loại game
+            let matchData = { roomId, gameType: finalGameType };
+            
+            if (finalGameType === 'snake') {
+                const mapSize = params.mapSize || 20;
+                rooms[roomId].snakeState = {
+                    status: 'playing',
+                    intervalId: null,
+                    speed: INITIAL_SPEED,
+                    deadBodies: [],
+                    item: { x: Math.floor(mapSize/2), y: Math.floor(mapSize/2) },
+                    snakes: {
+                        [opponent.socket.id]: { id: opponent.socket.id, positions: [{x: 5, y: 5}, {x: 4, y: 5}, {x: 3, y: 5}], direction: {x: 1, y: 0}, nextDir: {x: 1, y: 0}, score: 0, isDead: false, color: 'green' },
+                        [socket.id]: { id: socket.id, positions: [{x: mapSize-6, y: mapSize-6}, {x: mapSize-5, y: mapSize-6}, {x: mapSize-4, y: mapSize-6}], direction: {x: -1, y: 0}, nextDir: {x: -1, y: 0}, score: 0, isDead: false, color: 'blue' }
                     }
                 };
-
-                p1.socket.join(roomId);
-                p2.socket.join(roomId);
-
-                p1.socket.emit('matchFound', { roomId, mapSize, color: 'green' });
-                p2.socket.emit('matchFound', { roomId, mapSize, color: 'blue' });
-
-                broadcastStats();
-
-                // Start game loop after delay to allow client to load
-                setTimeout(() => {
-                    startSnakeGameLoop(roomId);
-                }, 2000);
+                io.to(opponent.socket.id).emit('matchFound', { ...matchData, mapSize, color: 'green' });
+                io.to(socket.id).emit('matchFound', { ...matchData, mapSize, color: 'blue' });
+                setTimeout(() => startSnakeGameLoop(roomId), 2000);
             } else {
-                snakeWaitingPlayers.push({ socket, mapSize });
+                io.to(roomId).emit('matchFound', matchData);
             }
+
+            broadcastStats();
+        } else {
+            // ĐANG CHỜ
+            queue.push({ socket, ...params });
+            socket.emit('waitingForMatch');
         }
     });
 
     socket.on('leaveMatchmaking', () => {
-        snakeWaitingPlayers = snakeWaitingPlayers.filter(p => p.socket.id !== socket.id);
+        for (const q in matchmakingQueues) {
+            matchmakingQueues[q] = matchmakingQueues[q].filter(p => p.socket.id !== socket.id);
+        }
     });
 
     socket.on('snakeChangeDirection', ({ roomId, direction }) => {
@@ -512,7 +553,9 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        snakeWaitingPlayers = snakeWaitingPlayers.filter(p => p.socket.id !== socket.id); // Remove from queue
+        for (const q in matchmakingQueues) {
+            matchmakingQueues[q] = matchmakingQueues[q].filter(p => p.socket.id !== socket.id);
+        }
 
         for (const roomId in rooms) {
             const index = rooms[roomId].players.indexOf(socket.id);

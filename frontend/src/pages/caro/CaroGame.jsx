@@ -278,7 +278,7 @@ export default function CaroGame() {
             }}>
                 
                 {/* TRÁI: BÀN CỜ GIGANTIC */}
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 0, margin: 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 0, margin: 0, position: 'relative' }}>
                     <div style={{ 
                         display: 'grid', 
                         gridTemplateColumns: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
@@ -323,6 +323,37 @@ export default function CaroGame() {
                             );
                         }))}
                     </div>
+
+                    {/* GAME OVER OVERLAY */}
+                    {isGameOver && (
+                        <div style={{
+                            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                            background: 'rgba(13, 17, 23, 0.88)', backdropFilter: 'blur(4px)',
+                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                            borderRadius: '4px', zIndex: 20, gap: '14px'
+                        }}>
+                            <div style={{ fontSize: '4rem' }}>
+                                {mode === 'multiplayer'
+                                    ? (winner === (playerSymbol === 'X' ? 1 : 2) ? '🏆' : '💀')
+                                    : (winner === 1 ? '🏆' : '💀')}
+                            </div>
+                            <h2 style={{ margin: 0, fontSize: '2.5rem', color: winner === 1 ? 'var(--primary-color)' : '#ff4757' }}>
+                                {mode === 'multiplayer'
+                                    ? (winner === (playerSymbol === 'X' ? 1 : 2) ? 'Bạn Thắng!' : 'Bạn Thua!')
+                                    : (winner === 1 ? 'X Thắng!' : 'O Thắng!')}
+                            </h2>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <button className="btn-primary" style={{ padding: '12px 24px', fontSize: '1rem' }}
+                                    onClick={resetGame}>
+                                    🔄 Chơi lại
+                                </button>
+                                <button className="btn-secondary" style={{ padding: '12px 24px', fontSize: '1rem' }}
+                                    onClick={handleExit}>
+                                    🚪 Thoát
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* PHẢI: ĐIỀU KHIỂN & CHAT */}
@@ -337,9 +368,43 @@ export default function CaroGame() {
                             {mode === 'solo' ? 'Thách đấu AI' : `Phòng: ${roomId}`}
                         </div>
 
+                        {/* Badge người chơi X/O */}
+                        {mode === 'multiplayer' && playerSymbol && (
+                            <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '12px' }}>
+                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(79,172,254,0.1)', padding: '10px', borderRadius: '10px', border: '1px solid rgba(79,172,254,0.3)' }}>
+                                    <span style={{ fontSize: '2rem', fontWeight: 900, color: playerSymbol === 'X' ? 'var(--primary-color)' : '#ff4757', lineHeight: 1 }}>{playerSymbol}</span>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Bạn</span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', color: 'var(--text-secondary)', fontWeight: 'bold' }}>vs</div>
+                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(255,71,87,0.1)', padding: '10px', borderRadius: '10px', border: '1px solid rgba(255,71,87,0.2)' }}>
+                                    <span style={{ fontSize: '2rem', fontWeight: 900, color: playerSymbol === 'O' ? 'var(--primary-color)' : '#ff4757', lineHeight: 1 }}>{playerSymbol === 'X' ? 'O' : 'X'}</span>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Đối thủ</span>
+                                </div>
+                            </div>
+                        )}
+
+                        {mode === 'solo' && (
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '12px' }}>
+                                <div style={{ display: 'flex', align: 'center', gap: '6px', flexDirection: 'column', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--primary-color)' }}>X</span>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Bạn</span>
+                                </div>
+                                <span style={{ color: 'var(--text-secondary)' }}>vs</span>
+                                <div style={{ display: 'flex', align: 'center', gap: '6px', flexDirection: 'column', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ff4757' }}>O</span>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>AI</span>
+                                </div>
+                            </div>
+                        )}
+
                         {!isGameOver && (
-                            <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.4rem', color: isXNext ? 'var(--primary-color)' : '#ff4757', padding: '15px 0', borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                                Lượt {isXNext ? 'X' : 'O'}
+                            <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.2rem', color: isXNext ? 'var(--primary-color)' : '#ff4757', padding: '12px 0', borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                Lượt: <strong>{isXNext ? 'X' : 'O'}</strong>
+                                {mode === 'multiplayer' && playerSymbol && (
+                                    <div style={{ fontSize: '0.8rem', fontWeight: 400, marginTop: '4px', color: 'var(--text-secondary)' }}>
+                                        {(isXNext && playerSymbol === 'X') || (!isXNext && playerSymbol === 'O') ? '👉 Lượt của bạn!' : '⏳ Đang chờ đối thủ...'}
+                                    </div>
+                                )}
                             </div>
                         )}
 

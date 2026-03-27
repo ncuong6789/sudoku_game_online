@@ -399,6 +399,7 @@ export default function ChessGame() {
                     {/* Bàn cờ bằng react-chessboard */}
                     <div style={{ flex: '1 1 500px', display: 'flex', justifyContent: 'center', width: '100%' }}>
                         <div style={{
+                            position: 'relative', // cần cho overlay
                             width: '100%',
                             maxWidth: '70vh',
                             aspectRatio: '1 / 1',
@@ -505,6 +506,35 @@ export default function ChessGame() {
                                 }
                                 return squares;
                             })()}
+
+                            {/* GAME OVER OVERLAY - bên trong div position:relative */}
+                            {gameOver && (
+                                <div style={{
+                                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                                    background: 'rgba(13, 17, 23, 0.88)', backdropFilter: 'blur(4px)',
+                                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                    borderRadius: '4px', zIndex: 20, gap: '12px'
+                                }}>
+                                    <div style={{ fontSize: '4rem' }}>
+                                        {statusMessage.includes('Thắng') ? '🏆' : statusMessage.includes('Hoà') ? '🤝' : '💀'}
+                                    </div>
+                                    <h2 style={{ margin: 0, fontSize: '2rem', textAlign: 'center', color: statusMessage.includes('Thắng') ? 'var(--success-color)' : statusMessage.includes('Hoà') ? '#fbbf24' : 'var(--error-color)' }}>
+                                        {statusMessage}
+                                    </h2>
+                                    <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                                        {mode === 'solo' && (
+                                            <button className="btn-primary" style={{ padding: '12px 24px', fontSize: '1rem' }}
+                                                onClick={() => navigate('/chess')}>
+                                                🔄 Ván mới
+                                            </button>
+                                        )}
+                                        <button className="btn-secondary" style={{ padding: '12px 24px', fontSize: '1rem' }}
+                                            onClick={() => navigate(mode === 'multiplayer' ? '/chess/multiplayer' : '/chess')}>
+                                            🚪 Thoát
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
