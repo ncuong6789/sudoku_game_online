@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, Trophy, Activity, Heart, Ghost as GhostIcon } from 'lucide-react';
-import { usePacmanSound } from '../../utils/useAudio';
+import { useAudio } from '../../utils/useAudio';
 
 const MAPS = {
     Classic: [
@@ -100,7 +100,7 @@ export default function PacmanGame() {
     const location = useLocation();
     const navigate = useNavigate();
     const { mapType = 'Classic', difficulty = 'Medium', mode = 'solo' } = location.state || {};
-    const playSound = usePacmanSound();
+    const playSound = useAudio();
     
     const [mapGrid, setMapGrid] = useState([]);
     const [pacman, setPacman] = useState({ x: 1, y: 1, dir: DIRS.RIGHT, nextDir: DIRS.RIGHT });

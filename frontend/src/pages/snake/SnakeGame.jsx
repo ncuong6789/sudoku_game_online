@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, Trophy, Activity, Skull } from 'lucide-react';
 import { socket } from '../../utils/socket';
+import { useAudio } from '../../utils/useAudio';
 
 // --- UTILS ---
 // Flood Fill (BFS) tìm vùng không gian mà Rắn có thể di chuyển tới
@@ -64,6 +65,7 @@ export default function SnakeGame() {
     const location = useLocation();
     const navigate = useNavigate();
     const { mode, mapSize, roomId, playerColor, difficulty, hasBot } = location.state || { mode: 'solo', mapSize: 20, roomId: null, difficulty: 'Medium', hasBot: false };
+    const { playWinSound, playLoseSound } = useAudio();
 
     // --- A* PATHFINDING FOR BOT ---
     const getAStarPath = (start, target, occupiedSet, mapSize) => {
@@ -325,14 +327,18 @@ export default function SnakeGame() {
                 if (hasBot) {
                     if (pDied && !bDied) {
                         setStatusMessage(`THẤT BẠI! Bạn đã bỏ mạng đi trước. (Bạn: ${score} - Bot: ${botScore})`);
+                        playLoseSound();
                     } else if (!pDied && bDied) {
                         setStatusMessage(`CHIẾN THẮNG! Bot lóng ngóng đâm đầu. (Bạn: ${score} - Bot: ${botScore})`);
+                        playWinSound();
                     } else {
                         // Cả hai cùng chết ở 1 frame
                         if (score > botScore) {
                             setStatusMessage(`CHIẾN THẮNG! Cùng tử nạn nhưng hơn điểm. (Bạn: ${score} - Bot: ${botScore})`);
+                            playWinSound();
                         } else if (score < botScore) {
                             setStatusMessage(`THẤT BẠI! Cùng tử nạn và thua điểm. (Bạn: ${score} - Bot: ${botScore})`);
+                            playLoseSound();
                         } else {
                             setStatusMessage(`HÒA CỜ! Đồng quy ư tận với số điểm bằng nhau. (Cùng ${score} điểm)`);
                         }
@@ -340,6 +346,7 @@ export default function SnakeGame() {
                 } else {
                     // Chơi một mình Solo cổ điển
                     setStatusMessage(`Game Over! Điểm của bạn: ${score}`);
+                    playLoseSound();
                 }
                 return; // Stop processing frame entirely
             }
@@ -457,14 +464,20 @@ export default function SnakeGame() {
                     if (!mySnake) return;
 
                     if (mySnake.isDead && oppSnake?.isDead) {
-                        setStatusMessage(mySnake.score > oppSnake.score ? 'Bạn Thắng (Nhiều điểm hơn)!' : (mySnake.score < oppSnake.score ? 'Bạn Thua!' : 'Hòa Cờ!'));
+                        const win = mySnake.score > oppSnake.score;
+                        setStatusMessage(win ? 'Bạn Thắng (Nhiều điểm hơn)!' : (mySnake.score < oppSnake.score ? 'Bạn Thua!' : 'Hòa Cờ!'));
+                        if (win) playWinSound(); else if (mySnake.score < oppSnake.score) playLoseSound();
                     } else if (mySnake.isDead) {
                         setStatusMessage('Bạn đã TỬ NẠN!');
+                        playLoseSound();
                     } else if (oppSnake?.isDead) {
                         setStatusMessage('Đối thủ đâm đầu vào dậu! BẠN THẮNG!');
+                        playWinSound();
                     } else {
                         // So điểm
-                        setStatusMessage(mySnake.score > oppSnake?.score ? 'Bạn Thắng!' : 'Bạn Thua!');
+                        const win = mySnake.score > oppSnake?.score;
+                        setStatusMessage(win ? 'Bạn Thắng!' : 'Bạn Thua!');
+                        if (win) playWinSound(); else playLoseSound();
                     }
                 }
             });
@@ -473,6 +486,7 @@ export default function SnakeGame() {
                 if (!gameOver) {
                     setGameOver(true);
                     setStatusMessage('Bạn Thắng! Đối thủ đã thoái lui.');
+                    playWinSound();
                 }
             });
 

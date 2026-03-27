@@ -3,6 +3,7 @@ import { generateSudoku } from '../../utils/sudoku';
 import Board from '../../components/Board';
 import Controls from '../../components/Controls';
 import { useNavigate } from 'react-router-dom';
+import { useAudio } from '../../utils/useAudio';
 
 export default function SoloGame() {
     const navigate = useNavigate();
@@ -20,38 +21,8 @@ export default function SoloGame() {
     const [time, setTime] = useState(0);
     const [won, setWon] = useState(false);
     const [hintsUsed, setHintsUsed] = useState(0);
-    const audioRef = useRef(null);
-
-    // Sound function refs
-    const playWinSoundRef = useRef(null);
-    const playLoseSoundRef = useRef(null);
-    const winAudioRef = useRef(new Audio('/win.mp3'));
-    const loseAudioRef = useRef(new Audio('/lose.mp3'));
-
-    // Preload sounds
-    useEffect(() => {
-        winAudioRef.current.load();
-        loseAudioRef.current.load();
-    }, []);
-
-    playLoseSoundRef.current = () => {
-        console.log('Solo: Triggering Lose Sound...');
-        if (audioRef.current) audioRef.current.pause();
-        const audio = loseAudioRef.current;
-        audio.currentTime = 0;
-        audioRef.current = audio;
-        audio.play().catch(e => console.log('Lose sound failed:', e));
-        setTimeout(() => { if (audioRef.current === audio) audio.pause(); }, 30000);
-    };
-    playWinSoundRef.current = () => {
-        console.log('Solo: Triggering Win Sound...');
-        if (audioRef.current) audioRef.current.pause();
-        const audio = winAudioRef.current;
-        audio.currentTime = 0;
-        audioRef.current = audio;
-        audio.play().catch(e => console.log('Win sound failed:', e));
-        setTimeout(() => { if (audioRef.current === audio) audio.pause(); }, 30000);
-    };
+    
+    const { playWinSound, playLoseSound } = useAudio();
 
     const startNewGame = useCallback((diff) => {
         const { puzzle, solution: sol } = generateSudoku(diff);
@@ -81,15 +52,6 @@ export default function SoloGame() {
         return () => clearInterval(interval);
     }, [isGameOver, initialPuzzle]);
 
-    useEffect(() => {
-        return () => {
-            if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current = null;
-            }
-        };
-    }, []);
-
     const checkWin = useCallback((answers) => {
         let emptyCount = 0;
         const counts = Array(10).fill(0);
@@ -109,9 +71,9 @@ export default function SoloGame() {
         if (emptyCount === 0) {
             setWon(true);
             setIsGameOver(true);
-            playWinSoundRef.current?.();
+            playWinSound();
         }
-    }, [initialPuzzle]);
+    }, [initialPuzzle, playWinSound]);
 
     const handleNumberClick = useCallback((num) => {
         if (!selectedCell || isGameOver) return;
@@ -132,7 +94,15 @@ export default function SoloGame() {
             // Check if correct
             if (solution[r][c] !== num) {
                 setErrors(prev => ({ ...prev, [`${r}-${c}`]: true }));
-                setErrorCount(prev => prev + 1);
+                setErrorCount(prev => {
+                    const newCount = prev + 1;
+                    if (newCount >= 3 && !isGameOver) {
+                        setIsGameOver(true);
+                        setWon(false);
+                        playLoseSound();
+                    }
+                    return newCount;
+                });
                 // Remove error highlight after 1s
                 setTimeout(() => {
                     setErrors(prev => {
@@ -263,13 +233,7 @@ export default function SoloGame() {
                             completedNumbers={completedNumbers}
                         />
 
-                        <button className="btn-secondary" style={{ marginTop: '20px' }} onClick={() => {
-                            if (audioRef.current) {
-                                audioRef.current.pause();
-                                audioRef.current = null;
-                            }
-                            navigate('/sudoku');
-                        }}>
+                        <button className="btn-secondary" style={{ marginTop: '20px' }} onClick={() => navigate('/sudoku')}>
                             Return to Menu
                         </button>
                     </div>
@@ -295,7 +259,7 @@ export default function SoloGame() {
                                 🔄 Chơi lại
                             </button>
                             <button className="btn-secondary" style={{ padding: '12px 24px', fontSize: '1rem' }}
-                                onClick={() => { if(audioRef.current) { audioRef.current.pause(); audioRef.current = null; } navigate('/sudoku'); }}>
+                                onClick={() => { navigate('/sudoku'); }}>
                                 🏠 Thoát
                             </button>
                         </div>

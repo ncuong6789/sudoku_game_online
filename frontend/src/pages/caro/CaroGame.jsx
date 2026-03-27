@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { socket } from '../../utils/socket';
 import { ArrowLeft, RotateCcw, MessageSquare, Send, Swords } from 'lucide-react';
+import { useAudio } from '../../utils/useAudio';
 
 export default function CaroGame() {
     const location = useLocation();
@@ -37,39 +38,15 @@ export default function CaroGame() {
     const humanNum = mode === 'solo' ? (realPlayerSymbol === 'X' ? 1 : 2) : (realPlayerSymbol === 'X' ? 1 : 2);
     const aiNum = mode === 'solo' ? (realPlayerSymbol === 'X' ? 2 : 1) : null;
 
-    const audioRef = useRef(null);
     const chatEndRef = useRef(null);
-    const winAudioRef = useRef(new Audio('/win.mp3'));
-    const loseAudioRef = useRef(new Audio('/lose.mp3'));
+    const { playWinSound, playLoseSound } = useAudio();
 
-    useEffect(() => {
-        winAudioRef.current.load();
-        loseAudioRef.current.load();
-    }, []);
+    const playSound = useCallback((type) => {
+        if (type === 'win') playWinSound();
+        else playLoseSound();
+    }, [playWinSound, playLoseSound]);
 
-    const playSound = (type) => {
-        if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current.currentTime = 0;
-        }
-        const audio = type === 'win' ? winAudioRef.current : loseAudioRef.current;
-        audio.currentTime = 0;
-        audioRef.current = audio;
-        audio.play().catch(e => console.log('Audio play failed:', e));
-    };
-
-    const stopAudio = () => {
-        if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current.currentTime = 0;
-        }
-    };
-
-    useEffect(() => {
-        return () => {
-            stopAudio();
-        };
-    }, []);
+    const stopAudio = () => {};
 
     const checkWinner = (grid, r, c, player) => {
         const directions = [[0, 1], [1, 0], [1, 1], [1, -1]];

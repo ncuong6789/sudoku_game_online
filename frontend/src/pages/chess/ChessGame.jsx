@@ -157,7 +157,7 @@ export default function ChessGame() {
     }, [mode, difficulty]);
 
     const makeAIMove = useCallback(() => {
-        if (engine.current && isEngineReady) {
+        if (engine.current && isEngineReady && !game.isGameOver()) {
             const depth = difficulty === 'Easy' ? 1 : difficulty === 'Medium' ? 8 : 15;
             engine.current.postMessage(`position fen ${game.fen()}`);
             engine.current.postMessage(`go depth ${depth}`);
@@ -165,13 +165,13 @@ export default function ChessGame() {
     }, [game, isEngineReady, difficulty]);
 
     useEffect(() => {
-        if (mode === 'solo' && !gameOver && game.turn() !== myColor) {
+        if (mode === 'solo' && !gameOver && isEngineReady && game.turn() !== myColor) {
             const timer = setTimeout(() => {
                 makeAIMove();
             }, 600);
             return () => clearTimeout(timer);
         }
-    }, [game, mode, gameOver, myColor, makeAIMove]);
+    }, [game, mode, gameOver, myColor, makeAIMove, isEngineReady]);
 
     function attemptPlayerMove(sourceSquare, targetSquare) {
         const gameCopy = new Chess();

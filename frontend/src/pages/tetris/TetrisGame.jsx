@@ -207,13 +207,19 @@ export default function TetrisGame() {
         };
     }, [mode, gameResult, isStarted, playWinSound, playLoseSound, setGameOver]);
 
-    // Emit GameOver state and leave room cleanup
     useEffect(() => {
         if (gameOver && mode === 'multiplayer' && !gameResult && isStarted) {
             // Tell server I topped out, let it judge based on current score
             socket.emit('tetrisPlayerLost', { roomId, score });
         }
     }, [gameOver, mode, gameResult, roomId, score, isStarted]);
+
+    // Play Lose Sound for Solo Mode
+    useEffect(() => {
+        if (gameOver && mode === 'solo' && !gameResult) {
+            playLoseSound();
+        }
+    }, [gameOver, mode, gameResult, playLoseSound]);
 
     useEffect(() => {
         return () => {

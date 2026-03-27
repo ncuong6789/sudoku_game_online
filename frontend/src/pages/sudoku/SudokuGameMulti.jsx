@@ -4,6 +4,7 @@ import Board from '../../components/Board';
 import Controls from '../../components/Controls';
 import { socket } from '../../utils/socket';
 import { useRef } from 'react';
+import { useAudio } from '../../utils/useAudio';
 
 export default function MultiplayerGame() {
     const { state } = useLocation();
@@ -32,41 +33,20 @@ export default function MultiplayerGame() {
     const [completedNumbers, setCompletedNumbers] = useState([]);
     const [chatMessages, setChatMessages] = useState([]);
     const [msgInput, setMsgInput] = useState('');
-    const audioRef = useRef(null);
     const errorCountRef = useRef(0);
     const hintsUsedRef = useRef(0);
     const myProgressRef = useRef(0);
 
-    // Sound function refs - always call the latest version, never stale
-    const playWinSoundRef = useRef(null);
-    const playLoseSoundRef = useRef(null);
-    const winAudioRef = useRef(new Audio('/win.mp3'));
-    const loseAudioRef = useRef(new Audio('/lose.mp3'));
+    const { playWinSound, playLoseSound } = useAudio();
 
-    // Preload sounds
+    // Use Refs to keep latest sound function references if needed in socket hooks
+    const playWinSoundRef = useRef(playWinSound);
+    const playLoseSoundRef = useRef(playLoseSound);
+
     useEffect(() => {
-        winAudioRef.current.load();
-        loseAudioRef.current.load();
-    }, []);
-
-    playLoseSoundRef.current = () => {
-        console.log('Triggering Lose Sound...');
-        if (audioRef.current) audioRef.current.pause();
-        const audio = loseAudioRef.current;
-        audio.currentTime = 0; // Reset to start
-        audioRef.current = audio;
-        audio.play().catch(e => console.log('Lose sound failed:', e));
-        setTimeout(() => { if (audioRef.current === audio) audio.pause(); }, 30000);
-    };
-    playWinSoundRef.current = () => {
-        console.log('Triggering Win Sound...');
-        if (audioRef.current) audioRef.current.pause();
-        const audio = winAudioRef.current;
-        audio.currentTime = 0; // Reset to start
-        audioRef.current = audio;
-        audio.play().catch(e => console.log('Win sound failed:', e));
-        setTimeout(() => { if (audioRef.current === audio) audio.pause(); }, 30000);
-    };
+        playWinSoundRef.current = playWinSound;
+        playLoseSoundRef.current = playLoseSound;
+    }, [playWinSound, playLoseSound]);
 
     useEffect(() => {
         if (!initialPuzzle) {
@@ -128,10 +108,6 @@ export default function MultiplayerGame() {
     // Separate useEffect for audio cleanup ON UNMOUNT only
     useEffect(() => {
         return () => {
-            if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current = null;
-            }
             if (roomId) socket.emit('leaveRoom', roomId);
         };
     }, [roomId]);
@@ -321,10 +297,6 @@ export default function MultiplayerGame() {
             setWon(false);
             playLoseSoundRef.current?.();
         } else {
-            if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current = null;
-            }
             navigate('/sudoku');
         }
     };
