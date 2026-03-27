@@ -118,8 +118,8 @@ export default function ChessHome() {
                     Bắt đầu chơi Solo
                 </button>
                 <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', margin: '0.2rem 0' }}></div>
-                <button className="btn-secondary" style={{ padding: '14px' }} onClick={() => navigate('/chess/multiplayer')} disabled={isFlipping}>
-                    Chế độ Multiplayer
+                <button className="btn-secondary" style={{ padding: '14px' }} onClick={() => navigate('/chess/multiplayer', { state: { autoCreate: true } })} disabled={isFlipping}>
+                    Tạo phòng Online
                 </button>
                 <button className="btn-secondary" style={{ marginTop: '0.5rem', padding: '14px', opacity: 0.7, width: 'auto' }} onClick={() => navigate('/')} disabled={isFlipping}>
                     Quay lại Hub

@@ -31,8 +31,8 @@ export default function TetrisHome() {
                 <button className="btn-primary" style={{ padding: '14px' }} onClick={() => navigate('/tetris/game', { state: { mode: 'solo', difficulty } })}>
                     Chơi Solo (Huấn luyện)
                 </button>
-                <button className="btn-secondary" style={{ padding: '14px' }} onClick={() => navigate('/tetris/multiplayer')}>
-                    Chế độ Multiplayer
+                <button className="btn-secondary" style={{ padding: '14px' }} onClick={() => navigate('/tetris/multiplayer', { state: { autoCreate: true, difficulty } })}>
+                    Tạo phòng Online
                 </button>
                 <button className="btn-secondary" style={{ marginTop: '0.5rem', padding: '14px', opacity: 0.7, width: 'auto' }} onClick={() => navigate('/')}>
                     Quay lại Hub

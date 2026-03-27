@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { socket } from '../../utils/socket';
 import { User } from 'lucide-react';
 
 export default function ChessLobby() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [inRoom, setInRoom] = useState(false);
     const [myRoom, setMyRoom] = useState('');
     const [isConnected, setIsConnected] = useState(socket.connected);
@@ -14,17 +15,33 @@ export default function ChessLobby() {
     const [opponentColor, setOpponentColor] = useState('random');
     const [isOpponentReady, setIsOpponentReady] = useState(false);
     const [isMyReady, setIsMyReady] = useState(false);
-    
+
+    const handleCreateRoom = useCallback(() => {
+        if (!socket.connected) return;
+        socket.emit('createRoom', { difficulty: 'Medium', gameType: 'chess' }, (res) => {
+            setMyRoom(res.roomId);
+            setInRoom(true);
+        });
+    }, []);
+
     useEffect(() => {
         const onConnect = () => setIsConnected(true);
         const onDisconnect = () => setIsConnected(false);
         socket.on('connect', onConnect);
         socket.on('disconnect', onDisconnect);
+
+        // Auto create if requested
+        if (location.state?.autoCreate && !inRoom && !myRoom) {
+            if (socket.connected) {
+                handleCreateRoom();
+            }
+        }
+
         return () => {
             socket.off('connect', onConnect);
             socket.off('disconnect', onDisconnect);
         };
-    }, []);
+    }, [location.state, inRoom, myRoom, handleCreateRoom]);
 
     // Setup Room socket listeners
     useEffect(() => {
@@ -78,12 +95,6 @@ export default function ChessLobby() {
         }
     };
 
-    const handleCreateRoom = () => {
-        socket.emit('createRoom', { difficulty: 'Medium', gameType: 'chess' }, (res) => {
-            setMyRoom(res.roomId);
-            setInRoom(true);
-        });
-    };
 
     const hasConflict = myColor !== 'random' && opponentColor !== 'random' && myColor === opponentColor;
     const canReady = !hasConflict;
@@ -161,21 +172,11 @@ export default function ChessLobby() {
     }
 
     return (
-        <div className="glass-panel menu-container" style={{ maxWidth: '450px' }}>
-            <h2>Chess Multiplayer</h2>
-            
-            {!isConnected && (
-                <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--error-color)', padding: '10px', borderRadius: '8px', marginBottom: '15px', border: '1px solid var(--error-color)', fontSize: '0.85rem' }}>
-                    ⚠️ Server chưa kết nối.
-                </div>
-            )}
-
-            <div style={{ textAlign: 'left', width: '100%' }}>
-                <h3 style={{ marginTop: 0, marginBottom: '0.8rem' }}>Tạo phòng</h3>
-                <button className="btn-primary" style={{ width: '100%' }} onClick={handleCreateRoom}>Tạo phòng mới</button>
-            </div>
-
-            <button className="btn-secondary" style={{ marginTop: '1.5rem', width: 'auto' }} onClick={() => navigate('/chess')}>Quay lại</button>
+        <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
+            <h2>Đang tạo phòng...</h2>
+            <div className="loader" style={{ margin: '20px auto' }}></div>
+            {!isConnected && <p style={{ color: 'var(--error-color)' }}>⚠️ Mất kết nối server...</p>}
+            <button className="btn-secondary" style={{ marginTop: '1rem', width: 'auto' }} onClick={() => navigate('/chess')}>Hủy</button>
         </div>
     );
 }

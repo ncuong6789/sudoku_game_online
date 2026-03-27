@@ -1,15 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { socket } from '../../utils/socket';
 import { generateSudoku } from '../../utils/sudoku';
 
 export default function SudokuLobby() {
     const navigate = useNavigate();
-    const [difficulty, setDifficulty] = useState('Medium');
+    const location = useLocation();
+    const [difficulty, setDifficulty] = useState(location.state?.difficulty || 'Medium');
     const [inRoom, setInRoom] = useState(false);
     const [myRoom, setMyRoom] = useState('');
     const [playerCount, setPlayerCount] = useState(1);
     const [isConnected, setIsConnected] = useState(socket.connected);
+
+    const handleCreateRoom = useCallback(() => {
+        if (!socket.connected) return;
+        socket.emit('createRoom', { difficulty }, (res) => {
+            setMyRoom(res.roomId);
+            setInRoom(true);
+            setPlayerCount(1);
+        });
+    }, [difficulty]);
 
     useEffect(() => {
         function onConnect() { setIsConnected(true); }
@@ -18,11 +28,18 @@ export default function SudokuLobby() {
         socket.on('connect', onConnect);
         socket.on('disconnect', onDisconnect);
 
+        // Auto create if requested
+        if (location.state?.autoCreate && !inRoom && !myRoom) {
+            if (socket.connected) {
+                handleCreateRoom();
+            }
+        }
+
         return () => {
             socket.off('connect', onConnect);
             socket.off('disconnect', onDisconnect);
         };
-    }, []);
+    }, [location.state, inRoom, myRoom, handleCreateRoom]);
 
     useEffect(() => {
         const handlePlayerJoined = ({ players }) => {
@@ -47,15 +64,6 @@ export default function SudokuLobby() {
         };
     }, [difficulty, navigate, myRoom]);
 
-    const handleCreateRoom = () => {
-        socket.emit('createRoom', { difficulty }, (res) => {
-            setMyRoom(res.roomId);
-            setInRoom(true);
-            setPlayerCount(1);
-        });
-    };
-
-
     if (inRoom) {
         return (
             <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
@@ -70,7 +78,6 @@ export default function SudokuLobby() {
                 <button className="btn-secondary" style={{ marginTop: '20px', width: 'auto' }} onClick={() => {
                     setInRoom(false);
                     setMyRoom('');
-                    // Emit disconnect/leave room if server supported it, else just go back
                     navigate('/sudoku');
                 }}>Leave Room</button>
             </div>
@@ -79,31 +86,10 @@ export default function SudokuLobby() {
 
     return (
         <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
-            <h2>Multiplayer</h2>
-            
-            {!isConnected && (
-                <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--error-color)', padding: '10px', borderRadius: '8px', marginBottom: '20px', border: '1px solid var(--error-color)', fontSize: '0.9rem' }}>
-                    ⚠️ Server chưa kết nối. Bạn cần triển khai Backend (Node.js) lên một server (như Render) để chơi Online.
-                </div>
-            )}
-            <div style={{ marginBottom: '10px', textAlign: 'left' }}>
-                <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Create match</h3>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Độ khó:</p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
-                    {['Easy', 'Medium', 'Hard', 'Expert'].map(d => (
-                        <button
-                            key={d}
-                            className={difficulty === d ? 'btn-primary' : 'btn-secondary'}
-                            onClick={() => setDifficulty(d)}
-                            style={{ padding: '10px', fontSize: '0.9rem' }}
-                        >
-                            {d === 'Easy' ? '😊 Dễ' : d === 'Medium' ? '🤔 Vừa' : d === 'Hard' ? '😤 Khó' : '🔥 Expert'}
-                        </button>
-                    ))}
-                </div>
-                <button className="btn-primary" style={{ padding: '10px', width: '100%' }} onClick={handleCreateRoom}>Tạo phòng & chờ đối thủ</button>
-            </div>
-            <button className="btn-secondary" style={{ marginTop: '1rem', padding: '10px', width: 'auto' }} onClick={() => navigate('/sudoku')}>Back to Menu</button>
+            <h2>Đang tạo phòng...</h2>
+            <div className="loader" style={{ margin: '20px auto' }}></div>
+            {!isConnected && <p style={{ color: 'var(--error-color)' }}>⚠️ Mất kết nối server...</p>}
+            <button className="btn-secondary" style={{ marginTop: '1rem', width: 'auto' }} onClick={() => navigate('/sudoku')}>Hủy</button>
         </div>
     );
 }

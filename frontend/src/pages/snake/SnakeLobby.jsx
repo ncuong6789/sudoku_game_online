@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Loader2, Users, Play, Hash } from 'lucide-react';
+import { ArrowLeft, Loader2, Users } from 'lucide-react';
 import { socket } from '../../utils/socket';
 
 const sizes = [
@@ -19,26 +19,35 @@ export default function SnakeLobby() {
     const [lobbyState, setLobbyState] = useState('idle');
     const [myRoom, setMyRoom] = useState('');
     const [status, setStatus] = useState('');
-    const [error, setError] = useState('');
     const [isConnected, setIsConnected] = useState(socket.connected);
+
+    const handleCreateRoom = useCallback(() => {
+        if (!socket.connected) return;
+        socket.emit('createRoom', { difficulty: 'Medium', gameType: 'snake', gridSize: mapSize }, (res) => {
+            setMyRoom(res.roomId);
+            setLobbyState('hosting');
+            setStatus('Đang chờ bạn bè kết nối...');
+        });
+    }, [mapSize]);
 
     useEffect(() => {
         const onConnect = () => setIsConnected(true);
         const onDisconnect = () => setIsConnected(false);
         socket.on('connect', onConnect);
         socket.on('disconnect', onDisconnect);
+
+        // Auto create if requested
+        if (location.state?.autoCreate && lobbyState === 'idle' && !myRoom) {
+            if (socket.connected) {
+                handleCreateRoom();
+            }
+        }
+
         return () => {
             socket.off('connect', onConnect);
             socket.off('disconnect', onDisconnect);
         };
-    }, []);
-    const handleCreateRoom = () => {
-        socket.emit('createRoom', { difficulty: 'Medium', gameType: 'snake', gridSize: mapSize }, (res) => {
-            setMyRoom(res.roomId);
-            setLobbyState('hosting');
-            setStatus('Đang chờ bạn bè kết nối...');
-        });
-    };
+    }, [location.state, lobbyState, myRoom, handleCreateRoom]);
 
     useEffect(() => {
         // MATCH FINDING LOGIC
@@ -142,31 +151,11 @@ export default function SnakeLobby() {
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1rem' }}>
-            <div className="glass-panel menu-container" style={{ maxWidth: '450px', width: '100%' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <h2 style={{ margin: 0, whiteSpace: 'nowrap', userSelect: 'none' }}>Sảnh Chờ Multiplayer</h2>
-                    <button className="btn-secondary" onClick={() => navigate('/snake')} style={{ padding: '8px', border: 'none', width: 'auto', flexShrink: 0 }}>
-                        <ArrowLeft size={20} />
-                    </button>
-                </div>
-                
-                {!isConnected && (
-                    <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--error-color)', padding: '10px', borderRadius: '8px', marginBottom: '15px', border: '1px solid var(--error-color)' }}>
-                        ⚠️ Máy chủ đang mất kết nối. Vui lòng chờ...
-                    </div>
-                )}
-
-                {/* PRIVATE ROOMS */}
-                <div style={{ textAlign: 'left', width: '100%' }}>
-                    <h3 style={{ marginTop: 0, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Users size={20} /> Tạo phòng riêng
-                    </h3>
-                    <button className="btn-secondary" style={{ width: '100%', padding: '12px', border: '1px solid var(--primary-color)', color: 'var(--primary-color)' }} onClick={handleCreateRoom}>
-                        + Tạo Mã Phòng Mới
-                    </button>
-                </div>
-            </div>
+        <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
+            <h2>Đang tạo phòng...</h2>
+            <div className="loader" style={{ margin: '20px auto' }}></div>
+            {!isConnected && <p style={{ color: 'var(--error-color)' }}>⚠️ Mất kết nối server...</p>}
+            <button className="btn-secondary" style={{ marginTop: '1rem', width: 'auto' }} onClick={() => navigate('/snake')}>Hủy</button>
         </div>
     );
 }

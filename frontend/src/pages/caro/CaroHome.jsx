@@ -54,8 +54,8 @@ export default function CaroHome() {
                 <button className="btn-primary" style={{ padding: '14px', marginTop: '0.5rem' }} onClick={() => navigate('/caro/game', { state: { mode: 'solo', difficulty, gridSize } })}>
                     Chế độ Solo
                 </button>
-                <button className="btn-secondary" style={{ padding: '14px' }} onClick={() => navigate('/caro/multiplayer')}>
-                    Chế độ Multiplayer
+                <button className="btn-secondary" style={{ padding: '14px' }} onClick={() => navigate('/caro/multiplayer', { state: { autoCreate: true, gridSize } })}>
+                    Tạo phòng Online
                 </button>
                 <button className="btn-secondary" style={{ marginTop: '0.5rem', padding: '14px', opacity: 0.7, width: 'auto' }} onClick={() => navigate('/')}>
                     Quay lại Hub

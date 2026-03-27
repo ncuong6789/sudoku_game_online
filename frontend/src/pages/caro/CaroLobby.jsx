@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { socket } from '../../utils/socket';
 
 const sizes = [
@@ -10,21 +10,38 @@ const sizes = [
 
 export default function CaroLobby() {
     const navigate = useNavigate();
-    const [gridSize, setGridSize] = useState(15);
+    const location = useLocation();
+    const [gridSize, setGridSize] = useState(location.state?.gridSize || 15);
     const [inRoom, setInRoom] = useState(false);
     const [myRoom, setMyRoom] = useState('');
     const [isConnected, setIsConnected] = useState(socket.connected);
+
+    const handleCreateRoom = useCallback(() => {
+        if (!socket.connected) return;
+        socket.emit('createRoom', { difficulty: 'Medium', gameType: 'caro', gridSize }, (res) => {
+            setMyRoom(res.roomId);
+            setInRoom(true);
+        });
+    }, [gridSize]);
 
     useEffect(() => {
         const onConnect = () => setIsConnected(true);
         const onDisconnect = () => setIsConnected(false);
         socket.on('connect', onConnect);
         socket.on('disconnect', onDisconnect);
+
+        // Auto create if requested
+        if (location.state?.autoCreate && !inRoom && !myRoom) {
+            if (socket.connected) {
+                handleCreateRoom();
+            }
+        }
+
         return () => {
             socket.off('connect', onConnect);
             socket.off('disconnect', onDisconnect);
         };
-    }, []);
+    }, [location.state, inRoom, myRoom, handleCreateRoom]);
 
     useEffect(() => {
         const handlePlayerJoined = ({ players }) => {
@@ -46,13 +63,6 @@ export default function CaroLobby() {
         };
     }, [myRoom, navigate, gridSize]);
 
-    const handleCreateRoom = () => {
-        socket.emit('createRoom', { difficulty: 'Medium', gameType: 'caro', gridSize }, (res) => {
-            setMyRoom(res.roomId);
-            setInRoom(true);
-        });
-    };
-
     if (inRoom) {
         return (
             <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
@@ -72,33 +82,11 @@ export default function CaroLobby() {
     }
 
     return (
-        <div className="glass-panel menu-container" style={{ maxWidth: '450px' }}>
-            <h2>Multiplayer</h2>
-            
-            {!isConnected && (
-                <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--error-color)', padding: '10px', borderRadius: '8px', marginBottom: '15px', border: '1px solid var(--error-color)', fontSize: '0.85rem' }}>
-                    ⚠️ Server chưa kết nối.
-                </div>
-            )}
-
-            <div style={{ textAlign: 'left', width: '100%' }}>
-                <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Tạo phòng</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '8px' }}>
-                    {sizes.map((s) => (
-                        <button 
-                            key={s.label}
-                            className={gridSize === s.value ? 'btn-primary' : 'btn-secondary'}
-                            onClick={() => setGridSize(s.value)}
-                            style={{ padding: '8px', fontSize: '0.8rem' }}
-                        >
-                            {s.label}
-                        </button>
-                    ))}
-                </div>
-                <button className="btn-primary" style={{ width: '100%', padding: '10px' }} onClick={handleCreateRoom}>Tạo phòng</button>
-            </div>
-
-            <button className="btn-secondary" style={{ marginTop: '1rem', width: 'auto', padding: '10px' }} onClick={() => navigate('/caro')}>Quay lại</button>
+        <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
+            <h2>Đang tạo phòng...</h2>
+            <div className="loader" style={{ margin: '20px auto' }}></div>
+            {!isConnected && <p style={{ color: 'var(--error-color)' }}>⚠️ Mất kết nối server...</p>}
+            <button className="btn-secondary" style={{ marginTop: '1rem', width: 'auto' }} onClick={() => navigate('/caro')}>Hủy</button>
         </div>
     );
 }

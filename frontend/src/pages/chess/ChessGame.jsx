@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Chess } from 'chess.js';
 import { Trophy, ArrowLeft, RefreshCw, Handshake, Users, ShieldAlert, RotateCcw, Swords, Crown } from 'lucide-react';
+import { useAudio } from '../../utils/useAudio';
+
+// ... (getPieceUnicode & CustomChessboard components)
 import { useLocation, useNavigate } from 'react-router-dom';
 import { socket } from '../../utils/socket';
 // Helper function to get Unicode chess piece
@@ -170,13 +173,29 @@ export default function ChessGame() {
     const [moveFrom, setMoveFrom] = useState(null);
     const [optionSquares, setOptionSquares] = useState({});
 
-    const [gameOver, setGameOver] = useState(false);
-    const [statusMessage, setStatusMessage] = useState('Ván đấu bắt đầu!');
+    const { playChessMoveSound, playChessCaptureSound, playChessCheckSound, playWinSound, playLoseSound } = useAudio();
 
     // 1. Cập nhật Status, History mỗi khi `game` thay đổi.
     useEffect(() => {
-        setMoveHistory(game.history({ verbose: true }));
+        const history = game.history({ verbose: true });
+        setMoveHistory(history);
         
+        if (history.length > 0) {
+            const lastMove = history[history.length - 1];
+            if (game.isCheckmate()) {
+                if (game.turn() === myColor) playLoseSound(); // Mình thua
+                else playWinSound(); // Mình thắng
+            } else if (game.isDraw()) {
+                playChessMoveSound();
+            } else if (game.isCheck()) {
+                playChessCheckSound();
+            } else if (lastMove.flags.includes('c')) {
+                playChessCaptureSound();
+            } else {
+                playChessMoveSound();
+            }
+        }
+
         let status = '';
         if (game.isCheckmate()) {
             status = `Chiếu Bí! ${game.turn() === 'w' ? 'Đen' : 'Trắng'} thắng.`;
@@ -187,22 +206,30 @@ export default function ChessGame() {
         } else {
             status = game.turn() === myColor 
                 ? 'Đến lượt bạn.' 
-                : `Đến lượt ${mode === 'solo' ? 'AI' : 'đối thủ'}.`;
-            if (game.isCheck()) {
-                status = `Đang bị chiếu! - ` + status;
-            }
+                : `Đến lượt đối thủ.`;
         }
         setStatusMessage(status);
         
-    }, [game, myColor, mode]);
+    }, [game, myColor, playChessMoveSound, playChessCaptureSound, playChessCheckSound, playWinSound, playLoseSound]);
 
     // Lắng nghe Socket cho Multiplayer
     useEffect(() => {
         if (mode === 'multiplayer' && roomId) {
-            const handleOpponentMove = ({ fen: newFen }) => {
+            const handleOpponentMove = ({ move, fen: newFen }) => {
                 setGame((g) => {
                     const newGame = new Chess();
-                    // Load FEN từ đối thủ
+                    newGame.loadPgn(g.pgn());
+                    
+                    if (move) {
+                        try {
+                            newGame.move(move);
+                            return newGame;
+                        } catch (e) {
+                            console.error("Lỗi đồng bộ move, dùng FEN fallback");
+                        }
+                    }
+                    
+                    // Fallback dùng FEN nếu không có move hoặc lỗi
                     try { newGame.load(newFen); } catch (e) { return g; }
                     return newGame;
                 });
@@ -287,7 +314,7 @@ export default function ChessGame() {
             setMoveFrom(null);
             setOptionSquares({});
             if (mode === 'multiplayer') {
-                socket.emit('chessMove', { roomId, fen: gameCopy.fen() });
+                socket.emit('chessMove', { roomId, move: moveObj, fen: gameCopy.fen() });
             }
             return true;
         } catch (e) {
@@ -441,10 +468,16 @@ export default function ChessGame() {
                                         // Tìm dữ liệu quân cờ tại tọa độ ô chuẩn
                                         const piece = game.get(sq); 
                                         
-                                        // Kiểm tra Option Styles cho nước cờ đi được
-                                        const highlightStyle = optionSquares[sq] || {};
+                                        // Kiểm tra Option Styles cho nước cờ đi được và Highlight nước đi cuối
+                                        const highlightStyle = customSquareStyles[sq] || {};
                                         let finalBg = highlightStyle.backgroundColor || bgColor;
-                                        let dotOverlay = highlightStyle.background; // Chấm tròn điểm đến hợp lệ
+                                        let dotOverlay = optionSquares[sq]?.background; // Chấm tròn điểm đến hợp lệ (giữ riêng từ optionSquares)
+
+                                        // HIỆU ỨNG CHIẾU VUA (Đỏ rực ô Vua)
+                                        if (game.inCheck() && piece && piece.type === 'k' && piece.color === game.turn()) {
+                                            finalBg = 'rgba(239, 68, 68, 0.7)';
+                                            highlightStyle.animation = 'blink-red 0.8s infinite';
+                                        }
 
                                         squares.push(
                                             <div 
@@ -556,6 +589,26 @@ export default function ChessGame() {
                                     {statusMessage}
                                 </span>
                             </div>
+
+                            {/* CẢNH BÁO CHIẾU VUA DÀNH CHO NGƯỜI CHƠI ĐANG BỊ CHIẾU */}
+                            {game.isCheck() && !gameOver && (
+                                <div style={{
+                                    background: 'rgba(239, 68, 68, 0.15)',
+                                    border: '1px solid rgba(239, 68, 68, 0.4)',
+                                    borderRadius: '8px',
+                                    padding: '10px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    marginBottom: '1rem',
+                                    animation: 'pulse 1.5s infinite'
+                                }}>
+                                    <ShieldAlert color="var(--error-color)" size={20} />
+                                    <span style={{ color: 'var(--error-color)', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                                        {game.turn() === myColor ? 'BẠN ĐANG BỊ CHIẾU!' : 'ĐỐI THỦ ĐANG BỊ CHIẾU!'}
+                                    </span>
+                                </div>
+                            )}
 
                             <div style={{ paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', marginBottom: '1rem' }}>
                                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 0.5rem 0' }}>Phe của bạn:</p>

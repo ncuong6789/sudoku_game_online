@@ -262,8 +262,8 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('chessMove', ({ roomId, fen }) => {
-        socket.to(roomId).emit('chessMoved', { fen });
+    socket.on('chessMove', ({ roomId, move, fen }) => {
+        socket.to(roomId).emit('chessMoved', { move, fen });
     });
 
     socket.on('updateProgress', (stats) => {

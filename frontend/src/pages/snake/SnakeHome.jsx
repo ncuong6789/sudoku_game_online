@@ -11,7 +11,7 @@ export default function SnakeHome() {
         if (mode === 'solo') {
             navigate('/snake/game', { state: { mode: 'solo', mapSize } });
         } else {
-            navigate('/snake/multiplayer', { state: { mapSize } });
+            navigate('/snake/multiplayer', { state: { autoCreate: true, mapSize } });
         }
     };
 
@@ -88,7 +88,7 @@ export default function SnakeHome() {
                 </div>
 
                 <button className="btn-primary" onClick={handleStart} style={{ padding: '15px', fontSize: '1.2rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
-                    <Play size={20} /> {mode === 'solo' ? 'Bắt Đầu Ngay' : 'Tìm Phòng Nhanh'}
+                    <Play size={20} /> {mode === 'solo' ? 'Bắt Đầu Solo' : 'Tạo phòng & Chờ bạn bè'}
                 </button>
 
             </div>
