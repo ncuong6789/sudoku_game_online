@@ -46,25 +46,11 @@ export const useAudio = () => {
     }, []);
 
     const playLoseSound = useCallback(() => {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        osc.type = 'sawtooth';
-        
-        const now = audioCtx.currentTime;
-        osc.frequency.setValueAtTime(300, now);
-        osc.frequency.exponentialRampToValueAtTime(50, now + 0.5);
-        
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.5);
-
-        osc.start(now);
-        osc.stop(now + 0.5);
+        try {
+            const audio = new Audio('/lose.mp3');
+            audio.currentTime = 0;
+            audio.play().catch(() => {});
+        } catch(e) {}
     }, []);
 
     const playClearLineSound = useCallback(() => {
