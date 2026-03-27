@@ -9,7 +9,7 @@ export default function MultiplayerGame() {
     const { state } = useLocation();
     const navigate = useNavigate();
 
-    const initialPuzzle = state?.puzzle;
+    const initialPuzzle = state?.initialPuzzle || state?.puzzle; // Hỗ trợ cả 2 key cũ và mới
     const solution = state?.solution;
     const roomId = state?.roomId;
     const difficulty = state?.difficulty;
@@ -107,7 +107,9 @@ export default function MultiplayerGame() {
         };
 
         const handleReceiveMessage = (data) => {
-            setChatMessages(prev => [...prev.slice(-10), { text: data.message, sender: 'opponent' }]);
+            // Server có thể gửi với {text} hoặc {message}, hỗ trợ cả 2 field
+            const msgText = data.text || data.message || '';
+            setChatMessages(prev => [...prev.slice(-10), { text: msgText, sender: 'opponent' }]);
         };
 
         socket.on('opponentProgress', handleOpponentProgress);

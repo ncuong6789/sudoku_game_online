@@ -20,7 +20,7 @@ export default function CaroGame() {
     const [isGameOver, setIsGameOver] = useState(false);
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
-    const [playerSymbol, setPlayerSymbol] = useState(null); // 'X' or 'O' for multiplayer
+    const [playerSymbol, setPlayerSymbol] = useState(initSymbol || null); // 'X' or 'O' for multiplayer
 
     const audioRef = useRef(null);
     const chatEndRef = useRef(null);
@@ -163,9 +163,17 @@ export default function CaroGame() {
     // Multiplayer Socket logic
     useEffect(() => {
         if (mode === 'multiplayer') {
-            socket.on('caroUpdateMove', ({ r, c, grid, nextSymbol }) => {
+            // Nhận lại playerSymbol nếu vào game từ lobby (không phải từ random matchmaking)
+            socket.on('caroGameStarted', ({ playerSymbol: sym }) => {
+                if (sym) setPlayerSymbol(sym);
+            });
+
+            // Event đúng: server phát 'caroMoved'
+            socket.on('caroMoved', ({ r, c, grid }) => {
                 setBoard(grid);
-                setIsXNext(nextSymbol === 'X');
+                // Tính lượt tiếp theo dựa vào board state
+                const filledCells = grid.flat().filter(v => v !== 0).length;
+                setIsXNext(filledCells % 2 === 0); // X đi trước (số chẵn ô đã đánh → X đến lượt)
                 const win = checkWinner(grid, r, c, grid[r][c]);
                 if (win) {
                     setWinner(grid[r][c]);
@@ -187,15 +195,12 @@ export default function CaroGame() {
                     setWinner(playerSymbol === 'X' ? 1 : 2);
                 }
             });
-
-            // If we are joining, we might need our symbol
-            // For simplicity, let's say Creator is X, Joiner is O
-            // We'll handle this in the lobby or first join
         }
 
         return () => {
             if (mode === 'multiplayer') {
-                socket.off('caroUpdateMove');
+                socket.off('caroGameStarted');
+                socket.off('caroMoved');
                 socket.off('receiveMessage');
                 socket.off('opponentDisconnected');
             }
