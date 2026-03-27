@@ -1,157 +1,8 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Chess } from 'chess.js';
-import { Trophy, ArrowLeft, RefreshCw, Handshake, Users, ShieldAlert, RotateCcw, Swords, Crown } from 'lucide-react';
 import { useAudio } from '../../utils/useAudio';
-
-// ... (getPieceUnicode & CustomChessboard components)
 import { useLocation, useNavigate } from 'react-router-dom';
 import { socket } from '../../utils/socket';
-// Helper function to get Unicode chess piece
-const getPieceUnicode = (piece) => {
-    if (!piece) return '';
-    const pieces = {
-        w: { p: '♙', n: '♘', b: '♗', r: '♖', q: '♕', k: '♔' },
-        b: { p: '♟', n: '♞', b: '♝', r: '♜', q: '♛', k: '♚' },
-    };
-    return pieces[piece.color][piece.type];
-};
-
-// Custom Chessboard Component
-function CustomChessboard({
-    game,
-    myColor,
-    onSquareClick,
-    onDrop,
-    customSquareStyles,
-    moveFrom,
-    optionSquares,
-    gameOver,
-    boardOrientation
-}) {
-    const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-    const ranks = ['1', '2', '3', '4', '5', '6', '7', '8'];
-
-    const displayRanks = boardOrientation === 'w' ? ranks.slice().reverse() : ranks;
-    const displayFiles = boardOrientation === 'w' ? files : files.slice().reverse();
-
-    const handleDragStart = (e, sourceSquare, piece) => {
-        if (gameOver || piece.color !== myColor) {
-            e.preventDefault();
-            return;
-        }
-        e.dataTransfer.setData('sourceSquare', sourceSquare);
-        e.dataTransfer.setData('piece', JSON.stringify(piece));
-        e.dataTransfer.effectAllowed = 'move';
-    };
-
-    const handleDragOver = (e) => {
-        e.preventDefault(); // Allow dropping
-        e.dataTransfer.dropEffect = 'move';
-    };
-
-    const handleDrop = (e, targetSquare) => {
-        e.preventDefault();
-        const sourceSquare = e.dataTransfer.getData('sourceSquare');
-        if (sourceSquare) {
-            onDrop(sourceSquare, targetSquare);
-        }
-    };
-
-    return (
-        <div style={{
-            position: 'relative',
-            width: '100%',
-            height: '100%',
-            aspectRatio: '1 / 1',
-            backgroundColor: 'rgba(20, 20, 30, 0.8)',
-            borderRadius: '8px',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-            overflow: 'hidden'
-        }}>
-            <div
-                className="grid"
-                style={{
-                    gridTemplateColumns: `repeat(8, 1fr)`,
-                    gridTemplateRows: `repeat(8, 1fr)`,
-                    width: '100%',
-                    height: '100%',
-                }}
-            >
-                {displayRanks.map((rank) =>
-                    displayFiles.map((file) => {
-                        const square = file + rank;
-                        const isLight = (files.indexOf(file) + ranks.indexOf(rank)) % 2 === 0;
-                        const piece = game.get(square);
-
-                        const squareStyle = {
-                            ...customSquareStyles[square],
-                            ...(optionSquares[square] || {}),
-                            backgroundColor: isLight ? 'rgba(173, 216, 230, 0.1)' : 'rgba(0, 0, 0, 0.3)', // Light blue tint for light squares, darker for dark
-                            backdropFilter: 'blur(5px)',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            position: 'relative',
-                            cursor: gameOver || (piece && piece.color !== myColor) ? 'default' : 'pointer',
-                            boxShadow: (moveFrom === square || optionSquares[square]) ? '0 0 10px 2px rgba(79, 172, 254, 0.8)' : 'none', // Neon glow for selected/option squares
-                            transition: 'box-shadow 0.2s ease-in-out',
-                        };
-
-                        return (
-                            <div
-                                key={square}
-                                id={square}
-                                style={{
-                                    ...squareStyle,
-                                    position: 'relative',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    userSelect: 'none'
-                                }}
-                                onClick={() => onSquareClick(square)}
-                                onDragOver={handleDragOver}
-                                onDrop={(e) => handleDrop(e, square)}
-                            >
-                                {piece && (
-                                    <div
-                                        draggable={piece.color === myColor && !gameOver}
-                                        onDragStart={(e) => handleDragStart(e, square, piece)}
-                                        style={{
-                                            fontSize: 'min(7vh, 7vw)',
-                                            lineHeight: 1,
-                                            cursor: piece.color === myColor && !gameOver ? 'grab' : 'default',
-                                            color: piece.color === 'w' ? '#f0f0f0' : '#303030',
-                                            textShadow: piece.color === 'w'
-                                                ? '2px 2px 4px rgba(0, 0, 0, 0.7), -2px -2px 4px rgba(255, 255, 255, 0.3)'
-                                                : '2px 2px 4px rgba(255, 255, 255, 0.7), -2px -2px 4px rgba(0, 0, 0, 0.3)',
-                                            filter: 'drop-shadow(0 0 5px rgba(255, 255, 255, 0.5))', // Subtle neon glow for pieces
-                                            zIndex: 10,
-                                        }}
-                                    >
-                                        {getPieceUnicode(piece)}
-                                    </div>
-                                )}
-                                {/* Rank and File Labels */}
-                                {file === displayFiles[0] && (
-                                    <span style={{ position: 'absolute', left: '4px', top: '0px', fontSize: '0.75rem', opacity: 0.7, color: isLight ? '#5f8099' : '#d1dee6', fontWeight: 'bold' }}>
-                                        {rank}
-                                    </span>
-                                )}
-                                {rank === displayRanks[displayRanks.length - 1] && (
-                                    <span style={{ position: 'absolute', right: '4px', bottom: '0px', fontSize: '0.75rem', opacity: 0.7, color: isLight ? '#5f8099' : '#d1dee6', fontWeight: 'bold' }}>
-                                        {file}
-                                    </span>
-                                )}
-                            </div>
-                        );
-                    })
-                )}
-            </div>
-        </div>
-    );
-}
-
 
 export default function ChessGame() {
     const location = useLocation();
@@ -170,6 +21,8 @@ export default function ChessGame() {
     const myColor = realPlayerColor || 'w';
     
     // UI State
+    const [gameOver, setGameOver] = useState(false);
+    const [statusMessage, setStatusMessage] = useState('');
     const [moveFrom, setMoveFrom] = useState(null);
     const [optionSquares, setOptionSquares] = useState({});
 
@@ -229,7 +82,6 @@ export default function ChessGame() {
                         }
                     }
                     
-                    // Fallback dùng FEN nếu không có move hoặc lỗi
                     try { newGame.load(newFen); } catch (e) { return g; }
                     return newGame;
                 });
@@ -237,7 +89,6 @@ export default function ChessGame() {
             const handleOpponentDisconnect = () => {
                 if (!gameOver) {
                     setGameOver(true);
-                    setWinner(myColor);
                     setStatusMessage(`Bạn đã thắng! Đối thủ thoái thác.`);
                 }
             };
@@ -256,32 +107,61 @@ export default function ChessGame() {
         };
     }, [roomId]);
 
-    // AI Logic cho Solo
-    const makeAIMove = useCallback(() => {
-        setGame((g) => {
-            const moves = g.moves({ verbose: true });
-            if (moves.length === 0) return g;
+    // --- STOCKFISH ENGINE INTEGRATION ---
+    const engine = useRef(null);
+    const [isEngineReady, setIsEngineReady] = useState(false);
 
-            let move = null;
-            if (difficulty === 'Easy') {
-                move = moves[Math.floor(Math.random() * moves.length)];
-            } else {
-                const captures = moves.filter(m => m.flags.includes('c'));
-                if (captures.length > 0) {
-                    move = captures[Math.floor(Math.random() * captures.length)];
-                } else {
-                    move = moves[Math.floor(Math.random() * moves.length)];
+    useEffect(() => {
+        if (mode === 'solo') {
+            const stockfishWorker = new Worker(
+                URL.createObjectURL(
+                    new Blob([`importScripts('https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js');`], { type: 'application/javascript' })
+                )
+            );
+
+            stockfishWorker.onmessage = (e) => {
+                const line = e.data;
+                if (line === 'readyok') {
+                    setIsEngineReady(true);
+                } else if (line.startsWith('bestmove')) {
+                    const moveMatch = line.match(/bestmove\s([a-h][1-8][a-h][1-8])(n|b|r|q)?/);
+                    if (moveMatch) {
+                        const moveStr = moveMatch[1];
+                        const promotion = moveMatch[2];
+                        const from = moveStr.substring(0, 2);
+                        const to = moveStr.substring(2, 4);
+                        
+                        setGame((g) => {
+                            const newGame = new Chess();
+                            newGame.loadPgn(g.pgn());
+                            try {
+                                newGame.move({ from, to, promotion: promotion || 'q' });
+                                return newGame;
+                            } catch (err) { return g; }
+                        });
+                    }
                 }
-            }
-            
-            try {
-                const gameCopy = new Chess();
-                gameCopy.loadPgn(g.pgn());
-                gameCopy.move(move);
-                return gameCopy;
-            } catch (e) { return g; }
-        });
-    }, [difficulty]);
+            };
+
+            stockfishWorker.postMessage('uci');
+            stockfishWorker.postMessage('isready');
+            const skillLevel = difficulty === 'Easy' ? 0 : difficulty === 'Medium' ? 10 : 20;
+            stockfishWorker.postMessage(`setoption name Skill Level value ${skillLevel}`);
+            engine.current = stockfishWorker;
+
+            return () => {
+                stockfishWorker.terminate();
+            };
+        }
+    }, [mode, difficulty]);
+
+    const makeAIMove = useCallback(() => {
+        if (engine.current && isEngineReady) {
+            const depth = difficulty === 'Easy' ? 1 : difficulty === 'Medium' ? 8 : 15;
+            engine.current.postMessage(`position fen ${game.fen()}`);
+            engine.current.postMessage(`go depth ${depth}`);
+        }
+    }, [game, isEngineReady, difficulty]);
 
     useEffect(() => {
         if (mode === 'solo' && !gameOver && game.turn() !== myColor) {
@@ -292,25 +172,19 @@ export default function ChessGame() {
         }
     }, [game, mode, gameOver, myColor, makeAIMove]);
 
-    // Hàm an toàn để thực thi nước đi của người chơi
     function attemptPlayerMove(sourceSquare, targetSquare) {
         const gameCopy = new Chess();
         gameCopy.loadPgn(game.pgn());
-
         const legalMoves = gameCopy.moves({ square: sourceSquare, verbose: true });
         const foundMove = legalMoves.find(m => m.to === targetSquare);
 
         if (!foundMove) return false;
-
         const moveObj = { from: sourceSquare, to: targetSquare };
         if (foundMove.promotion) moveObj.promotion = 'q';
 
         try {
             gameCopy.move(moveObj);
-            
-            // Cập nhật State tức thì (Synchronous Object Reference Update)
             setGame(gameCopy);
-
             setMoveFrom(null);
             setOptionSquares({});
             if (mode === 'multiplayer') {
@@ -323,11 +197,6 @@ export default function ChessGame() {
         }
     }
 
-    function onDrop(sourceSquare, targetSquare, piece) {
-        if (gameOver || game.turn() !== myColor) return false;
-        return attemptPlayerMove(sourceSquare, targetSquare);
-    }
-
     function onSquareClick(square) {
         if (gameOver || game.turn() !== myColor) return;
 
@@ -335,39 +204,32 @@ export default function ChessGame() {
             const hasPiece = game.get(sq);
             if (hasPiece && hasPiece.color === myColor) {
                 setMoveFrom(sq);
-                return getMoveOptions(sq);
+                const moves = game.moves({ square: sq, verbose: true });
+                if (moves.length === 0) {
+                    setOptionSquares({});
+                    return false;
+                }
+                const newSquares = {};
+                moves.map((move) => {
+                    newSquares[move.to] = {
+                        background: game.get(move.to) && game.get(move.to).color !== game.get(sq).color
+                            ? 'radial-gradient(circle, rgba(239, 68, 68, 0.4) 85%, transparent 85%)'
+                            : 'radial-gradient(circle, rgba(79, 172, 254, 0.6) 25%, transparent 25%)',
+                        borderRadius: '50%'
+                    };
+                });
+                newSquares[sq] = { background: 'rgba(79, 172, 254, 0.5)' }; 
+                setOptionSquares(newSquares);
+                return true;
             }
             setMoveFrom(null);
             setOptionSquares({});
             return false;
         }
 
-        function getMoveOptions(sq) {
-            const moves = game.moves({ square: sq, verbose: true });
-            if (moves.length === 0) {
-                setOptionSquares({});
-                return false;
-            }
-
-            const newSquares = {};
-            moves.map((move) => {
-                newSquares[move.to] = {
-                    background: game.get(move.to) && game.get(move.to).color !== game.get(sq).color
-                        ? 'radial-gradient(circle, rgba(239, 68, 68, 0.4) 85%, transparent 85%)'
-                        : 'radial-gradient(circle, rgba(79, 172, 254, 0.6) 25%, transparent 25%)',
-                    borderRadius: '50%'
-                };
-            });
-            newSquares[sq] = { background: 'rgba(79, 172, 254, 0.5)' }; // highlighted selected
-            setOptionSquares(newSquares);
-            return true;
-        }
-
         if (!moveFrom) {
             return resetFirstMove(square);
         }
-
-        // Đã có từ moveFrom, thử đi quân
         const isSuccess = attemptPlayerMove(moveFrom, square);
         if (!isSuccess) {
             return resetFirstMove(square);
@@ -383,11 +245,11 @@ export default function ChessGame() {
             setOptionSquares({});
         }
     };
+
     const customSquareStyles = useMemo(() => {
         const styles = { ...optionSquares };
         if (moveHistory.length > 0) {
             const lastMove = moveHistory[moveHistory.length - 1];
-            // Highlight background cho From và To của nước cờ vừa rồi
             styles[lastMove.from] = { ...styles[lastMove.from], backgroundColor: 'rgba(255, 235, 59, 0.4)' };
             styles[lastMove.to] = { ...styles[lastMove.to], backgroundColor: 'rgba(255, 235, 59, 0.4)' };
         }
@@ -396,141 +258,119 @@ export default function ChessGame() {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1rem' }}>
-            <div className="glass-panel" style={{ width: '100%', maxWidth: '1000px', display: 'flex', flexDirection: 'column', padding: '1rem' }}>
-
-                {/* Header */}
+            <div className="glass-panel" style={{ width: '100%', maxWidth: '1000px', display: 'flex', flexDirection: 'column', padding: '1.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                         <div className="nav-item active" style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Crown size={18} /> Cờ vua
+                            <span style={{ fontSize: '1.2rem' }}>👑</span> Cờ vua
                         </div>
                         <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                            {mode === 'solo' ? `Thách đấu AI (${difficulty})` : `Phòng: ${roomId}`}
+                            {mode === 'solo' ? `Thử thách AI (${difficulty})` : `Phòng: ${roomId}`}
                         </span>
                     </div>
-
                     <div style={{ display: 'flex', gap: '10px' }}>
                         {mode === 'solo' && (
-                            <button className="btn-secondary" onClick={handleReset} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}>
-                                <RotateCcw size={16} /> Chơi lại
+                            <button className="btn-secondary" onClick={handleReset} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <span style={{ fontSize: '1.1rem' }}>🔄</span> Chơi lại
                             </button>
                         )}
-                        <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/chess/multiplayer' : '/chess')} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}>
-                            <ArrowLeft size={16} /> Thoát
+                        <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/chess/multiplayer' : '/chess')} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <span style={{ fontSize: '1.1rem' }}>⬅️</span> Thoát
                         </button>
                     </div>
                 </div>
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', marginTop: '1rem' }}>
-
-                    {/* Bàn cờ bằng react-chessboard */}
-                    <div style={{ flex: '1 1 500px', display: 'flex', justifyContent: 'center', width: '100%' }}>
-                        <div style={{
-                            position: 'relative', // cần cho overlay
-                            width: '100%',
-                            maxWidth: '70vh',
-                            aspectRatio: '1 / 1',
-                            border: '4px solid rgba(20, 20, 30, 0.8)',
-                            borderRadius: '8px',
-                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-                            overflow: 'hidden',
-                            background: 'rgba(255, 255, 255, 0.1)',
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(8, 1fr)',
-                            gridTemplateRows: 'repeat(8, 1fr)'
+                    <div style={{ flex: '2 1 500px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ 
+                            width: '100%', maxWidth: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: '12px 15px', background: game.turn() !== myColor ? 'rgba(79, 172, 254, 0.15)' : 'rgba(255,255,255,0.05)',
+                            borderRadius: '12px', border: `2px solid ${game.turn() !== myColor ? 'var(--primary-color)' : 'transparent'}`,
+                            transition: 'all 0.3s'
                         }}>
-                            {/* Render Bàn cờ 64 ô tự custom cực chuẩn UI */}
-                            {(() => {
-                                const board = game.board(); // Mảng 2 chiều 8x8 chứa object quân cờ
-                                const ranks = [8,7,6,5,4,3,2,1];
-                                const files = ['a','b','c','d','e','f','g','h'];
-                                
-                                const isFlipped = myColor === 'b';
-                                const displayRanks = isFlipped ? [...ranks].reverse() : ranks;
-                                const displayFiles = isFlipped ? [...files].reverse() : files;
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div style={{ 
+                                    width: '45px', height: '45px', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.2)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                }}>
+                                    <span style={{ fontSize: '1.5rem' }}>⚔️</span>
+                                </div>
+                                <div>
+                                    <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
+                                        {mode === 'solo' ? `Stockfish AI (${difficulty})` : 'Đối thủ'}
+                                    </div>
+                                    <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                                        {myColor === 'w' ? 'Quân Đen' : 'Quân Trắng'}
+                                    </div>
+                                </div>
+                            </div>
+                            {game.turn() !== myColor && !gameOver && (
+                                <div className="pulse" style={{ color: 'var(--primary-color)', fontSize: '0.85rem', fontWeight: 'bold' }}>Đang suy nghĩ...</div>
+                            )}
+                        </div>
 
-                                const unicodePieces = {
+                        <div style={{
+                            position: 'relative', width: '100%', maxWidth: '70vh', aspectRatio: '1 / 1',
+                            border: '6px solid rgba(20, 20, 30, 0.9)', borderRadius: '12px',
+                            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)', overflow: 'hidden',
+                            background: '#d1dee6', display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gridTemplateRows: 'repeat(8, 1fr)'
+                        }}>
+                            {(() => {
+                                const ranksArr = [8,7,6,5,4,3,2,1];
+                                const filesArr = ['a','b','c','d','e','f','g','h'];
+                                const isFlipped = myColor === 'b';
+                                const displayRanks = isFlipped ? [...ranksArr].reverse() : ranksArr;
+                                const displayFiles = isFlipped ? [...filesArr].reverse() : filesArr;
+                                const beautifulUnicode = {
                                     'w': { 'p': '♙', 'n': '♘', 'b': '♗', 'r': '♖', 'q': '♕', 'k': '♔' },
                                     'b': { 'p': '♟', 'n': '♞', 'b': '♝', 'r': '♜', 'q': '♛', 'k': '♚' }
                                 };
-
                                 const squares = [];
                                 for (let i = 0; i < 8; i++) {
                                     for (let j = 0; j < 8; j++) {
                                         const r = displayRanks[i];
                                         const f = displayFiles[j];
                                         const sq = f + r;
-                                        
-                                        // Màu ô kẻ caro
-                                        const isLight = (r + files.indexOf(f)) % 2 !== 0;
+                                        const isLight = (r + filesArr.indexOf(f)) % 2 !== 0;
                                         const bgColor = isLight ? '#d1dee6' : '#5f8099';
-                                        
-                                        // Tìm dữ liệu quân cờ tại tọa độ ô chuẩn
                                         const piece = game.get(sq); 
-                                        
-                                        // Kiểm tra Option Styles cho nước cờ đi được và Highlight nước đi cuối
                                         const highlightStyle = customSquareStyles[sq] || {};
                                         let finalBg = highlightStyle.backgroundColor || bgColor;
-                                        let dotOverlay = optionSquares[sq]?.background; // Chấm tròn điểm đến hợp lệ (giữ riêng từ optionSquares)
-
-                                        // HIỆU ỨNG CHIẾU VUA (Đỏ rực ô Vua)
-                                        if (game.inCheck() && piece && piece.type === 'k' && piece.color === game.turn()) {
-                                            finalBg = 'rgba(239, 68, 68, 0.7)';
-                                            highlightStyle.animation = 'blink-red 0.8s infinite';
+                                        let dotOverlay = optionSquares[sq]?.background;
+                                        if (game.isCheck() && piece && piece.type === 'k' && piece.color === game.turn()) {
+                                            finalBg = 'rgba(239, 68, 68, 0.8)';
                                         }
-
                                         squares.push(
-                                            <div 
-                                                key={sq}
-                                                onClick={() => onSquareClick(sq)}
+                                            <div key={sq} onClick={() => onSquareClick(sq)}
                                                 onDragOver={(e) => e.preventDefault()}
                                                 onDrop={(e) => {
                                                     e.preventDefault();
                                                     const sourceSq = e.dataTransfer.getData('text/plain');
-                                                    if(sourceSq !== sq) attemptPlayerMove(sourceSq, sq);
+                                                    if(sourceSq && sourceSq !== sq) attemptPlayerMove(sourceSq, sq);
                                                 }}
                                                 style={{
-                                                    backgroundColor: finalBg,
-                                                    position: 'relative',
-                                                    display: 'flex',
-                                                    justifyContent: 'center',
-                                                    alignItems: 'center',
+                                                    backgroundColor: finalBg, position: 'relative', display: 'flex',
+                                                    justifyContent: 'center', alignItems: 'center', 
                                                     cursor: game.turn() === myColor ? 'pointer' : 'default',
-                                                    userSelect: 'none'
+                                                    ...(game.isCheck() && piece && piece.type === 'k' && piece.color === game.turn() ? {animation: 'blink-red 1s infinite'} : {})
                                                 }}
                                             >
-                                                {dotOverlay && (
-                                                    <div style={{
-                                                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                                        background: dotOverlay, pointerEvents: 'none'
-                                                    }}/>
-                                                )}
-                                                
+                                                {dotOverlay && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: dotOverlay, borderRadius: '50%', transform: 'scale(0.3)', opacity: 0.6 }}/>}
                                                 {piece && (
                                                     <span 
                                                         draggable={piece.color === myColor && game.turn() === myColor}
                                                         onDragStart={(e) => {
                                                             e.dataTransfer.setData('text/plain', sq);
                                                             e.dataTransfer.effectAllowed = 'move';
-                                                            onSquareClick(sq); // Lấy highlight move path ngay khi nhấc
+                                                            onSquareClick(sq);
                                                         }}
                                                         style={{
-                                                            fontSize: 'min(7vh, 7vw)',
-                                                            lineHeight: 1,
-                                                            color: piece.color === 'w' ? '#fff' : '#1e1e1e',
-                                                            textShadow: piece.color === 'w' 
-                                                                ? '0px 2px 4px rgba(0,0,0,0.8), 0 0 2px #fff'
-                                                                : '0px 2px 4px rgba(255,255,255,0.4), 0 0 4px #000',
-                                                            position: 'relative',
-                                                            zIndex: 2,
-                                                            cursor: piece.color === myColor ? 'grab' : 'default'
+                                                            fontSize: 'min(7vh, 7vw)', lineHeight: 1, color: piece.color === 'w' ? '#fff' : '#1e1e1e',
+                                                            textShadow: piece.color === 'w' ? '0px 2px 4px rgba(0,0,0,0.8)' : '0px 2px 4px rgba(255,255,255,0.4)',
+                                                            position: 'relative', zIndex: 2, cursor: piece.color === myColor ? 'grab' : 'default'
                                                         }}
-                                                    >
-                                                        {unicodePieces[piece.color][piece.type]}
-                                                    </span>
+                                                    >{beautifulUnicode[piece.color][piece.type]}</span>
                                                 )}
-
-                                                {/* Hiển thị tên Cột và Hàng mờ ở viền bàn cờ */}
                                                 {i === 7 && <span style={{position:'absolute', bottom: '2px', right: '4px', fontSize:'0.7rem', color: isLight?'#5f8099':'#d1dee6', fontWeight: 'bold'}}>{f}</span>}
                                                 {j === 0 && <span style={{position:'absolute', top: '2px', left: '4px', fontSize:'0.7rem', color: isLight?'#5f8099':'#d1dee6', fontWeight: 'bold'}}>{r}</span>}
                                             </div>
@@ -540,118 +380,104 @@ export default function ChessGame() {
                                 return squares;
                             })()}
 
-                            {/* GAME OVER OVERLAY - bên trong div position:relative */}
                             {gameOver && (
                                 <div style={{
                                     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                    background: 'rgba(13, 17, 23, 0.88)', backdropFilter: 'blur(4px)',
+                                    background: 'rgba(13, 17, 23, 0.92)', backdropFilter: 'blur(8px)',
                                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                    borderRadius: '4px', zIndex: 20, gap: '12px'
+                                    zIndex: 100, gap: '25px', padding: '2rem'
                                 }}>
-                                    <div style={{ fontSize: '4rem' }}>
-                                        {statusMessage.includes('Thắng') ? '🏆' : statusMessage.includes('Hoà') ? '🤝' : '💀'}
+                                    <div style={{ fontSize: '5rem', animation: 'float 3s ease-in-out infinite' }}>
+                                        {statusMessage.includes('Thắng') ? '🏆' : statusMessage.includes('Hòa') ? '🤝' : '💀'}
                                     </div>
-                                    <h2 style={{ margin: 0, fontSize: '2rem', textAlign: 'center', color: statusMessage.includes('Thắng') ? 'var(--success-color)' : statusMessage.includes('Hoà') ? '#fbbf24' : 'var(--error-color)' }}>
+                                    <h2 style={{ margin: 0, fontSize: '2.5rem', textAlign: 'center', color: statusMessage.includes('Thắng') ? '#4ade80' : '#f87171' }}>
                                         {statusMessage}
                                     </h2>
-                                    <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                                        {mode === 'solo' && (
-                                            <button className="btn-primary" style={{ padding: '12px 24px', fontSize: '1rem' }}
-                                                onClick={() => navigate('/chess')}>
-                                                🔄 Ván mới
-                                            </button>
-                                        )}
-                                        <button className="btn-secondary" style={{ padding: '12px 24px', fontSize: '1rem' }}
-                                            onClick={() => navigate(mode === 'multiplayer' ? '/chess/multiplayer' : '/chess')}>
+                                    <div style={{ display: 'flex', gap: '15px' }}>
+                                        <button className="btn-primary" style={{ padding: '14px 28px' }} onClick={handleReset}>
+                                            🔄 Chơi lại
+                                        </button>
+                                        <button className="btn-secondary" style={{ padding: '14px 28px' }} onClick={() => navigate(mode === 'multiplayer' ? '/chess/multiplayer' : '/chess')}>
                                             🚪 Thoát
                                         </button>
                                     </div>
                                 </div>
                             )}
                         </div>
+
+                        <div style={{ 
+                            width: '100%', maxWidth: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: '12px 15px', background: game.turn() === myColor ? 'rgba(79, 172, 254, 0.15)' : 'rgba(255,255,255,0.05)',
+                            borderRadius: '12px', border: `2px solid ${game.turn() === myColor ? 'var(--primary-color)' : 'transparent'}`,
+                            transition: 'all 0.3s'
+                        }}>
+                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div style={{ 
+                                    width: '45px', height: '45px', borderRadius: '10px', background: 'rgba(74, 222, 128, 0.2)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                }}>
+                                    <span style={{ fontSize: '1.5rem' }}>👤</span>
+                                </div>
+                                <div>
+                                    <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Bạn (Người chơi)</div>
+                                    <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                                        {myColor === 'w' ? 'Quân Trắng (Đi trước)' : 'Quân Đen'}
+                                    </div>
+                                </div>
+                            </div>
+                            {game.turn() === myColor && !gameOver && (
+                                <div className="pulse" style={{ color: '#4ade80', fontSize: '0.9rem', fontWeight: 'bold' }}>Lượt của bạn</div>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Bảng trạng thái bên phải */}
                     <div style={{ flex: '1 1 250px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <span style={{ fontSize: '1.2rem' }}>📊</span> Diễn biến
+                            </h3>
 
-                        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                            <h3 style={{ margin: '0 0 1rem 0' }}>Trạng thái</h3>
-
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1rem' }}>
-                                <div style={{
-                                    width: '24px', height: '24px', borderRadius: '50%',
-                                    background: game.turn() === 'w' ? '#f8f9fa' : '#212529',
-                                    border: '2px solid rgba(255,255,255,0.5)',
-                                    boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                                    flexShrink: 0
-                                }}></div>
-                                <span style={{ fontWeight: 'bold', fontSize: '1.05rem', color: gameOver ? 'var(--error-color)' : game.turn() === myColor ? 'var(--primary-color)' : 'white' }}>
-                                    {statusMessage}
-                                </span>
-                            </div>
-
-                            {/* CẢNH BÁO CHIẾU VUA DÀNH CHO NGƯỜI CHƠI ĐANG BỊ CHIẾU */}
                             {game.isCheck() && !gameOver && (
                                 <div style={{
-                                    background: 'rgba(239, 68, 68, 0.15)',
-                                    border: '1px solid rgba(239, 68, 68, 0.4)',
-                                    borderRadius: '8px',
-                                    padding: '10px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '10px',
-                                    marginBottom: '1rem',
+                                    background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)',
+                                    borderRadius: '8px', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px',
                                     animation: 'pulse 1.5s infinite'
                                 }}>
-                                    <ShieldAlert color="var(--error-color)" size={20} />
-                                    <span style={{ color: 'var(--error-color)', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                                    <span style={{ fontSize: '1.2rem' }}>⚠️</span>
+                                    <span style={{ color: '#f87171', fontWeight: 'bold', fontSize: '0.9rem' }}>
                                         {game.turn() === myColor ? 'BẠN ĐANG BỊ CHIẾU!' : 'ĐỐI THỦ ĐANG BỊ CHIẾU!'}
                                     </span>
                                 </div>
                             )}
 
-                            <div style={{ paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', marginBottom: '1rem' }}>
-                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 0.5rem 0' }}>Phe của bạn:</p>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <div style={{
-                                        width: '28px', height: '28px', borderRadius: '4px',
-                                        background: myColor === 'w' ? '#f8f9fa' : '#212529',
-                                        border: '1px solid rgba(255,255,255,0.3)',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        color: myColor === 'w' ? '#000' : '#fff'
-                                    }}>
-                                        {myColor === 'w' ? '♔' : '♚'}
-                                    </div>
-                                    <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{myColor === 'w' ? 'Trắng (Đi trước)' : 'Đen'}</span>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+                                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Nước đi</span>
+                                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Ký hiệu</span>
                                 </div>
-                            </div>
-
-                            {/* Lịch sử di chuyển */}
-                            <div style={{ paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-                                <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem' }}>Lịch sử giao tranh</h4>
                                 <div style={{
-                                    flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)',
-                                    borderRadius: '8px', padding: '0.5rem', maxHeight: '150px'
+                                    height: '350px', overflowY: 'auto', background: 'rgba(0,0,0,0.3)',
+                                    borderRadius: '8px', padding: '10px', border: '1px solid rgba(255,255,255,0.05)'
                                 }}>
-                                    {moveHistory.length === 0 && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textAlign: 'center', margin: '40px 0' }}>Chưa có nước đi nào</p>}
+                                    {moveHistory.length === 0 && (
+                                        <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                                            Khởi đầu trận đấu...
+                                        </div>
+                                    )}
                                     {Array.from({ length: Math.ceil(moveHistory.length / 2) }).map((_, i) => (
-                                        <div key={i} style={{ display: 'flex', fontSize: '0.85rem', padding: '4px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <span style={{ width: '30px', color: 'var(--text-secondary)', fontWeight: 'bold' }}>{i + 1}.</span>
+                                        <div key={i} style={{ display: 'flex', fontSize: '0.9rem', padding: '6px 4px', borderBottom: '1px solid rgba(255,255,255,0.03)', alignItems: 'center' }}>
+                                            <span style={{ width: '25px', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold', fontSize: '0.75rem' }}>{i + 1}.</span>
                                             <span style={{ flex: 1, color: '#f8f9fa' }}>{moveHistory[i * 2]?.san}</span>
-                                            <span style={{ flex: 1, color: '#aaa' }}>{moveHistory[i * 2 + 1]?.san || ''}</span>
+                                            <span style={{ flex: 1, color: 'rgba(255,255,255,0.5)' }}>{moveHistory[i * 2 + 1]?.san || ''}</span>
                                         </div>
                                     ))}
                                     <div ref={el => el && el.scrollIntoView({ behavior: 'smooth' })} />
                                 </div>
                             </div>
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
     );
 }

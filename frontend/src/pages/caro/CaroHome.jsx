@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 const sizes = [
     { label: '3x3', value: 3 },
     { label: '15x15', value: 15 },
-    { label: '30x30', value: 30 }
+    { label: '20x20', value: 20 }
 ];
 
 export default function CaroHome() {

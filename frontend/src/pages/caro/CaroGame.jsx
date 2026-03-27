@@ -18,6 +18,7 @@ export default function CaroGame() {
     const [winner, setWinner] = useState(null);
     const [winningLine, setWinningLine] = useState(null);
     const [isGameOver, setIsGameOver] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false); // Guard for double-clicks/AI racing
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const [playerSymbol, setPlayerSymbol] = useState(initSymbol || null); // 'X' or 'O' for multiplayer
@@ -94,61 +95,160 @@ export default function CaroGame() {
         return null;
     };
 
-    // Simple AI for Solo mode
-    const makeAIMove = useCallback((currentBoard) => {
-        // Handle Easy mode: make a random move 40% of the time
-        if (difficulty === 'Easy' && Math.random() < 0.4) {
-            const emptyCells = [];
-            for (let r = 0; r < BOARD_SIZE; r++) {
-                for (let c = 0; c < BOARD_SIZE; c++) {
-                    if (currentBoard[r][c] === 0) emptyCells.push({ r, c });
+    // --- THUẬT TOÁN AI MINIMAX CHO CARO ---
+    const evaluateBoard = (grid, size) => {
+        let score = 0;
+        const directions = [[1, 0], [0, 1], [1, 1], [1, -1]]; 
+        
+        const weights = {
+            ai5: 10000000,
+            opp5: -9000000,
+            ai4Open: 100000,
+            opp4Open: -800000, // ƯU TIÊN CHẶN 4 MỞ
+            ai4Blocked: 10000,
+            opp4Blocked: -50000,
+            ai3Open: 5000,
+            opp3Open: -40000, // ƯU TIÊN CHẶN 3 MỞ
+            ai3Blocked: 500,
+            opp3Blocked: -1000,
+            ai2Open: 100,
+            opp2Open: -200
+        };
+
+        for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) {
+                if (grid[r][c] === 0) continue;
+                const p = grid[r][c];
+
+                for (const [dr, dc] of directions) {
+                    let count = 1;
+                    for (let i = 1; i < 5; i++) {
+                        const nr = r + dr * i, nc = c + dc * i;
+                        if (nr >= 0 && nr < size && nc >= 0 && nc < size && grid[nr][nc] === p) count++;
+                        else break;
+                    }
+                    
+                    if (count >= 2) {
+                        const rBefore = r - dr, cBefore = c - dc;
+                        const rAfter = r + dr * count, cAfter = c + dc * count;
+                        
+                        let openEnds = 0;
+                        if (rBefore >= 0 && rBefore < size && cBefore >= 0 && cBefore < size && grid[rBefore][cBefore] === 0) openEnds++;
+                        if (rAfter >= 0 && rAfter < size && cAfter >= 0 && cAfter < size && grid[rAfter][cAfter] === 0) openEnds++;
+
+                        let val = 0;
+                        if (count >= 5) val = p === 2 ? weights.ai5 : weights.opp5;
+                        else if (count === 4) {
+                            if (openEnds === 2) val = p === 2 ? weights.ai4Open : weights.opp4Open;
+                            else if (openEnds === 1) val = p === 2 ? weights.ai4Blocked : weights.opp4Blocked;
+                        } else if (count === 3) {
+                            if (openEnds === 2) val = p === 2 ? weights.ai3Open : weights.opp3Open;
+                            else if (openEnds === 1) val = p === 2 ? weights.ai3Blocked : weights.opp3Blocked;
+                        } else if (count === 2) {
+                            if (openEnds === 2) val = p === 2 ? weights.ai2Open : weights.opp2Open;
+                        }
+                        score += val;
+                    }
                 }
             }
-            if (emptyCells.length > 0) {
-                const move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-                applyAIMove(currentBoard, move);
-                return;
-            }
         }
+        return score;
+    };
 
-        // Find best move for Medium/Hard
-        let bestScore = -1;
-        let move = null;
-        const searchRadius = difficulty === 'Hard' ? 2 : 1; 
+    const minimax = (grid, depth, alpha, beta, isMaximizing) => {
+        const score = evaluateBoard(grid, BOARD_SIZE);
+        if (depth === 0 || Math.abs(score) > 5000000) return score;
 
+        const candidates = [];
         for (let r = 0; r < BOARD_SIZE; r++) {
             for (let c = 0; c < BOARD_SIZE; c++) {
-                if (currentBoard[r][c] === 0) {
-                    let score = 0;
-                    // Focus search around stones to speed up
-                    let nearStone = false;
-                    for (let dr = -searchRadius; dr <= searchRadius; dr++) {
-                        for (let dc = -searchRadius; dc <= searchRadius; dc++) {
-                            const nr = r + dr;
-                            const nc = c + dc;
-                            if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && currentBoard[nr][nc] !== 0) {
-                                score += currentBoard[nr][nc] === 2 ? 3 : 2; // AI moves/blocking
-                                nearStone = true;
+                if (grid[r][c] === 0) {
+                    let isNear = false;
+                    for (let dr = -1; dr <= 1; dr++) {
+                        for (let dc = -1; dc <= 1; dc++) {
+                            const nr = r + dr, nc = c + dc;
+                            if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && grid[nr][nc] !== 0) {
+                                isNear = true; break;
                             }
                         }
+                        if (isNear) break;
                     }
-                    if (!nearStone && difficulty !== 'Easy') continue; 
-                    
-                    if (score > bestScore) {
-                        bestScore = score;
-                        move = { r, c };
-                    }
+                    if (isNear) candidates.push({ r, c });
                 }
             }
         }
 
-        if (move) applyAIMove(currentBoard, move);
+        if (candidates.length === 0) return 0;
+
+        if (isMaximizing) {
+            let maxEval = -Infinity;
+            for (const { r, c } of candidates) {
+                grid[r][c] = 2;
+                const ev = minimax(grid, depth - 1, alpha, beta, false);
+                grid[r][c] = 0;
+                maxEval = Math.max(maxEval, ev);
+                alpha = Math.max(alpha, ev);
+                if (beta <= alpha) break;
+            }
+            return maxEval;
+        } else {
+            let minEval = Infinity;
+            for (const { r, c } of candidates) {
+                grid[r][c] = 1;
+                const ev = minimax(grid, depth - 1, alpha, beta, true);
+                grid[r][c] = 0;
+                minEval = Math.min(minEval, ev);
+                beta = Math.min(beta, ev);
+                if (beta <= alpha) break;
+            }
+            return minEval;
+        }
+    };
+
+    const makeAIMove = useCallback((currentBoard) => {
+        const boardCopy = currentBoard.map(row => [...row]);
+        const depth = difficulty === 'Hard' ? 2 : (difficulty === 'Medium' ? 1 : 0);
+        
+        let bestScore = -Infinity;
+        let bestMove = null;
+
+        const candidates = [];
+        for (let r = 0; r < BOARD_SIZE; r++) {
+            for (let c = 0; c < BOARD_SIZE; c++) {
+                if (boardCopy[r][c] === 0) {
+                    let isNear = false;
+                    for (let dr = -2; dr <= 2; dr++) {
+                        for (let dc = -2; dc <= 2; dc++) {
+                            const nr = r + dr, nc = c + dc;
+                            if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE && boardCopy[nr][nc] !== 0) {
+                                isNear = true; break;
+                            }
+                        }
+                        if (isNear) break;
+                    }
+                    if (isNear || (r === Math.floor(BOARD_SIZE/2) && c === Math.floor(BOARD_SIZE/2))) candidates.push({ r, c });
+                }
+            }
+        }
+
+        for (const { r, c } of candidates) {
+            boardCopy[r][c] = 2;
+            const score = minimax(boardCopy, depth, -Infinity, Infinity, false);
+            boardCopy[r][c] = 0;
+            if (score > bestScore) {
+                bestScore = score;
+                bestMove = { r, c };
+            }
+        }
+
+        if (bestMove) applyAIMove(currentBoard, bestMove);
     }, [difficulty, BOARD_SIZE]);
 
     const applyAIMove = (currentBoard, move) => {
         const newBoard = currentBoard.map(row => [...row]);
         newBoard[move.r][move.c] = 2; // AI is O (2)
         setBoard(newBoard);
+        setIsProcessing(false); // Done processing move
         const win = checkWinner(newBoard, move.r, move.c, 2);
         if (win) {
             setWinner(2);
@@ -214,7 +314,7 @@ export default function CaroGame() {
     }, [roomId]);
 
     const handleCellClick = (r, c) => {
-        if (board[r][c] !== 0 || isGameOver) return;
+        if (board[r][c] !== 0 || isGameOver || isProcessing) return;
         
         // Multiplayer turn guard
         if (mode === 'multiplayer') {
@@ -224,6 +324,7 @@ export default function CaroGame() {
             }
         }
 
+        setIsProcessing(true); // Start processing
         const newBoard = board.map(row => [...row]);
         const currentPlayer = isXNext ? 1 : 2;
         newBoard[r][c] = currentPlayer;
@@ -234,11 +335,14 @@ export default function CaroGame() {
             setWinner(currentPlayer);
             setWinningLine(win.line);
             setIsGameOver(true);
-            playSound(currentPlayer === 1 ? 'win' : 'lose'); // Simplistic for solo
+            setIsProcessing(false);
+            playSound(currentPlayer === 1 ? 'win' : 'lose'); 
         } else {
             setIsXNext(!isXNext);
             if (mode === 'solo' && isXNext) {
                 setTimeout(() => makeAIMove(newBoard), 500);
+            } else {
+                setIsProcessing(false); // Manual/Multiplayer done
             }
         }
 
@@ -307,18 +411,22 @@ export default function CaroGame() {
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        fontSize: BOARD_SIZE >= 30 ? '0.9rem' : (BOARD_SIZE > 15 ? '1.5rem' : '2.5rem'),
-                                        fontWeight: 'bold',
-                                        cursor: cell === 0 && !isGameOver ? 'pointer' : 'default',
+                                        // fontSize DYNAMIC: 
+                                        // Board size is min(calc(100vh - 130px), calc(100vw - 400px))
+                                        // Let's use vmin to approximate or just a formula based on grid count
+                                        fontSize: `calc(min(calc(100vh - 130px), calc(100vw - 400px)) / ${BOARD_SIZE} * 0.7)`,
+                                        fontWeight: 900,
+                                        cursor: cell === 0 && !isGameOver && !isProcessing ? 'pointer' : 'default',
                                         color: cell === 1 ? 'var(--primary-color)' : '#ff4757',
                                         transition: 'background 0.2s',
-                                        border: BOARD_SIZE >= 30 ? '0.5px solid rgba(255,255,255,0.03)' : 'none',
+                                        border: BOARD_SIZE >= 20 ? '0.5px solid rgba(255,255,255,0.03)' : 'none',
                                         boxSizing: 'border-box',
                                         lineHeight: 1,
-                                        overflow: 'hidden'
+                                        overflow: 'hidden',
+                                        userSelect: 'none'
                                     }}
                                 >
-                                    {cell === 1 ? 'X' : cell === 2 ? 'O' : '\u00A0'}
+                                    {cell === 1 ? 'X' : cell === 2 ? 'O' : ''}
                                 </div>
                             );
                         }))}
@@ -342,14 +450,30 @@ export default function CaroGame() {
                                     ? (winner === (playerSymbol === 'X' ? 1 : 2) ? 'Bạn Thắng!' : 'Bạn Thua!')
                                     : (winner === 1 ? 'X Thắng!' : 'O Thắng!')}
                             </h2>
-                            <div style={{ display: 'flex', gap: '12px' }}>
-                                <button className="btn-primary" style={{ padding: '12px 24px', fontSize: '1rem' }}
-                                    onClick={resetGame}>
-                                    🔄 Chơi lại
+                            <div style={{ display: 'flex', gap: '16px', marginTop: '10px' }}>
+                                <button className="btn-primary" style={{ 
+                                    padding: '12px 28px', 
+                                    fontSize: '1.1rem', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '10px',
+                                    whiteSpace: 'nowrap',
+                                    minWidth: '160px',
+                                    justifyContent: 'center'
+                                }} onClick={resetGame}>
+                                    <RotateCcw size={20} /> Chơi lại
                                 </button>
-                                <button className="btn-secondary" style={{ padding: '12px 24px', fontSize: '1rem' }}
-                                    onClick={handleExit}>
-                                    🚪 Thoát
+                                <button className="btn-secondary" style={{ 
+                                    padding: '12px 28px', 
+                                    fontSize: '1.1rem', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '10px',
+                                    whiteSpace: 'nowrap',
+                                    minWidth: '160px',
+                                    justifyContent: 'center'
+                                }} onClick={handleExit}>
+                                    <ArrowLeft size={20} /> Thoát
                                 </button>
                             </div>
                         </div>
