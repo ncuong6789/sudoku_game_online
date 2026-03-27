@@ -20,7 +20,7 @@ export default function CaroGame() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
-    
+
     // Đếm số ván đã chơi để luân phiên lượt đi
     const [soloGameCount, setSoloGameCount] = useState(0);
 
@@ -46,7 +46,7 @@ export default function CaroGame() {
         else playLoseSound();
     }, [playWinSound, playLoseSound]);
 
-    const stopAudio = () => {};
+    const stopAudio = () => { };
 
     const checkWinner = (grid, r, c, player) => {
         const directions = [[0, 1], [1, 0], [1, 1], [1, -1]];
@@ -73,26 +73,26 @@ export default function CaroGame() {
     // --- CARO AI V2: MOVE ORDERING + ADVANCED HEURISTIC + NOISE ---
     const evaluateBoardForMoves = (grid, moveR, moveC, player) => {
         let score = 0;
-        const directions = [[1, 0], [0, 1], [1, 1], [1, -1]]; 
+        const directions = [[1, 0], [0, 1], [1, 1], [1, -1]];
         let open3Count = 0;
         let open4Count = 0;
 
         for (const [dr, dc] of directions) {
             let count = 1;
             let blocked = 0;
-            
+
             // Check forward
             let i = 1;
-            while(true) {
+            while (true) {
                 const nr = moveR + dr * i, nc = moveC + dc * i;
                 if (nr < 0 || nr >= BOARD_SIZE || nc < 0 || nc >= BOARD_SIZE) { blocked++; break; }
                 if (grid[nr][nc] === player) { count++; i++; }
                 else if (grid[nr][nc] !== 0) { blocked++; break; }
-                else break; 
+                else break;
             }
             // Check backward
             let j = 1;
-            while(true) {
+            while (true) {
                 const nr = moveR - dr * j, nc = moveC - dc * j;
                 if (nr < 0 || nr >= BOARD_SIZE || nc < 0 || nc >= BOARD_SIZE) { blocked++; break; }
                 if (grid[nr][nc] === player) { count++; j++; }
@@ -112,7 +112,7 @@ export default function CaroGame() {
                 else if (blocked === 1) score += 5;
             }
         }
-        
+
         // Forks: Double 3 or 4-3
         if (open4Count >= 2) score += 500000;
         else if (open4Count >= 1 && open3Count >= 1) score += 100000;
@@ -154,8 +154,8 @@ export default function CaroGame() {
                     if (isNear) {
                         grid[r][c] = isMaximizing ? aiNum : humanNum;
                         // Điểm sơ bộ cho Move Ordering (tính nhanh)
-                        const tempScore = evaluateBoardForMoves(grid, r, c, isMaximizing ? aiNum : humanNum) 
-                                        + evaluateBoardForMoves(grid, r, c, isMaximizing ? humanNum : aiNum) * 0.8; 
+                        const tempScore = evaluateBoardForMoves(grid, r, c, isMaximizing ? aiNum : humanNum)
+                            + evaluateBoardForMoves(grid, r, c, isMaximizing ? humanNum : aiNum) * 0.8;
                         grid[r][c] = 0;
                         candidates.push({ r, c, score: tempScore });
                     }
@@ -165,7 +165,7 @@ export default function CaroGame() {
 
         // Move Ordering: Lấy các nước đi tốt nhất lên trước
         candidates.sort((a, b) => b.score - a.score);
-        
+
         // Cắt giảm Beam Width: Chỉ xét 15 nước đi tiềm năng nhất để tăng cấu hình Depth
         const topCandidates = candidates.slice(0, 15);
         if (topCandidates.length === 0) return 0;
@@ -204,7 +204,7 @@ export default function CaroGame() {
             if (BOARD_SIZE === 3) depth = difficulty === 'Hard' ? 6 : 3;
             else depth = difficulty === 'Hard' ? 3 : (difficulty === 'Medium' ? 2 : 1); // Depth 3 cho Hard 15x15 nhờ Move Ordering
             // depth 3 tương đối mạnh mẽ ở Gomoku với Beam Search = 15
-            
+
             let bestScore = -Infinity;
             let bestMove = null;
 
@@ -227,11 +227,11 @@ export default function CaroGame() {
                         if (isNear) {
                             boardCopy[r][c] = aiNum;
                             // Move ordering base score + Center bias & Random Noise
-                            const centerDist = Math.abs(r - Math.floor(BOARD_SIZE/2)) + Math.abs(c - Math.floor(BOARD_SIZE/2));
-                            const heuristicVal = evaluateBoardForMoves(boardCopy, r, c, aiNum) 
-                                               + evaluateBoardForMoves(boardCopy, r, c, humanNum)*1.2 
-                                               - centerDist * 0.5 
-                                               + Math.random() * 5; // Noise: Tránh lặp lại lối mòn
+                            const centerDist = Math.abs(r - Math.floor(BOARD_SIZE / 2)) + Math.abs(c - Math.floor(BOARD_SIZE / 2));
+                            const heuristicVal = evaluateBoardForMoves(boardCopy, r, c, aiNum)
+                                + evaluateBoardForMoves(boardCopy, r, c, humanNum) * 1.2
+                                - centerDist * 0.5
+                                + Math.random() * 5; // Noise: Tránh lặp lại lối mòn
                             boardCopy[r][c] = 0;
                             candidates.push({ r, c, score: heuristicVal });
                         }
@@ -241,7 +241,7 @@ export default function CaroGame() {
 
             // Mở màn: Đánh trung tâm (hoặc ngẫu nhiên gần trung tâm) nếu chưa ai đi
             if (emptyCount === BOARD_SIZE * BOARD_SIZE) {
-                const center = Math.floor(BOARD_SIZE/2);
+                const center = Math.floor(BOARD_SIZE / 2);
                 const offsetR = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
                 const offsetC = Math.floor(Math.random() * 3) - 1;
                 bestMove = { r: center + offsetR, c: center + offsetC };
@@ -265,14 +265,14 @@ export default function CaroGame() {
             } else {
                 setIsProcessing(false);
             }
-        }, 50); 
+        }, 50);
     }, [difficulty, BOARD_SIZE, aiNum, humanNum]);
 
     const applyAIMove = (currentBoard, move) => {
         const newBoard = currentBoard.map(row => [...row]);
-        newBoard[move.r][move.c] = aiNum; 
+        newBoard[move.r][move.c] = aiNum;
         setBoard(newBoard);
-        setIsProcessing(false); 
+        setIsProcessing(false);
         const win = checkWinner(newBoard, move.r, move.c, aiNum);
         if (win) {
             setWinner(aiNum);
@@ -280,7 +280,14 @@ export default function CaroGame() {
             setIsGameOver(true);
             playSound('lose');
         } else {
-            // Xác nhận lượt đi bằng phép tính chẵn lẻ an toàn
+            // Check draw
+            const totalCells = BOARD_SIZE * BOARD_SIZE;
+            const filled = newBoard.flat().filter(v => v !== 0).length;
+            if (filled >= totalCells) {
+                setWinner(-1);
+                setIsGameOver(true);
+                return;
+            }
             const filledCells = newBoard.flat().filter(v => v !== 0).length;
             setIsXNext(filledCells % 2 === 0);
         }
@@ -291,8 +298,8 @@ export default function CaroGame() {
         if (mode === 'solo' && !isGameOver && !isProcessing) {
             const filledCells = board.flat().filter(v => v !== 0).length;
             // Ở Caro truyền thống, X luộn đi trước (số ô trống lẻ => tới O, chẵn => tới X).
-            const currentTurnNum = filledCells % 2 === 0 ? 1 : 2; 
-            
+            const currentTurnNum = filledCells % 2 === 0 ? 1 : 2;
+
             if (currentTurnNum === aiNum) {
                 makeAIMove(board);
             }
@@ -309,7 +316,7 @@ export default function CaroGame() {
             socket.on('caroMoved', ({ r, c, grid }) => {
                 setBoard(grid);
                 const filledCells = grid.flat().filter(v => v !== 0).length;
-                setIsXNext(filledCells % 2 === 0); 
+                setIsXNext(filledCells % 2 === 0);
                 const win = checkWinner(grid, r, c, grid[r][c]);
                 if (win) {
                     setWinner(grid[r][c]);
@@ -350,14 +357,14 @@ export default function CaroGame() {
 
     const handleCellClick = (r, c) => {
         if (board[r][c] !== 0 || isGameOver || isProcessing) return;
-        
+
         const filledCells = board.flat().filter(v => v !== 0).length;
-        const currentTurnNum = filledCells % 2 === 0 ? 1 : 2; 
-        
+        const currentTurnNum = filledCells % 2 === 0 ? 1 : 2;
+
         if (mode === 'solo' && currentTurnNum !== humanNum) return;
         if (mode === 'multiplayer' && currentTurnNum !== humanNum) return;
 
-        setIsProcessing(true); 
+        setIsProcessing(true);
         const newBoard = board.map(row => [...row]);
         newBoard[r][c] = currentTurnNum;
         setBoard(newBoard);
@@ -368,8 +375,17 @@ export default function CaroGame() {
             setWinningLine(win.line);
             setIsGameOver(true);
             setIsProcessing(false);
-            playSound(currentTurnNum === humanNum ? 'win' : 'lose'); 
+            playSound(currentTurnNum === humanNum ? 'win' : 'lose');
         } else {
+            // Check draw: board full and no winner
+            const totalCells = BOARD_SIZE * BOARD_SIZE;
+            const filled = newBoard.flat().filter(v => v !== 0).length;
+            if (filled >= totalCells) {
+                setWinner(-1); // -1 = draw
+                setIsGameOver(true);
+                setIsProcessing(false);
+                return;
+            }
             setIsXNext(!isXNext);
             if (mode === 'multiplayer') {
                 setIsProcessing(false);
@@ -388,7 +404,7 @@ export default function CaroGame() {
         setWinningLine(null);
         setIsGameOver(false);
         setIsProcessing(false);
-        
+
         if (mode === 'solo') {
             setSoloGameCount(prev => prev + 1);
         }
@@ -405,24 +421,24 @@ export default function CaroGame() {
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: 'calc(100vh - 80px)', padding: '0.5rem' }}>
-            <div className="glass-panel" style={{ 
+            <div className="glass-panel" style={{
                 position: 'relative',
                 overflow: 'hidden',
-                width: 'fit-content', 
-                height: 'fit-content', 
-                display: 'flex', 
-                flexDirection: 'row', 
-                padding: '1rem', 
-                gap: '1.5rem', 
+                width: 'fit-content',
+                height: 'fit-content',
+                display: 'flex',
+                flexDirection: 'row',
+                padding: '1rem',
+                gap: '1.5rem',
                 alignItems: 'stretch',
                 flexWrap: 'wrap',
                 justifyContent: 'center'
             }}>
-                
+
                 {/* TRÁI: BÀN CỜ GIGANTIC */}
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 0, margin: 0, position: 'relative' }}>
-                    <div style={{ 
-                        display: 'grid', 
+                    <div style={{
+                        display: 'grid',
                         gridTemplateColumns: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
                         gridTemplateRows: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
                         gap: BOARD_SIZE >= 30 ? '0px' : (BOARD_SIZE > 15 ? '1px' : '2px'),
@@ -437,7 +453,7 @@ export default function CaroGame() {
                         {board.map((row, r) => row.map((cell, c) => {
                             const isWinCell = winningLine?.some(coord => coord.r === r && coord.c === c);
                             return (
-                                <div 
+                                <div
                                     key={`${r}-${c}`}
                                     className="caro-cell"
                                     onClick={() => handleCellClick(r, c)}
@@ -467,7 +483,7 @@ export default function CaroGame() {
 
                 {/* PHẢI: ĐIỀU KHIỂN & CHAT */}
                 <div style={{ flex: '1 1 250px', maxWidth: '300px', display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: 'min(calc(100vh - 150px), calc(100vw - 320px))' }}>
-                    
+
                     {/* Header Sidebar */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
                         <div className="nav-item active" style={{ padding: '10px', display: 'flex', alignSelf: 'center', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 'bold' }}>
@@ -516,12 +532,12 @@ export default function CaroGame() {
                                 <MessageSquare size={18} />
                                 <span style={{ fontWeight: 'bold' }}>Trò chuyện</span>
                             </div>
-                            
+
                             <div style={{ flex: 1, overflowY: 'auto', marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 {messages.length === 0 && <p style={{ color: 'var(--text-secondary)', textAlign: 'center', fontSize: '0.8rem', fontStyle: 'italic', margin: 'auto' }}>Gửi lời chào nhau nhé!</p>}
                                 {messages.map((msg, idx) => (
-                                    <div key={idx} style={{ 
-                                        padding: '8px 12px', 
+                                    <div key={idx} style={{
+                                        padding: '8px 12px',
                                         background: msg.sender === socket.id ? 'rgba(var(--primary-color-rgb), 0.2)' : 'rgba(255,255,255,0.05)',
                                         borderRadius: '12px',
                                         alignSelf: msg.sender === socket.id ? 'flex-end' : 'flex-start',
@@ -536,14 +552,14 @@ export default function CaroGame() {
                             </div>
 
                             <div style={{ display: 'flex', gap: '6px' }}>
-                                <input 
+                                <input
                                     type="text"
                                     className="glass-input"
                                     placeholder="Giao tiếp..."
                                     value={inputMessage}
                                     onChange={(e) => setInputMessage(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && (()=>{
-                                        if(!inputMessage.trim()) return;
+                                    onKeyDown={(e) => e.key === 'Enter' && (() => {
+                                        if (!inputMessage.trim()) return;
                                         const msgObj = { message: inputMessage, sender: socket.id };
                                         socket.emit('sendMessage', { roomId, ...msgObj });
                                         setMessages(prev => [...prev, msgObj]);
@@ -551,8 +567,8 @@ export default function CaroGame() {
                                     })()}
                                     style={{ flex: 1, padding: '8px 10px', fontSize: '0.9rem' }}
                                 />
-                                <button className="btn-primary" style={{ padding: '0 12px', borderRadius: '8px' }} onClick={()=>{
-                                    if(!inputMessage.trim()) return;
+                                <button className="btn-primary" style={{ padding: '0 12px', borderRadius: '8px' }} onClick={() => {
+                                    if (!inputMessage.trim()) return;
                                     const msgObj = { message: inputMessage, sender: socket.id };
                                     socket.emit('sendMessage', { roomId, ...msgObj });
                                     setMessages(prev => [...prev, msgObj]);
@@ -574,11 +590,12 @@ export default function CaroGame() {
                         zIndex: 100, gap: '20px'
                     }}>
                         <div style={{ fontSize: '5rem', animation: 'float 3s ease-in-out infinite' }}>
-                            {winner === humanNum ? '🏆' : '💀'}
+                            {winner === -1 ? '🤝' : winner === humanNum ? '🏆' : '💀'}
                         </div>
-                        <h2 style={{ margin: 0, fontSize: '3rem', color: winner === humanNum ? 'var(--primary-color)' : '#ff4757', textAlign: 'center', textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
-                            {winner === humanNum ? 'Bạn Thắng!' : 'Bạn Thua!'}
+                        <h2 style={{ margin: 0, fontSize: '3rem', color: winner === -1 ? '#fbbf24' : winner === humanNum ? 'var(--primary-color)' : '#ff4757', textAlign: 'center', textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
+                            {winner === -1 ? 'Hòa!' : winner === humanNum ? 'Bạn Thắng!' : 'Bạn Thua!'}
                         </h2>
+
                         <div style={{ display: 'flex', gap: '20px', marginTop: '15px' }}>
                             <button className="btn-primary" style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }} onClick={resetGame}>
                                 <RotateCcw size={24} /> Chơi ván {soloGameCount + 2}
