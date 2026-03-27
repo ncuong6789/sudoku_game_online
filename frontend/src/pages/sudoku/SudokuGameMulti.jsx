@@ -333,7 +333,7 @@ export default function MultiplayerGame() {
 
     return (
         <div className="game-container">
-            <div className="sudoku-container glass-panel" style={{ position: 'relative' }}>
+            <div className="sudoku-container glass-panel" style={{ position: 'relative', overflow: 'hidden' }}>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
                     <div style={{ flex: 1, textAlign: 'left', paddingRight: '10px' }}>

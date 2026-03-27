@@ -110,13 +110,13 @@ export default function SnakeGame() {
     // --- SOLO STATE ---
     const [snake, setSnake] = useState(() => {
         const startX = Math.max(2, Math.floor(mapSize / 4));
-        const startY = Math.floor(mapSize / 2);
+        const startY = Math.floor(mapSize / 4);
         return [{ x: startX, y: startY }, { x: startX - 1, y: startY }];
     });
     const [botSnake, setBotSnake] = useState(() => {
         if (!hasBot) return [];
         const startX = Math.min(mapSize - 3, Math.floor(mapSize * 3 / 4));
-        const startY = Math.floor(mapSize / 2);
+        const startY = Math.floor(mapSize * 3 / 4);
         return [{ x: startX, y: startY }, { x: startX + 1, y: startY }];
     });
     const [botDirection, setBotDirection] = useState({x: -1, y: 0});
@@ -208,112 +208,192 @@ export default function SnakeGame() {
         const currentSpeed = goldenItem ? baseSpeed + 40 : baseSpeed; // Golden Item làm rắn đi chậm lại (dễ ăn hơn)
 
         const moveSnake = () => {
-            // --- 1. MOVE PLAYER ---
-            setSnake(prevSnake => {
-                const head = prevSnake[0];
-                const dir = nextDirRef.current;
-                setDirection(dir);
+            if (snake.length === 0) return;
 
-                const nx = head.x + dir.x;
-                const ny = head.y + dir.y;
+            // --- 1. PREDICT PLAYER ---
+            const pHead = snake[0];
+            const pDir = nextDirRef.current;
+            const pnx = pHead.x + pDir.x;
+            const pny = pHead.y + pDir.y;
+            const newPHead = { x: pnx, y: pny };
 
-                // Check collision (Walls, Self, Dead Bodies, OR Bot Body)
-                const isBotHit = hasBot && botSnake.some(s => s.x === nx && s.y === ny);
-                if (nx < 0 || nx >= mapSize || ny < 0 || ny >= mapSize || 
-                    prevSnake.some((segment, idx) => idx !== prevSnake.length - 1 && segment.x === nx && segment.y === ny) ||
-                    deadBodies.some(body => body.x === nx && body.y === ny) || isBotHit) {
-                    handleDeath(prevSnake);
-                    return prevSnake;
+            // --- 2. PREDICT BOT ---
+            let bnx = null, bny = null, newBHead = null, bDir = botDirection;
+            if (hasBot && botSnake.length > 0) {
+                const bHead = botSnake[0];
+                    
+                const obstacles = new Set();
+                // Both old body and NEW player head are obstacles
+                snake.forEach(p => obstacles.add(`${p.x},${p.y}`));
+                obstacles.add(`${pnx},${pny}`);
+
+                // Bot's own body (except tail since it moves forward, but we must protect neck)
+                botSnake.slice(0, -1).forEach(p => obstacles.add(`${p.x},${p.y}`));
+                if (botSnake.length > 1) {
+                    obstacles.add(`${botSnake[1].x},${botSnake[1].y}`); // Explicitly block 180 degree neck turn
                 }
+                deadBodies.forEach(p => obstacles.add(`${p.x},${p.y}`));
 
-                const newHead = { x: nx, y: ny };
-                const newSnake = [newHead, ...prevSnake];
+                const target = goldenItem || item;
+                let path = getAStarPath(bHead, target, obstacles, mapSize);
+                
+                // Difficulty Adjustment
+                if (difficulty === 'Easy' && Math.random() < 0.4) path = null;
+                if (difficulty === 'Medium' && Math.random() < 0.1) path = null;
 
-                if (nx === item.x && ny === item.y) {
-                    setScore(s => s + 1);
-                    newSnake.push({ ...prevSnake[prevSnake.length - 1] });
-                    setItem(spawnItemIntelligently(newSnake, deadBodies, mapSize));
-                    if (Math.random() < 0.15 && !goldenItem) {
-                        const gPos = spawnItemIntelligently(newSnake, deadBodies, mapSize);
-                        setGoldenItem({ ...gPos, timeLeft: 5 });
-                    }
-                } else if (goldenItem && nx === goldenItem.x && ny === goldenItem.y) {
-                    setScore(s => s + 2);
-                    setGoldenItem(null);
-                    newSnake.pop();
-                    if (newSnake.length > 2) newSnake.pop();
+                if (path && path.length > 0) {
+                    bDir = path[0];
                 } else {
-                    newSnake.pop();
-                }
-                return newSnake;
-            });
-
-            // --- 2. MOVE BOT ---
-            if (hasBot && !gameOver) {
-                setBotSnake(prevBot => {
-                    if (prevBot.length === 0) return prevBot;
-                    const head = prevBot[0];
-                    
-                    // Obstacles for Bot (Walls, Player Body, Own Body, Dead Bodies)
-                    const obstacles = new Set();
-                    snake.forEach(p => obstacles.add(`${p.x},${p.y}`));
-                    prevBot.slice(0, -1).forEach(p => obstacles.add(`${p.x},${p.y}`));
-                    deadBodies.forEach(p => obstacles.add(`${p.x},${p.y}`));
-
-                    const target = goldenItem || item;
-                    let path = getAStarPath(head, target, obstacles, mapSize);
-                    
-                    // Difficulty Adjustment
-                    if (difficulty === 'Easy' && Math.random() < 0.4) path = null;
-                    if (difficulty === 'Medium' && Math.random() < 0.1) path = null;
-
-                    let bDir = botDirection;
+                    // Safe Move: Try to reach tail or just any free square
+                    const tail = botSnake[botSnake.length - 1];
+                    path = getAStarPath(bHead, tail, obstacles, mapSize);
                     if (path && path.length > 0) {
                         bDir = path[0];
                     } else {
-                        // Safe Move: Try to reach tail or just any free square
-                        const tail = prevBot[prevBot.length - 1];
-                        path = getAStarPath(head, tail, obstacles, mapSize);
-                        if (path && path.length > 0) {
-                            bDir = path[0];
-                        } else {
-                            // Random available move
-                            const dirs = [{x: 0, y: -1}, {x: 0, y: 1}, {x: -1, y: 0}, {x: 1, y: 0}];
-                            const validDirs = dirs.filter(d => {
-                                const nx = head.x + d.x, ny = head.y + d.y;
-                                return nx >= 0 && nx < mapSize && ny >= 0 && ny < mapSize && !obstacles.has(`${nx},${ny}`);
-                            });
-                            if (validDirs.length > 0) bDir = validDirs[0];
+                        // Random available move safely avoiding neck and obstacles
+                        const dirs = [{x: 0, y: -1}, {x: 0, y: 1}, {x: -1, y: 0}, {x: 1, y: 0}];
+                        const neck = botSnake.length > 1 ? botSnake[1] : null;
+                        
+                        const validDirs = dirs.filter(d => {
+                            const nx = bHead.x + d.x, ny = bHead.y + d.y;
+                            if (neck && nx === neck.x && ny === neck.y) return false;
+                            return nx >= 0 && nx < mapSize && ny >= 0 && ny < mapSize && !obstacles.has(`${nx},${ny}`);
+                        });
+                        
+                        if (validDirs.length > 0) {
+                            bDir = validDirs[Math.floor(Math.random() * validDirs.length)]; // Pick random instead of always [0]
                         }
                     }
+                }
 
-                    setBotDirection(bDir);
-                    const nx = head.x + bDir.x, ny = head.y + bDir.y;
+                      // --- 3. RESOLVE COLLISIONS ---
+            let pDied = false;
+            let bDied = false;
 
-                    // Bot Collision
-                    if (nx < 0 || nx >= mapSize || ny < 0 || ny >= mapSize || obstacles.has(`${nx},${ny}`)) {
-                        setDeadBodies(d => [...d, ...prevBot]);
-                        setBotSnake([]);
-                        return [];
-                    }
-
-                    const newBotHead = { x: nx, y: ny };
-                    const newBot = [newBotHead, ...prevBot];
-
-                    if (nx === item.x && ny === item.y) {
-                        setBotScore(s => s + 1);
-                        newBot.push({ ...prevBot[prevBot.length - 1] });
-                        setItem(spawnItemIntelligently(snake, deadBodies, mapSize));
-                    } else if (goldenItem && nx === goldenItem.x && ny === goldenItem.y) {
-                        setBotScore(s => s + 2);
-                        setGoldenItem(null);
-                        newBot.pop();
-                    } else {
-                        newBot.pop();
-                    }
-                    return newBot;
-                });
+            // Player vs Walls, Old Self, DeadBodies
+            if (pnx < 0 || pnx >= mapSize || pny < 0 || pny >= mapSize || 
+                snake.some((s, idx) => idx !== snake.length - 1 && s.x === pnx && s.y === pny) ||
+                deadBodies.some(b => b.x === pnx && b.y === pny)) {
+                pDied = true;
             }
+            
+            // Bot vs Walls, Bot Old Self, Player Old Self, DeadBodies
+            if (hasBot && botSnake.length > 0) {
+                if (bnx < 0 || bnx >= mapSize || bny < 0 || bny >= mapSize ||
+                    botSnake.some((s, idx) => idx !== botSnake.length - 1 && s.x === bnx && s.y === bny) ||
+                    snake.some((s, idx) => idx !== snake.length - 1 && s.x === bnx && s.y === bny) ||
+                    deadBodies.some(b => b.x === bnx && b.y === bny)) {
+                    bDied = true;
+                }
+            }
+
+            // Head-to-head or overlap collisions between the two
+            // Bắt đâm chéo trực diện (Cross-collision)
+            if (hasBot && botSnake.length > 0) {
+                if (pnx === bnx && pny === bny) {
+                    pDied = true;
+                    bDied = true; // Cùng lao chung vào 1 ô trống!
+                }
+                if (botSnake.some(s => s.x === pnx && s.y === pny)) {
+                    pDied = true; // Rắn đâm vào Bot (Bao gồm cả đầu hiện tại của Bot)
+                }
+                if (snake.some(s => s.x === bnx && s.y === bny)) {
+                    bDied = true; // Bot đâm vào Rắn (Bao gồm cả đầu hiện tại của Rắn)
+                }
+            }
+
+            // --- 4. APPLY DEATHS & END GAME ---
+            if (pDied || (bDied && hasBot)) {
+                let newDeadBodies = [...deadBodies];
+                if (pDied) {
+                    newDeadBodies = [...newDeadBodies, ...snake];
+                    setSnake([]);
+                }
+                if (bDied && hasBot) {
+                    newDeadBodies = [...newDeadBodies, ...botSnake];
+                    setBotSnake([]);
+                }
+                
+                setDeadBodies(newDeadBodies);
+                setGameOver(true);
+                
+                if (hasBot) {
+                    if (pDied && !bDied) {
+                        setStatusMessage(`THẤT BẠI! Bạn đã bỏ mạng đi trước. (Bạn: ${score} - Bot: ${botScore})`);
+                    } else if (!pDied && bDied) {
+                        setStatusMessage(`CHIẾN THẮNG! Bot lóng ngóng đâm đầu. (Bạn: ${score} - Bot: ${botScore})`);
+                    } else {
+                        // Cả hai cùng chết ở 1 frame
+                        if (score > botScore) {
+                            setStatusMessage(`CHIẾN THẮNG! Cùng tử nạn nhưng hơn điểm. (Bạn: ${score} - Bot: ${botScore})`);
+                        } else if (score < botScore) {
+                            setStatusMessage(`THẤT BẠI! Cùng tử nạn và thua điểm. (Bạn: ${score} - Bot: ${botScore})`);
+                        } else {
+                            setStatusMessage(`HÒA CỜ! Đồng quy ư tận với số điểm bằng nhau. (Cùng ${score} điểm)`);
+                        }
+                    }
+                } else {
+                    // Chơi một mình Solo cổ điển
+                    setStatusMessage(`Game Over! Điểm của bạn: ${score}`);
+                }
+                return; // Stop processing frame entirely
+            }
+
+            // --- 5. EXECUTE MOVEMENT & ITEMS ---          // Do NOT return here. Bot dies but Player can keep playing in Solo Mode.
+            }
+
+            // --- 5. EXECUTE MOVEMENT & ITEMS ---
+            let newPScore = score;
+            let newP = [newPHead, ...snake];
+            let newItem = item;
+            let newGolden = goldenItem;
+
+            // Player eats items
+            if (pnx === item.x && pny === item.y) {
+                newPScore++;
+                newP.push({ ...snake[snake.length - 1] });
+                newItem = spawnItemIntelligently(newP, newDeadBodies, mapSize);
+                if (Math.random() < 0.15 && !goldenItem) {
+                    const gPos = spawnItemIntelligently(newP, newDeadBodies, mapSize);
+                    newGolden = { ...gPos, timeLeft: 5 };
+                }
+            } else if (goldenItem && pnx === goldenItem.x && pny === goldenItem.y) {
+                newPScore += 2;
+                newGolden = null;
+                newP.pop();
+                if (newP.length > 2) newP.pop(); // Shrink effect from golden item
+            } else {
+                newP.pop();
+            }
+
+            // Bot eats items
+            if (hasBot && botSnake.length > 0 && !bDied) {
+                let newB = [newBHead, ...botSnake];
+                let newBScore = botScore;
+
+                if (bnx === newItem.x && bny === newItem.y) {
+                    newBScore++;
+                    newB.push({ ...botSnake[botSnake.length - 1] });
+                    newItem = spawnItemIntelligently(newP.concat(newB), newDeadBodies, mapSize);
+                } else if (newGolden && bnx === newGolden.x && bny === newGolden.y) {
+                    newBScore += 2;
+                    newGolden = null;
+                    newB.pop(); 
+                } else {
+                    newB.pop();
+                }
+
+                setBotDirection(bDir);
+                setBotSnake(newB);
+                setBotScore(newBScore);
+            }
+
+            // FINAL STATE COMMIT
+            setDirection(pDir);
+            setSnake(newP);
+            setScore(newPScore);
+            setItem(newItem);
+            if (newGolden !== undefined) setGoldenItem(newGolden);
         };
 
         const interval = setInterval(moveSnake, currentSpeed);
@@ -342,11 +422,12 @@ export default function SnakeGame() {
 
     const handleRestartSolo = () => {
         const startX = Math.max(1, Math.floor(mapSize / 4));
-        const startY = Math.floor(mapSize / 2);
+        const startY = Math.floor(mapSize / 4);
         setSnake([{ x: startX, y: startY }, { x: startX - 1, y: startY }]);
 
         const botStartX = Math.min(mapSize - 2, Math.floor(mapSize * 3 / 4));
-        setBotSnake(hasBot ? [{ x: botStartX, y: startY }, { x: botStartX + 1, y: startY }] : []);
+        const botStartY = Math.floor(mapSize * 3 / 4);
+        setBotSnake(hasBot ? [{ x: botStartX, y: botStartY }, { x: botStartX + 1, y: botStartY }] : []);
         
         setBotDirection({x: -1, y: 0});
         setDirection({x: 1, y: 0});
@@ -438,7 +519,7 @@ export default function SnakeGame() {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1rem' }}>
-            <div className="glass-panel" style={{ width: '100%', maxWidth: '800px', display: 'flex', flexDirection: 'column', padding: '1.5rem' }}>
+            <div className="glass-panel" style={{ position: 'relative', overflow: 'hidden', width: '100%', maxWidth: '800px', display: 'flex', flexDirection: 'column', padding: '1.5rem' }}>
                 
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem', alignItems: 'center', flexWrap: 'nowrap' }}>
@@ -539,9 +620,19 @@ export default function SnakeGame() {
                                 boxShadow: '0 0 15px #fbbf24',
                                 transform: 'scale(0.9)',
                                 zIndex: 16,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontSize: '10px', fontWeight: 'bold'
+                                display: 'flex', alignItems: 'center', justifyContent: 'center'
                             }}>
-                                {goldenItem?.timeLeft || ''}
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '-25px', left: '50%', transform: 'translateX(-50%)',
+                                    background: 'rgba(0,0,0,0.85)', color: '#fbbf24',
+                                    padding: '2px 8px', borderRadius: '10px',
+                                    fontSize: '0.8rem', fontWeight: 'bold',
+                                    border: '1px solid #fbbf24', whiteSpace: 'nowrap',
+                                    zIndex: 25, boxShadow: '0 2px 10px rgba(0,0,0,0.5)'
+                                }}>
+                                    ⏳ {goldenItem ? goldenItem.timeLeft : (gameState?.goldenItem?.timeLeft || '')}
+                                </div>
                             </div>
                         )}
 
@@ -624,32 +715,39 @@ export default function SnakeGame() {
                             </div>
                         )}
 
-                        {/* GAME OVER OVERLAY */}
-                        {gameOver && (
-                            <div style={{
-                                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                                background: 'rgba(0, 0, 0, 0.7)',
-                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                zIndex: 50, backdropFilter: 'blur(3px)'
-                            }}>
-                                <h2 style={{ fontSize: '2.5rem', margin: '0 0 10px 0', color: '#f87171' }}>GAME OVER</h2>
-                                <p style={{ fontSize: '1.2rem', marginBottom: '20px' }}>Điểm của bạn: <strong style={{color: '#4ade80'}}>{renderData.score}</strong></p>
-                                
-                                <div style={{ display: 'flex', gap: '15px' }}>
-                                    {mode === 'solo' && (
-                                        <button className="btn-primary" onClick={handleRestartSolo} style={{ padding: '12px 24px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <RotateCcw size={20} /> Chơi lại ngay
-                                        </button>
-                                    )}
-                                    <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/snake/multiplayer' : '/snake')} style={{ padding: '12px 24px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.1)' }}>
-                                        <ArrowLeft size={20} /> Thoát ra
-                                    </button>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
 
+                {/* GAME OVER OVERLAY BLOCK HIỆU ỨNG FULL PANEL */}
+                {gameOver && (
+                    <div style={{
+                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(13, 17, 23, 0.95)',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                        zIndex: 100, backdropFilter: 'blur(8px)', gap: '15px', padding: '2rem', textAlign: 'center'
+                    }}>
+                        <div style={{ fontSize: '5rem', animation: 'float 3s ease-in-out infinite' }}>
+                            {statusMessage.includes('Thắng') ? '🏆' : statusMessage.includes('Hòa') ? '🤝' : '💀'}
+                        </div>
+                        <h2 style={{ fontSize: '2.5rem', margin: '0', color: statusMessage.includes('Thắng') ? '#4ade80' : statusMessage.includes('Hòa') ? '#fbbf24' : '#f87171' }}>
+                            {statusMessage.split('!')[0]}!
+                        </h2>
+                        <p style={{ fontSize: '1.4rem', marginBottom: '10px' }}>
+                            {statusMessage.includes('(') ? statusMessage.split('(')[1].replace(')', '') : statusMessage.split('!')[1] || ''}
+                        </p>
+                        
+                        <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
+                            {mode === 'solo' && (
+                                <button className="btn-primary" onClick={handleRestartSolo} style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <RotateCcw size={24} /> Chơi lại ngay
+                                </button>
+                            )}
+                            <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/snake/multiplayer' : '/snake')} style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.1)' }}>
+                                <ArrowLeft size={24} /> Thoát ra
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

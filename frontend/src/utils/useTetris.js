@@ -30,9 +30,20 @@ export const STAGE_HEIGHT = 20;
 export const createStage = () =>
     Array.from(Array(STAGE_HEIGHT), () => Array(STAGE_WIDTH).fill([0, 'clear']));
 
-const randomPiece = () => PIECES[Math.floor(Math.random() * PIECES.length)];
+// 7-Bag Randomizer to prevent droughts
+let bag = [];
+const randomPiece = () => {
+    if (bag.length === 0) {
+        bag = [...PIECES];
+        for (let i = bag.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [bag[i], bag[j]] = [bag[j], bag[i]];
+        }
+    }
+    return bag.pop();
+};
 
-export const useTetris = (initialPieceSequence = [], difficulty = 'Medium') => {
+export const useTetris = (initialPieceSequence = [], difficulty = 'Medium', playClearLineSound = null) => {
     const [stage, setStage] = useState(createStage());
     const [dropTime, setDropTime] = useState(null);
     const [gameOver, setGameOver] = useState(false);
@@ -264,6 +275,7 @@ export const useTetris = (initialPieceSequence = [], difficulty = 'Medium') => {
                                 const linePoints = [40, 100, 300, 1200];
                                 setScore(s => s + linePoints[rowsCleared - 1] * (level + 1));
                                 setRows(r => r + rowsCleared);
+                                if (playClearLineSound) playClearLineSound();
                             }
                             return swept;
                         });

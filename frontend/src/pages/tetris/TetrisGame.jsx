@@ -87,12 +87,14 @@ export default function TetrisGame() {
     const defaultSeq = useRef([]);
     const pieceSequence = locationState.pieceSequence || defaultSeq.current;
 
+    const { playWinSound, playLoseSound, playClearLineSound, playTetrisMoveSound, playTetrisRotateSound, playTetrisDropSound } = useAudio();
+
     // Player hook
     const { 
         stage, nextPieces, score, rows, level, gameOver,
         startGame, movePlayer, dropPlayer, playerRotate, hardDrop, resumeDrop,
         setGameOver
-    } = useTetris(pieceSequence, difficulty);
+    } = useTetris(pieceSequence, difficulty, playClearLineSound);
 
     // Opponent state
     const [opponentStage, setOpponentStage] = useState(Array.from(Array(STAGE_HEIGHT), () => Array(STAGE_WIDTH).fill([0, 'clear'])));
@@ -100,7 +102,6 @@ export default function TetrisGame() {
     const [gameResult, setGameResult] = useState(''); // 'Win', 'Lose', 'Draw'
     
     const [isStarted, setIsStarted] = useState(false);
-    const { playWinSound, playLoseSound } = useAudio();
 
     // Keyboard handlers
     const move = useCallback((e) => {
@@ -111,17 +112,22 @@ export default function TetrisGame() {
             }
             if (keyCode === 37) {
                 movePlayer(-1);
+                playTetrisMoveSound();
             } else if (keyCode === 39) {
                 movePlayer(1);
+                playTetrisMoveSound();
             } else if (keyCode === 40) {
                 dropPlayer();
+                playTetrisMoveSound();
             } else if (keyCode === 38) {
                 playerRotate(stage, 1);
+                playTetrisRotateSound();
             } else if (keyCode === 32) {
                 hardDrop();
+                playTetrisDropSound();
             }
         }
-    }, [gameOver, isStarted, movePlayer, dropPlayer, playerRotate, stage, hardDrop]);
+    }, [gameOver, isStarted, movePlayer, dropPlayer, playerRotate, stage, hardDrop, playTetrisMoveSound, playTetrisRotateSound, playTetrisDropSound]);
 
     const keyUp = useCallback((e) => {
         const { keyCode } = e;
@@ -216,90 +222,141 @@ export default function TetrisGame() {
     }, [roomId]);
 
     return (
-        <div className="game-container" style={{ outline: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '1rem' }} tabIndex="0">
-            <div className="glass-panel" style={{ width: '100%', maxWidth: '800px', display: 'flex', flexDirection: 'column', padding: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '2rem' }}>
-                    <h2 style={{ margin: 0, whiteSpace: 'nowrap', userSelect: 'none' }}>Tetris {mode === 'multiplayer' ? 'PvP' : 'Solo'}</h2>
-                    <button className="btn-secondary" onClick={() => navigate('/tetris')} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px', width: 'auto' }}>
-                        <ArrowLeft size={16} /> Thoát
-                    </button>
-                </div>
+        <div className="game-container" style={{ outline: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 80px)', padding: '0.5rem' }} tabIndex="0">
+            <div className="glass-panel" style={{ 
+                position: 'relative', overflow: 'hidden',
+                width: 'fit-content', height: 'fit-content', display: 'flex', flexDirection: 'row', 
+                padding: '1rem', gap: '1.5rem', alignItems: 'stretch', flexWrap: 'wrap', justifyContent: 'center' 
+            }}>
                 
-                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', flexWrap: 'wrap', justifyContent: 'center' }}>
-                
-                {/* PLAYER BOARD */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-                    <h3 style={{ margin: 0 }}>Bạn ({score})</h3>
-                    <Stage stage={stage} />
+                {/* TRÁI: KHU VỰC BÀN CỜ (CẢ CỦA MÌNH & ĐỐI THỦ) */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+                        <h3 style={{ margin: 0, color: '#4ade80', fontSize: '1.1rem' }}>Bạn ({score})</h3>
+                        <div style={{ width: 'min(calc(100vh - 190px), 320px)' }}>
+                            <Stage stage={stage} />
+                        </div>
+                    </div>
+                    
+                    {mode === 'multiplayer' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+                            <h3 style={{ margin: 0, color: '#f87171', fontSize: '1.1rem' }}>Đối thủ ({opponentScore})</h3>
+                            <div style={{ width: 'min(calc(100vh - 190px), 320px)' }}>
+                                <Stage stage={opponentStage} isOpponent={true} />
+                            </div>
+                        </div>
+                    )}
                 </div>
 
-                {/* INFO PANEL (MIDDLE) */}
-                <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1.5rem', minWidth: '150px' }}>
+                {/* PHẢI: BẢNG ĐIỀU KHIỂN ĐỒNG BỘ */}
+                <div style={{ flex: '1 1 280px', maxWidth: '320px', display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: 'min(calc(100vh - 120px), 650px)' }}>
                     
-                    <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
-                        <h4 style={{ margin: '0 0 10px 0', color: 'var(--text-secondary)' }}>ĐIỂM</h4>
-                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary-color)' }}>{score}</div>
+                    {/* Header Sidebar */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <div className="nav-item active" style={{ padding: '10px', display: 'flex', alignSelf: 'center', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                            <span style={{fontSize: '1.3rem'}}>🧱</span> Tetris {mode === 'multiplayer' ? 'PvP' : 'Solo'}
+                        </div>
+                        <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                            {mode === 'solo' ? `Chế độ: ${difficulty}` : `Phòng: ${roomId}`}
+                        </div>
+
+                        {/* Thông tin Điểm & Cấp */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
+                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '8px', textAlign: 'center' }}>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>ĐIỂM</div>
+                                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary-color)' }}>{score}</div>
+                            </div>
+                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '8px', textAlign: 'center' }}>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>CẤP ĐỘ</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#a371f7' }}>{level}</div>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', padding: '0 5px' }}>
+                            <span style={{ color: 'var(--text-secondary)' }}>Số hàng đã xóa:</span>
+                            <b style={{ color: '#4ade80' }}>{rows}</b>
+                        </div>
+
+                        {/* Nút điều khiển */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '0.5rem' }}>
+                            {mode === 'solo' && (
+                                <button className="btn-primary" onClick={() => { startGame(); }} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%' }}>
+                                    <RefreshCw size={18} /> Chơi ván mới
+                                </button>
+                            )}
+                            <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/tetris/multiplayer' : '/tetris')} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%' }}>
+                                <ArrowLeft size={18} /> Thoát
+                            </button>
+                        </div>
                     </div>
 
-                    <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
-                        <h4 style={{ margin: '0 0 10px 0', color: 'var(--text-secondary)' }}>KẾ TIẾP</h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px' }}>
+                    {/* Khối Tiếp Theo */}
+                    <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', flex: 1, minHeight: '120px' }}>
+                        <h3 style={{ margin: '0 0 10px 0', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)' }}>
+                            <span>🎯</span> Gạch Kế Tiếp
+                        </h3>
+                        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', padding: '15px 10px', border: '1px solid rgba(255,255,255,0.05)', flex: 1 }}>
                             {nextPieces.map((type, idx) => (
                                 <NextPiece key={idx} type={type} />
                             ))}
                         </div>
                     </div>
-
-                    <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                        <span style={{ color: 'var(--text-secondary)' }}>CẤP:</span>
-                        <b>{level}</b>
-                    </div>
-                    <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                        <span style={{ color: 'var(--text-secondary)' }}>HÀNG:</span>
-                        <b>{rows}</b>
-                    </div>
-
-                    {mode === 'solo' && gameOver && (
-                        <button className="btn-primary" onClick={() => startGame()} style={{ marginTop: '20px', padding: '10px', display: 'flex', alignItems: 'center', gap: '5px', width: '100%', justifyContent: 'center' }}>
-                            <RefreshCw size={16} /> Chơi lại
-                        </button>
-                    )}
                 </div>
 
-                {/* OPPONENT BOARD (PvP) */}
-                {mode === 'multiplayer' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-                        <h3 style={{ margin: 0, color: 'var(--error-color)' }}>Đối thủ ({opponentScore})</h3>
-                        <Stage stage={opponentStage} isOpponent={true} />
+                {/* GAME OVER BANNER OVERLAY FULL PANEL */}
+                {gameOver && gameResult && (
+                    <div style={{
+                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(13, 17, 23, 0.95)', backdropFilter: 'blur(8px)',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                        zIndex: 100, gap: '20px'
+                    }}>
+                        <div style={{ fontSize: '5rem', animation: 'float 3s ease-in-out infinite' }}>
+                            {gameResult === 'Win' ? '🏆' : gameResult === 'Draw' ? '🤝' : '💀'}
+                        </div>
+                        <h2 style={{ margin: 0, fontSize: '3rem', textAlign: 'center', color: gameResult === 'Win' ? '#4ade80' : '#f87171', textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
+                            {gameResult === 'Win' ? 'CHIẾN THẮNG!' : gameResult === 'Draw' ? 'HÒA' : 'THẤT BẠI'}
+                        </h2>
+                        <p style={{ fontSize: '1.4rem', marginBottom: '10px' }}>Điểm của bạn: <strong style={{color: '#4ade80'}}>{score}</strong></p>
+                        
+                        <div style={{ display: 'flex', gap: '20px' }}>
+                            {mode === 'solo' && (
+                                <button className="btn-primary" onClick={() => startGame()} style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <RefreshCw size={24} /> Chơi lại ngay
+                                </button>
+                            )}
+                            <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/tetris/multiplayer' : '/tetris')} style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.1)' }}>
+                                <ArrowLeft size={24} /> Thoát ra
+                            </button>
+                        </div>
                     </div>
                 )}
-                </div>
-            </div>
+                
+                {/* Dành cho Solo khi GameOver */}
+                {gameOver && !gameResult && mode === 'solo' && (
+                    <div style={{
+                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(13, 17, 23, 0.95)', backdropFilter: 'blur(8px)',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                        zIndex: 100, gap: '20px'
+                    }}>
+                        <div style={{ fontSize: '5rem', animation: 'float 3s ease-in-out infinite' }}>💀</div>
+                        <h2 style={{ margin: 0, fontSize: '3rem', textAlign: 'center', color: '#f87171', textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
+                            GAME OVER
+                        </h2>
+                        <p style={{ fontSize: '1.4rem', marginBottom: '10px' }}>Điểm của bạn: <strong style={{color: '#4ade80'}}>{score}</strong></p>
+                        
+                        <div style={{ display: 'flex', gap: '20px' }}>
+                            <button className="btn-primary" onClick={() => startGame()} style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <RefreshCw size={24} /> Chơi lại ngay
+                            </button>
+                            <button className="btn-secondary" onClick={() => navigate('/tetris')} style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.1)' }}>
+                                <ArrowLeft size={24} /> Thoát ra
+                            </button>
+                        </div>
+                    </div>
+                )}
 
-            {/* GAME OVER BANNER */}
-            {gameOver && gameResult && (
-                <div style={{ 
-                    position: 'fixed', top: '40%', left: '50%', transform: 'translate(-50%, -50%)', 
-                    background: 'rgba(15, 23, 42, 0.95)', padding: '3rem', borderRadius: '20px', 
-                    boxShadow: '0 0 50px rgba(0,0,0,0.8)', border: `2px solid ${gameResult==='Win' ? 'var(--success-color)' : 'var(--error-color)'}`,
-                    textAlign: 'center', zIndex: 100, backdropFilter: 'blur(10px)'
-                }}>
-                    <Trophy size={64} color={gameResult==='Win' ? '#4ade80' : '#f87171'} style={{ marginBottom: '1rem' }} />
-                    <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '3rem', color: gameResult==='Win'?'var(--success-color)':'var(--error-color)' }}>
-                        {gameResult === 'Win' ? 'CHIẾN THẮNG!' : gameResult === 'Draw' ? 'HÒA' : 'THẤT BẠI'}
-                    </h1>
-                    <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', marginBottom: '2rem' }}>Điểm của bạn: {score}</p>
-                    <button className="btn-secondary" onClick={() => navigate('/tetris')} style={{ padding: '12px 24px', fontSize: '1.2rem', width: '100%' }}>
-                        Rời phòng
-                    </button>
-                </div>
-            )}
-            
-            {!gameResult && gameOver && mode === 'solo' && (
-                <div style={{ position: 'fixed', top: '50%', background: 'rgba(239, 68, 68, 0.9)', padding: '10px 20px', borderRadius: '10px', color: 'white', fontWeight: 'bold' }}>
-                    GAME OVER
-                </div>
-            )}
+            </div>
         </div>
     );
 }

@@ -429,6 +429,8 @@ export default function CaroGame() {
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: 'calc(100vh - 80px)', padding: '0.5rem' }}>
             <div className="glass-panel" style={{ 
+                position: 'relative',
+                overflow: 'hidden',
                 width: 'fit-content', 
                 height: 'fit-content', 
                 display: 'flex', 
@@ -484,31 +486,6 @@ export default function CaroGame() {
                             );
                         }))}
                     </div>
-
-                    {/* GAME OVER OVERLAY */}
-                    {isGameOver && (
-                        <div style={{
-                            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                            background: 'rgba(13, 17, 23, 0.88)', backdropFilter: 'blur(4px)',
-                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                            borderRadius: '4px', zIndex: 20, gap: '14px'
-                        }}>
-                            <div style={{ fontSize: '4rem' }}>
-                                {winner === humanNum ? '🏆' : '💀'}
-                            </div>
-                            <h2 style={{ margin: 0, fontSize: '2.5rem', color: winner === 1 ? 'var(--primary-color)' : '#ff4757', textAlign: 'center' }}>
-                                {winner === humanNum ? 'Bạn Thắng!' : 'Bạn Thua!'}
-                            </h2>
-                            <div style={{ display: 'flex', gap: '16px', marginTop: '10px' }}>
-                                <button className="btn-primary" style={{ padding: '12px 28px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '10px' }} onClick={resetGame}>
-                                    <RotateCcw size={20} /> Chơi ván {soloGameCount + 2}
-                                </button>
-                                <button className="btn-secondary" style={{ padding: '12px 28px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '10px' }} onClick={handleExit}>
-                                    <ArrowLeft size={20} /> Thoát
-                                </button>
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 {/* PHẢI: ĐIỀU KHIỂN & CHAT */}
@@ -610,6 +587,31 @@ export default function CaroGame() {
                         </div>
                     )}
                 </div>
+
+                {/* GAME OVER FULL PANEL OVERLAY */}
+                {isGameOver && (
+                    <div style={{
+                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(13, 17, 23, 0.95)', backdropFilter: 'blur(8px)',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                        zIndex: 100, gap: '20px'
+                    }}>
+                        <div style={{ fontSize: '5rem', animation: 'float 3s ease-in-out infinite' }}>
+                            {winner === humanNum ? '🏆' : '💀'}
+                        </div>
+                        <h2 style={{ margin: 0, fontSize: '3rem', color: winner === humanNum ? 'var(--primary-color)' : '#ff4757', textAlign: 'center', textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
+                            {winner === humanNum ? 'Bạn Thắng!' : 'Bạn Thua!'}
+                        </h2>
+                        <div style={{ display: 'flex', gap: '20px', marginTop: '15px' }}>
+                            <button className="btn-primary" style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }} onClick={resetGame}>
+                                <RotateCcw size={24} /> Chơi ván {soloGameCount + 2}
+                            </button>
+                            <button className="btn-secondary" style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }} onClick={handleExit}>
+                                <ArrowLeft size={24} /> Thoát
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

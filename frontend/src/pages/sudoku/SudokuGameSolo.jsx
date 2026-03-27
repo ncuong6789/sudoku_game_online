@@ -225,7 +225,7 @@ export default function SoloGame() {
 
     return (
         <div className="game-container">
-            <div className="sudoku-container glass-panel">
+            <div className="sudoku-container glass-panel" style={{ position: 'relative', overflow: 'hidden' }}>
                 <div className="header-info">
                     <span>Difficulty: {difficulty}</span>
                     <span>Mistakes: {errorCount}</span>
