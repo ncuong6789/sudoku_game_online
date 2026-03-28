@@ -17,10 +17,10 @@ export default function ChessGame() {
         }
         return playerColor;
     });
-    const [moveHistory, setMoveHistory] = useState([]); 
+    const [moveHistory, setMoveHistory] = useState([]);
 
     const myColor = realPlayerColor || 'w';
-    
+
     // UI State
     const [gameOver, setGameOver] = useState(false);
     const [statusMessage, setStatusMessage] = useState('');
@@ -33,7 +33,7 @@ export default function ChessGame() {
     useEffect(() => {
         const history = game.history({ verbose: true });
         setMoveHistory(history);
-        
+
         if (history.length > 0) {
             const lastMove = history[history.length - 1];
             if (game.isCheckmate()) {
@@ -58,12 +58,12 @@ export default function ChessGame() {
             status = 'Hòa cờ!';
             setGameOver(true);
         } else {
-            status = game.turn() === myColor 
-                ? 'Đến lượt bạn.' 
+            status = game.turn() === myColor
+                ? 'Đến lượt bạn.'
                 : `Đến lượt đối thủ.`;
         }
         setStatusMessage(status);
-        
+
     }, [game, myColor, playChessMoveSound, playChessCaptureSound, playChessCheckSound, playWinSound, playLoseSound]);
 
     // Lắng nghe Socket cho Multiplayer
@@ -73,7 +73,7 @@ export default function ChessGame() {
                 setGame((g) => {
                     const newGame = new Chess();
                     newGame.loadPgn(g.pgn());
-                    
+
                     if (move) {
                         try {
                             newGame.move(move);
@@ -82,7 +82,7 @@ export default function ChessGame() {
                             console.error("Lỗi đồng bộ move, dùng FEN fallback");
                         }
                     }
-                    
+
                     try { newGame.load(newFen); } catch (e) { return g; }
                     return newGame;
                 });
@@ -104,7 +104,7 @@ export default function ChessGame() {
 
     useEffect(() => {
         return () => {
-             if (roomId) socket.emit('leaveRoom', roomId);
+            if (roomId) socket.emit('leaveRoom', roomId);
         };
     }, [roomId]);
 
@@ -131,7 +131,7 @@ export default function ChessGame() {
                         const promotion = moveMatch[2];
                         const from = moveStr.substring(0, 2);
                         const to = moveStr.substring(2, 4);
-                        
+
                         setGame((g) => {
                             const newGame = new Chess();
                             newGame.loadPgn(g.pgn());
@@ -219,7 +219,7 @@ export default function ChessGame() {
                         borderRadius: '50%'
                     };
                 });
-                newSquares[sq] = { background: 'rgba(79, 172, 254, 0.5)' }; 
+                newSquares[sq] = { background: 'rgba(79, 172, 254, 0.5)' };
                 setOptionSquares(newSquares);
                 return true;
             }
@@ -267,37 +267,89 @@ export default function ChessGame() {
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100vh', padding: '0.5rem', boxSizing: 'border-box', overflow: 'hidden' }}>
-            <div className="glass-panel" style={{ 
+            <div className="glass-panel" style={{
                 position: 'relative',
                 overflow: 'hidden',
-                display: 'flex', 
-                flexDirection: 'row', 
-                padding: '1rem', 
-                gap: '1.5rem', 
+                display: 'flex',
+                flexDirection: 'row',
+                padding: '1.5rem',
+                gap: '2.5rem',
                 alignItems: 'stretch',
                 justifyContent: 'center',
-                maxHeight: '100%',
-                maxWidth: '100%',
+                maxHeight: '90vh',
+                width: 'fit-content',
+                maxWidth: '98%',
+                borderRadius: '24px',
             }}>
-                
-                {/* TRÁI: BÀN CỜ TỐI ƯU KÍCH THƯỚC */}
+
+                {/* TRÁI: LỊCH SỬ NƯỚC ĐI */}
+                <div style={{
+                    flex: '0 0 240px',
+                    width: '240px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    maxHeight: '100%',
+                    overflow: 'hidden',
+                    background: 'rgba(255,255,255,0.03)',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    padding: '1.2rem',
+                    boxSizing: 'border-box'
+                }}>
+                    <h3 style={{ margin: '0 0 15px 0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)' }}>
+                        <span style={{ fontSize: '1.2rem' }}>📊</span> Lịch sử
+                    </h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '30px 1fr 1fr', marginBottom: '0.6rem', padding: '0 4px' }}>
+                        <span></span>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Trắng</span>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Đen</span>
+                    </div>
+                    <div style={{
+                        flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)',
+                        borderRadius: '12px', padding: '8px', border: '1px solid rgba(255,255,255,0.05)',
+                        scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.1) transparent'
+                    }}>
+                        {moveHistory.length === 0 && (
+                            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '0.85rem' }}>
+                                Bắt đầu...
+                            </div>
+                        )}
+                        {Array.from({ length: Math.ceil(moveHistory.length / 2) }).map((_, i) => (
+                            <div key={i} style={{
+                                display: 'grid',
+                                gridTemplateColumns: '30px 1fr 1fr',
+                                fontSize: '0.9rem',
+                                padding: '8px 4px',
+                                borderBottom: '1px solid rgba(255,255,255,0.03)',
+                                alignItems: 'center'
+                            }}>
+                                <span style={{ color: 'rgba(255,255,255,0.2)', fontWeight: 'bold', fontSize: '0.75rem' }}>{i + 1}.</span>
+                                <span style={{ color: '#fff', fontWeight: 500 }}>{moveHistory[i * 2]?.san}</span>
+                                <span style={{ color: 'rgba(255,255,255,0.6)' }}>{moveHistory[i * 2 + 1]?.san || ''}</span>
+                            </div>
+                        ))}
+                        <div ref={el => el && el.scrollIntoView({ behavior: 'smooth' })} />
+                    </div>
+                </div>
+
+                {/* GIỮA: BÀN CỜ */}
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 0, margin: 0, position: 'relative' }}>
                     <div style={{
-                        position: 'relative', 
-                        width: 'min(calc(100vh - 32px), calc(100vw - 360px), 640px)', 
-                        height: 'min(calc(100vh - 32px), calc(100vw - 360px), 640px)',
-                        border: '6px solid rgba(20, 20, 30, 0.9)', 
+                        position: 'relative',
+                        width: 'min(calc(100vh - 100px), calc(100vw - 650px), 620px)',
+                        height: 'min(calc(100vh - 100px), calc(100vw - 650px), 620px)',
+                        border: '8px solid rgba(15, 15, 25, 0.95)',
                         borderRadius: '12px',
-                        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)', 
+                        boxShadow: '0 30px 60px rgba(0, 0, 0, 0.6)',
                         overflow: 'hidden',
-                        background: '#d1dee6', 
-                        display: 'grid', 
-                        gridTemplateColumns: 'repeat(8, 1fr)', 
+                        background: '#d1dee6',
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(8, 1fr)',
                         gridTemplateRows: 'repeat(8, 1fr)'
                     }}>
                         {(() => {
-                            const ranksArr = [8,7,6,5,4,3,2,1];
-                            const filesArr = ['a','b','c','d','e','f','g','h'];
+                            const ranksArr = [8, 7, 6, 5, 4, 3, 2, 1];
+                            const filesArr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
                             const isFlipped = myColor === 'b';
                             const displayRanks = isFlipped ? [...ranksArr].reverse() : ranksArr;
                             const displayFiles = isFlipped ? [...filesArr].reverse() : filesArr;
@@ -313,7 +365,7 @@ export default function ChessGame() {
                                     const sq = f + r;
                                     const isLight = (r + filesArr.indexOf(f)) % 2 !== 0;
                                     const bgColor = isLight ? '#d1dee6' : '#5f8099';
-                                    const piece = game.get(sq); 
+                                    const piece = game.get(sq);
                                     const highlightStyle = customSquareStyles[sq] || {};
                                     let finalBg = highlightStyle.backgroundColor || bgColor;
                                     let dotOverlay = optionSquares[sq]?.background;
@@ -326,18 +378,18 @@ export default function ChessGame() {
                                             onDrop={(e) => {
                                                 e.preventDefault();
                                                 const sourceSq = e.dataTransfer.getData('text/plain');
-                                                if(sourceSq && sourceSq !== sq) attemptPlayerMove(sourceSq, sq);
+                                                if (sourceSq && sourceSq !== sq) attemptPlayerMove(sourceSq, sq);
                                             }}
                                             style={{
                                                 backgroundColor: finalBg, position: 'relative', display: 'flex',
-                                                justifyContent: 'center', alignItems: 'center', 
+                                                justifyContent: 'center', alignItems: 'center',
                                                 cursor: game.turn() === myColor ? 'pointer' : 'default',
-                                                ...(game.isCheck() && piece && piece.type === 'k' && piece.color === game.turn() ? {animation: 'blink-red 1s infinite'} : {})
+                                                ...(game.isCheck() && piece && piece.type === 'k' && piece.color === game.turn() ? { animation: 'blink-red 1s infinite' } : {})
                                             }}
                                         >
-                                            {dotOverlay && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: dotOverlay, borderRadius: '50%', transform: 'scale(0.3)', opacity: 0.6 }}/>}
+                                            {dotOverlay && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: dotOverlay, borderRadius: '50%', transform: 'scale(0.3)', opacity: 0.6 }} />}
                                             {piece && (
-                                                <span 
+                                                <span
                                                     draggable={piece.color === myColor && game.turn() === myColor}
                                                     onDragStart={(e) => {
                                                         e.dataTransfer.setData('text/plain', sq);
@@ -351,8 +403,8 @@ export default function ChessGame() {
                                                     }}
                                                 >{beautifulUnicode[piece.color][piece.type]}</span>
                                             )}
-                                            {i === 7 && <span style={{position:'absolute', bottom: '2px', right: '4px', fontSize:'0.75rem', color: isLight?'#5f8099':'#d1dee6', fontWeight: 'bold'}}>{f}</span>}
-                                            {j === 0 && <span style={{position:'absolute', top: '2px', left: '4px', fontSize:'0.75rem', color: isLight?'#5f8099':'#d1dee6', fontWeight: 'bold'}}>{r}</span>}
+                                            {i === 7 && <span style={{ position: 'absolute', bottom: '2px', right: '4px', fontSize: '0.75rem', color: isLight ? '#5f8099' : '#d1dee6', fontWeight: 'bold' }}>{f}</span>}
+                                            {j === 0 && <span style={{ position: 'absolute', top: '2px', left: '4px', fontSize: '0.75rem', color: isLight ? '#5f8099' : '#d1dee6', fontWeight: 'bold' }}>{r}</span>}
                                         </div>
                                     );
                                 }
@@ -362,28 +414,37 @@ export default function ChessGame() {
                     </div>
                 </div>
 
-                {/* PHẢI: BẢNG ĐIỀU KHIỂN ĐỒNG BỘ */}
+                {/* PHẢI: BẢNG ĐIỀU KHIỂN */}
                 <div style={{ flex: '0 0 300px', width: '300px', display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '100%', overflow: 'hidden' }}>
-                    
+
                     {/* Header Sidebar */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
                         <div className="nav-item active" style={{ padding: '10px', display: 'flex', alignSelf: 'center', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                            <span style={{fontSize: '1.3rem'}}>👑</span> Cờ Vua Pro
+                            <span style={{ fontSize: '1.3rem' }}>👑</span> Cờ Vua
                         </div>
                         <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                             {mode === 'solo' ? `Thách đấu AI (${difficulty})` : `Phòng: ${roomId}`}
                         </div>
 
                         {/* Badge người chơi */}
-                        <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '12px' }}>
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(74, 222, 128, 0.1)', padding: '10px', borderRadius: '10px', border: '1px solid rgba(74, 222, 128, 0.3)' }}>
-                                <span style={{ fontSize: '1.8rem', fontWeight: 900, color: '#4ade80', lineHeight: 1 }}>{myColor === 'w' ? 'Trắng' : 'Đen'}</span>
-                                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Bạn</span>
+                        <div style={{ display: 'flex', gap: '12px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '15px' }}>
+                            <div style={{
+                                flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
+                                background: myColor === 'w' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.4)',
+                                padding: '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.15)',
+                                boxShadow: myColor === 'w' ? '0 0 15px rgba(255,255,255,0.05)' : 'none'
+                            }}>
+                                <span style={{ fontSize: '1.6rem', fontWeight: 900, color: '#fff', lineHeight: 1 }}>{myColor === 'w' ? 'Trắng' : 'Đen'}</span>
+                                <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>BẠN</span>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', color: 'var(--text-secondary)', fontWeight: 'bold' }}>vs</div>
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(239, 68, 68, 0.1)', padding: '10px', borderRadius: '10px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                                <span style={{ fontSize: '1.8rem', fontWeight: 900, color: '#f87171', lineHeight: 1 }}>{myColor === 'w' ? 'Đen' : 'Trắng'}</span>
-                                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px', textAlign: 'center' }}>{mode === 'solo' ? 'Thần đồng AI' : 'Đối thủ'}</span>
+                            <div style={{ display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,0.2)', fontWeight: 'bold' }}>VS</div>
+                            <div style={{
+                                flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
+                                background: myColor === 'w' ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.08)',
+                                padding: '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)',
+                            }}>
+                                <span style={{ fontSize: '1.6rem', fontWeight: 900, color: 'rgba(255,255,255,0.8)', lineHeight: 1 }}>{myColor === 'w' ? 'Đen' : 'Trắng'}</span>
+                                <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>{mode === 'solo' ? 'AI' : 'ĐỐI THỦ'}</span>
                             </div>
                         </div>
 
@@ -412,35 +473,6 @@ export default function ChessGame() {
                             <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/chess/multiplayer' : '/chess')} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%' }}>
                                 <ArrowLeft size={18} /> Thoát
                             </button>
-                        </div>
-                    </div>
-
-                    {/* Diễn biến Lịch sử nước đi */}
-                    <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-                        <h3 style={{ margin: '0 0 10px 0', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)' }}>
-                            <span>📊</span> Lịch sử nước đi
-                        </h3>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem', padding: '0 4px' }}>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Trắng</span>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Đen</span>
-                        </div>
-                        <div style={{
-                            flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)',
-                            borderRadius: '8px', padding: '10px', border: '1px solid rgba(255,255,255,0.05)'
-                        }}>
-                            {moveHistory.length === 0 && (
-                                <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                                    Bắt đầu ván mới...
-                                </div>
-                            )}
-                            {Array.from({ length: Math.ceil(moveHistory.length / 2) }).map((_, i) => (
-                                <div key={i} style={{ display: 'flex', fontSize: '0.9rem', padding: '6px 4px', borderBottom: '1px solid rgba(255,255,255,0.03)', alignItems: 'center' }}>
-                                    <span style={{ width: '25px', color: 'rgba(255,255,255,0.3)', fontWeight: 'bold', fontSize: '0.75rem' }}>{i + 1}.</span>
-                                    <span style={{ flex: 1, color: '#f8f9fa' }}>{moveHistory[i * 2]?.san}</span>
-                                    <span style={{ flex: 1, color: 'rgba(255,255,255,0.5)' }}>{moveHistory[i * 2 + 1]?.san || ''}</span>
-                                </div>
-                            ))}
-                            <div ref={el => el && el.scrollIntoView({ behavior: 'smooth' })} />
                         </div>
                     </div>
                 </div>
