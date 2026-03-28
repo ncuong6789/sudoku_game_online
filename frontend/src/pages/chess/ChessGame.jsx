@@ -266,26 +266,32 @@ export default function ChessGame() {
     }, [optionSquares, moveHistory]);
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100vh', padding: '0.5rem', boxSizing: 'border-box', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', minHeight: '100vh', padding: '0.5rem', boxSizing: 'border-box', background: '#0d1117' }}>
             <div className="glass-panel" style={{
                 position: 'relative',
                 overflow: 'hidden',
                 display: 'flex',
                 flexDirection: 'row',
-                padding: '1.5rem',
-                gap: '2.5rem',
+                padding: '1.2rem',
+                gap: '1.5rem',
                 alignItems: 'stretch',
                 justifyContent: 'center',
-                maxHeight: '90vh',
+                height: 'fit-content',
+                maxHeight: '96vh',
                 width: 'fit-content',
                 maxWidth: '98%',
-                borderRadius: '24px',
+                borderRadius: '20px',
+                background: 'rgba(23, 23, 33, 0.85)',
+                backdropFilter: 'blur(25px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
             }}>
 
                 {/* TRÁI: LỊCH SỬ NƯỚC ĐI */}
                 <div style={{
-                    flex: '0 0 240px',
-                    width: '240px',
+                    flex: '0 1 230px',
+                    width: '230px',
+                    minWidth: '180px',
                     display: 'flex',
                     flexDirection: 'column',
                     maxHeight: '100%',
@@ -333,11 +339,11 @@ export default function ChessGame() {
                 </div>
 
                 {/* GIỮA: BÀN CỜ */}
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 0, margin: 0, position: 'relative' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 0, margin: 0, flex: '1 0 auto' }}>
                     <div style={{
                         position: 'relative',
-                        width: 'min(calc(100vh - 100px), calc(100vw - 650px), 620px)',
-                        height: 'min(calc(100vh - 100px), calc(100vw - 650px), 620px)',
+                        width: 'min(calc(100vh - 100px), calc(100vw - 620px), 640px)',
+                        height: 'min(calc(100vh - 100px), calc(100vw - 620px), 640px)',
                         border: '8px solid rgba(15, 15, 25, 0.95)',
                         borderRadius: '12px',
                         boxShadow: '0 30px 60px rgba(0, 0, 0, 0.6)',
@@ -415,7 +421,7 @@ export default function ChessGame() {
                 </div>
 
                 {/* PHẢI: BẢNG ĐIỀU KHIỂN */}
-                <div style={{ flex: '0 0 300px', width: '300px', display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '100%', overflow: 'hidden' }}>
+                <div style={{ flex: '0 1 280px', width: '280px', minWidth: '240px', display: 'flex', flexDirection: 'column', gap: '0.8rem', maxHeight: '100%', overflow: 'hidden' }}>
 
                     {/* Header Sidebar */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
@@ -430,21 +436,21 @@ export default function ChessGame() {
                         <div style={{ display: 'flex', gap: '12px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '15px' }}>
                             <div style={{
                                 flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
-                                background: myColor === 'w' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.4)',
+                                background: myColor === 'w' ? '#f8f9fa' : '#1e1e1e',
                                 padding: '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.15)',
-                                boxShadow: myColor === 'w' ? '0 0 15px rgba(255,255,255,0.05)' : 'none'
+                                boxShadow: myColor === 'w' ? '0 0 15px rgba(255,255,255,0.1)' : 'none'
                             }}>
-                                <span style={{ fontSize: '1.6rem', fontWeight: 900, color: '#fff', lineHeight: 1 }}>{myColor === 'w' ? 'Trắng' : 'Đen'}</span>
-                                <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>BẠN</span>
+                                <span style={{ fontSize: '1.6rem', fontWeight: 900, color: myColor === 'w' ? '#1e1e1e' : '#f8f9fa', lineHeight: 1 }}>{myColor === 'w' ? 'Trắng' : 'Đen'}</span>
+                                <span style={{ fontSize: '0.7rem', color: myColor === 'w' ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>BẠN</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,0.2)', fontWeight: 'bold' }}>VS</div>
                             <div style={{
                                 flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
-                                background: myColor === 'w' ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.08)',
+                                background: myColor === 'w' ? '#1e1e1e' : '#f8f9fa',
                                 padding: '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)',
                             }}>
-                                <span style={{ fontSize: '1.6rem', fontWeight: 900, color: 'rgba(255,255,255,0.8)', lineHeight: 1 }}>{myColor === 'w' ? 'Đen' : 'Trắng'}</span>
-                                <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>{mode === 'solo' ? 'AI' : 'ĐỐI THỦ'}</span>
+                                <span style={{ fontSize: '1.6rem', fontWeight: 900, color: myColor === 'w' ? '#f8f9fa' : '#1e1e1e', lineHeight: 1 }}>{myColor === 'w' ? 'Đen' : 'Trắng'}</span>
+                                <span style={{ fontSize: '0.7rem', color: myColor === 'w' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>{mode === 'solo' ? 'AI' : 'ĐỐI THỦ'}</span>
                             </div>
                         </div>
 
