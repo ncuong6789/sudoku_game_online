@@ -393,7 +393,7 @@ export default function PacmanGame() {
             };
 
             // Move Pacman
-            let np = { ...s.pacman };
+            let np = { ...s.pacman, prevX: s.pacman.x, prevY: s.pacman.y };
             const wantX = np.x + nextDir.current.x, wantY = np.y + nextDir.current.y;
             if (passable(wantX, wantY)) {
                 np.x = (wantX + cols) % cols; np.y = wantY; np.dir = nextDir.current;
@@ -422,7 +422,7 @@ export default function PacmanGame() {
 
             // Move Ghosts
             const newGhosts = s.ghosts.map(g => {
-                let cg = { ...g };
+                let cg = { ...g, prevX: g.x, prevY: g.y };
                 
                 // Spawning Logic: exit when delay passed
                 if (cg.state === 'house') {
@@ -581,7 +581,7 @@ export default function PacmanGame() {
                     <div style={{
                         width: '100%', height: '100%',
                         display: 'grid', gridTemplateColumns: `repeat(${cols},1fr)`, gridTemplateRows: `repeat(${rows},1fr)`,
-                        background: '#000', borderRadius: '8px', border: '4px solid #1e40af', boxSizing: 'border-box'
+                        background: '#000', borderRadius: '8px', boxSizing: 'border-box'
                     }}>
                         {mapGrid.map((row, y) => row.map((cell, x) => (
                             <div key={`c${x}${y}`} style={{
@@ -609,7 +609,13 @@ export default function PacmanGame() {
                                     left: `${(x / cols) * 100}%`, top: `${(y / rows) * 100}%`,
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none'
                                 }}>
-                                    <div style={{ width: '60%', height: '60%', background: '#fbbf24', borderRadius: '50%', animation: 'pacPulse 0.6s infinite alternate' }} />
+                                    <div style={{
+                                        width: '70%', height: '70%', background: '#ef4444', borderRadius: '50%',
+                                        animation: 'pacPulse 0.6s infinite alternate', position: 'relative',
+                                        boxShadow: '0 0 10px rgba(239,68,68,0.5)'
+                                    }}>
+                                        <div style={{ position: 'absolute', top: '-25%', left: '40%', width: '20%', height: '40%', background: '#22c55e', borderRadius: '4px', transform: 'rotate(20deg)' }} />
+                                    </div>
                                 </div>
                             );
                         })}
@@ -618,12 +624,13 @@ export default function PacmanGame() {
                             const fr = g.state === 'frightened';
                             const flash = fr && frightenedTimer < 8 && frightenedTimer % 2 === 0;
                             const c = g.state === 'dead' ? 'transparent' : flash ? '#fff' : fr ? '#1d4ed8' : g.color;
+                            const skipTrans = Math.abs(g.x - (g.prevX ?? g.x)) > 1;
                             return (
                                 <div key={g.id} style={{
                                     position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
                                     left: `${(g.x / cols) * 100}%`, top: `${(g.y / rows) * 100}%`,
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    zIndex: 10, transition: 'left 0.1s linear,top 0.1s linear', pointerEvents: 'none'
+                                    zIndex: 10, transition: skipTrans ? 'none' : 'left 0.1s linear,top 0.1s linear', pointerEvents: 'none'
                                 }}>
                                     {g.state === 'dead'
                                         ? <span style={{ lineHeight: 1, fontSize: `clamp(10px,${100 / rows}cqw,24px)` }}>👀</span>
@@ -634,21 +641,26 @@ export default function PacmanGame() {
                         })}
 
                         {/* Pacman */}
-                        <div style={{
-                            position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
-                            left: `${(pacman.x / cols) * 100}%`, top: `${(pacman.y / rows) * 100}%`,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            zIndex: 11, transition: isDying ? 'none' : 'left 0.1s linear,top 0.1s linear',
-                            pointerEvents: 'none',
-                            animation: isDying ? 'pacDie 1.2s forwards' : isProtected ? 'pacFlash 0.25s infinite' : undefined
-                        }}>
-                            <div style={{
-                                width: '88%', height: '88%', background: '#fbbf24', borderRadius: '50%',
-                                clipPath: 'polygon(100% 74%, 44% 48%, 100% 21%, 100% 0, 0 0, 0 100%, 100% 100%)',
-                                transform: `rotate(${pacman.dir.x === 1 ? 0 : pacman.dir.y === 1 ? 90 : pacman.dir.x === -1 ? 180 : -90}deg)`,
-                                animation: isDying ? 'none' : isProtected ? undefined : 'pacmanChomp 0.25s infinite alternate'
-                            }} />
-                        </div>
+                        {(() => {
+                            const skipTrans = Math.abs(pacman.x - (pacman.prevX ?? pacman.x)) > 1;
+                            return (
+                                <div style={{
+                                    position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
+                                    left: `${(pacman.x / cols) * 100}%`, top: `${(pacman.y / rows) * 100}%`,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    zIndex: 11, transition: (isDying || skipTrans) ? 'none' : 'left 0.1s linear,top 0.1s linear',
+                                    pointerEvents: 'none',
+                                    animation: isDying ? 'pacDie 1.2s forwards' : isProtected ? 'pacFlash 0.25s infinite' : undefined
+                                }}>
+                                    <div style={{
+                                        width: '88%', height: '88%', background: '#fbbf24', borderRadius: '50%',
+                                        clipPath: 'polygon(100% 74%, 44% 48%, 100% 21%, 100% 0, 0 0, 0 100%, 100% 100%)',
+                                        transform: `rotate(${pacman.dir.x === 1 ? 0 : pacman.dir.y === 1 ? 90 : pacman.dir.x === -1 ? 180 : -90}deg)`,
+                                        animation: isDying ? 'none' : isProtected ? undefined : 'pacmanChomp 0.25s infinite alternate'
+                                    }} />
+                                </div>
+                            );
+                        })()}
 
                         {phase === 'ready' && !isDying && (
                             <div style={{
