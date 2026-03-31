@@ -9,64 +9,158 @@ import { useAudio } from '../../utils/useAudio';
 // Left corridor: cols 1-5 (rows 7-9). Right corridor: cols 14-19 (rows 7-9).
 
 const CLASSIC = [
-    "WWWWWWWWWWWWWWWWWWWWW",  // 0
-    "W.........W.........W",  // 1
-    "W.WWW.WWW.W.WWW.WWW.W",  // 2
-    "WP.WW.WWW.W.WWW.WW.PW",  // 3  power pills: (1,3) (19,3)
-    "W...................W",  // 4
-    "W.WWW.W.WWWWW.W.WWW.W",  // 5
-    "W.....W.......W.....W",  // 6
-    "W.....WWWWHWWW......W",  // 7  ghost house top (H at col 10)
-    "W.....W______W......W",  // 8  ghost house floor (cols 7-12)
-    "W.....WWWWWWWW......W",  // 9  ghost house bottom (cols 6-13 = 8 W's)
-    "W...................W",  // 10
-    "W.WWW.W.WWWWW.W.WWW.W",  // 11
-    "W.....W.......W.....W",  // 12
-    "WWWWWWW.WWWWWWW.WWWWW",  // 13  gaps at col 7 and col 15
-    "W..........S........W",  // 14  Pacman: col 11
-    "W.WWW.WWW.W.WWW.WWW.W",  // 15
-    "WP..W.....W.....W..PW",  // 16  power pills: (1,16) (19,16)
-    "WWW.W.W.WWWWW.W.W.WWW",  // 17
-    "W.....W.......W.....W",  // 18
-    "W.WWWWWWW.W.WWWWWWW.W",  // 19
-    "W...................W",  // 20
-    "WWWWWWWWWWWWWWWWWWWWW",  // 21
+    "WWWWWWWWWWWWWWWWWWWWW",
+    "W.........W.........W",
+    "W.WWW.WWW.W.WWW.WWW.W",
+    "WPW W.W W.W.W W.W WPW",
+    "W.WWW.WWW.W.WWW.WWW.W",
+    "W...................W",
+    "W.WWW.W.WWWWW.W.WWW.W",
+    "W.....W... ...W.....W",
+    "WWWWW.WWW H WWW.WWWWW",
+    "____W.W_______W.W____",
+    "WWWWW.W_WWWWW_W.WWWWW",
+    "W.........W.........W",
+    "W.WWW.WWW.W.WWW.WWW.W",
+    "W...W.....S.....W...W",
+    "WWW.W.W.WWWWW.W.W.WWW",
+    "W.....W.......W.....W",
+    "W.WWWWWWW.W.WWWWWWW.W",
+    "W.........W.........W",
+    "W.WWW.WWW.W.WWW.WWW.W",
+    "WP..W...........W..PW",
+    "WWWWWWWWWWWWWWWWWWWWW",
 ];
 
 const LABYRINTH = [
-    "WWWWWWWWWWWWWWWWWWWWW",  // 0
-    "WP.................PW",  // 1  power pills at each end
-    "W.W.WWWWWW.WWWWWW.W.W",  // 2
-    "W.W...........W...W.W",  // 3
-    "W...WWWWW.W.WWWWW...W",  // 4
-    "W.W.W...W.W.W...W.W.W",  // 5
-    "W.W.W.WWW.W.WWW.W.W.W",  // 6
-    "W.....WWWWHWWW......W",  // 7  ghost house top (same gate position)
-    "W.....W______W......W",  // 8  ghost house floor
-    "W.....WWWWWWWW......W",  // 9  ghost house bottom
-    "W.W.W.W.......W.W.W.W",  // 10
-    "W.W.W.WWWWWWWWW.W.W.W",  // 11
-    "W.....W.......W.....W",  // 12
-    "WWWWWWW.WWWWWWW.WWWWW",  // 13  gaps at col 7 and col 15
-    "W..........S........W",  // 14  Pacman: col 11
-    "W.W.W.W.......W.W.W.W",  // 15
-    "WP.W...W.W.W.W...W.PW",  // 16  power pills
-    "W.WW.WW.W.W.W.WW.WW.W",  // 17
-    "W...W...W.W.W...W...W",  // 18
-    "W.WWWWW...W...WWWWW.W",  // 19
-    "W...................W",  // 20
-    "WWWWWWWWWWWWWWWWWWWWW",  // 21
+    "WWWWWWWWWWWWWWWWWWWWW",
+    "W.........W.........W",
+    "W.WWWWW.W.W.W.WWWWW.W",
+    "WPW...W.W.W.W.W...WPW",
+    "W.W.W.W.W.W.W.W.W.W.W",
+    "W...W...........W...W",
+    "W.WWW.W.WWWWW.W.WWW.W",
+    "W.....W... ...W.....W",
+    "WWWWW.WWW H WWW.WWWWW",
+    "____W.W_______W.W____",
+    "WWWWW.W_WWWWW_W.WWWWW",
+    "W.........W.........W",
+    "W.W.WWWWWWWWWWWWW.W.W",
+    "W.W.......S.......W.W",
+    "W.WWWWW.WWWWW.WWWWW.W",
+    "W...W.......W.......W",
+    "W.W.W.WWWWW.W.WWWWW.W",
+    "W.W.W.......W.......W",
+    "W.W.WWWWWWW.WWWWWWW.W",
+    "WP..................PW",
+    "WWWWWWWWWWWWWWWWWWWWW",
 ];
 
-const ALL_MAPS = { Classic: CLASSIC, Labyrinth: LABYRINTH };
+const SPLIT = [
+    "WWWWWWWWWWWWWWWWWWWWW",
+    "W.........W.........W",
+    "W.WWWW.WW.W.WW.WWWW.W",
+    "WPW.........W......PW",
+    "W.W.WWWWWWWWWWWWW.W.W",
+    "W.W...............W.W",
+    "W.W.W.WWWWW.WWWWW.W.W",
+    "W.....W... ...W.....W",
+    "WWWWW.WWW H WWW.WWWWW",
+    "____W.W_______W.W____",
+    "WWWWW.W_WWWWW_W.WWWWW",
+    "W...W.....W.....W...W",
+    "W.W.W.WWWWW.WWWWW.W.W",
+    "W.W.......S.......W.W",
+    "W.W.WWWWWWWWWWWWW.W.W",
+    "W.W...............W.W",
+    "W.WWWW.WW.W.WW.WWWW.W",
+    "W.........W.........W",
+    "W.WWWW.WW.W.WW.WWWW.W",
+    "WP..................PW",
+    "WWWWWWWWWWWWWWWWWWWWW",
+];
+
+const CROSS = [
+    "WWWWWWWWWWWWWWWWWWWWW",
+    "W.........W.........W",
+    "W.WWW.W.WWWWW.W.WWW.W",
+    "WP..W.W...W...W.W..PW",
+    "WWW.W.WWW.W.WWW.W.WWW",
+    "W.........W.........W",
+    "W.WWWWW.W.W.W.WWWWW.W",
+    "W.....W... ...W.....W",
+    "WWWWW.WWW H WWW.WWWWW",
+    "____W.W_______W.W____",
+    "WWWWW.W_WWWWW_W.WWWWW",
+    "W.....W.......W.....W",
+    "W.WWWWW.W.W.W.WWWWW.W",
+    "W.........S.........W",
+    "WWW.W.WWW.W.WWW.W.WWW",
+    "WP..W.W...W...W.W..PW",
+    "W.WWW.W.WWWWW.W.WWW.W",
+    "W...................W",
+    "W.WWWWWWW.W.WWWWWWW.W",
+    "WP.................PW",
+    "WWWWWWWWWWWWWWWWWWWWW",
+];
+
+const OPEN = [
+    "WWWWWWWWWWWWWWWWWWWWW",
+    "W...................W",
+    "W.WWWW.WWWWW.WWWW.W.W",
+    "WP....W.....W....W.PW",
+    "WWWW.W.W.W.W.W.WWWW.W",
+    "W......W.W.W......W.W",
+    "W.WWWW.W.W.W.WWWW.V.W",
+    "W.....W... ...W.....W",
+    "WWWWW.WWW H WWW.WWWWW",
+    "____W.W_______W.W____",
+    "WWWWW.W_WWWWW_W.WWWWW",
+    "W......W...W......W.W",
+    "W.WWWW.W.W.W.WWWW.W.W",
+    "W........S..........W",
+    "WWWW.W.W.W.W.W.WWWW.W",
+    "W....W.......W....W.W",
+    "W.WWWW.WWWWW.WWWW.W.W",
+    "W...................W",
+    "W.WWWWWWW.W.WWWWWWW.W",
+    "WP.................PW",
+    "WWWWWWWWWWWWWWWWWWWWW",
+];
+
+const VOID = [
+    "WWWWWWWWWWWWWWWWWWWWW",
+    "WP........W........PW",
+    "W.WWWWWW.W.W.WWWWWW.W",
+    "W.W......W.W......W.W",
+    "W.W.WWWWW.W.WWWWW.W.W",
+    "W.W...............W.W",
+    "W.W.WWWWW.W.WWWWW.W.W",
+    "W.....W... ...W.....W",
+    "WWWWW.WWW H WWW.WWWWW",
+    "____W.W_______W.W____",
+    "WWWWW.W_WWWWW_W.WWWWW",
+    "W.W.......W.......W.W",
+    "W.W.WWWWW.S.WWWWW.W.W",
+    "W.W...............W.W",
+    "W.W.WWWWW.W.WWWWW.W.W",
+    "W.W.......W.......W.W",
+    "W.WWWWWW.W.W.WWWWWW.W",
+    "W........W........W.W",
+    "W.WWWWWWWWWWWWWWWWW.W",
+    "WP.................PW",
+    "WWWWWWWWWWWWWWWWWWWWW",
+];
+
+const ALL_MAPS = { Classic: CLASSIC, Labyrinth: LABYRINTH, Split: SPLIT, Cross: CROSS, Open: OPEN, Void: VOID };
 
 // Ghost start positions (hardcoded, not from map)
 // BLINKY starts outside house already; others inside
 const GHOST_STARTS = [
-    { id: 'BLINKY', color: '#ef4444', x: 10, y: 6, dir: { x: -1, y: 0 }, exitDelay: 0 },
-    { id: 'PINKY', color: '#f9a8d4', x: 9, y: 8, dir: { x: 0, y: -1 }, exitDelay: 80 },
-    { id: 'INKY', color: '#06b6d4', x: 10, y: 8, dir: { x: 0, y: -1 }, exitDelay: 160 },
-    { id: 'CLYDE', color: '#fb923c', x: 11, y: 8, dir: { x: 0, y: -1 }, exitDelay: 240 },
+    { id: 'BLINKY', color: '#ef4444', x: 10, y: 7, dir: { x: -1, y: 0 }, exitDelay: 0 },
+    { id: 'PINKY', color: '#f9a8d4', x: 9, y: 9, dir: { x: 0, y: -1 }, exitDelay: 80 },
+    { id: 'INKY', color: '#06b6d4', x: 10, y: 9, dir: { x: 0, y: -1 }, exitDelay: 160 },
+    { id: 'CLYDE', color: '#fb923c', x: 11, y: 9, dir: { x: 0, y: -1 }, exitDelay: 240 },
 ];
 
 const DIRS = { UP: { x: 0, y: -1 }, DOWN: { x: 0, y: 1 }, LEFT: { x: -1, y: 0 }, RIGHT: { x: 1, y: 0 } };
@@ -76,28 +170,67 @@ const GHOST_RANGES = { BLINKY: 30, PINKY: 10, INKY: 7, CLYDE: 12 };
 const isSameDir = (a, b) => a?.x === b?.x && a?.y === b?.y;
 const getOpp = d => ({ x: -d.x, y: -d.y });
 
-function bfsStep(start, target, grid, canPassH = false) {
+const manhattan = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+
+function findPathAStar(start, target, grid, canPassH = false) {
     const rows = grid.length, cols = grid[0].length;
-    const visited = new Set([`${start.x},${start.y}`]);
-    const queue = [{ x: start.x, y: start.y, first: null }];
-    while (queue.length) {
-        const cur = queue.shift();
-        if (cur.x === target.x && cur.y === target.y) return cur.first;
+    const pq = [{ x: start.x, y: start.y, g: 0, h: manhattan(start, target), path: [] }];
+    const visited = new Map();
+    visited.set(`${start.x},${start.y}`, 0);
+
+    while (pq.length) {
+        pq.sort((a, b) => (a.g + a.h) - (b.g + b.h));
+        const cur = pq.shift();
+
+        if (cur.x === target.x && cur.y === target.y) return cur.path[0];
+
         for (const d of DIR_LIST) {
-            let nx = cur.x + d.x, ny = cur.y + d.y;
-            if (nx < 0) nx = cols - 1; if (nx >= cols) nx = 0;
+            let nx = (cur.x + d.x + cols) % cols;
+            let ny = cur.y + d.y;
             if (ny < 0 || ny >= rows) continue;
+
             const cell = grid[ny][nx];
             if (cell === 'W') continue;
             if (cell === 'H' && !canPassH) continue;
+
+            const g = cur.g + 1;
             const k = `${nx},${ny}`;
-            if (!visited.has(k)) {
-                visited.add(k);
-                queue.push({ x: nx, y: ny, first: cur.first ?? d });
+            if (!visited.has(k) || g < visited.get(k)) {
+                visited.set(k, g);
+                pq.push({ x: nx, y: ny, g, h: manhattan({ x: nx, y: ny }, target), path: [...cur.path, d] });
             }
         }
     }
     return null;
+}
+
+function getNextMoveClassic(ghost, target, grid, canPassH = false) {
+    const rows = grid.length, cols = grid[0].length;
+    const opp = { x: -ghost.dir.x, y: -ghost.dir.y };
+    
+    const validDirs = DIR_LIST.filter(d => {
+        if (ghost.state !== 'dead' && ghost.state !== 'frightened' && isSameDir(d, opp)) return false;
+        let nx = (ghost.x + d.x + cols) % cols;
+        let ny = ghost.y + d.y;
+        if (ny < 0 || ny >= rows) return false;
+        const cell = grid[ny][nx];
+        return cell !== 'W' && (cell !== 'H' || canPassH);
+    });
+
+    if (validDirs.length === 0) return ghost.dir || DIR_LIST[0];
+
+    let bestDir = validDirs[0], minDist = Infinity;
+    validDirs.forEach(d => {
+        const nx = (ghost.x + d.x + cols) % cols;
+        const ny = ghost.y + d.y;
+        const dist = Math.sqrt(Math.pow(nx - target.x, 2) + Math.pow(ny - target.y, 2));
+        if (dist < minDist) {
+            minDist = dist;
+            bestDir = d;
+        }
+    });
+
+    return bestDir;
 }
 
 function parseMap(raw) {
@@ -190,13 +323,12 @@ export default function PacmanGame() {
             const tc = s.tickCount + 1;
             setTickCount(tc);
 
-            const passable = (x, y, forGhost = false, isDead = false) => {
-                if (x < 0) x = cols - 1; if (x >= cols) x = 0;
+            const passable = (x, y, forGhost = false) => {
+                const nx = (x + cols) % cols;
                 if (y < 0 || y >= rows) return false;
-                const c = grid[y][x];
+                const c = grid[y][nx];
                 if (c === 'W') return false;
-                if (c === 'H') return isDead; // only dead ghost passes gate
-                if (c === '_') return true;
+                if (c === 'H' || c === '_') return forGhost;
                 return true;
             };
 
@@ -230,55 +362,85 @@ export default function PacmanGame() {
 
             // Move Ghosts
             const newGhosts = s.ghosts.map(g => {
-                if (g.state === 'house') {
-                    // Exit when timer fires
-                    if (tc >= g.exitDelay) {
-                        // Navigate toward gate (10,7) then out
-                        return { ...g, state: 'exiting' };
-                    }
-                    return g;
-                }
                 let cg = { ...g };
-                // Exiting: pathfind to outside (10,6)
+                
+                // Spawning Logic: exit when delay passed
+                if (cg.state === 'house') {
+                    if (tc >= cg.exitDelay) cg.state = 'exiting';
+                    else return cg;
+                }
+
+                // If at a junction or just starting, decide next move
+                // In classic Pacman, they choose next move *before* entering the next tile
+                // But for this grid implementation, we calculate next move at each step
+                
+                // Exiting Logic: target outside house (10,7)
                 if (cg.state === 'exiting') {
-                    const target = { x: 10, y: 6 };
-                    if (cg.x === target.x && cg.y === target.y) { cg.state = 'chase'; return cg; }
-                    const step = bfsStep(cg, target, grid, true);
-                    if (step) { cg.x += step.x; cg.y += step.y; cg.dir = step; }
+                    const gateOut = { x: 10, y: 7 };
+                    if (cg.x === gateOut.x && cg.y === gateOut.y) { cg.state = 'chase'; return cg; }
+                    const step = getNextMoveClassic(cg, gateOut, grid, true);
+                    cg.dir = step; cg.x = (cg.x + step.x + cols) % cols; cg.y += step.y;
                     return cg;
                 }
-                // State transitions
+
+                // State Transitions (Scatter/Chase timer: 7s Scatter, 20s Chase)
+                const cycle = 27 * 6; // ticks per cycle (approx)
+                const isScatter = (tc % cycle) < (7 * 6);
+                
                 if (isFr && cg.state !== 'dead') cg.state = 'frightened';
                 else if (!isFr && cg.state === 'frightened') cg.state = 'chase';
-                if (cg.state === 'dead' && cg.x === cg.startX && cg.y === cg.startY) cg.state = 'chase';
+                if (cg.state === 'dead' && cg.x === 10 && cg.y === 8) cg.state = 'exiting';
 
-                // Valid dirs (no reversal unless dead)
-                const opp = getOpp(cg.dir);
-                const valid = DIR_LIST.filter(d => {
-                    if (cg.state !== 'dead' && isSameDir(d, opp)) return false;
-                    let nx = cg.x + d.x, ny = cg.y + d.y;
-                    if (nx < 0) nx = cols - 1; if (nx >= cols) nx = 0;
-                    return passable(nx, ny, true, cg.state === 'dead');
-                });
-                if (!valid.length) valid.push(opp);
-
-                let chosen = valid[Math.floor(Math.random() * valid.length)];
+                // Pathfinding Target
+                let target = { x: np.x, y: np.y }; // Default (Blinky Chase)
+                
                 if (cg.state === 'dead') {
-                    const step = bfsStep(cg, { x: cg.startX, y: cg.startY }, grid, true);
-                    if (step && valid.some(d => isSameDir(d, step))) chosen = step;
-                } else if (cg.state === 'chase') {
-                    const dist = Math.abs(cg.x - np.x) + Math.abs(cg.y - np.y);
-                    if (dist <= GHOST_RANGES[cg.id] ?? 8) {
-                        let tgt = { x: np.x, y: np.y };
-                        if (cg.id === 'PINKY') tgt = { x: np.x + np.dir.x * 4, y: np.y + np.dir.y * 4 };
-                        else if (cg.id === 'CLYDE' && dist < 5) tgt = { x: 1, y: rows - 2 };
-                        const step = bfsStep(cg, tgt, grid, false);
-                        if (step && valid.some(d => isSameDir(d, step))) chosen = step;
+                    target = { x: 10, y: 8 }; // House interior
+                } else if (cg.state === 'frightened') {
+                    // Classic Scared: Random turn at every junction
+                    const valid = DIR_LIST.filter(d => passable((cg.x + d.x + cols) % cols, cg.y + d.y, true));
+                    if (valid.length > 1) {
+                        const opp = { x: -cg.dir.x, y: -cg.dir.y };
+                        const forward = valid.filter(d => !isSameDir(d, opp));
+                        cg.dir = forward[Math.floor(Math.random() * forward.length)] || opp;
+                    } else if (valid.length === 1) {
+                        cg.dir = valid[0];
+                    }
+                    cg.x = (cg.x + cg.dir.x + cols) % cols; cg.y += cg.dir.y;
+                    return cg;
+                } else if (isScatter) {
+                    const scatterTargets = {
+                        BLINKY: { x: cols - 2, y: 1 },
+                        PINKY: { x: 1, y: 1 },
+                        INKY: { x: cols - 2, y: rows - 2 },
+                        CLYDE: { x: 1, y: rows - 2 }
+                    };
+                    target = scatterTargets[cg.id];
+                } else {
+                    // Classic Personality Target Tiles
+                    if (cg.id === 'PINKY') {
+                        // 4 tiles ahead of Pacman
+                        target = { x: np.x + np.dir.x * 4, y: np.y + np.dir.y * 4 };
+                    } else if (cg.id === 'INKY') {
+                        // Vector from Blinky to 2 tiles ahead of Pacman, doubled
+                        const twoAhead = { x: np.x + np.dir.x * 2, y: np.y + np.dir.y * 2 };
+                        const blinky = s.ghosts.find(ghost => ghost.id === 'BLINKY') || cg;
+                        target = {
+                            x: twoAhead.x + (twoAhead.x - blinky.x),
+                            y: twoAhead.y + (twoAhead.y - blinky.y)
+                        };
+                    } else if (cg.id === 'CLYDE') {
+                        // If distance > 8 chase, else scatter
+                        if (manhattan(cg, np) < 8) target = { x: 1, y: rows - 2 };
+                        else target = { x: np.x, y: np.y };
                     }
                 }
-                cg.dir = chosen;
-                cg.x += chosen.x; cg.y += chosen.y;
-                if (cg.x < 0) cg.x = cols - 1; if (cg.x >= cols) cg.x = 0;
+
+                // Choose next move that minimizes distance to target
+                const step = getNextMoveClassic(cg, target, grid, cg.state === 'dead');
+                cg.dir = step;
+                cg.x = (cg.x + step.x + cols) % cols;
+                cg.y += step.y;
                 return cg;
             });
 

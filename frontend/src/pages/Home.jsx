@@ -154,7 +154,7 @@ export default function Home() {
     return (
         <div className="dashboard-container">
             <aside className="sidebar">
-                <div className="sidebar-logo">GameOn</div>
+                <div className="sidebar-logo">GameOnl</div>
                 <nav className="nav-group">
                     <div className={`nav-item ${activeGame === 'sudoku' ? 'active' : ''}`} onClick={() => { setActiveGame('sudoku'); setShowHelp(false); }}>
                         <Grid3X3 size={20} /> Sudoku
@@ -179,7 +179,7 @@ export default function Home() {
                     <div className="nav-item"><Trophy size={20} /> Xếp hạng</div>
                     <div className="nav-item"><Users size={20} /> Bạn bè</div>
                 </div>
-                <div className="sidebar-footer">GameOn v1.2</div>
+                <div className="sidebar-footer">GameOnl v1.2</div>
             </aside>
 
             <main className="main-content" style={{ padding: '2rem' }}>

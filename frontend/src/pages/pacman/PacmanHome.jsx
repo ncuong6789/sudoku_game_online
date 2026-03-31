@@ -8,7 +8,11 @@ export default function PacmanHome() {
 
     const MAP_INFO = {
         Classic: 'Bản đồ cổ điển: đối xứng, dễ ghi nhớ lối đi.',
-        Labyrinth: 'Mê cung: đường hẹp hơn, ma dễ tóm Pacman hơn!'
+        Labyrinth: 'Mê cung: đường hẹp hơn, ma dễ tóm Pacman hơn!',
+        Split: 'Chia cắt: Các hành lang dọc lớn, thử thách khả năng né tránh.',
+        Cross: 'Ngã tư: Khu vực trung tâm rộng lớn, rất nguy hiểm.',
+        Open: 'Không gian mở: Ít tường hơn, ma có thể di chuyển từ nhiều phía.',
+        Void: 'Hố đen: Mê cung tối giản với các ô trống lớn ở góc.'
     };
 
     return (
@@ -37,13 +41,13 @@ export default function PacmanHome() {
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>
                         <Map size={18} /> Chọn Bản Đồ
                     </label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
-                        {['Classic', 'Labyrinth'].map((type) => (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '10px' }}>
+                        {Object.keys(MAP_INFO).map((type) => (
                             <button
                                 key={type}
                                 onClick={() => setMapType(type)}
                                 style={{
-                                    padding: '12px', borderRadius: '12px', fontSize: '1rem', fontWeight: 600,
+                                    padding: '10px 5px', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 600,
                                     background: mapType === type ? 'var(--accent-color)' : 'rgba(255,255,255,0.05)',
                                     color: mapType === type ? '#000' : 'var(--text-primary)',
                                     border: `2px solid ${mapType === type ? 'var(--accent-color)' : 'rgba(255,255,255,0.1)'}`,
@@ -55,7 +59,7 @@ export default function PacmanHome() {
                             </button>
                         ))}
                     </div>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'center', margin: 0 }}>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'center', minHeight: '3em', margin: '0.5rem 0' }}>
                         {MAP_INFO[mapType]}
                     </p>
                 </div>
