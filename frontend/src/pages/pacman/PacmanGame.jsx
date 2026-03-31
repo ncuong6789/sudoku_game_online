@@ -101,11 +101,11 @@ function bfsStep(start, target, grid, canPassH = false) {
 }
 
 function parseMap(raw) {
+    const maxLen = Math.max(...raw.map(r => r.length));
     const grid = [], dots = new Set(), pills = new Set();
     let pStart = null;
-
     raw.forEach((row, y) => {
-        const cells = row.split('');
+        const cells = row.padEnd(maxLen, '_').split('');
         cells.forEach((ch, x) => {
             if (ch === '.') dots.add(`${x},${y}`);
             else if (ch === 'P') pills.add(`${x},${y}`);
@@ -113,7 +113,6 @@ function parseMap(raw) {
         });
         grid.push(cells);
     });
-
     if (!pStart) pStart = { x: 11, y: 14 };
     return { grid, dots, pills, pStart };
 }
