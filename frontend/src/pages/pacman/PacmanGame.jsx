@@ -212,6 +212,8 @@ const MSMAP4 = [
     "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
 ];
 
+const ALL_MAPS = { Classic: CLASSIC, Prototype: PROTOTYPE, MsMap1: MSMAP1, MsMap2: MSMAP2, MsMap3: MSMAP3, MsMap4: MSMAP4 };
+
 const MODE_TIMES = [
     { mode: 'SCATTER', time: 7 },
     { mode: 'CHASE', time: 20 },
