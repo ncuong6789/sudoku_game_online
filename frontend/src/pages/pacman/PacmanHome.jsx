@@ -68,6 +68,13 @@ export default function PacmanHome() {
                         <Gamepad size={24} /> Chơi Ngay
                     </button>
 
+                    <button
+                        className="btn-secondary"
+                        onClick={() => navigate('/')}
+                        style={{ padding: '16px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                    >
+                        <ArrowLeft size={20} /> Quay lại Hub
+                    </button>
                 </div>
             </div>
         </div>
