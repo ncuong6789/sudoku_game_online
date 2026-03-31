@@ -355,12 +355,13 @@ export default function PacmanGame() {
     const [lives, setLives] = useState(3);
     const [phase, setPhase] = useState('ready'); // ready|playing|dying|won|over
     const [frightenedTimer, setFrightenedTimer] = useState(0);
+    const [protectedTimer, setProtectedTimer] = useState(0);
     const [tickCount, setTickCount] = useState(0); // for ghost exit
 
     // Live refs (avoid stale closure in setInterval)
     const ref = useRef({});
     useEffect(() => {
-        ref.current = { pacman, ghosts, dots, pills, score, lives, phase, frightenedTimer, mapGrid, tickCount };
+        ref.current = { pacman, ghosts, dots, pills, score, lives, phase, frightenedTimer, protectedTimer, mapGrid, tickCount };
     });
 
     const snd = useRef({});
@@ -383,7 +384,7 @@ export default function PacmanGame() {
             ...g, startX: g.x, startY: g.y,
             state: g.exitDelay === 0 ? 'chase' : 'house'
         })));
-        setScore(0); setLives(3); setFrightenedTimer(0); setTickCount(0);
+        setScore(0); setLives(3); setFrightenedTimer(0); setProtectedTimer(0); setTickCount(0);
         nextDir.current = { x: -1, y: 0 };
         setPhase('ready');
         try { playPacmanStartSound(); } catch (e) { }
@@ -432,6 +433,7 @@ export default function PacmanGame() {
             const pk = `${np.x},${np.y}`;
             let newDots = s.dots, newPills = s.pills, sd = 0;
             let newFr = s.frightenedTimer > 0 ? s.frightenedTimer - 1 : 0;
+            let newProt = s.protectedTimer > 0 ? s.protectedTimer - 1 : 0;
 
             if (s.dots.has(pk)) {
                 newDots = new Set(s.dots); newDots.delete(pk); sd += 10;
@@ -484,13 +486,16 @@ export default function PacmanGame() {
 
                 if (cg.state === 'dead' && cg.x === 13 && cg.y === 14) cg.state = 'exiting';
 
+                // SLO-MO Logic: Frightened ghosts move at 50% speed (every even tick)
+                const isFrightened = cg.state === 'frightened';
+                const shouldMove = !isFrightened || (tc % 2 === 0);
+
                 // Pathfinding Target
                 let target = { x: np.x, y: np.y }; 
 
                 if (cg.state === 'dead') {
                     target = { x: 13, y: 14 }; // House interior
-                } else if (cg.state === 'frightened') {
-                    // Stable Flee: Target corner furthest from Pacman
+                } else if (isFrightened) {
                     const corners = [{ x: 1, y: 1 }, { x: cols - 2, y: 1 }, { x: 1, y: rows - 2 }, { x: cols - 2, y: rows - 2 }];
                     let maxDist = -1, bestCorner = corners[0];
                     corners.forEach(c => {
@@ -501,7 +506,6 @@ export default function PacmanGame() {
                 } else if (cg.state === 'scatter') {
                     target = cg.scatter || { x: 1, y: 1 };
                 } else if (cg.state === 'chase') {
-                    // PERSONALITIES
                     if (cg.id === 'BLINKY') target = { x: np.x, y: np.y };
                     else if (cg.id === 'PINKY') target = { x: np.x + np.dir.x * 4, y: np.y + np.dir.y * 4 };
                     else if (cg.id === 'INKY') {
@@ -514,18 +518,20 @@ export default function PacmanGame() {
                     }
                 }
 
-                // A* Move with Reversal Prevention
-                const forbidden = { x: -cg.dir.x, y: -cg.dir.y };
-                const step = findPathAStar(cg, target, grid, cg.state === 'dead', forbidden);
-                if (step) {
-                    cg.dir = step;
-                    cg.x = (cg.x + step.x + cols) % cols;
-                    cg.y += step.y;
-                } else {
-                    const fallback = getNextMoveClassic(cg, target, grid, cg.state === 'dead');
-                    cg.dir = fallback;
-                    cg.x = (cg.x + fallback.x + cols) % cols;
-                    cg.y += fallback.y;
+                if (shouldMove) {
+                    // A* Move with Reversal Prevention
+                    const forbidden = { x: -cg.dir.x, y: -cg.dir.y };
+                    const step = findPathAStar(cg, target, grid, cg.state === 'dead', forbidden);
+                    if (step) {
+                        cg.dir = step;
+                        cg.x = (cg.x + step.x + cols) % cols;
+                        cg.y += step.y;
+                    } else {
+                        const fallback = getNextMoveClassic(cg, target, grid, cg.state === 'dead');
+                        cg.dir = fallback;
+                        cg.x = (cg.x + fallback.x + cols) % cols;
+                        cg.y += fallback.y;
+                    }
                 }
                 return cg;
             });
@@ -539,7 +545,7 @@ export default function PacmanGame() {
                         try { snd.current.playPacmanEatGhostSound(); } catch (e) { }
                         return { ...cg, state: 'dead' };
                     } else if (cg.state !== 'dead' && cg.state !== 'house' && cg.state !== 'exiting') {
-                        if (!np.isProtected) pacDied = true;
+                        if (newProt === 0) pacDied = true;
                     }
                 }
                 return cg;
@@ -562,13 +568,10 @@ export default function PacmanGame() {
                             state: g.exitDelay === 0 ? 'chase' : 'house'
                         })));
                         setFrightenedTimer(0);
+                        setProtectedTimer(12); // ~2 seconds of invincibility
                         setPhase('ready');
                         try { playPacmanStartSound(); } catch (e) { }
-                        setTimeout(() => {
-                            setPhase('playing');
-                            // Remove protection after 2s
-                            setTimeout(() => setPacman(p => p ? { ...p, isProtected: false } : p), 2000);
-                        }, 2000);
+                        setTimeout(() => setPhase('playing'), 2000);
                     }
                 }, 1200);
                 setPacman(np); setGhosts(finalGhosts);
@@ -578,6 +581,7 @@ export default function PacmanGame() {
             setPacman(np); setGhosts(finalGhosts);
             setDots(newDots); setPills(newPills);
             setFrightenedTimer(newFr);
+            setProtectedTimer(newProt);
             if (sd) setScore(sc => sc + sd);
         }, 165);
         return () => clearInterval(id);
@@ -604,7 +608,7 @@ export default function PacmanGame() {
 
     const cols = mapGrid[0].length, rows = mapGrid.length;
     const isDying = phase === 'dying';
-    const isProtected = pacman.isProtected;
+    const isProtected = protectedTimer > 0;
 
     return (
         <div style={{
@@ -620,14 +624,18 @@ export default function PacmanGame() {
                     <div style={{
                         width: '100%', height: '100%',
                         display: 'grid', gridTemplateColumns: `repeat(${cols},1fr)`, gridTemplateRows: `repeat(${rows},1fr)`,
-                        background: '#000', borderRadius: '8px', boxSizing: 'border-box'
+                        background: '#000', borderRadius: '8px', border: '4px solid #1e40af', boxSizing: 'border-box'
                     }}>
-                        {mapGrid.map((row, y) => row.map((cell, x) => (
-                            <div key={`c${x}${y}`} style={{
-                                background: cell === 'W' ? '#1e3a8a' : cell === 'H' ? 'rgba(249,115,22,0.5)' : '#000',
-                                border: cell === 'W' ? '0.5px solid #1e40af' : 'none', boxSizing: 'border-box'
-                            }} />
-                        )))}
+                        {mapGrid.map((row, y) => row.map((cell, x) => {
+                            const isWall = cell === 'W' || cell === '|';
+                            const isGate = cell === 'H' || cell === '-' || cell === '_';
+                            return (
+                                <div key={`c${x}${y}`} style={{
+                                    background: isWall ? '#1e3a8a' : isGate ? '#78350f' : '#000',
+                                    border: isWall ? '0.5px solid #1e40af' : 'none', boxSizing: 'border-box'
+                                }} />
+                            );
+                        }))}
 
                         {Array.from(dots).map(k => {
                             const [x, y] = k.split(',').map(Number); return (
