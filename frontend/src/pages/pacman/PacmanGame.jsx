@@ -611,12 +611,16 @@ export default function PacmanGame() {
     const isProtected = protectedTimer > 0;
 
     return (
-        <div style={{
-            display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
-            width: '100%', height: 'calc(100vh - 80px)',
-            padding: 'clamp(0.5rem,1.5vw,1rem)',
-            boxSizing: 'border-box', gap: 'clamp(0.5rem,1vw,1rem)',
-            overflow: 'hidden', minWidth: 0
+        <div className="glass-panel" style={{
+            display: 'flex', justifyContent: 'center', alignItems: 'stretch',
+            width: 'min(1200px, 98%)', height: 'calc(100vh - 120px)',
+            margin: '20px auto',
+            padding: 'clamp(0.5rem,1.5vw,1.5rem)',
+            boxSizing: 'border-box', gap: 'clamp(1rem,2vw,2rem)',
+            overflow: 'hidden', minWidth: 0,
+            background: 'rgba(0,0,0,0.85)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            boxShadow: '0 0 40px rgba(0,0,0,0.5)'
         }}>
             {/* ── BOARD ── */}
             <div style={{ flex: '1 1 0', minWidth: 0, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
@@ -624,11 +628,11 @@ export default function PacmanGame() {
                     <div style={{
                         width: '100%', height: '100%',
                         display: 'grid', gridTemplateColumns: `repeat(${cols},1fr)`, gridTemplateRows: `repeat(${rows},1fr)`,
-                        background: '#000', borderRadius: '8px', border: '4px solid #1e40af', boxSizing: 'border-box'
+                        background: '#000', borderRadius: '4px', boxSizing: 'border-box'
                     }}>
                         {mapGrid.map((row, y) => row.map((cell, x) => {
                             const isWall = cell === 'W' || cell === '|';
-                            const isGate = cell === 'H' || cell === '-' || cell === '_';
+                            const isGate = cell === 'H' || cell === '-';
                             return (
                                 <div key={`c${x}${y}`} style={{
                                     background: isWall ? '#1e3a8a' : isGate ? '#78350f' : '#000',
@@ -750,7 +754,7 @@ export default function PacmanGame() {
                 width: 'clamp(150px,18vw,220px)', flexShrink: 0, height: '100%', overflowY: 'auto'
             }}>
 
-                <div className="glass-panel" style={{ padding: 'clamp(0.8rem,1.5vw,1.2rem)', display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center' }}>
+                <div style={{ padding: 'clamp(0.8rem,1.5vw,1.2rem)', display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                     <div style={{ textAlign: 'center', width: '100%' }}>
                         <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '2px' }}>Score</div>
                         <div style={{ fontSize: 'clamp(1.4rem,2.5vw,1.8rem)', fontWeight: 800, color: '#fbbf24', lineHeight: 1 }}>{score}</div>
@@ -775,7 +779,7 @@ export default function PacmanGame() {
                     </div>
                 </div>
 
-                <div className="glass-panel" style={{ padding: '0.8rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ padding: '0.8rem', display: 'flex', flexDirection: 'column', gap: '6px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '2px' }}>Ghosts</div>
                     {ghosts.map(g => (
                         <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem' }}>
@@ -790,14 +794,14 @@ export default function PacmanGame() {
                 </div>
 
                 {frightenedTimer > 0 && (
-                    <div className="glass-panel" style={{ padding: '0.8rem', textAlign: 'center', border: '1px solid rgba(29,78,216,0.5)', background: 'rgba(29,78,216,0.1)' }}>
+                    <div style={{ padding: '0.8rem', textAlign: 'center', borderRadius: '12px', border: '1px solid rgba(29,78,216,0.5)', background: 'rgba(29,78,216,0.1)' }}>
                         <div style={{ fontSize: '0.7rem', color: '#93c5fd', marginBottom: '2px' }}>⚡ POWER</div>
                         <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#60a5fa' }}>{frightenedTimer}</div>
                     </div>
                 )}
 
                 {isProtected && phase === 'playing' && (
-                    <div className="glass-panel" style={{ padding: '0.8rem', textAlign: 'center', border: '1px solid rgba(251,191,36,0.5)', background: 'rgba(251,191,36,0.1)' }}>
+                    <div style={{ padding: '0.8rem', textAlign: 'center', borderRadius: '12px', border: '1px solid rgba(251,191,36,0.5)', background: 'rgba(251,191,36,0.1)' }}>
                         <div style={{ fontSize: '0.75rem', color: '#fbbf24', animation: 'pacFlash 0.5s infinite' }}>🛡️ Bất Tử</div>
                     </div>
                 )}
