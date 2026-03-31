@@ -1,75 +1,94 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutGrid, Grid3X3, Swords, Trophy, Users, X, Activity, Ghost } from 'lucide-react';
+import { LayoutGrid, Grid3X3, Swords, Trophy, Users, X, Activity, Ghost, Crown, Zap, Layers, Hash } from 'lucide-react';
 import { socket } from '../utils/socket';
 
 const games = {
     sudoku: {
         id: 'sudoku',
         name: 'Sudoku',
-        description: 'Trò chơi giải đố logic cổ điển. Điền các số vào lưới sao cho không trùng lặp trong hàng, cột và vùng 3x3.',
+        description: 'Một bài toán logic tưởng chừng đơn giản nhưng đầy thử thách. Mỗi con số bạn đặt xuống đều ảnh hưởng đến toàn bộ bàn cờ. Quan sát, suy luận và từng bước giải mã để hoàn thành bảng Sudoku hoàn hảo.',
         path: '/sudoku',
         difficulty: 'Vừa',
         instructions: [
             'Điền các số từ 1 đến 9 vào các ô trống.',
-            'Mỗi hàng ngang, cột dọc và vùng 3x3 phải có đủ các số từ 1 đến 9 không trùng lặp.'
+            'Không được lặp lại số trong cùng một hàng, cột hoặc vùng 3x3.',
+            'Phân tích các ô đã có để suy ra vị trí hợp lệ.',
+            'Tránh đoán mò – hãy dựa vào logic để giải bài.',
+            'Kiên nhẫn và tập trung là chìa khóa để hoàn thành.',
+            'Hoàn thành toàn bộ bảng mà không sai sót để chiến thắng.'
         ]
     },
     caro: {
         id: 'caro',
         name: 'Tic-Tac-Toe',
-        description: 'Trận chiến trí tuệ trên bàn cờ 15x15. Xếp đủ 5 quân cờ liên tiếp theo hàng ngang, dọc hoặc chéo để giành chiến thắng.',
+        description: 'Trò chơi đấu trí kinh điển với nhiều kích thước bàn cờ: từ 3x3 nhanh gọn đến 15x15 và 20x20 đầy chiến thuật. Người chơi thay phiên đặt quân để tạo thành chuỗi chiến thắng, từ những ván đấu nhanh cho đến những màn so tài căng não.',
         path: '/caro',
         difficulty: 'Cao',
         instructions: [
-            'Thay phiên nhau đặt quân X và O vào bàn cờ 15x15.',
-            'Mục tiêu: Tạo thành một hàng gồm 5 quân cờ của mình liên tiếp (ngang, dọc hoặc chéo).'
+            'Chọn chế độ phù hợp: 3x3 (casual), 15x15 hoặc 20x20 (chiến thuật).',
+            'Thay phiên đặt quân X và O lên bàn cờ.',
+            'Tạo chuỗi 5 quân liên tiếp để chiến thắng (3 quân với chế độ 3x3).',
+            'Kết hợp tấn công và phòng thủ để kiểm soát thế trận.',
+            'Dự đoán nước đi của đối thủ để tránh rơi vào bẫy.',
+            'Một sai lầm nhỏ có thể khiến bạn thua ngay lập tức.'
         ]
     },
     chess: {
         id: 'chess',
         name: 'Chess',
-        description: 'Đỉnh cao của chiến thuật quân sự trên bàn cờ 8x8. Điều khiển quân đội của bạn để chiếu bí vua đối phương.',
+        description: 'Trò chơi chiến thuật kinh điển trên bàn cờ 8x8, nơi mỗi nước đi đều mang tính quyết định. Điều khiển các quân cờ với quy tắc riêng biệt, xây dựng chiến lược và tìm cách chiếu bí vua đối phương để giành chiến thắng.',
         path: '/chess',
         difficulty: 'Rất cao',
         instructions: [
-            'Cờ vua là trò chơi chiến thuật giữa hai người chơi.',
-            'Mỗi quân cờ có cách di chuyển riêng. Mục tiêu là chiếu bí Vua đối phương.'
+            'Cờ vua là trò chơi chiến thuật dành cho hai người chơi trên bàn cờ 8x8.',
+            'Mỗi loại quân cờ có cách di chuyển riêng (Tốt, Mã, Tượng, Xe, Hậu, Vua).',
+            'Mục tiêu là đặt Vua đối phương vào trạng thái "chiếu bí" (không thể thoát).',
+            'Bảo vệ Vua của bạn và tận dụng các quân cờ để kiểm soát thế trận.',
+            'Lên kế hoạch trước nhiều nước đi để chiếm ưu thế và kết thúc ván đấu.'
         ]
     },
     snake: {
         id: 'snake',
         name: 'Snake',
-        description: 'Sinh tồn trên bản đồ lưới (20x20 hoặc 30x30). Điều khiển Rắn ăn mồi để tăng kích thước và tốc độ. Đối đầu Multiplayer kịch tính!',
+        description: 'Điều khiển chú rắn sinh tồn trên bản đồ lưới, thu thập thức ăn để lớn dần và tăng tốc độ. Càng dài, thử thách càng cao khi không gian di chuyển bị thu hẹp. Tham gia chế độ Multiplayer để cạnh tranh và loại bỏ đối thủ trong những pha đấu trí căng thẳng!',
         path: '/snake',
         difficulty: 'Tuỳ chỉnh',
         instructions: [
-            'Sử dụng 4 phím mũi tên (Lên, Xuống, Trái, Phải) để di chuyển hướng đi.',
-            'Ăn mồi sẽ tăng 2 kích thước (đốt) và tăng tốc độ rắn.',
-            'Trong Multiplay, chạm vào tường, vào bản thân hoặc đối thủ sẽ chết. Rắn chết biến thành chướng ngại vật!'
+            'Sử dụng các phím mũi tên (Lên, Xuống, Trái, Phải) để điều khiển hướng di chuyển của rắn.',
+            'Ăn mồi để tăng chiều dài và tốc độ của rắn.',
+            'Tránh va chạm với tường và chính cơ thể của bạn.',
+            'Trong chế độ Multiplayer, va chạm với đối thủ sẽ khiến bạn bị loại.',
+            'Rắn bị loại sẽ trở thành chướng ngại vật trên bản đồ.',
+            'Càng sống lâu và ăn nhiều, điểm số của bạn càng cao.'
         ]
     },
     tetris: {
         name: 'Tetris',
-        description: 'Trò chơi xếp gạch huyền thoại (Block Puzzle). Xoay và xếp các khối gạch rơi xuống để lấp đầy hàng. Đối đầu trực tiếp Multiplayer - Điểm cao nhất thắng!',
+        description: 'Những khối gạch không ngừng rơi xuống – bạn có đủ nhanh và chính xác để kiểm soát chúng? Xoay, sắp xếp và tạo combo xóa hàng để ghi điểm tối đa. Tham gia chế độ Multiplayer và chứng minh ai mới là bậc thầy Tetris thực thụ!',
         path: '/tetris',
         difficulty: 'Vừa',
         instructions: [
-            'Sử dụng Mũi tên TRÁI/PHẢI để di chuyển khối, XUỐNG để tăng tốc.',
-            'Mũi tên LÊN để xoay khối, Dấu CÁCH (Space) để thả thẳng phi thuyền cứng (Hard Drop).',
-            'Hoàn thành một hàng ngang để ghi điểm. Màn hình đụng trần là Xong!'
+            'Dùng phím TRÁI/PHẢI để điều khiển vị trí khối gạch.',
+            'Nhấn XUỐNG để tăng tốc độ rơi và kiểm soát nhịp độ.',
+            'Nhấn LÊN để xoay khối gạch theo ý muốn.',
+            'Nhấn Space để thực hiện Hard Drop – thả nhanh xuống vị trí cuối.',
+            'Xóa nhiều hàng cùng lúc để ghi điểm cao hơn.',
+            'Nếu khối gạch chạm đỉnh màn hình, trò chơi sẽ kết thúc.'
         ]
     },
     pacman: {
         id: 'pacman',
         name: 'Pacman',
-        description: 'Băng qua các mê cung, ăn toàn bộ chấm và trốn thoát khỏi bầy ma. Ăn viên sức mạnh để lật ngược thế cờ chặn đầu bầy ma!',
+        description: 'Khám phá mê cung đầy thử thách, nơi mỗi bước đi đều có thể là sống hoặc bị bắt. Thu thập chấm, né tránh bầy ma và tận dụng Power Pill để đảo ngược tình thế, biến kẻ săn thành con mồi!',
         path: '/pacman',
         difficulty: 'Tuỳ chỉnh',
         instructions: [
-            'Dùng phím mũi tên để điều hướng Pacman.',
-            'Ăn tất cả các chấm nhỏ để qua màn.',
-            'Ăn viên sức mạnh (Power Pill) để có khả năng ăn lại Ma bá đạo trong thời gian ngắn!'
+            'Sử dụng các phím mũi tên để điều khiển Pacman di chuyển trong mê cung.',
+            'Thu thập toàn bộ chấm nhỏ (dots) để hoàn thành màn chơi.',
+            'Ăn Power Pill để tạm thời trở nên mạnh mẽ và có thể tiêu diệt các con ma.',
+            'Tận dụng các lối đi và cổng dịch chuyển để né tránh hoặc đánh lừa kẻ địch.',
+            'Tránh va chạm với ma khi không có sức mạnh, nếu không bạn sẽ thua cuộc.'
         ]
     }
 };
@@ -121,7 +140,7 @@ export default function Home() {
 
     const handleJoinByCode = () => {
         if (!roomCode || roomCode.length < 4) return alert('Vui lòng nhập mã phòng hợp lệ!');
-        
+
         socket.emit('lookupRoom', { roomId: roomCode }, (res) => {
             if (res.success) {
                 const path = `/${res.gameType}/game`;
@@ -144,13 +163,13 @@ export default function Home() {
                         <Swords size={20} /> Tic-Tac-Toe
                     </div>
                     <div className={`nav-item ${activeGame === 'chess' ? 'active' : ''}`} onClick={() => { setActiveGame('chess'); setShowHelp(false); }}>
-                        <LayoutGrid size={20} /> Chess
+                        <Crown size={20} /> Chess
                     </div>
                     <div className={`nav-item ${activeGame === 'snake' ? 'active' : ''}`} onClick={() => { setActiveGame('snake'); setShowHelp(false); }}>
-                        <Activity size={20} /> Snake
+                        <Zap size={20} /> Snake
                     </div>
                     <div className={`nav-item ${activeGame === 'tetris' ? 'active' : ''}`} onClick={() => { setActiveGame('tetris'); setShowHelp(false); }}>
-                        <Grid3X3 size={20} /> Tetris
+                        <Layers size={20} /> Tetris
                     </div>
                     <div className={`nav-item ${activeGame === 'pacman' ? 'active' : ''}`} onClick={() => { setActiveGame('pacman'); setShowHelp(false); }}>
                         <Ghost size={20} /> Pacman
@@ -165,7 +184,15 @@ export default function Home() {
 
             <main className="main-content" style={{ padding: '2rem' }}>
                 <div className="game-detail" style={{ maxWidth: '700px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem', gap: '15px' }}>
+                        <div className="game-icon-container" style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '12px' }}>
+                            {activeGame === 'sudoku' && <Grid3X3 size={32} color="var(--accent-color)" />}
+                            {activeGame === 'caro' && <Swords size={32} color="var(--accent-color)" />}
+                            {activeGame === 'chess' && <Crown size={32} color="var(--accent-color)" />}
+                            {activeGame === 'snake' && <Zap size={32} color="var(--accent-color)" />}
+                            {activeGame === 'tetris' && <Layers size={32} color="var(--accent-color)" />}
+                            {activeGame === 'pacman' && <Ghost size={32} color="var(--accent-color)" />}
+                        </div>
                         <h1 className="game-title" style={{ margin: 0, fontSize: '3rem' }}>{game.name}</h1>
                     </div>
                     <p className="game-desc" style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>{game.description}</p>
@@ -213,23 +240,23 @@ export default function Home() {
                             <div style={{ borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '1.5rem' }}>
                                 <h4 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: 'var(--text-secondary)' }}>Ghép cặp trực tuyến</h4>
                                 <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                                    <button 
-                                        className={searchMode === 'active' ? 'btn-primary' : 'btn-secondary'} 
+                                    <button
+                                        className={searchMode === 'active' ? 'btn-primary' : 'btn-secondary'}
                                         onClick={() => setSearchMode('active')}
                                         style={{ flex: 1, padding: '8px', fontSize: '0.85rem' }}
                                     >
                                         Game hiện tại
                                     </button>
-                                    <button 
-                                        className={searchMode === 'random' ? 'btn-primary' : 'btn-secondary'} 
+                                    <button
+                                        className={searchMode === 'random' ? 'btn-primary' : 'btn-secondary'}
                                         onClick={() => setSearchMode('random')}
                                         style={{ flex: 1, padding: '8px', fontSize: '0.85rem' }}
                                     >
                                         🎲 Random Game
                                     </button>
                                 </div>
-                                <button 
-                                    className="btn-primary" 
+                                <button
+                                    className="btn-primary"
                                     style={{ width: '100%', padding: '12px', background: isSearching ? '#ef4444' : 'var(--accent-color)' }}
                                     onClick={() => isSearching ? (socket.emit('leaveMatchmaking'), setIsSearching(false)) : handleFindMatch()}
                                 >
@@ -241,13 +268,13 @@ export default function Home() {
                             <div>
                                 <h4 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: 'var(--text-secondary)' }}>Tham gia bằng mã</h4>
                                 <div style={{ display: 'flex', gap: '8px' }}>
-                                    <input 
-                                        type="text" 
-                                        placeholder="MÃ PHÒNG..." 
+                                    <input
+                                        type="text"
+                                        placeholder="MÃ PHÒNG..."
                                         value={roomCode}
                                         onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                                        style={{ 
-                                            flex: 1, padding: '10px', borderRadius: '8px', 
+                                        style={{
+                                            flex: 1, padding: '10px', borderRadius: '8px',
                                             background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)',
                                             color: 'white', fontWeight: 'bold', textAlign: 'center'
                                         }}
