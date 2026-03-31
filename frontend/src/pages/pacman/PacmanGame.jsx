@@ -4,212 +4,212 @@ import { ArrowLeft, RotateCcw, Trophy, Heart, Ghost as GhostIcon } from 'lucide-
 import { useAudio } from '../../utils/useAudio';
 
 // ─── Maps: 21 cols × 22 rows ─────────────────────────────────────────────────
-// W=wall  .=dot  P=PowerPill  _=floor  H=gate(ghost only)  S=Pacman start
+// |=wall  .=dot  P=PowerPill  _=floor  H=gate(ghost only)  S=Pacman start
 // Ghost house: rows 7-9, cols 6-13. Gate H at (10,7). Interior floor at row 8.
 // Left corridor: cols 1-5 (rows 7-9). Right corridor: cols 14-19 (rows 7-9).
 
 const CLASSIC = [
-    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
-    "W............WW............W",
-    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
-    "WPWWWW.WWWWW.WW.WWWWW.WWWWPW",
-    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
-    "W..........................W",
-    "W.WWWW.WW.WWWWWWWW.WW.WWWW.W",
-    "W.WWWW.WW.WWWWWWWW.WW.WWWW.W",
-    "W......WW....WW....WW......W",
-    "WWWWWW.WWWWW WW WWWWW.WWWWWW",
-    "     W.WWWWW WW WWWWW.W     ",
-    "     W.WW          WW.W     ",
-    "     W.WW WWW--WWW WW.W     ",
-    "WWWWWW.WW W______W WW.WWWWWW",
-    "          W______W          ",
-    "WWWWWW.WW W______W WW.WWWWWW",
-    "     W.WW WWWWWWWW WW.W     ",
-    "     W.WW          WW.W     ",
-    "     W.WW WWWWWWWW WW.W     ",
-    "WWWWWW.WW WWWWWWWW WW.WWWWWW",
-    "W............WW............W",
-    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
-    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
-    "W...WW.......S........WW...W",
-    "WWW.WW.WW.WWWWWWWW.WW.WW.WWW",
-    "WWW.WW.WW.WWWWWWWW.WW.WW.WWW",
-    "W......WW....WW....WW......W",
-    "W.WWWWWWWWWW.WW.WWWWWWWWWW.W",
-    "W.WWWWWWWWWW.WW.WWWWWWWWWW.W",
-    "W..........................W",
-    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+    "||||||||||||||||||||||||||||",
+    "|............||............|",
+    "|.||||.|||||.||.|||||.||||.|",
+    "|P|__|.|___|.||.|___|.|__|P|",
+    "|.||||.|||||.||.|||||.||||.|",
+    "|..........................|",
+    "|.||||.||.||||||||.||.||||.|",
+    "|.||||.||.||||||||.||.||||.|",
+    "|......||....||....||......|",
+    "||||||.||||| || |||||.||||||",
+    "_____|.||||| || |||||.|_____",
+    "_____|.||..........||.|_____",
+    "_____|.||.|||--|||.||.|_____",
+    "||||||.||.|______|.||.||||||",
+    "..........|______|..........",
+    "||||||.||.|______|.||.||||||",
+    "_____|.||.||||||||.||.|_____",
+    "_____|.||..........||.|_____",
+    "_____|.||.||||||||.||.|_____",
+    "||||||.||.||||||||.||.||||||",
+    "|............||............|",
+    "|.||||.|||||.||.|||||.||||.|",
+    "|.||||.|||||.||.|||||.||||.|",
+    "|...||.......S........||...|",
+    "|||.||.||.||||||||.||.||.|||",
+    "|||.||.||.||||||||.||.||.|||",
+    "|......||....||....||......|",
+    "|P||||||||||.||.||||||||||P|",
+    "|.||||||||||.||.||||||||||.|",
+    "|..........................|",
+    "||||||||||||||||||||||||||||",
 ];
 
 const PROTOTYPE = [
-    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
-    "W............WW............W",
-    "W.WWWWW.WWWW.WW.WWWW.WWWWW.W",
-    "WPWWWWW.WWWW.WW.WWWW.WWWWWPW",
-    "W.WWWWW.WWWW.WW.WWWW.WWWWW.W",
-    "W..........................W",
-    "W.WWWW.WW.WWWWWWWW.WW.WWWW.W",
-    "W.WWWW.WW.WWWWWWWW.WW.WWWW.W",
-    "W..WW..WW....WW....WW..WW..W",
-    "WW.WW.WWWWWW WW WWWWWW.WW.WW",
-    "WW.WW.WWWWWW WW WWWWWW.WW.WW",
-    "W..WW........S.........WW..W",
-    "W.WWWWWW.WWWW--WWWW.WWWWWW.W",
-    "W.WWWWWW.WW______WW.WWWWWW.W",
-    "          W______W          ",
-    "W.WWWWWW.WW______WW.WWWWWW.W",
-    "W.WWWWWW.WWWWWWWWWW.WWWWWW.W",
-    "W..........................W",
-    "W.WWWWWW.WWWWWWWWWW.WWWWWW.W",
-    "W.WWWWWW.WWWWWWWWWW.WWWWWW.W",
-    "W............WW............W",
-    "W.WWWWW.WWWW.WW.WWWW.WWWWW.W",
-    "W.WWWWW.WWWW.WW.WWWW.WWWWW.W",
-    "WP.WW..................WW.PW",
-    "WW.WW.WW.WWWWWWWWWW.WW.WW.WW",
-    "WW.WW.WW.WWWWWWWWWW.WW.WW.WW",
-    "W......WW....WW....WW......W",
-    "W.WWWWWWWWWW.WW.WWWWWWWWWW.W",
-    "W.WWWWWWWWWW.WW.WWWWWWWWWW.W",
-    "W..........................W",
-    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+    "||||||||||||||||||||||||||||",
+    "|............||............|",
+    "|.|||||.||||.||.||||.|||||.|",
+    "|P|||||.||||.||.||||.|||||P|",
+    "|.|||||.||||.||.||||.|||||.|",
+    "|..........................|",
+    "|.||||.||.||||||||.||.||||.|",
+    "|.||||.||.||||||||.||.||||.|",
+    "|..||..||....||....||..||..|",
+    "||.||.|||||| || ||||||.||.||",
+    "||.||.|||||| || ||||||.||.||",
+    "|..||........S.........||..|",
+    "|.|||.|||.|||--|||.|||.|||.|",
+    "|.|||.|||.|______|.|||.|||.|",
+    "..........|______|..........",
+    "|.|||.|||.|______|.|||.|||.|",
+    "|.|||.|||.||||||||.|||.|||.|",
+    "|..........................|",
+    "|.||||||.|||.||.|||.||||||.|",
+    "|.||||||.|||.||.|||.||||||.|",
+    "|............||............|",
+    "|.|||||.||||.||.||||.|||||.|",
+    "|.|||||.||||.||.||||.|||||.|",
+    "|P.||..................||.P|",
+    "||.||.||.||||||||||.||.||.||",
+    "||.||.||.||||||||||.||.||.||",
+    "|.....||.....||.....||.....|",
+    "|.||||||||||.||.||||||||||.|",
+    "|.||||||||||.||.||||||||||.|",
+    "|..........................|",
+    "||||||||||||||||||||||||||||",
 ];
 
 const MSMAP1 = [
-    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
-    "W............WW............W",
-    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
-    "WPW__W.W___W.WW.W___W.W__WPW",
-    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
-    "W..........................W",
-    "W.WWWWW.WW.WWWWWWWW.WW.WWWWW",
-    "W.WWWWW.WW.WWWWWWWW.WW.WWWWW",
-    "W.......WW....WW....WW......W",
-    "WWWWWW.WWWWWW WW WWWWWW.WWWW",
-    "     W.WWWWWW WW WWWWWW.W   ",
-    "     W.WW          WW.W     ",
-    "     W.WW WWW--WWW WW.W     ",
-    "WWWWWW.WW W______W WW.WWWWWW",
-    "          W______W          ",
-    "WWWWWW.WW W______W WW.WWWWWW",
-    "     W.WW WWWWWWWW WW.W     ",
-    "     W.WW..........WW.W     ",
-    "     W.WW WWWWWWWW WW.W     ",
-    "WWWWWW.WW WWWWWWWW WW.WWWWWW",
-    "W............WW............W",
-    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
-    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
-    "W...WW.......S........WW...W",
-    "WWW.WW.WW.WWWWWWWW.WW.WW.WWW",
-    "WWW.WW.WW.WWWWWWWW.WW.WW.WWW",
-    "W......WW....WW....WW......W",
-    "W.WWWWWWWWWW.WW.WWWWWWWWWW.W",
-    "W.WWWWWWWWWW.WW.WWWWWWWWWW.W",
-    "W..........................W",
-    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+    "||||||||||||||||||||||||||||",
+    "|............||............|",
+    "|.||||.|||||.||.|||||.||||.|",
+    "|P|__|.|___|.||.|___|.|__|P|",
+    "|.||||.|||||.||.|||||.||||.|",
+    "|..........................|",
+    "|.|||||.||.||||||||.||.|||||",
+    "|.|||||.||.||||||||.||.|||||",
+    "|.......||....||....||.....|",
+    "||||||.|||||.||.|||||.||||||",
+    "_____|.|||||.||.|||||.|_____",
+    "_____|.||..........||.|_____",
+    "_____|.|| |||--||| ||.|_____",
+    "||||||.|| |______| ||.||||||",
+    "..........|______|..........",
+    "||||||.|| |______| ||.||||||",
+    "_____|.|| |||||||| ||.|_____",
+    "_____|.||..........||.|_____",
+    "_____|.|| |||||||| ||.|_____",
+    "||||||.|| |||||||| ||.||||||",
+    "|............||............|",
+    "|.||||.|||||.||.|||||.||||.|",
+    "|.||||.|||||.||.|||||.||||.|",
+    "|...||.......S........||...|",
+    "|||.||.||.||||||||.||.||.|||",
+    "|||.||.||.||||||||.||.||.|||",
+    "|P.....||....||....||.....P|",
+    "|.||||||||||.||.||||||||||.|",
+    "|.||||||||||.||.||||||||||.|",
+    "|..........................|",
+    "||||||||||||||||||||||||||||",
 ];
 
 const MSMAP2 = [
-    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
-    "...........WW..........WW   ",
-    "WWWWWW.WW.WWWWWWWW.WW.WWWWWW",
-    "WWWWWW.WW.WWWWWWWW.WW.WWWWWW",
-    "W............WW............W",
-    "W.WWWWWWW.WW.WW.WW.WWWWWWW.W",
-    "W.WWWWWWW.WW.WW.WW.WWWWWWW.W",
-    "W.WW......WW.WW.WW......WW.W",
-    "W.WW.WWWW.WW....WW.WWWW.WW.W",
-    "W.WW.WWWW.WWWWWWWW.WWWW.WW.W",
-    "W......WW.WWWWWWWW.WW......W",
-    "WWWWWW.WW..........WW.WWWWWW",
-    "WWWWWW.WW.WWWW--WWWW.WW.WWWW",
-    "W......WW.W______W.WW......W",
-    "W.WWWW.WW.W______W.WW.WWWW.W",
-    "W.WWWW....W______W....WWWW.W",
-    "W...WW.WW.WWWWWWWW.WW.WW...W",
-    "WWW.WW.WW..........WW.WW.WWW",
-    "  W.WW.WWWW.WWWW.WWWW.WW.W  ",
-    "  W.WW.WWWW.W__W.WWWW.WW.W  ",
-    "  W.........W__W.........W  ",
-    "  W.WWWWWWW.W__W.WWWWWWW.W  ",
-    "WWW.WWWWWWW.WWWW.WWWWWWW.WWW",
-    "...........WW..........WW   ",
-    "WWW.WW.WW.WWWWWWWW.WW.WW.WWW",
-    "WWW.WW.WW.WWWWWWWW.WW.WW.WWW",
-    "W...WW.......S.......WW...W",
-    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
-    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
-    "W..........................W",
-    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+    "||||||||||||||||||||||||||||",
+    ".......||..........||.......",
+    "||||||.||.||||||||.||.||||||",
+    "||||||.||.||||||||.||.||||||",
+    "|P...........||...........P|",
+    "|.|||||||.||.||.||.|||||||.|",
+    "|.|||||||.||.||.||.|||||||.|",
+    "|.||......||.||.||......||.|",
+    "|.||.||||.||....||.||||.||.|",
+    "|.||.||||.||||||||.||||.||.|",
+    "|......||.||||||||.||......|",
+    "||||||.||..........||.||||||",
+    "||||||.||.|||--|||.||.||||||",
+    "|......||.|______|.||......|",
+    "|.||||.||.|______|.||.||||.|",
+    "|.||||....|______|....||||.|",
+    "|...||.||.||||||||.||.||...|",
+    "|||.||.||..........||.||.|||",
+    "__|.||.||||.||||.||||.||.|__",
+    "__|.||.||||.|__|.||||.||.|__",
+    "__|.........|__|.........|__",
+    "__|.|||||||.|__|.|||||||.|__",
+    "|||.|||||||.||||.|||||||.|||",
+    ".......||..........||.......",
+    "|||.||.||.||||||||.||.||.|||",
+    "|||.||.||.||||||||.||.||.|||",
+    "|P..||......S||.......||..P|",
+    "|.||||.|||||.||.|||||.||||.|",
+    "|.||||.|||||.||.|||||.||||.|",
+    "|..........................|",
+    "||||||||||||||||||||||||||||",
 ];
 
 const MSMAP3 = [
-    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
-    "W.........WW....WW.........W",
-    "W.WWWWWWW.WW.WW.WW.WWWWWWW.W",
-    "W.WWWWWWW.WW.WW.WW.WWWWWWW.W",
-    "W.WW.........WW.........WW.W",
-    "W.WW.WW.WWWW.WW.WWWW.WW.WW.W",
-    "W....WW.WWWW.WW.WWWW.WW....W",
-    "WWWW.WW.WWWW.WW.WWWW.WW.WWWW",
-    "WWWW.WW..............WW.WWWW",
-    "     WWWW.WWWWWWWW.WWWW     ",
-    "W.WW.WWWW.WWWWWWWW.WWWW.WW.W",
-    "W.WW....................WW.W",
-    "W.WWWW.WW.WW--WW.WW.WWWW.W",
-    "W.WWWW.WW.W______W.WW.WWWW.W",
-    "W......WW.W______W.WW......W",
-    "W.WW.WWWW.W______W.WWWW.WW.W",
-    "W.WW.WWWW.WWWWWWWW.WWWW.WW.W",
-    "W.WW....................WW.W",
-    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
-    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
-    "W......WW....WW....WW......W",
-    "WWW.WW.WW.WWWWWWWW.WW.WW.WWW",
-    "WWW.WW.WW.WWWWWWWW.WW.WW.WWW",
-    "W...WW.......S........WW...W",
-    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
-    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
-    "W......WW....WW....WW......W",
-    "W.WWWW.WW.WWWWWWWW.WW.WWWW.W",
-    "W.WWWW.WW.WWWWWWWW.WW.WWWW.W",
-    "W.........WW....WW.........W",
-    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+    "||||||||||||||||||||||||||||",
+    "|.........||....||.........|",
+    "|.|||||||.||.||.||.|||||||.|",
+    "|P|||||||.||.||.||.|||||||P|",
+    "|.||.........||.........||.|",
+    "|.||.||.||||.||.||||.||.||.|",
+    "|....||.||||.||.||||.||....|",
+    "||||.||.||||.||.||||.||.||||",
+    "||||.||..............||.||||",
+    ".....||||.||||||||.||||.....",
+    "|.||.||||.||||||||.||||.||.|",
+    "|.||....................||.|",
+    "|.||||.||.||----||.||.||||.|",
+    "|.||||.||.|______|.||.||||.|",
+    "|......||.|______|.||......|",
+    "|.||.||||.|______|.||||.||.|",
+    "|.||.||||.||||||||.||||.||.|",
+    "|.||....................||.|",
+    "|.||||.|||||.||.|||||.||||.|",
+    "|.||||.|||||.||.|||||.||||.|",
+    "|......||....||....||......|",
+    "|||.||.||.||||||||.||.||.|||",
+    "|||.||.||.||||||||.||.||.|||",
+    "|...||.......S........||...|",
+    "|.||||.|||||.||.|||||.||||.|",
+    "|.||||.|||||.||.|||||.||||.|",
+    "|P.....||....||....||.....P|",
+    "|.||||.||.||||||||.||.||||.|",
+    "|.||||.||.||||||||.||.||||.|",
+    "|.........||....||.........|",
+    "||||||||||||||||||||||||||||",
 ];
 
 const MSMAP4 = [
-    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
-    "W..........................W",
-    "W.WW.WWWW.WWWWWWWW.WWWW.WW.W",
-    "W.WW.WWWW.WWWWWWWW.WWWW.WW.W",
-    "W.WW.WWWW.WW....WW.WWWW.WW.W",
-    "W.WW......WW.WW.WW......WW.W",
-    "W.WWWW.WW.WW.WW.WW.WW.WWWW.W",
-    "W.WWWW.WW.WW.WW.WW.WW.WWWW.W",
-    "W......WW....WW....WW......W",
-    "WWW.WWWWWWWW.WW.WWWWWWWW.WWW",
-    "  W.WWWWWWWW.WW.WWWWWWWW.W  ",
-    "  W....WW..........WW....W  ",
-    "WWW.WW.WW.WW--WW.WW.WW.WWW  ",
-    "     WW.WW.W______W.WW.WW   ",
-    "WWWWWW....W______W....WWWWWW",
-    "WWWWWW.WW.W______W.WW.WWWWWW",
-    "     WW.WW.WWWWWWWW.WW.WW   ",
-    "WWW.WW.WW..........WW.WW.WWW",
-    "  W....WWWWW.WW.WWWWW....W  ",
-    "  W.WW.WWWWW.WW.WWWWW.WW.W  ",
-    "  W.WW.......WW.......WW.W  ",
-    "  W.WWWWW.WW.WW.WW.WWWWW.W  ",
-    "WWW.WWWWW.WW.WW.WW.WWWWW.WWW",
-    "W.........WW....WW.........W",
-    "W.WWWW.WW.WWWWWWWW.WW.WWWW.W",
-    "W.WWWW.WW.WWWWWWWW.WW.WWWW.W",
-    "W.WW...WW....S.....WW...WW.W",
-    "W.WW.WWWWWWW.WW.WWWWWWW.WW.W",
-    "W.WW.WWWWWWW.WW.WWWWWWW.WW.W",
-    "W............WW............W",
-    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+    "||||||||||||||||||||||||||||",
+    "|..........................|",
+    "|.||.||||.||||||||.||||.||.|",
+    "|.||.||||.||||||||.||||.||.|",
+    "|P||.||||.||....||.||||.||P|",
+    "|.||......||.||.||......||.|",
+    "|.||||.||.||.||.||.||.||||.|",
+    "|.||||.||.||.||.||.||.||||.|",
+    "|......||....||....||......|",
+    "|||.||||||||.||.||||||||.|||",
+    "__|.||||||||.||.||||||||.|__",
+    "__|....||..........||....|__",
+    "|||.||.||.|||--|||.||.||.|||",
+    "....||.||.|______|.||.||....",
+    "||||||....|______|....||||||",
+    "||||||.||.|______|.||.||||||",
+    "....||.||.||||||||.||.||....",
+    "|||.||.||..........||.||.|||",
+    "_||....|||||.||.|||||....||_",
+    "_||.||.|||||.||.|||||.||.||_",
+    "_||.||.......||.......||.||_",
+    "_||.|||||.||.||.||.|||||.||_",
+    "|||.|||||.||.||.||.|||||.|||",
+    "|.........||....||.........|",
+    "|.||||.||.||||||||.||.||||.|",
+    "|.||||.||.||||||||.||.||||.|",
+    "|P||...||....S.....||...||P|",
+    "|.||.|||||||.||.|||||||.||.|",
+    "|.||.|||||||.||.|||||||.||.|",
+    "|............||............|",
+    "||||||||||||||||||||||||||||",
 ];
 
 const ALL_MAPS = { Classic: CLASSIC, Prototype: PROTOTYPE, MsMap1: MSMAP1, MsMap2: MSMAP2, MsMap3: MSMAP3, MsMap4: MSMAP4 };
@@ -468,7 +468,7 @@ export default function PacmanGame() {
                 const shouldMove = !isFrightened || (tc % 2 === 0);
 
                 // Pathfinding Target
-                let target = { x: np.x, y: np.y }; 
+                let target = { x: np.x, y: np.y };
 
                 if (cg.state === 'dead') {
                     target = { x: 13, y: 14 }; // House interior
@@ -609,124 +609,124 @@ export default function PacmanGame() {
                     display: 'grid', gridTemplateColumns: `repeat(${cols},1fr)`, gridTemplateRows: `repeat(${rows},1fr)`,
                     background: '#000', borderRadius: '4px', boxSizing: 'border-box'
                 }}>
-                        {mapGrid.map((row, y) => row.map((cell, x) => {
-                            const isWall = cell === 'W' || cell === '|';
-                            const isGate = cell === 'H' || cell === '-';
-                            return (
-                                <div key={`c${x}${y}`} style={{
-                                    background: isWall ? '#1e3a8a' : isGate ? '#78350f' : '#000',
-                                    border: isWall ? '0.5px solid #1e40af' : 'none', boxSizing: 'border-box'
-                                }} />
-                            );
-                        }))}
+                    {mapGrid.map((row, y) => row.map((cell, x) => {
+                        const isWall = cell === 'W' || cell === '|';
+                        const isGate = cell === 'H' || cell === '-';
+                        return (
+                            <div key={`c${x}${y}`} style={{
+                                background: isWall ? '#1e3a8a' : isGate ? '#78350f' : '#000',
+                                border: isWall ? '0.5px solid #1e40af' : 'none', boxSizing: 'border-box'
+                            }} />
+                        );
+                    }))}
 
-                        {Array.from(dots).map(k => {
-                            const [x, y] = k.split(',').map(Number); return (
-                                <div key={`d${k}`} style={{
-                                    position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
-                                    left: `${(x / cols) * 100}%`, top: `${(y / rows) * 100}%`,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none'
-                                }}>
-                                    <div style={{ width: '35%', height: '35%', background: '#fbbf24', borderRadius: '50%' }} />
-                                </div>
-                            );
-                        })}
-
-                        {Array.from(pills).map(k => {
-                            const [x, y] = k.split(',').map(Number); return (
-                                <div key={`p${k}`} style={{
-                                    position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
-                                    left: `${(x / cols) * 100}%`, top: `${(y / rows) * 100}%`,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none'
-                                }}>
-                                    <div style={{
-                                        width: '70%', height: '70%', background: '#ef4444', borderRadius: '50%',
-                                        animation: 'pacPulse 0.6s infinite alternate', position: 'relative',
-                                        boxShadow: '0 0 10px rgba(239,68,68,0.5)'
-                                    }}>
-                                        <div style={{ position: 'absolute', top: '-25%', left: '40%', width: '20%', height: '40%', background: '#22c55e', borderRadius: '4px', transform: 'rotate(20deg)' }} />
-                                    </div>
-                                </div>
-                            );
-                        })}
-
-                        {ghosts.filter(g => g.state !== 'house').map(g => {
-                            const fr = g.state === 'frightened';
-                            const flash = fr && frightenedTimer < 8 && frightenedTimer % 2 === 0;
-                            const c = g.state === 'dead' ? 'transparent' : flash ? '#fff' : fr ? '#1d4ed8' : g.color;
-                            const skipTrans = Math.abs(g.x - (g.prevX ?? g.x)) > 1;
-                            return (
-                                <div key={g.id} style={{
-                                    position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
-                                    left: `${(g.x / cols) * 100}%`, top: `${(g.y / rows) * 100}%`,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    zIndex: 10, 
-                                    transition: skipTrans ? 'none' : `left ${fr ? 0.3 : 0.1}s linear, top ${fr ? 0.3 : 0.1}s linear`, 
-                                    pointerEvents: 'none'
-                                }}>
-                                    {g.state === 'dead'
-                                        ? <span style={{ lineHeight: 1, fontSize: `clamp(10px,${100 / rows}cqw,24px)` }}>👀</span>
-                                        : <GhostIcon width="95%" height="95%" color={c} fill={c} />
-                                    }
-                                </div>
-                            );
-                        })}
-
-                        {/* Pacman */}
-                        {(() => {
-                            const skipTrans = Math.abs(pacman.x - (pacman.prevX ?? pacman.x)) > 1;
-                            return (
-                                <div style={{
-                                    position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
-                                    left: `${(pacman.x / cols) * 100}%`, top: `${(pacman.y / rows) * 100}%`,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    zIndex: 11, transition: (isDying || skipTrans) ? 'none' : 'left 0.1s linear,top 0.1s linear',
-                                    pointerEvents: 'none',
-                                    animation: isDying ? 'pacDie 1.2s forwards' : isProtected ? 'pacFlash 0.25s infinite' : undefined
-                                }}>
-                                    <div style={{
-                                        width: '88%', height: '88%', background: '#fbbf24', borderRadius: '50%',
-                                        clipPath: 'polygon(100% 74%, 44% 48%, 100% 21%, 100% 0, 0 0, 0 100%, 100% 100%)',
-                                        transform: `rotate(${pacman.dir.x === 1 ? 0 : pacman.dir.y === 1 ? 90 : pacman.dir.x === -1 ? 180 : -90}deg)`,
-                                        animation: isDying ? 'none' : isProtected ? undefined : 'pacmanChomp 0.25s infinite alternate'
-                                    }} />
-                                </div>
-                            );
-                        })()}
-
-                        {phase === 'ready' && !isDying && (
-                            <div style={{
-                                position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                background: 'rgba(0,0,0,0.65)', zIndex: 20, borderRadius: '4px'
+                    {Array.from(dots).map(k => {
+                        const [x, y] = k.split(',').map(Number); return (
+                            <div key={`d${k}`} style={{
+                                position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
+                                left: `${(x / cols) * 100}%`, top: `${(y / rows) * 100}%`,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none'
                             }}>
-                                <h2 style={{ color: '#fbbf24', fontSize: 'clamp(1rem,4vw,2.5rem)', animation: 'pacFlash 0.8s infinite', margin: 0 }}>READY!</h2>
+                                <div style={{ width: '35%', height: '35%', background: '#fbbf24', borderRadius: '50%' }} />
                             </div>
-                        )}
-                    </div>
+                        );
+                    })}
 
-                    {/* Win / Over overlay */}
-                    {(phase === 'over' || phase === 'won') && (
-                        <div style={{
-                            position: 'absolute', inset: 0, background: 'rgba(13,17,23,0.95)', backdropFilter: 'blur(8px)',
-                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                            zIndex: 100, gap: '16px', borderRadius: '8px'
-                        }}>
-                            <div style={{ fontSize: 'clamp(3rem,8vw,5rem)' }}>{phase === 'won' ? '🏆' : '💀'}</div>
-                            <h2 style={{ fontSize: 'clamp(1.5rem,5vw,3rem)', margin: 0, color: phase === 'won' ? '#4ade80' : '#f87171' }}>
-                                {phase === 'won' ? 'VICTORY!' : 'GAME OVER!'}
-                            </h2>
-                            <p style={{ fontSize: 'clamp(1rem,3vw,1.5rem)', color: '#fbbf24', margin: 0 }}>SCORE: {score}</p>
-                            <div style={{ display: 'flex', gap: '14px', marginTop: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                                <button className="btn-primary" onClick={handleRestart} style={{ padding: '12px 28px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <RotateCcw size={18} /> Chơi Lại
-                                </button>
-                                <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '12px 28px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <ArrowLeft size={18} /> Về Sảnh
-                                </button>
+                    {Array.from(pills).map(k => {
+                        const [x, y] = k.split(',').map(Number); return (
+                            <div key={`p${k}`} style={{
+                                position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
+                                left: `${(x / cols) * 100}%`, top: `${(y / rows) * 100}%`,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none'
+                            }}>
+                                <div style={{
+                                    width: '70%', height: '70%', background: '#ef4444', borderRadius: '50%',
+                                    animation: 'pacPulse 0.6s infinite alternate', position: 'relative',
+                                    boxShadow: '0 0 10px rgba(239,68,68,0.5)'
+                                }}>
+                                    <div style={{ position: 'absolute', top: '-25%', left: '40%', width: '20%', height: '40%', background: '#22c55e', borderRadius: '4px', transform: 'rotate(20deg)' }} />
+                                </div>
                             </div>
+                        );
+                    })}
+
+                    {ghosts.filter(g => g.state !== 'house').map(g => {
+                        const fr = g.state === 'frightened';
+                        const flash = fr && frightenedTimer < 8 && frightenedTimer % 2 === 0;
+                        const c = g.state === 'dead' ? 'transparent' : flash ? '#fff' : fr ? '#1d4ed8' : g.color;
+                        const skipTrans = Math.abs(g.x - (g.prevX ?? g.x)) > 1;
+                        return (
+                            <div key={g.id} style={{
+                                position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
+                                left: `${(g.x / cols) * 100}%`, top: `${(g.y / rows) * 100}%`,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                zIndex: 10,
+                                transition: skipTrans ? 'none' : `left ${fr ? 0.3 : 0.1}s linear, top ${fr ? 0.3 : 0.1}s linear`,
+                                pointerEvents: 'none'
+                            }}>
+                                {g.state === 'dead'
+                                    ? <span style={{ lineHeight: 1, fontSize: `clamp(10px,${100 / rows}cqw,24px)` }}>👀</span>
+                                    : <GhostIcon width="95%" height="95%" color={c} fill={c} />
+                                }
+                            </div>
+                        );
+                    })}
+
+                    {/* Pacman */}
+                    {(() => {
+                        const skipTrans = Math.abs(pacman.x - (pacman.prevX ?? pacman.x)) > 1;
+                        return (
+                            <div style={{
+                                position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
+                                left: `${(pacman.x / cols) * 100}%`, top: `${(pacman.y / rows) * 100}%`,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                zIndex: 11, transition: (isDying || skipTrans) ? 'none' : 'left 0.1s linear,top 0.1s linear',
+                                pointerEvents: 'none',
+                                animation: isDying ? 'pacDie 1.2s forwards' : isProtected ? 'pacFlash 0.25s infinite' : undefined
+                            }}>
+                                <div style={{
+                                    width: '88%', height: '88%', background: '#fbbf24', borderRadius: '50%',
+                                    clipPath: 'polygon(100% 74%, 44% 48%, 100% 21%, 100% 0, 0 0, 0 100%, 100% 100%)',
+                                    transform: `rotate(${pacman.dir.x === 1 ? 0 : pacman.dir.y === 1 ? 90 : pacman.dir.x === -1 ? 180 : -90}deg)`,
+                                    animation: isDying ? 'none' : isProtected ? undefined : 'pacmanChomp 0.25s infinite alternate'
+                                }} />
+                            </div>
+                        );
+                    })()}
+
+                    {phase === 'ready' && !isDying && (
+                        <div style={{
+                            position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            background: 'rgba(0,0,0,0.65)', zIndex: 20, borderRadius: '4px'
+                        }}>
+                            <h2 style={{ color: '#fbbf24', fontSize: 'clamp(1rem,4vw,2.5rem)', animation: 'pacFlash 0.8s infinite', margin: 0 }}>READY!</h2>
                         </div>
                     )}
                 </div>
+
+                {/* Win / Over overlay */}
+                {(phase === 'over' || phase === 'won') && (
+                    <div style={{
+                        position: 'absolute', inset: 0, background: 'rgba(13,17,23,0.95)', backdropFilter: 'blur(8px)',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                        zIndex: 100, gap: '16px', borderRadius: '8px'
+                    }}>
+                        <div style={{ fontSize: 'clamp(3rem,8vw,5rem)' }}>{phase === 'won' ? '🏆' : '💀'}</div>
+                        <h2 style={{ fontSize: 'clamp(1.5rem,5vw,3rem)', margin: 0, color: phase === 'won' ? '#4ade80' : '#f87171' }}>
+                            {phase === 'won' ? 'VICTORY!' : 'GAME OVER!'}
+                        </h2>
+                        <p style={{ fontSize: 'clamp(1rem,3vw,1.5rem)', color: '#fbbf24', margin: 0 }}>SCORE: {score}</p>
+                        <div style={{ display: 'flex', gap: '14px', marginTop: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                            <button className="btn-primary" onClick={handleRestart} style={{ padding: '12px 28px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <RotateCcw size={18} /> Chơi Lại
+                            </button>
+                            <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '12px 28px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <ArrowLeft size={18} /> Về Sảnh
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
 
             {/* ── SIDEBAR ── */}
             <div style={{
