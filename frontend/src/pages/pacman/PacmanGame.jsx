@@ -561,20 +561,20 @@ export default function PacmanGame() {
                         try { snd.current.playLoseSound(); } catch (e) { }
                     } else {
                         setLives(nl);
-                        // Pacman stays at death position but becomes protected
                         setPacman(p => ({ ...p, isProtected: true }));
                         setGhosts(GHOST_STARTS.map(g => ({
                             ...g, startX: g.x, startY: g.y,
                             state: g.exitDelay === 0 ? 'chase' : 'house'
                         })));
                         setFrightenedTimer(0);
-                        setProtectedTimer(12); // ~2 seconds of invincibility
+                        setProtectedTimer(12);
                         setPhase('ready');
                         try { playPacmanStartSound(); } catch (e) { }
                         setTimeout(() => setPhase('playing'), 2000);
                     }
                 }, 1200);
-                setPacman(np); setGhosts(finalGhosts);
+                // CRITICAL: Do NOT use 'np' which contains the next-tile jump
+                setGhosts(finalGhosts);
                 return;
             }
 
@@ -689,7 +689,9 @@ export default function PacmanGame() {
                                     position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
                                     left: `${(g.x / cols) * 100}%`, top: `${(g.y / rows) * 100}%`,
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    zIndex: 10, transition: skipTrans ? 'none' : 'left 0.1s linear,top 0.1s linear', pointerEvents: 'none'
+                                    zIndex: 10, 
+                                    transition: skipTrans ? 'none' : `left ${fr ? 0.3 : 0.1}s linear, top ${fr ? 0.3 : 0.1}s linear`, 
+                                    pointerEvents: 'none'
                                 }}>
                                     {g.state === 'dead'
                                         ? <span style={{ lineHeight: 1, fontSize: `clamp(10px,${100 / rows}cqw,24px)` }}>👀</span>
