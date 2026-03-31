@@ -249,69 +249,45 @@ const GHOST_RANGES = { BLINKY: 99, PINKY: 99, INKY: 99, CLYDE: 99 };
 const isSameDir = (a, b) => a?.x === b?.x && a?.y === b?.y;
 const getOpp = d => ({ x: -d.x, y: -d.y });
 
-const manhattan = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+const distSq = (a, b) => Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2);
 
-function findPathAStar(start, target, grid, canPassH = false, forbiddenDir = null) {
+function getRandomDir(ghost, grid) {
     const rows = grid.length, cols = grid[0].length;
-    const pq = [{ x: start.x, y: start.y, g: 0, h: manhattan(start, target), path: [] }];
-    const visited = new Map();
-    visited.set(`${start.x},${start.y}`, 0);
-
-    while (pq.length) {
-        pq.sort((a, b) => {
-            const fA = a.g + a.h, fB = b.g + b.h;
-            if (fA !== fB) return fA - fB;
-            return 0; // Insertion order of DIR_LIST ensures stable priority (UP > LEFT > DOWN > RIGHT)
-        });
-        const cur = pq.shift();
-
-        if (cur.x === target.x && cur.y === target.y) return cur.path[0];
-
-        for (const d of DIR_LIST) {
-            // No reversal allowed for the first move
-            if (cur.path.length === 0 && forbiddenDir && d.x === forbiddenDir.x && d.y === forbiddenDir.y) continue;
-            
-            let nx = (cur.x + d.x + cols) % cols;
-            let ny = cur.y + d.y;
-            if (ny < 0 || ny >= rows) continue;
-
-            const cell = grid[ny][nx];
-            if (cell === 'W' || cell === '|') continue;
-            if ((cell === 'H' || cell === '-' || cell === '_') && !canPassH) continue;
-
-            const g = cur.g + 1;
-            const k = `${nx},${ny}`;
-            if (!visited.has(k) || g < visited.get(k)) {
-                visited.set(k, g);
-                pq.push({ x: nx, y: ny, g, h: manhattan({ x: nx, y: ny }, target), path: [...cur.path, d] });
-            }
-        }
-    }
-    return null;
-}
-
-function getNextMoveClassic(ghost, target, grid, canPassH = false) {
-    const rows = grid.length, cols = grid[0].length;
-    const opp = { x: -ghost.dir.x, y: -ghost.dir.y };
-
-    const validDirs = DIR_LIST.filter(d => {
-        if (ghost.state !== 'dead' && ghost.state !== 'frightened' && isSameDir(d, opp)) return false;
+    const opp = getOpp(ghost.dir);
+    const valid = DIR_LIST.filter(d => {
+        if (isSameDir(d, opp)) return false;
         let nx = (ghost.x + d.x + cols) % cols;
         let ny = ghost.y + d.y;
         if (ny < 0 || ny >= rows) return false;
         const cell = grid[ny][nx];
-        return cell !== 'W' && (cell !== 'H' || canPassH);
+        return cell !== 'W' && cell !== '|';
+    });
+    if (valid.length === 0) return ghost.dir;
+    return valid[Math.floor(Math.random() * valid.length)];
+}
+
+function chooseDirectionClassic(ghost, target, grid, canPassH = false) {
+    const rows = grid.length, cols = grid[0].length;
+    const opp = getOpp(ghost.dir);
+
+    const validDirs = DIR_LIST.filter(d => {
+        if (isSameDir(d, opp)) return false;
+        let nx = (ghost.x + d.x + cols) % cols;
+        let ny = ghost.y + d.y;
+        if (ny < 0 || ny >= rows) return false;
+        const cell = grid[ny][nx];
+        return cell !== 'W' && cell !== '|' && (cell !== 'H' && cell !== '-' && cell !== '_' || canPassH);
     });
 
-    if (validDirs.length === 0) return ghost.dir || DIR_LIST[0];
+    if (validDirs.length === 0) return ghost.dir;
 
     let bestDir = validDirs[0], minDist = Infinity;
     validDirs.forEach(d => {
         const nx = (ghost.x + d.x + cols) % cols;
         const ny = ghost.y + d.y;
-        const dist = Math.sqrt(Math.pow(nx - target.x, 2) + Math.pow(ny - target.y, 2));
-        if (dist < minDist) {
-            minDist = dist;
+        const d2 = distSq({ x: nx, y: ny }, target);
+        if (d2 < minDist) {
+            minDist = d2;
             bestDir = d;
         }
     });
@@ -319,6 +295,7 @@ function getNextMoveClassic(ghost, target, grid, canPassH = false) {
     return bestDir;
 }
 
+const manhattan = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 function parseMap(raw) {
     const maxLen = Math.max(...raw.map(r => r.length));
     const grid = [], dots = new Set(), pills = new Set();
@@ -466,7 +443,7 @@ export default function PacmanGame() {
                     if (cg.x === gateOut.x && cg.y === gateOut.y) {
                         cg.state = 'chase'; // immediate transition
                     } else {
-                        const step = findPathAStar(cg, gateOut, grid, true);
+                        const step = chooseDirectionClassic(cg, gateOut, grid, true);
                         if (step) { cg.dir = step; cg.x = (cg.x + step.x + cols) % cols; cg.y += step.y; }
                         return cg;
                     }
@@ -519,19 +496,13 @@ export default function PacmanGame() {
                 }
 
                 if (shouldMove) {
-                    // A* Move with Reversal Prevention
-                    const forbidden = { x: -cg.dir.x, y: -cg.dir.y };
-                    const step = findPathAStar(cg, target, grid, cg.state === 'dead', forbidden);
-                    if (step) {
-                        cg.dir = step;
-                        cg.x = (cg.x + step.x + cols) % cols;
-                        cg.y += step.y;
+                    if (isFrightened) {
+                        cg.dir = getRandomDir(cg, grid);
                     } else {
-                        const fallback = getNextMoveClassic(cg, target, grid, cg.state === 'dead');
-                        cg.dir = fallback;
-                        cg.x = (cg.x + fallback.x + cols) % cols;
-                        cg.y += fallback.y;
+                        cg.dir = chooseDirectionClassic(cg, target, grid, cg.state === 'dead' || cg.state === 'exiting');
                     }
+                    cg.x = (cg.x + cg.dir.x + cols) % cols;
+                    cg.y += cg.dir.y;
                 }
                 return cg;
             });
