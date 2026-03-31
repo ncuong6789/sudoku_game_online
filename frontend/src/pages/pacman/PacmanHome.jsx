@@ -75,13 +75,11 @@ export default function PacmanHome() {
                     </button>
 
                     <button
-                        disabled
-                        style={{
-                            padding: '16px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                            background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.3)', border: '1px outset rgba(255,255,255,0.1)', cursor: 'not-allowed', borderRadius: '12px'
-                        }}
+                        className="btn-secondary"
+                        onClick={() => navigate('/')}
+                        style={{ padding: '16px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
                     >
-                        <Lock size={20} /> Multiplayer (Coming Soon)
+                        <ArrowLeft size={20} /> Quay lại Hub
                     </button>
                 </div>
             </div>

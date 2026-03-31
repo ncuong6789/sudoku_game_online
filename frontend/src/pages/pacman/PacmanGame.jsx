@@ -613,14 +613,17 @@ export default function PacmanGame() {
     return (
         <div className="glass-panel" style={{
             display: 'flex', justifyContent: 'center', alignItems: 'stretch',
-            width: 'min(1200px, 98%)', height: 'calc(100vh - 120px)',
-            margin: '20px auto',
-            padding: 'clamp(0.5rem,1.5vw,1.5rem)',
-            boxSizing: 'border-box', gap: 'clamp(1rem,2vw,2rem)',
+            width: 'fit-content', height: 'fit-content',
+            maxHeight: '94vh', maxWidth: '98vw',
+            margin: 'auto',
+            padding: '1.2rem',
+            boxSizing: 'border-box', gap: '1.5rem',
             overflow: 'hidden', minWidth: 0,
-            background: 'rgba(0,0,0,0.85)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            boxShadow: '0 0 40px rgba(0,0,0,0.5)'
+            background: 'rgba(23, 23, 33, 0.85)',
+            backdropFilter: 'blur(25px)',
+            borderRadius: '20px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
         }}>
             {/* ── BOARD ── */}
             <div style={{ flex: '1 1 0', minWidth: 0, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
@@ -750,8 +753,8 @@ export default function PacmanGame() {
 
             {/* ── SIDEBAR ── */}
             <div style={{
-                display: 'flex', flexDirection: 'column', gap: 'clamp(0.4rem,0.8vw,0.8rem)',
-                width: 'clamp(150px,18vw,220px)', flexShrink: 0, height: '100%', overflowY: 'auto'
+                display: 'flex', flexDirection: 'column', gap: '0.8rem',
+                width: '240px', flexShrink: 0, height: '100%', overflowY: 'auto'
             }}>
 
                 <div style={{ padding: 'clamp(0.8rem,1.5vw,1.2rem)', display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
