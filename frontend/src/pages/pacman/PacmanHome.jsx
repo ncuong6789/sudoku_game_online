@@ -19,12 +19,6 @@ export default function PacmanHome() {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1rem' }}>
             <div className="glass-panel" style={{ position: 'relative', overflow: 'hidden', padding: '2.5rem', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
-                <div style={{ position: 'absolute', top: '20px', left: '20px' }}>
-                    <button className="btn-secondary" onClick={() => navigate('/')} style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <ArrowLeft size={18} /> Về Home
-                    </button>
-                </div>
-
                 <div style={{ width: '80px', height: '80px', background: 'var(--accent-color)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', boxShadow: '0 0 30px rgba(74, 222, 128, 0.3)', marginTop: '2rem' }}>
                     <Ghost size={45} color="#000" />
                 </div>
@@ -74,13 +68,6 @@ export default function PacmanHome() {
                         <Gamepad size={24} /> Chơi Ngay
                     </button>
 
-                    <button
-                        className="btn-secondary"
-                        onClick={() => navigate('/')}
-                        style={{ padding: '16px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
-                    >
-                        <ArrowLeft size={20} /> Quay lại Hub
-                    </button>
                 </div>
             </div>
         </div>

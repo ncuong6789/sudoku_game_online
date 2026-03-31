@@ -626,13 +626,18 @@ export default function PacmanGame() {
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
         }}>
             {/* ── BOARD ── */}
-            <div style={{ flex: '1 1 0', minWidth: 0, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                <div style={{ position: 'relative', height: '100%', maxHeight: '100%', aspectRatio: `${cols}/${rows}`, maxWidth: '100%', flexShrink: 0 }}>
-                    <div style={{
-                        width: '100%', height: '100%',
-                        display: 'grid', gridTemplateColumns: `repeat(${cols},1fr)`, gridTemplateRows: `repeat(${rows},1fr)`,
-                        background: '#000', borderRadius: '4px', boxSizing: 'border-box'
-                    }}>
+            <div style={{
+                position: 'relative',
+                height: 'min(85vh, 800px)',
+                width: 'min(calc(85vh * 0.9), 720px)',
+                flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}>
+                <div style={{
+                    width: '100%', height: '100%',
+                    display: 'grid', gridTemplateColumns: `repeat(${cols},1fr)`, gridTemplateRows: `repeat(${rows},1fr)`,
+                    background: '#000', borderRadius: '4px', boxSizing: 'border-box'
+                }}>
                         {mapGrid.map((row, y) => row.map((cell, x) => {
                             const isWall = cell === 'W' || cell === '|';
                             const isGate = cell === 'H' || cell === '-';
@@ -749,7 +754,6 @@ export default function PacmanGame() {
                         </div>
                     )}
                 </div>
-            </div>
 
             {/* ── SIDEBAR ── */}
             <div style={{
