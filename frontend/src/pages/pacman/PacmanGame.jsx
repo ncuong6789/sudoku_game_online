@@ -9,163 +9,223 @@ import { useAudio } from '../../utils/useAudio';
 // Left corridor: cols 1-5 (rows 7-9). Right corridor: cols 14-19 (rows 7-9).
 
 const CLASSIC = [
-    "WWWWWWWWWWWWWWWWWWWWW",
-    "W.........W.........W",
-    "W.WWW.WWW.W.WWW.WWW.W",
-    "WPW W.W W.W.W W.W WPW",
-    "W.WWW.WWW.W.WWW.WWW.W",
-    "W...................W",
-    "W.WWW.W.WWWWW.W.WWW.W",
-    "W.....W... ...W.....W",
-    "WWWWW.WWW H WWW.WWWWW",
-    "____W.W_______W.W____",
-    "WWWWW.W_WWWWW_W.WWWWW",
-    "W.........W.........W",
-    "W.WWW.WWW.W.WWW.WWW.W",
-    "W...W.....S.....W...W",
-    "WWW.W.W.WWWWW.W.W.WWW",
-    "W.....W.......W.....W",
-    "W.WWWWWWW.W.WWWWWWW.W",
-    "W.........W.........W",
-    "W.WWW.WWW.W.WWW.WWW.W",
-    "WP..W...........W..PW",
-    "WWWWWWWWWWWWWWWWWWWWW",
+    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+    "W............WW............W",
+    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
+    "WPWWWW.WWWWW.WW.WWWWW.WWWWPW",
+    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
+    "W..........................W",
+    "W.WWWW.WW.WWWWWWWW.WW.WWWW.W",
+    "W.WWWW.WW.WWWWWWWW.WW.WWWW.W",
+    "W......WW....WW....WW......W",
+    "WWWWWW.WWWWW WW WWWWW.WWWWWW",
+    "     W.WWWWW WW WWWWW.W     ",
+    "     W.WW          WW.W     ",
+    "     W.WW WWW  WWW WW.W     ",
+    "WWWWWW.WW W______W WW.WWWWWW",
+    "          W______W          ",
+    "WWWWWW.WW W______W WW.WWWWWW",
+    "     W.WW WWWWWWWW WW.W     ",
+    "     W.WW          WW.W     ",
+    "     W.WW WWWWWWWW WW.W     ",
+    "WWWWWW.WW WWWWWWWW WW.WWWWWW",
+    "W............WW............W",
+    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
+    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
+    "W...WW.......S........WW...W",
+    "WWW.WW.WW.WWWWWWWW.WW.WW.WWW",
+    "WWW.WW.WW.WWWWWWWW.WW.WW.WWW",
+    "W......WW....WW....WW......W",
+    "W.WWWWWWWWWW.WW.WWWWWWWWWW.W",
+    "W.WWWWWWWWWW.WW.WWWWWWWWWW.W",
+    "W..........................W",
+    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
 ];
 
-const LABYRINTH = [
-    "WWWWWWWWWWWWWWWWWWWWW",
-    "W.........W.........W",
-    "W.WWWWW.W.W.W.WWWWW.W",
-    "WPW...W.W.W.W.W...WPW",
-    "W.W.W.W.W.W.W.W.W.W.W",
-    "W...W...........W...W",
-    "W.WWW.W.WWWWW.W.WWW.W",
-    "W.....W... ...W.....W",
-    "WWWWW.WWW H WWW.WWWWW",
-    "____W.W_______W.W____",
-    "WWWWW.W_WWWWW_W.WWWWW",
-    "W.........W.........W",
-    "W.W.WWWWWWWWWWWWW.W.W",
-    "W.W.......S.......W.W",
-    "W.WWWWW.WWWWW.WWWWW.W",
-    "W...W.......W.......W",
-    "W.W.W.WWWWW.W.WWWWW.W",
-    "W.W.W.......W.......W",
-    "W.W.WWWWWWW.WWWWWWW.W",
-    "WP..................PW",
-    "WWWWWWWWWWWWWWWWWWWWW",
+const PROTOTYPE = [
+    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+    "W............WW............W",
+    "W.WWWWW.WWWW.WW.WWWW.WWWWW.W",
+    "WPWWWWW.WWWW.WW.WWWW.WWWWWPW",
+    "W.WWWWW.WWWW.WW.WWWW.WWWWW.W",
+    "W..........................W",
+    "W.WWWW.WW.WWWWWWWW.WW.WWWW.W",
+    "W.WWWW.WW.WWWWWWWW.WW.WWWW.W",
+    "W..WW..WW....WW....WW..WW..W",
+    "WW.WW.WWWWWW WW WWWWWW.WW.WW",
+    "WW.WW.WWWWWW WW WWWWWW.WW.WW",
+    "W..WW........S.........WW..W",
+    "W.WWWWWW.WWWWWWWWWW.WWWWWW.W",
+    "W.WWWWWW.WW______WW.WWWWWW.W",
+    " .........W______W......... ",
+    "W.WWWWWW.WW______WW.WWWWWW.W",
+    "W.WWWWWW.WWWWWWWWWW.WWWWWW.W",
+    "W..........................W",
+    "W.WWWWWW.WWWWWWWWWW.WWWWWW.W",
+    "W.WWWWWW.WWWWWWWWWW.WWWWWW.W",
+    "W............WW............W",
+    "W.WWWWW.WWWW.WW.WWWW.WWWWW.W",
+    "W.WWWWW.WWWW.WW.WWWW.WWWWW.W",
+    "WP.WW..................WW.PW",
+    "WW.WW.WW.WWWWWWWWWW.WW.WW.WW",
+    "WW.WW.WW.WWWWWWWWWW.WW.WW.WW",
+    "W......WW....WW....WW......W",
+    "W.WWWWWWWWWW.WW.WWWWWWWWWW.W",
+    "W.WWWWWWWWWW.WW.WWWWWWWWWW.W",
+    "W..........................W",
+    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
 ];
 
-const SPLIT = [
-    "WWWWWWWWWWWWWWWWWWWWW",
-    "W.........W.........W",
-    "W.WWWW.WW.W.WW.WWWW.W",
-    "WPW.........W......PW",
-    "W.W.WWWWWWWWWWWWW.W.W",
-    "W.W...............W.W",
-    "W.W.W.WWWWW.WWWWW.W.W",
-    "W.....W... ...W.....W",
-    "WWWWW.WWW H WWW.WWWWW",
-    "____W.W_______W.W____",
-    "WWWWW.W_WWWWW_W.WWWWW",
-    "W...W.....W.....W...W",
-    "W.W.W.WWWWW.WWWWW.W.W",
-    "W.W.......S.......W.W",
-    "W.W.WWWWWWWWWWWWW.W.W",
-    "W.W...............W.W",
-    "W.WWWW.WW.W.WW.WWWW.W",
-    "W.........W.........W",
-    "W.WWWW.WW.W.WW.WWWW.W",
-    "WP..................PW",
-    "WWWWWWWWWWWWWWWWWWWWW",
+const MSMAP1 = [
+    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+    "W............WW............W",
+    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
+    "WPW__W.W___W.WW.W___W.W__WPW",
+    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
+    "W..........................W",
+    "W.WWWWW.WW.WWWWWWWW.WW.WWWWW",
+    "W.WWWWW.WW.WWWWWWWW.WW.WWWWW",
+    "W.......WW....WW....WW......W",
+    "WWWWWW.WWWWWW WW WWWWWW.WWWW",
+    "     W.WWWWWW WW WWWWWW.W   ",
+    "     W.WW          WW.W     ",
+    "     W.WW WWW--WWW WW.W     ",
+    "WWWWWW.WW W______W WW.WWWWWW",
+    "          W______W          ",
+    "WWWWWW.WW W______W WW.WWWWWW",
+    "     W.WW WWWWWWWW WW.W     ",
+    "     W.WW..........WW.W     ",
+    "     W.WW WWWWWWWW WW.W     ",
+    "WWWWWW.WW WWWWWWWW WW.WWWWWW",
+    "W............WW............W",
+    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
+    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
+    "W...WW.......S........WW...W",
+    "WWW.WW.WW.WWWWWWWW.WW.WW.WWW",
+    "WWW.WW.WW.WWWWWWWW.WW.WW.WWW",
+    "W......WW....WW....WW......W",
+    "W.WWWWWWWWWW.WW.WWWWWWWWWW.W",
+    "W.WWWWWWWWWW.WW.WWWWWWWWWW.W",
+    "W..........................W",
+    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
 ];
 
-const CROSS = [
-    "WWWWWWWWWWWWWWWWWWWWW",
-    "W.........W.........W",
-    "W.WWW.W.WWWWW.W.WWW.W",
-    "WP..W.W...W...W.W..PW",
-    "WWW.W.WWW.W.WWW.W.WWW",
-    "W.........W.........W",
-    "W.WWWWW.W.W.W.WWWWW.W",
-    "W.....W... ...W.....W",
-    "WWWWW.WWW H WWW.WWWWW",
-    "____W.W_______W.W____",
-    "WWWWW.W_WWWWW_W.WWWWW",
-    "W.....W.......W.....W",
-    "W.WWWWW.W.W.W.WWWWW.W",
-    "W.........S.........W",
-    "WWW.W.WWW.W.WWW.W.WWW",
-    "WP..W.W...W...W.W..PW",
-    "W.WWW.W.WWWWW.W.WWW.W",
-    "W...................W",
-    "W.WWWWWWW.W.WWWWWWW.W",
-    "WP.................PW",
-    "WWWWWWWWWWWWWWWWWWWWW",
+const MSMAP2 = [
+    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+    "          .WW..........WW   ",
+    "WWWWWW.WW.WWWWWWWW.WW.WWWWWW",
+    "WWWWWW.WW.WWWWWWWW.WW.WWWWWW",
+    "W............WW............W",
+    "W.WWWWWWW.WW.WW.WW.WWWWWWW.W",
+    "W.WWWWWWW.WW.WW.WW.WWWWWWW.W",
+    "W.WW......WW.WW.WW......WW.W",
+    "W.WW.WWWW.WW....WW.WWWW.WW.W",
+    "W.WW.WWWW.WWWWWWWW.WWWW.WW.W",
+    "W......WW.WWWWWWWW.WW......W",
+    "WWWWWW.WW..........WW.WWWWWW",
+    "WWWWWW.WW.WW HH WW.WW.WWWWWW",
+    "W......WW.W______W.WW......W",
+    "W.WWWW.WW.W______W.WW.WWWW.W",
+    "W.WWWW....W______W....WWWW.W",
+    "W...WW.WW.WWWWWWWW.WW.WW...W",
+    "WWW.WW.WW..........WW.WW.WWW",
+    "  W.WW.WWWW.WWWW.WWWW.WW.W  ",
+    "  W.WW.WWWW.W__W.WWWW.WW.W  ",
+    "  W.........W__W.........W  ",
+    "  W.WWWWWWW.W__W.WWWWWWW.W  ",
+    "WWW.WWWWWWW.WWWW.WWWWWWW.WWW",
+    "          .WW..........WW   ",
+    "WWW.WW.WW.WWWWWWWW.WW.WW.WWW",
+    "WWW.WW.WW.WWWWWWWW.WW.WW.WWW",
+    "W...WW.......S.......WW...W",
+    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
+    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
+    "W..........................W",
+    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
 ];
 
-const OPEN = [
-    "WWWWWWWWWWWWWWWWWWWWW",
-    "W...................W",
-    "W.WWWW.WWWWW.WWWW.W.W",
-    "WP....W.....W....W.PW",
-    "WWWW.W.W.W.W.W.WWWW.W",
-    "W......W.W.W......W.W",
-    "W.WWWW.W.W.W.WWWW.V.W",
-    "W.....W... ...W.....W",
-    "WWWWW.WWW H WWW.WWWWW",
-    "____W.W_______W.W____",
-    "WWWWW.W_WWWWW_W.WWWWW",
-    "W......W...W......W.W",
-    "W.WWWW.W.W.W.WWWW.W.W",
-    "W........S..........W",
-    "WWWW.W.W.W.W.W.WWWW.W",
-    "W....W.......W....W.W",
-    "W.WWWW.WWWWW.WWWW.W.W",
-    "W...................W",
-    "W.WWWWWWW.W.WWWWWWW.W",
-    "WP.................PW",
-    "WWWWWWWWWWWWWWWWWWWWW",
+const MSMAP3 = [
+    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+    "W.........WW....WW.........W",
+    "W.WWWWWWW.WW.WW.WW.WWWWWWW.W",
+    "W.WWWWWWW.WW.WW.WW.WWWWWWW.W",
+    "W.WW.........WW.........WW.W",
+    "W.WW.WW.WWWW.WW.WWWW.WW.WW.W",
+    "W....WW.WWWW.WW.WWWW.WW....W",
+    "WWWW.WW.WWWW.WW.WWWW.WW.WWWW",
+    "WWWW.WW..............WW.WWWW",
+    "     WWWW.WWWWWWWW.WWWW     ",
+    "W.WW.WWWW.WWWWWWWW.WWWW.WW.W",
+    "W.WW....................WW.W",
+    "W.WWWW.WW.WW HH WW.WW.WWWW.W",
+    "W.WWWW.WW.W______W.WW.WWWW.W",
+    "W......WW.W______W.WW......W",
+    "W.WW.WWWW.W______W.WWWW.WW.W",
+    "W.WW.WWWW.WWWWWWWW.WWWW.WW.W",
+    "W.WW....................WW.W",
+    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
+    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
+    "W......WW....WW....WW......W",
+    "WWW.WW.WW.WWWWWWWW.WW.WW.WWW",
+    "WWW.WW.WW.WWWWWWWW.WW.WW.WWW",
+    "W...WW.......S........WW...W",
+    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
+    "W.WWWW.WWWWW.WW.WWWWW.WWWW.W",
+    "W......WW....WW....WW......W",
+    "W.WWWW.WW.WWWWWWWW.WW.WWWW.W",
+    "W.WWWW.WW.WWWWWWWW.WW.WWWW.W",
+    "W.........WW....WW.........W",
+    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
 ];
 
-const VOID = [
-    "WWWWWWWWWWWWWWWWWWWWW",
-    "WP........W........PW",
-    "W.WWWWWW.W.W.WWWWWW.W",
-    "W.W......W.W......W.W",
-    "W.W.WWWWW.W.WWWWW.W.W",
-    "W.W...............W.W",
-    "W.W.WWWWW.W.WWWWW.W.W",
-    "W.....W... ...W.....W",
-    "WWWWW.WWW H WWW.WWWWW",
-    "____W.W_______W.W____",
-    "WWWWW.W_WWWWW_W.WWWWW",
-    "W.W.......W.......W.W",
-    "W.W.WWWWW.S.WWWWW.W.W",
-    "W.W...............W.W",
-    "W.W.WWWWW.W.WWWWW.W.W",
-    "W.W.......W.......W.W",
-    "W.WWWWWW.W.W.WWWWWW.W",
-    "W........W........W.W",
-    "W.WWWWWWWWWWWWWWWWW.W",
-    "WP.................PW",
-    "WWWWWWWWWWWWWWWWWWWWW",
+const MSMAP4 = [
+    "WWWWWWWWWWWWWWWWWWWWWWWWWWWW",
+    "W..........................W",
+    "W.WW.WWWW.WWWWWWWW.WWWW.WW.W",
+    "W.WW.WWWW.WWWWWWWW.WWWW.WW.W",
+    "W.WW.WWWW.WW....WW.WWWW.WW.W",
+    "W.WW......WW.WW.WW......WW.W",
+    "W.WWWW.WW.WW.WW.WW.WW.WWWW.W",
+    "W.WWWW.WW.WW.WW.WW.WW.WWWW.W",
+    "W......WW....WW....WW......W",
+    "WWW.WWWWWWWW.WW.WWWWWWWW.WWW",
+    "  W.WWWWWWWW.WW.WWWWWWWW.W  ",
+    "  W....WW..........WW....W  ",
+    "WWW.WW.WW.WW HH WW.WW.WW.WWW",
+    "    WW.WW.W______W.WW.WW    ",
+    "WWWWWW....W______W....WWWWWW",
+    "WWWWWW.WW.W______W.WW.WWWWWW",
+    "    WW.WW.WWWWWWWW.WW.WW    ",
+    "WWW.WW.WW..........WW.WW.WWW",
+    "  W....WWWWW.WW.WWWWW....W  ",
+    "  W.WW.WWWWW.WW.WWWWW.WW.W  ",
+    "  W.WW.......WW.......WW.W  ",
+    "  W.WWWWW.WW.WW.WW.WWWWW.W  ",
+    "WWW.WWWWW.WW.WW.WW.WWWWW.WWW",
+    "W.........WW....WW.........W",
+    "W.WWWW.WW.WWWWWWWW.WW.WWWW.W",
+    "W.WWWW.WW.WWWWWWWW.WW.WWWW.W",
+    "W.WW...WW....S.....WW...WW.W",
+    "W.WW.WWWWWWW.WW.WWWWWWW.WW.W",
+    "W.WW.WWWWWWW.WW.WWWWWWW.WW.W",
+    "W............WW............W",
+    "WWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
 ];
 
-const ALL_MAPS = { Classic: CLASSIC, Labyrinth: LABYRINTH, Split: SPLIT, Cross: CROSS, Open: OPEN, Void: VOID };
+const ALL_MAPS = { Classic: CLASSIC, Prototype: PROTOTYPE, MsMap1: MSMAP1, MsMap2: MSMAP2, MsMap3: MSMAP3, MsMap4: MSMAP4 };
 
 // Ghost start positions (hardcoded, not from map)
 // BLINKY starts outside house already; others inside
 const GHOST_STARTS = [
-    { id: 'BLINKY', color: '#ef4444', x: 10, y: 7, dir: { x: -1, y: 0 }, exitDelay: 0 },
-    { id: 'PINKY', color: '#f9a8d4', x: 9, y: 9, dir: { x: 0, y: -1 }, exitDelay: 80 },
-    { id: 'INKY', color: '#06b6d4', x: 10, y: 9, dir: { x: 0, y: -1 }, exitDelay: 160 },
-    { id: 'CLYDE', color: '#fb923c', x: 11, y: 9, dir: { x: 0, y: -1 }, exitDelay: 240 },
+    { id: 'BLINKY', color: '#ef4444', x: 13, y: 11, dir: { x: -1, y: 0 }, exitDelay: 0 },
+    { id: 'PINKY', color: '#f9a8d4', x: 12, y: 14, dir: { x: 0, y: -1 }, exitDelay: 15 },
+    { id: 'INKY', color: '#06b6d4', x: 13, y: 14, dir: { x: 0, y: -1 }, exitDelay: 30 },
+    { id: 'CLYDE', color: '#fb923c', x: 14, y: 14, dir: { x: 0, y: -1 }, exitDelay: 45 },
 ];
 
 const DIRS = { UP: { x: 0, y: -1 }, DOWN: { x: 0, y: 1 }, LEFT: { x: -1, y: 0 }, RIGHT: { x: 1, y: 0 } };
 const DIR_LIST = Object.values(DIRS);
-const GHOST_RANGES = { BLINKY: 30, PINKY: 10, INKY: 7, CLYDE: 12 };
+const GHOST_RANGES = { BLINKY: 99, PINKY: 99, INKY: 99, CLYDE: 99 }; // Full A* aggression
 
 const isSameDir = (a, b) => a?.x === b?.x && a?.y === b?.y;
 const getOpp = d => ({ x: -d.x, y: -d.y });
@@ -374,40 +434,37 @@ export default function PacmanGame() {
                 // In classic Pacman, they choose next move *before* entering the next tile
                 // But for this grid implementation, we calculate next move at each step
                 
-                // Exiting Logic: target outside house (10,7)
+                // Exiting Logic: target outside house (13,11)
                 if (cg.state === 'exiting') {
-                    const gateOut = { x: 10, y: 7 };
+                    const gateOut = { x: 13, y: 11 };
                     if (cg.x === gateOut.x && cg.y === gateOut.y) { cg.state = 'chase'; return cg; }
-                    const step = getNextMoveClassic(cg, gateOut, grid, true);
-                    cg.dir = step; cg.x = (cg.x + step.x + cols) % cols; cg.y += step.y;
+                    const step = findPathAStar(cg, gateOut, grid, true);
+                    if (step) { cg.dir = step; cg.x = (cg.x + step.x + cols) % cols; cg.y += step.y; }
                     return cg;
                 }
 
                 // State Transitions (Scatter/Chase timer: 7s Scatter, 20s Chase)
-                const cycle = 27 * 6; // ticks per cycle (approx)
-                const isScatter = (tc % cycle) < (7 * 6);
+                const cycles = 27 * 6;
+                const isScatter = (tc % cycles) < (7 * 6);
                 
                 if (isFr && cg.state !== 'dead') cg.state = 'frightened';
                 else if (!isFr && cg.state === 'frightened') cg.state = 'chase';
-                if (cg.state === 'dead' && cg.x === 10 && cg.y === 8) cg.state = 'exiting';
+                if (cg.state === 'dead' && cg.x === 13 && cg.y === 14) cg.state = 'exiting';
 
                 // Pathfinding Target
-                let target = { x: np.x, y: np.y }; // Default (Blinky Chase)
+                let target = { x: np.x, y: np.y }; // Default CHASE (A*)
                 
                 if (cg.state === 'dead') {
-                    target = { x: 10, y: 8 }; // House interior
+                    target = { x: 13, y: 14 }; // House interior
                 } else if (cg.state === 'frightened') {
-                    // Classic Scared: Random turn at every junction
-                    const valid = DIR_LIST.filter(d => passable((cg.x + d.x + cols) % cols, cg.y + d.y, true));
-                    if (valid.length > 1) {
-                        const opp = { x: -cg.dir.x, y: -cg.dir.y };
-                        const forward = valid.filter(d => !isSameDir(d, opp));
-                        cg.dir = forward[Math.floor(Math.random() * forward.length)] || opp;
-                    } else if (valid.length === 1) {
-                        cg.dir = valid[0];
-                    }
-                    cg.x = (cg.x + cg.dir.x + cols) % cols; cg.y += cg.dir.y;
-                    return cg;
+                    // Intelligent Flee: Target corner furthest from Pacman
+                    const corners = [{ x: 1, y: 1 }, { x: cols - 2, y: 1 }, { x: 1, y: rows - 2 }, { x: cols - 2, y: rows - 2 }];
+                    let maxDist = -1, bestCorner = corners[0];
+                    corners.forEach(c => {
+                        const d = manhattan(c, np);
+                        if (d > maxDist) { maxDist = d; bestCorner = c; }
+                    });
+                    target = bestCorner;
                 } else if (isScatter) {
                     const scatterTargets = {
                         BLINKY: { x: cols - 2, y: 1 },
@@ -416,31 +473,21 @@ export default function PacmanGame() {
                         CLYDE: { x: 1, y: rows - 2 }
                     };
                     target = scatterTargets[cg.id];
-                } else {
-                    // Classic Personality Target Tiles
-                    if (cg.id === 'PINKY') {
-                        // 4 tiles ahead of Pacman
-                        target = { x: np.x + np.dir.x * 4, y: np.y + np.dir.y * 4 };
-                    } else if (cg.id === 'INKY') {
-                        // Vector from Blinky to 2 tiles ahead of Pacman, doubled
-                        const twoAhead = { x: np.x + np.dir.x * 2, y: np.y + np.dir.y * 2 };
-                        const blinky = s.ghosts.find(ghost => ghost.id === 'BLINKY') || cg;
-                        target = {
-                            x: twoAhead.x + (twoAhead.x - blinky.x),
-                            y: twoAhead.y + (twoAhead.y - blinky.y)
-                        };
-                    } else if (cg.id === 'CLYDE') {
-                        // If distance > 8 chase, else scatter
-                        if (manhattan(cg, np) < 8) target = { x: 1, y: rows - 2 };
-                        else target = { x: np.x, y: np.y };
-                    }
                 }
 
-                // Choose next move that minimizes distance to target
-                const step = getNextMoveClassic(cg, target, grid, cg.state === 'dead');
-                cg.dir = step;
-                cg.x = (cg.x + step.x + cols) % cols;
-                cg.y += step.y;
+                // A* Move for all active states to maximize "aggression"
+                const step = findPathAStar(cg, target, grid, cg.state === 'dead');
+                if (step) {
+                    cg.dir = step;
+                    cg.x = (cg.x + step.x + cols) % cols;
+                    cg.y += step.y;
+                } else {
+                    // Fallback to classic if A* is blocked (shouldn't happen on this map)
+                    const fallback = getNextMoveClassic(cg, target, grid, cg.state === 'dead');
+                    cg.dir = fallback;
+                    cg.x = (cg.x + fallback.x + cols) % cols;
+                    cg.y += fallback.y;
+                }
                 return cg;
             });
 
@@ -550,7 +597,7 @@ export default function PacmanGame() {
                                     left: `${(x / cols) * 100}%`, top: `${(y / rows) * 100}%`,
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none'
                                 }}>
-                                    <div style={{ width: '22%', height: '22%', background: '#fbbf24', borderRadius: '50%' }} />
+                                    <div style={{ width: '35%', height: '35%', background: '#fbbf24', borderRadius: '50%' }} />
                                 </div>
                             );
                         })}
@@ -579,8 +626,8 @@ export default function PacmanGame() {
                                     zIndex: 10, transition: 'left 0.1s linear,top 0.1s linear', pointerEvents: 'none'
                                 }}>
                                     {g.state === 'dead'
-                                        ? <span style={{ lineHeight: 1, fontSize: `clamp(6px,${80 / rows}cqw,20px)` }}>👀</span>
-                                        : <GhostIcon width="80%" height="80%" color={c} fill={c} />
+                                        ? <span style={{ lineHeight: 1, fontSize: `clamp(10px,${100 / rows}cqw,24px)` }}>👀</span>
+                                        : <GhostIcon width="95%" height="95%" color={c} fill={c} />
                                     }
                                 </div>
                             );

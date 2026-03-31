@@ -7,12 +7,12 @@ export default function PacmanHome() {
     const [mapType, setMapType] = useState('Classic');
 
     const MAP_INFO = {
-        Classic: 'Bản đồ cổ điển: đối xứng, dễ ghi nhớ lối đi.',
-        Labyrinth: 'Mê cung: đường hẹp hơn, ma dễ tóm Pacman hơn!',
-        Split: 'Chia cắt: Các hành lang dọc lớn, thử thách khả năng né tránh.',
-        Cross: 'Ngã tư: Khu vực trung tâm rộng lớn, rất nguy hiểm.',
-        Open: 'Không gian mở: Ít tường hơn, ma có thể di chuyển từ nhiều phía.',
-        Void: 'Hố đen: Mê cung tối giản với các ô trống lớn ở góc.'
+        Classic: 'Bản đồ Pac-Man arcade huyền thoại.',
+        Prototype: 'Phiên bản thử nghiệm với cấu trúc lạ và khó lường.',
+        MsMap1: 'Ms. Pac-Man: Bản đồ màu hồng với lối đi rộng.',
+        MsMap2: 'Ms. Pac-Man: Mê cung xanh có nhiều đường hầm liên thông.',
+        MsMap3: 'Ms. Pac-Man: Thiết kế đối xứng phức tạp, đầy thử thách.',
+        MsMap4: 'Ms. Pac-Man: Bản đồ cuối cùng với độ khó cực cao.'
     };
 
     return (
