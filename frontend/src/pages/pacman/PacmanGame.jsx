@@ -507,7 +507,8 @@ export default function PacmanGame() {
 
             const gm = getGlobalMode(tc);
             const prevGm = getGlobalMode(tc - 1);
-            const modeFlip = (gm !== prevGm) || (newFr === 35 && s.frightenedTimer === 0);
+            // Only flip on real scatter/chase mode transitions (NOT on power pill)
+            const modeFlip = (gm !== prevGm);
 
             const newGhosts = s.ghosts.map(g => {
                 let cg = { ...g, prevX: g.x, prevY: g.y };
@@ -532,12 +533,12 @@ export default function PacmanGame() {
                     }
                 }
 
-                // Instant Flip on Mode Transition
+                // Reverse direction only — no position update (prevents teleport)
                 if (modeFlip && cg.state !== 'dead') {
                     const rev = { x: -cg.dir.x, y: -cg.dir.y };
-                    let rx = (cg.x + rev.x + cols) % cols, ry = cg.y + rev.y;
+                    const rx = (cg.x + rev.x + cols) % cols, ry = cg.y + rev.y;
                     const canRev = ry >= 0 && ry < rows && grid[ry][rx] !== 'W' && grid[ry][rx] !== '|';
-                    if (canRev) { cg.dir = rev; cg.x = rx; cg.y = ry; }
+                    if (canRev) cg.dir = rev; // direction only, position unchanged
                 }
 
                 if (isFr && cg.state !== 'dead') cg.state = 'frightened';
@@ -786,8 +787,6 @@ export default function PacmanGame() {
                                         />
                                     )}
                                 </path>
-                                {/* Eye */}
-                                <circle cx='11' cy='7' r='2' fill='#1a1a2e' />
                             </svg>
                             </div>
                         );
