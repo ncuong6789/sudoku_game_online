@@ -36,22 +36,22 @@ export default function PacmanHome() {
     const selectedDiff = DIFF_INFO[difficulty];
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1rem' }}>
-            <div className="glass-panel" style={{ position: 'relative', overflow: 'hidden', padding: '2.5rem', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '1rem' }}>
+            <div className="glass-panel" style={{ position: 'relative', overflow: 'hidden', padding: '1.5rem', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
-                <div style={{ width: '80px', height: '80px', background: 'var(--accent-color)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', boxShadow: '0 0 30px rgba(74, 222, 128, 0.3)', marginTop: '2rem' }}>
-                    <Ghost size={45} color="#000" />
+                <div style={{ width: '70px', height: '70px', background: 'var(--accent-color)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', boxShadow: '0 0 30px rgba(74, 222, 128, 0.3)', marginTop: '0.5rem' }}>
+                    <Ghost size={40} color="#000" />
                 </div>
 
-                <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', background: 'linear-gradient(135deg, #fbbf24, #f59e0b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                <h1 style={{ fontSize: '2.2rem', marginBottom: '0.2rem', background: 'linear-gradient(135deg, #fbbf24, #f59e0b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                     PAC-MAN
                 </h1>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem', textAlign: 'center', fontSize: '1.1rem' }}>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', textAlign: 'center', fontSize: '1rem' }}>
                     Săn đuổi và trốn chạy trong mê cung vô tận!
                 </p>
 
                 {/* Map Type Selection */}
-                <div style={{ width: '100%', marginBottom: '2rem' }}>
+                <div style={{ width: '100%', marginBottom: '1.2rem' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>
                         <Map size={18} /> Chọn Bản Đồ
                     </label>
@@ -73,13 +73,13 @@ export default function PacmanHome() {
                             </button>
                         ))}
                     </div>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'center', minHeight: '2em', margin: '0.5rem 0' }}>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'center', minHeight: '1.5em', margin: '0.3rem 0' }}>
                         {MAP_INFO[mapType]}
                     </p>
                 </div>
 
                 {/* Difficulty Selection */}
-                <div style={{ width: '100%', marginBottom: '2rem' }}>
+                <div style={{ width: '100%', marginBottom: '1.5rem' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>
                         <Flame size={18} /> Độ Khó
                     </label>
@@ -111,31 +111,28 @@ export default function PacmanHome() {
                             </button>
                         ))}
                     </div>
-                    <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', textAlign: 'center', minHeight: '2.5em', margin: '0.5rem 0', lineHeight: 1.5 }}>
-                        <span style={{ color: selectedDiff.color, fontWeight: 600 }}>●</span> {selectedDiff.desc}
-                    </p>
                 </div>
 
                 {/* Play Buttons */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%' }}>
                     <button
                         className="btn-primary"
                         onClick={() => navigate('/pacman/game', { state: { mapType, difficulty } })}
                         style={{
-                            padding: '16px', fontSize: '1.2rem',
+                            padding: '12px', fontSize: '1.1rem',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
                             boxShadow: '0 6px 20px rgba(74, 222, 128, 0.3)'
                         }}
                     >
-                        <Gamepad size={24} /> Chơi Ngay
+                        <Gamepad size={22} /> Chơi Ngay
                     </button>
 
                     <button
                         className="btn-secondary"
                         onClick={() => navigate('/')}
-                        style={{ padding: '16px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                        style={{ padding: '12px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
                     >
-                        <ArrowLeft size={20} /> Quay lại Hub
+                        <ArrowLeft size={18} /> Quay lại Hub
                     </button>
                 </div>
             </div>
