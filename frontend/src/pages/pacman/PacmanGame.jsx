@@ -1,6 +1,63 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Trophy, Heart, Ghost as GhostIcon } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Heart } from 'lucide-react';
+
+// ─── Custom Cute Ghost SVG ───────────────────────────────────────────────────
+function GhostArt({ color = '#ef4444', dir = { x: 0, y: 0 }, state = 'chase', size = '95%', frightenedFlash = false }) {
+    const isFr = state === 'frightened';
+    const isDead = state === 'dead';
+    const bodyColor = isDead ? 'transparent' : frightenedFlash ? '#ffffff' : isFr ? '#1d4ed8' : color;
+
+    // Pupil offset based on direction
+    const px = dir.x * 2.5;
+    const py = dir.y * 2.5;
+
+    const eye = (cx, cy) => isFr
+        ? <circle cx={cx} cy={cy} r={2.5} fill={frightenedFlash ? '#1d4ed8' : '#fff'} />
+        : isDead
+        ? (<>
+            <ellipse cx={cx} cy={cy} rx={4.5} ry={5.5} fill='white' />
+            <circle cx={cx + px} cy={cy + py} r={2.5} fill='#1d4ed8' />
+            <circle cx={cx + px + 0.8} cy={cy + py - 0.8} r={0.9} fill='white' />
+          </>)
+        : (<>
+            <ellipse cx={cx} cy={cy} rx={4.5} ry={5.5} fill='white' />
+            <circle cx={cx + px} cy={cy + py} r={2.5} fill='#1a1a2e' />
+            <circle cx={cx + px + 0.8} cy={cy + py - 0.8} r={0.9} fill='white' />
+          </>);
+
+    return (
+        <svg width={size} height={size} viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg' style={{ display: 'block', overflow: 'visible' }}>
+            {/* Body */}
+            <path
+                d={[
+                    'M 2 28',
+                    'L 2 12',
+                    'Q 2 2 14 2',
+                    'Q 26 2 26 12',
+                    'L 26 28',
+                    'Q 23.7 24 21.3 28',
+                    'Q 19 24 16.7 28',
+                    'Q 14.3 24 12 28',
+                    'Q 9.7 24 7.3 28',
+                    'Q 5 24 2 28',
+                    'Z',
+                ].join(' ')}
+                fill={bodyColor}
+                style={{ transition: 'fill 0.1s' }}
+            />
+            {/* Eyes */}
+            {!isDead && <>{eye(9.5, 12)}{eye(18.5, 12)}</>}
+            {isDead && <>{eye(9.5, 14)}{eye(18.5, 14)}</>}
+            {/* Frightened mouth squiggle */}
+            {isFr && !isDead && (
+                <path d='M 8 19 Q 10 17 12 19 Q 14 21 16 19 Q 18 17 20 19'
+                    stroke={frightenedFlash ? '#1d4ed8' : '#fff'} strokeWidth={1.5} fill='none'
+                    strokeLinecap='round' />
+            )}
+        </svg>
+    );
+}
 import { useAudio } from '../../utils/useAudio';
 
 // ─── Maps: 21 cols × 22 rows ─────────────────────────────────────────────────
@@ -54,13 +111,13 @@ const PROTOTYPE = [
     "|..||..||....||....||..||..|",
     "||.||.|||||| || ||||||.||.||",
     "||.||.|||||| || ||||||.||.||",
-    "|..||........S.........||..|",
+    "|..||..................||..|",
     "|.|||.|||.|||--|||.|||.|||.|",
     "|.|||.|||.|______|.|||.|||.|",
     "..........|______|..........",
     "|.|||.|||.|______|.|||.|||.|",
     "|.|||.|||.||||||||.|||.|||.|",
-    "|..........................|",
+    "|.........S................|",
     "|.||||||.|||.||.|||.||||||.|",
     "|.||||||.|||.||.|||.||||||.|",
     "|............||............|",
@@ -235,11 +292,13 @@ const getGlobalMode = (totalTicks) => {
     return 'CHASE';
 };
 
+// Ghost release logic (classic arcade):
+// Blinky: always outside | Pinky: immediately | Inky: 30 dots OR ~4s | Clyde: 60 dots OR ~6s
 const GHOST_STARTS = [
-    { id: 'BLINKY', color: '#ef4444', x: 13, y: 11, dir: { x: -1, y: 0 }, exitDelay: 0, scatter: { x: 26, y: 1 } },
-    { id: 'PINKY', color: '#f9a8d4', x: 12, y: 14, dir: { x: 0, y: -1 }, exitDelay: 15, scatter: { x: 1, y: 1 } },
-    { id: 'INKY', color: '#06b6d4', x: 13, y: 14, dir: { x: 0, y: -1 }, exitDelay: 30, scatter: { x: 26, y: 29 } },
-    { id: 'CLYDE', color: '#fb923c', x: 14, y: 14, dir: { x: 0, y: -1 }, exitDelay: 45, scatter: { x: 1, y: 29 } },
+    { id: 'BLINKY', color: '#ef4444', x: 13, y: 11, dir: { x: -1, y: 0 }, exitDelay: 0,   dotThreshold: 0,  fallbackDelay: 0,  scatter: { x: 26, y: 1 } },
+    { id: 'PINKY',  color: '#f9a8d4', x: 12, y: 14, dir: { x: 0, y: -1 }, exitDelay: 0,   dotThreshold: 0,  fallbackDelay: 0,  scatter: { x: 1,  y: 1 } },
+    { id: 'INKY',   color: '#06b6d4', x: 13, y: 14, dir: { x: 0, y: -1 }, exitDelay: 9999, dotThreshold: 30, fallbackDelay: 24, scatter: { x: 26, y: 29 } },
+    { id: 'CLYDE',  color: '#fb923c', x: 14, y: 14, dir: { x: 0, y: -1 }, exitDelay: 9999, dotThreshold: 60, fallbackDelay: 36, scatter: { x: 1,  y: 29 } },
 ];
 
 const DIRS = { UP: { x: 0, y: -1 }, LEFT: { x: -1, y: 0 }, DOWN: { x: 0, y: 1 }, RIGHT: { x: 1, y: 0 } };
@@ -317,7 +376,7 @@ function parseMap(raw) {
 export default function PacmanGame() {
     const { state = {} } = useLocation();
     const navigate = useNavigate();
-    const { mapType = 'Classic' } = state;
+    const { mapType = 'Classic', difficulty = 'medium' } = state;
 
     const { playWinSound, playLoseSound, playPacmanStartSound,
         playPacmanWakaSound, playPacmanPowerPillSound,
@@ -350,6 +409,7 @@ export default function PacmanGame() {
     }, [playWinSound, playLoseSound, playPacmanWakaSound, playPacmanPowerPillSound, playPacmanEatGhostSound, playPacmanDieSound]);
 
     const nextDir = useRef({ x: -1, y: 0 }); // LEFT
+    const totalDotsRef = useRef(0); // track initial dot count for ghost release
 
     const initGame = useCallback(() => {
         const raw = ALL_MAPS[mapType] ?? CLASSIC;
@@ -357,16 +417,36 @@ export default function PacmanGame() {
         setMapGrid(grid);
         setPacman({ ...pStart, startX: pStart.x, startY: pStart.y, dir: { x: -1, y: 0 }, isProtected: false });
         setDots(d); setPills(p);
-        setGhosts(GHOST_STARTS.map(g => ({
-            ...g, startX: g.x, startY: g.y,
-            state: g.exitDelay === 0 ? 'chase' : 'house'
-        })));
+        totalDotsRef.current = d.size;
+
+        // Compute dot thresholds based on difficulty
+        // Index matches GHOST_STARTS order: 0=Blinky, 1=Pinky, 2=Inky, 3=Clyde
+        const total = d.size;
+        const ghostDotThresholds =
+            difficulty === 'hard'
+                ? [0, Math.floor(total * 0.10), Math.floor(total * 0.20), Math.floor(total * 0.30)]
+                : /* medium */
+                  [0, Math.floor(total * 0.20), Math.floor(total * 0.40), Math.floor(total * 0.60)];
+        // Blinky (index 0) = 0 → immediate (always outside)
+        // Pinky/Inky/Clyde use dot threshold
+
+        setGhosts(GHOST_STARTS.map((g, i) => {
+            const threshold = ghostDotThresholds[i] ?? 9999;
+            const immediate = threshold === 0;
+            return {
+                ...g, startX: g.x, startY: g.y,
+                state: immediate ? (g.id === 'PINKY' ? 'exiting' : 'chase') : 'house',
+                dotThreshold: threshold,
+                fallbackDelay: 9999, // difficulty modes use dot-only logic, no time fallback
+            };
+        }));
+
         setScore(0); setLives(3); setFrightenedTimer(0); setProtectedTimer(0); setTickCount(0);
         nextDir.current = { x: -1, y: 0 };
         setPhase('ready');
         try { playPacmanStartSound(); } catch (e) { }
         setTimeout(() => setPhase('playing'), 2000);
-    }, [mapType, playPacmanStartSound]);
+    }, [mapType, difficulty, playPacmanStartSound]);
 
     useEffect(() => { initGame(); }, [mapType]); // eslint-disable-line
 
@@ -432,9 +512,12 @@ export default function PacmanGame() {
             const newGhosts = s.ghosts.map(g => {
                 let cg = { ...g, prevX: g.x, prevY: g.y };
 
-                // Spawning Logic: exit when delay passed
+                // Spawning Logic: classic arcade rules
                 if (cg.state === 'house') {
-                    if (tc >= cg.exitDelay) cg.state = 'exiting';
+                    const dotsEaten = totalDotsRef.current - newDots.size;
+                    const dotOk = cg.dotThreshold !== undefined && dotsEaten >= cg.dotThreshold;
+                    const timeOk = cg.fallbackDelay !== undefined && tc >= cg.fallbackDelay;
+                    if (dotOk || timeOk) cg.state = 'exiting';
                     else return cg;
                 }
 
@@ -653,7 +736,6 @@ export default function PacmanGame() {
                     {ghosts.filter(g => g.state !== 'house').map(g => {
                         const fr = g.state === 'frightened';
                         const flash = fr && frightenedTimer < 8 && frightenedTimer % 2 === 0;
-                        const c = g.state === 'dead' ? 'transparent' : flash ? '#fff' : fr ? '#1d4ed8' : g.color;
                         const skipTrans = Math.abs(g.x - (g.prevX ?? g.x)) > 1;
                         return (
                             <div key={g.id} style={{
@@ -664,10 +746,13 @@ export default function PacmanGame() {
                                 transition: skipTrans ? 'none' : `left ${fr ? 0.3 : 0.1}s linear, top ${fr ? 0.3 : 0.1}s linear`,
                                 pointerEvents: 'none'
                             }}>
-                                {g.state === 'dead'
-                                    ? <span style={{ lineHeight: 1, fontSize: `clamp(10px,${100 / rows}cqw,24px)` }}>👀</span>
-                                    : <GhostIcon width="95%" height="95%" color={c} fill={c} />
-                                }
+                                <GhostArt
+                                    color={g.color}
+                                    dir={g.dir}
+                                    state={g.state}
+                                    frightenedFlash={flash}
+                                    size='95%'
+                                />
                             </div>
                         );
                     })}
@@ -684,12 +769,26 @@ export default function PacmanGame() {
                                 pointerEvents: 'none',
                                 animation: isDying ? 'pacDie 1.2s forwards' : isProtected ? 'pacFlash 0.25s infinite' : undefined
                             }}>
-                                <div style={{
-                                    width: '88%', height: '88%', background: '#fbbf24', borderRadius: '50%',
-                                    clipPath: 'polygon(100% 74%, 44% 48%, 100% 21%, 100% 0, 0 0, 0 100%, 100% 100%)',
+                                <svg width='88%' height='88%' viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg'
+                                style={{
                                     transform: `rotate(${pacman.dir.x === 1 ? 0 : pacman.dir.y === 1 ? 90 : pacman.dir.x === -1 ? 180 : -90}deg)`,
-                                    animation: isDying ? 'none' : isProtected ? undefined : 'pacmanChomp 0.25s infinite alternate'
-                                }} />
+                                    display: 'block'
+                                }}>
+                                {/* Pacman body — mouth animated via SMIL */}
+                                <path fill='#fbbf24' d='M14,14 L28,5 A13,13 0 1,0 28,23 Z'>
+                                    {!isDying && !isProtected && (
+                                        <animate
+                                            attributeName='d'
+                                            values='M14,14 L28,5 A13,13 0 1,0 28,23 Z;M14,14 L28,13 A13,13 0 1,0 28,15 Z'
+                                            dur='0.25s'
+                                            repeatCount='indefinite'
+                                            calcMode='linear'
+                                        />
+                                    )}
+                                </path>
+                                {/* Eye */}
+                                <circle cx='11' cy='7' r='2' fill='#1a1a2e' />
+                            </svg>
                             </div>
                         );
                     })()}
@@ -747,15 +846,40 @@ export default function PacmanGame() {
                             ))}
                         </div>
                     </div>
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.8rem', width: '100%', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.8rem', width: '100%', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}>
                             <span style={{ color: 'var(--text-secondary)' }}>Map</span>
                             <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{mapType}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}>
-                            <span style={{ color: 'var(--text-secondary)' }}>Dots</span>
+                            <span style={{ color: 'var(--text-secondary)' }}>Độ khó</span>
+                            <span style={{ fontWeight: 700, fontSize: '0.72rem', color: difficulty === 'hard' ? '#ef4444' : '#f59e0b' }}>
+                                {difficulty === 'hard' ? '🔥 Khó' : '⚡ TB'}
+                            </span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}>
+                            <span style={{ color: 'var(--text-secondary)' }}>Chấm còn</span>
                             <span style={{ color: '#fbbf24', fontWeight: 600 }}>{dots.size}</span>
                         </div>
+                        {totalDotsRef.current > 0 && (() => {
+                            const eaten = totalDotsRef.current - dots.size;
+                            const pct = Math.round((eaten / totalDotsRef.current) * 100);
+                            return (
+                                <div style={{ marginTop: '4px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--text-secondary)', marginBottom: '3px' }}>
+                                        <span>Ăn được</span><span>{pct}%</span>
+                                    </div>
+                                    <div style={{ height: '5px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden' }}>
+                                        <div style={{
+                                            height: '100%', borderRadius: '3px',
+                                            width: `${pct}%`,
+                                            background: pct >= 60 ? '#ef4444' : pct >= 40 ? '#f59e0b' : '#4ade80',
+                                            transition: 'width 0.3s ease'
+                                        }} />
+                                    </div>
+                                </div>
+                            );
+                        })()}
                     </div>
                 </div>
 
@@ -763,8 +887,9 @@ export default function PacmanGame() {
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '2px' }}>Ghosts</div>
                     {ghosts.map(g => (
                         <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem' }}>
-                            <GhostIcon size={14} color={g.state === 'dead' ? '#6b7280' : g.state === 'frightened' ? '#1d4ed8' : g.color}
-                                fill={g.state === 'dead' ? '#6b7280' : g.state === 'frightened' ? '#1d4ed8' : g.color} />
+                            <div style={{ width: 18, height: 18, flexShrink: 0 }}>
+                                <GhostArt color={g.color} dir={g.dir} state={g.state} size='100%' frightenedFlash={false} />
+                            </div>
                             <span style={{ color: 'var(--text-secondary)', flex: 1 }}>{g.id[0] + g.id.slice(1).toLowerCase()}</span>
                             <span style={{ fontSize: '0.65rem' }}>
                                 {g.state === 'frightened' ? '😱' : g.state === 'dead' ? '💀' : g.state === 'house' ? '🏠' : g.state === 'exiting' ? '🚪' : '🎯'}
@@ -799,10 +924,6 @@ export default function PacmanGame() {
             </div>
 
             <style>{`
-                @keyframes pacmanChomp {
-                    0%  { clip-path: polygon(100% 74%, 44% 48%, 100% 21%, 100% 0, 0 0, 0 100%, 100% 100%); }
-                    100%{ clip-path: polygon(100% 50%, 50% 50%, 100% 50%, 100% 0, 0 0, 0 100%, 100% 100%); }
-                }
                 @keyframes pacDie {
                     0%  { transform:scale(1) rotate(0deg); opacity:1; }
                     60% { transform:scale(1.3) rotate(180deg); opacity:0.7; }
