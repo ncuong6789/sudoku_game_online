@@ -29,7 +29,7 @@ export default function SnakeHome() {
                         RẮN SĂN MỒI
                     </h1>
                 </div>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', textAlign: 'center', fontSize: '1rem' }}>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '0', textAlign: 'center', fontSize: '1rem' }}>
                     Điều khiển chú rắn huyền thoại, sống sót và trở nên khổng lồ!
                 </p>
 
@@ -37,9 +37,9 @@ export default function SnakeHome() {
                 <div style={{ width: '100%', marginBottom: '1.5rem' }}>
                     <h4 style={{ marginBottom: '0.8rem', color: 'var(--text-secondary)' }}>Chọn chế độ</h4>
                     <div style={{ display: 'flex', gap: '1rem' }}>
-                        <div 
+                        <div
                             onClick={() => setMode('solo')}
-                            style={{ 
+                            style={{
                                 flex: 1, padding: '1.2rem', borderRadius: '12px', cursor: 'pointer',
                                 background: mode === 'solo' ? 'rgba(79, 172, 254, 0.15)' : 'rgba(255, 255, 255, 0.05)',
                                 border: `2px solid ${mode === 'solo' ? 'var(--primary-color, #4facfe)' : 'transparent'}`,
@@ -48,11 +48,11 @@ export default function SnakeHome() {
                             }}
                         >
                             <User size={24} color={mode === 'solo' ? '#4facfe' : '#94a3b8'} />
-                            <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Solo (Có Bot)</span>
+                            <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Solo</span>
                         </div>
-                        <div 
+                        <div
                             onClick={() => setMode('multiplayer')}
-                            style={{ 
+                            style={{
                                 flex: 1, padding: '1.2rem', borderRadius: '12px', cursor: 'pointer',
                                 background: mode === 'multiplayer' ? 'rgba(79, 172, 254, 0.15)' : 'rgba(255, 255, 255, 0.05)',
                                 border: `2px solid ${mode === 'multiplayer' ? 'var(--primary-color, #4facfe)' : 'transparent'}`,
@@ -68,18 +68,18 @@ export default function SnakeHome() {
 
                 {/* Cấu hình Solo */}
                 {mode === 'solo' && (
-                    <div style={{ width: '100%', marginBottom: '1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ width: '100%', marginBottom: '0', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                             <span style={{ fontWeight: 'bold' }}>Thách đấu Bot AI</span>
-                            <div 
+                            <div
                                 onClick={() => setHasBot(!hasBot)}
-                                style={{ 
-                                    width: '50px', height: '26px', borderRadius: '13px', 
+                                style={{
+                                    width: '50px', height: '26px', borderRadius: '13px',
                                     background: hasBot ? 'var(--primary-color)' : '#334155',
                                     position: 'relative', cursor: 'pointer', transition: '0.3s'
                                 }}
                             >
-                                <div style={{ 
+                                <div style={{
                                     width: '20px', height: '20px', borderRadius: '50%', background: '#fff',
                                     position: 'absolute', top: '3px', left: hasBot ? '27px' : '3px', transition: '0.3s'
                                 }} />
@@ -91,7 +91,7 @@ export default function SnakeHome() {
                                 <h4 style={{ marginBottom: '0.8rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Độ khó của Bot</h4>
                                 <div style={{ display: 'flex', gap: '8px' }}>
                                     {['Easy', 'Medium', 'Hard'].map(d => (
-                                        <button 
+                                        <button
                                             key={d}
                                             onClick={() => setDifficulty(d)}
                                             style={{
