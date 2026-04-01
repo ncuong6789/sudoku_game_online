@@ -36,16 +36,17 @@ export default function PacmanHome() {
     const selectedDiff = DIFF_INFO[difficulty];
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 60px)', width: '100%', padding: '1rem' }}>
             <div className="glass-panel" style={{ position: 'relative', overflow: 'hidden', padding: '1.5rem', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
-                <div style={{ width: '70px', height: '70px', background: 'var(--accent-color)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', boxShadow: '0 0 30px rgba(74, 222, 128, 0.3)', marginTop: '0.5rem' }}>
-                    <Ghost size={40} color="#000" />
+                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', marginBottom: '0.5rem', marginTop: '0.5rem' }}>
+                    <div style={{ width: '60px', height: '60px', background: 'var(--accent-color)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 30px rgba(74, 222, 128, 0.3)' }}>
+                        <Ghost size={36} color="#000" />
+                    </div>
+                    <h1 style={{ fontSize: '2.5rem', margin: 0, background: 'linear-gradient(135deg, #fbbf24, #f59e0b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', whiteSpace: 'nowrap', userSelect: 'none' }}>
+                        PAC-MAN
+                    </h1>
                 </div>
-
-                <h1 style={{ fontSize: '2.2rem', marginBottom: '0.2rem', background: 'linear-gradient(135deg, #fbbf24, #f59e0b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                    PAC-MAN
-                </h1>
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', textAlign: 'center', fontSize: '1rem' }}>
                     Săn đuổi và trốn chạy trong mê cung vô tận!
                 </p>

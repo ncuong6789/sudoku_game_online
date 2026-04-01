@@ -14,16 +14,17 @@ export default function CaroHome() {
     const [gridSize, setGridSize] = useState(15);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 60px)', width: '100%', padding: '1rem' }}>
             <div className="glass-panel" style={{ position: 'relative', overflow: 'hidden', padding: '1.5rem', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
-                <div style={{ width: '70px', height: '70px', background: '#14b8a6', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', boxShadow: '0 0 30px rgba(20, 184, 166, 0.3)', marginTop: '0.5rem' }}>
-                    <Swords size={40} color="#fff" />
+                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', marginBottom: '0.5rem', marginTop: '0.5rem' }}>
+                    <div style={{ width: '60px', height: '60px', background: '#14b8a6', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 30px rgba(20, 184, 166, 0.3)' }}>
+                        <Swords size={36} color="#fff" />
+                    </div>
+                    <h1 style={{ fontSize: '2.5rem', margin: 0, background: 'linear-gradient(135deg, #2dd4bf, #14b8a6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', whiteSpace: 'nowrap', userSelect: 'none' }}>
+                        CARO
+                    </h1>
                 </div>
-
-                <h1 style={{ fontSize: '2.5rem', marginBottom: '0.2rem', background: 'linear-gradient(135deg, #2dd4bf, #14b8a6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', whiteSpace: 'nowrap', userSelect: 'none' }}>
-                    CARO
-                </h1>
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', textAlign: 'center', fontSize: '1rem' }}>
                     Cờ ca-rô truyền thống - đơn giản nhưng đầy chiến thuật!
                 </p>

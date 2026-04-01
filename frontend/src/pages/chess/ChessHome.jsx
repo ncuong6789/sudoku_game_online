@@ -39,16 +39,17 @@ export default function ChessHome() {
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 60px)', width: '100%', padding: '1rem' }}>
             <div className="glass-panel" style={{ position: 'relative', overflow: 'hidden', padding: '1.5rem', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
-                <div style={{ width: '70px', height: '70px', background: '#9ca3af', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', boxShadow: '0 0 30px rgba(156, 163, 175, 0.3)', marginTop: '0.5rem' }}>
-                    <Crown size={40} color="#fff" />
+                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', marginBottom: '0.5rem', marginTop: '0.5rem' }}>
+                    <div style={{ width: '60px', height: '60px', background: '#9ca3af', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 30px rgba(156, 163, 175, 0.3)' }}>
+                        <Crown size={36} color="#fff" />
+                    </div>
+                    <h1 style={{ fontSize: '2.5rem', margin: 0, background: 'linear-gradient(135deg, #e5e7eb, #9ca3af)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', whiteSpace: 'nowrap', userSelect: 'none' }}>
+                        CỜ VUA
+                    </h1>
                 </div>
-
-                <h1 style={{ fontSize: '2.5rem', marginBottom: '0.2rem', background: 'linear-gradient(135deg, #e5e7eb, #9ca3af)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', whiteSpace: 'nowrap', userSelect: 'none' }}>
-                    CỜ VUA
-                </h1>
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', textAlign: 'center', fontSize: '1rem' }}>
                     Môn thể thao trí tuệ đỉnh cao của nhân loại!
                 </p>
@@ -74,54 +75,57 @@ export default function ChessHome() {
                 {/* Solo Color Selection */}
                 <div style={{ textAlign: 'left', marginTop: '0.2rem' }}>
                     <p style={{ fontSize: '0.8rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Phe của bạn (Solo):</p>
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
                         <button 
                             onClick={() => setSoloColor('w')}
                             disabled={isFlipping}
                             style={{ 
-                                flex: 1, padding: '10px 5px', fontSize: '0.85rem', fontWeight: 'bold',
-                                background: '#f8f9fa', color: '#212529',
-                                border: soloColor === 'w' ? '2px solid #212529' : '2px solid transparent',
+                                flex: 1, padding: '10px 5px', fontSize: '0.9rem', fontWeight: 'bold',
+                                background: '#f8f9fa', color: '#111827',
+                                border: soloColor === 'w' ? '2px solid var(--primary-color, #4facfe)' : '2px solid transparent',
                                 outline: 'none',
-                                borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s',
-                                opacity: soloColor === 'w' ? 1 : 0.6,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px'
+                                borderRadius: '10px', cursor: 'pointer', transition: 'all 0.2s',
+                                opacity: soloColor === 'w' ? 1 : 0.5,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                boxShadow: soloColor === 'w' ? '0 0 10px rgba(79, 172, 254, 0.4)' : 'none'
                             }}
                         >
-                            <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>♔</span> Trắng
-                        </button>
-                        
-                        <button 
-                            onClick={() => setSoloColor('b')}
-                            disabled={isFlipping}
-                            style={{ 
-                                flex: 1, padding: '10px 5px', fontSize: '0.85rem', fontWeight: 'bold',
-                                background: '#212529', color: '#f8f9fa',
-                                border: soloColor === 'b' ? '2px solid #f8f9fa' : '2px solid transparent',
-                                outline: 'none',
-                                borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s',
-                                opacity: soloColor === 'b' ? 1 : 0.6,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px'
-                            }}
-                        >
-                            <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>♚</span> Đen
+                            <span style={{ fontSize: '1.3rem', lineHeight: 1 }}>♔</span> Trắng
                         </button>
 
                         <button 
                             onClick={() => setSoloColor('random')}
                             disabled={isFlipping}
                             style={{ 
-                                width: '50px', flexShrink: 0, padding: '10px 0', fontSize: '0.85rem', fontWeight: 'bold',
-                                background: soloColor === 'random' ? 'var(--primary-color)' : 'rgba(255,255,255,0.05)', 
+                                width: '60px', flexShrink: 0, padding: '0', fontSize: '0.9rem', fontWeight: 'bold',
+                                background: soloColor === 'random' ? 'var(--primary-color, #4facfe)' : 'rgba(255,255,255,0.1)', 
                                 color: '#fff',
                                 outline: 'none',
-                                border: soloColor === 'random' ? '2px solid var(--primary-color)' : '2px solid transparent',
-                                borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s',
+                                border: soloColor === 'random' ? '2px solid var(--primary-color, #4facfe)' : '2px solid rgba(255,255,255,0.2)',
+                                borderRadius: '10px', cursor: 'pointer', transition: 'all 0.2s',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                opacity: soloColor === 'random' ? 1 : 0.6
+                                opacity: soloColor === 'random' ? 1 : 0.6,
+                                boxShadow: soloColor === 'random' ? '0 0 10px rgba(79, 172, 254, 0.4)' : 'none'
                             }}
                         >
-                            <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>🎲</span>
+                            <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>🎲</span>
+                        </button>
+                        
+                        <button 
+                            onClick={() => setSoloColor('b')}
+                            disabled={isFlipping}
+                            style={{ 
+                                flex: 1, padding: '10px 5px', fontSize: '0.9rem', fontWeight: 'bold',
+                                background: '#1f2937', color: '#f8f9fa',
+                                border: soloColor === 'b' ? '2px solid var(--primary-color, #4facfe)' : '2px solid #4b5563',
+                                outline: 'none',
+                                borderRadius: '10px', cursor: 'pointer', transition: 'all 0.2s',
+                                opacity: soloColor === 'b' ? 1 : 0.5,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                boxShadow: soloColor === 'b' ? '0 0 10px rgba(79, 172, 254, 0.4)' : 'none'
+                            }}
+                        >
+                            <span style={{ fontSize: '1.3rem', lineHeight: 1 }}>♚</span> Đen
                         </button>
                     </div>
                 </div>
