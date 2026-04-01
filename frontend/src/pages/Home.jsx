@@ -229,66 +229,68 @@ export default function Home() {
                         </div>
                     </div>
 
-                    <div className="glass-panel" style={{ marginTop: '2rem', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.2rem' }}>
-                            <Swords size={24} color="var(--accent-color)" />
-                            <h3 style={{ margin: 0, fontSize: '1.3rem' }}>Matchmaking Hub</h3>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }}>
-                            {/* Cột 1: Tìm ngẫu nhiên */}
-                            <div style={{ borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '1.5rem' }}>
-                                <h4 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: 'var(--text-secondary)' }}>Ghép cặp trực tuyến</h4>
-                                <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                                    <button
-                                        className={searchMode === 'active' ? 'btn-primary' : 'btn-secondary'}
-                                        onClick={() => setSearchMode('active')}
-                                        style={{ flex: 1, padding: '8px', fontSize: '0.85rem' }}
-                                    >
-                                        Game hiện tại
-                                    </button>
-                                    <button
-                                        className={searchMode === 'random' ? 'btn-primary' : 'btn-secondary'}
-                                        onClick={() => setSearchMode('random')}
-                                        style={{ flex: 1, padding: '8px', fontSize: '0.85rem' }}
-                                    >
-                                        🎲 Random Game
-                                    </button>
-                                </div>
-                                <button
-                                    className="btn-primary"
-                                    style={{ width: '100%', padding: '12px', background: isSearching ? '#ef4444' : 'var(--accent-color)' }}
-                                    onClick={() => isSearching ? (socket.emit('leaveMatchmaking'), setIsSearching(false)) : handleFindMatch()}
-                                >
-                                    {isSearching ? '⏳ Đang tìm... (Hủy)' : `Tìm đối thủ ${searchMode === 'active' ? game.name : ''}`}
-                                </button>
+                    {activeGame !== 'pacman' && (
+                        <div className="glass-panel" style={{ marginTop: '2rem', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.2rem' }}>
+                                <Swords size={24} color="var(--accent-color)" />
+                                <h3 style={{ margin: 0, fontSize: '1.3rem' }}>Matchmaking Hub</h3>
                             </div>
 
-                            {/* Cột 2: Vào bằng mã */}
-                            <div>
-                                <h4 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: 'var(--text-secondary)' }}>Tham gia bằng mã</h4>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    <input
-                                        type="text"
-                                        placeholder="MÃ PHÒNG..."
-                                        value={roomCode}
-                                        onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                                        style={{
-                                            flex: 1, padding: '10px', borderRadius: '8px',
-                                            background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)',
-                                            color: 'white', fontWeight: 'bold', textAlign: 'center'
-                                        }}
-                                    />
-                                    <button className="btn-secondary" style={{ padding: '0 15px' }} onClick={handleJoinByCode}>
-                                        Vào
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }}>
+                                {/* Cột 1: Tìm ngẫu nhiên */}
+                                <div style={{ borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '1.5rem' }}>
+                                    <h4 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: 'var(--text-secondary)' }}>Ghép cặp trực tuyến</h4>
+                                    <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                                        <button
+                                            className={searchMode === 'active' ? 'btn-primary' : 'btn-secondary'}
+                                            onClick={() => setSearchMode('active')}
+                                            style={{ flex: 1, padding: '8px', fontSize: '0.85rem' }}
+                                        >
+                                            Game hiện tại
+                                        </button>
+                                        <button
+                                            className={searchMode === 'random' ? 'btn-primary' : 'btn-secondary'}
+                                            onClick={() => setSearchMode('random')}
+                                            style={{ flex: 1, padding: '8px', fontSize: '0.85rem' }}
+                                        >
+                                            🎲 Random Game
+                                        </button>
+                                    </div>
+                                    <button
+                                        className="btn-primary"
+                                        style={{ width: '100%', padding: '12px', background: isSearching ? '#ef4444' : 'var(--accent-color)' }}
+                                        onClick={() => isSearching ? (socket.emit('leaveMatchmaking'), setIsSearching(false)) : handleFindMatch()}
+                                    >
+                                        {isSearching ? '⏳ Đang tìm... (Hủy)' : `Tìm đối thủ ${searchMode === 'active' ? game.name : ''}`}
                                     </button>
                                 </div>
-                                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
-                                    Hệ thống sẽ tự nhận diện loại game từ mã bạn nhập.
-                                </p>
+
+                                {/* Cột 2: Vào bằng mã */}
+                                <div>
+                                    <h4 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: 'var(--text-secondary)' }}>Tham gia bằng mã</h4>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <input
+                                            type="text"
+                                            placeholder="MÃ PHÒNG..."
+                                            value={roomCode}
+                                            onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                                            style={{
+                                                flex: 1, padding: '10px', borderRadius: '8px',
+                                                background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)',
+                                                color: 'white', fontWeight: 'bold', textAlign: 'center'
+                                            }}
+                                        />
+                                        <button className="btn-secondary" style={{ padding: '0 15px' }} onClick={handleJoinByCode}>
+                                            Vào
+                                        </button>
+                                    </div>
+                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
+                                        Hệ thống sẽ tự nhận diện loại game từ mã bạn nhập.
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </main>
         </div>
