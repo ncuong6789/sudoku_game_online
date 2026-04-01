@@ -25,46 +25,43 @@ export default function CaroHome() {
                         CARO
                     </h1>
                 </div>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', textAlign: 'center', fontSize: '1rem' }}>
-                    Cờ ca-rô truyền thống - đơn giản nhưng đầy chiến thuật!
-                </p>
-            
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%', marginBottom: '1.5rem' }}>
-                {/* Difficulty */}
-                <div style={{ textAlign: 'left' }}>
-                    <p style={{ fontSize: '0.8rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Độ khó Solo:</p>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        {['Easy', 'Medium', 'Hard'].map((d) => (
-                            <button 
-                                key={d}
-                                className={difficulty === d ? 'btn-primary' : 'btn-secondary'}
-                                onClick={() => setDifficulty(d)}
-                                style={{ flex: 1, padding: '10px', fontSize: '0.9rem' }}
-                            >
-                                {d === 'Easy' ? 'Dễ' : d === 'Medium' ? 'Vừa' : 'Khó'}
-                            </button>
-                        ))}
+                    {/* Difficulty */}
+                    <div style={{ textAlign: 'left' }}>
+                        <p style={{ fontSize: '0.8rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Độ khó Solo:</p>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            {['Easy', 'Medium', 'Hard'].map((d) => (
+                                <button
+                                    key={d}
+                                    className={difficulty === d ? 'btn-primary' : 'btn-secondary'}
+                                    onClick={() => setDifficulty(d)}
+                                    style={{ flex: 1, padding: '10px', fontSize: '0.9rem' }}
+                                >
+                                    {d === 'Easy' ? 'Dễ' : d === 'Medium' ? 'Vừa' : 'Khó'}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Grid Size */}
+                    <div style={{ textAlign: 'left' }}>
+                        <p style={{ fontSize: '0.8rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Kích thước bàn cờ:</p>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                            {sizes.map((s) => (
+                                <button
+                                    key={s.label}
+                                    className={gridSize === s.value ? 'btn-primary' : 'btn-secondary'}
+                                    onClick={() => setGridSize(s.value)}
+                                    style={{ padding: '12px 10px', fontSize: '0.8rem' }}
+                                >
+                                    {s.label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
-                {/* Grid Size */}
-                <div style={{ textAlign: 'left' }}>
-                    <p style={{ fontSize: '0.8rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Kích thước bàn cờ:</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                        {sizes.map((s) => (
-                            <button 
-                                key={s.label}
-                                className={gridSize === s.value ? 'btn-primary' : 'btn-secondary'}
-                                onClick={() => setGridSize(s.value)}
-                                style={{ padding: '12px 10px', fontSize: '0.8rem' }}
-                            >
-                                {s.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-                </div>
-                
                 {/* Play Buttons */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%' }}>
                     <button className="btn-primary" style={{ padding: '12px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 6px 20px rgba(20, 184, 166, 0.3)' }} onClick={() => navigate('/caro/game', { state: { mode: 'solo', difficulty, gridSize } })}>

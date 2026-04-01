@@ -8,12 +8,12 @@ export default function PacmanHome() {
     const [difficulty, setDifficulty] = useState('medium'); // 'medium' | 'hard'
 
     const MAP_INFO = {
-        Classic:   'Bản đồ Pac-Man arcade huyền thoại.',
+        Classic: 'Bản đồ Pac-Man arcade huyền thoại.',
         Prototype: 'Phiên bản thử nghiệm với cấu trúc lạ và khó lường.',
-        MsMap1:    'Ms. Pac-Man: Bản đồ màu hồng với lối đi rộng.',
-        MsMap2:    'Ms. Pac-Man: Mê cung xanh có nhiều đường hầm liên thông.',
-        MsMap3:    'Ms. Pac-Man: Thiết kế đối xứng phức tạp, đầy thử thách.',
-        MsMap4:    'Ms. Pac-Man: Bản đồ cuối cùng với độ khó cực cao.'
+        MsMap1: 'Ms. Pac-Man: Bản đồ màu hồng với lối đi rộng.',
+        MsMap2: 'Ms. Pac-Man: Mê cung xanh có nhiều đường hầm liên thông.',
+        MsMap3: 'Ms. Pac-Man: Thiết kế đối xứng phức tạp, đầy thử thách.',
+        MsMap4: 'Ms. Pac-Man: Bản đồ cuối cùng với độ khó cực cao.'
     };
 
     const DIFF_INFO = {
@@ -47,9 +47,6 @@ export default function PacmanHome() {
                         PAC-MAN
                     </h1>
                 </div>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', textAlign: 'center', fontSize: '1rem' }}>
-                    Săn đuổi và trốn chạy trong mê cung vô tận!
-                </p>
 
                 {/* Map Type Selection */}
                 <div style={{ width: '100%', marginBottom: '1.2rem' }}>

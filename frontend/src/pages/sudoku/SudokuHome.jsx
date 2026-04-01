@@ -18,27 +18,24 @@ export default function SudokuHome() {
                         SUDOKU
                     </h1>
                 </div>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', textAlign: 'center', fontSize: '1rem' }}>
-                    Rèn luyện tư duy logic qua những con số!
-                </p>
-            
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%', marginBottom: '1.5rem' }}>
                     {/* Difficulty Selection */}
                     <div style={{ textAlign: 'left' }}>
                         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Độ khó Solo:</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
-                        {['Easy', 'Medium', 'Hard', 'Expert'].map(d => (
-                            <button
-                                key={d}
-                                className={difficulty === d ? 'btn-primary' : 'btn-secondary'}
-                                onClick={() => setDifficulty(d)}
-                                style={{ padding: '10px', fontSize: '0.9rem' }}
-                            >
-                                {d === 'Easy' ? '😊 Dễ' : d === 'Medium' ? '🤔 Vừa' : d === 'Hard' ? '😤 Khó' : '🔥 Expert'}
-                            </button>
-                        ))}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
+                            {['Easy', 'Medium', 'Hard', 'Expert'].map(d => (
+                                <button
+                                    key={d}
+                                    className={difficulty === d ? 'btn-primary' : 'btn-secondary'}
+                                    onClick={() => setDifficulty(d)}
+                                    style={{ padding: '10px', fontSize: '0.9rem' }}
+                                >
+                                    {d === 'Easy' ? '😊 Dễ' : d === 'Medium' ? '🤔 Vừa' : d === 'Hard' ? '😤 Khó' : '🔥 Expert'}
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                </div>
                 </div>
 
                 {/* Play Buttons */}

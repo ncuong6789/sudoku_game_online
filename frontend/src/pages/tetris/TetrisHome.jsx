@@ -18,28 +18,25 @@ export default function TetrisHome() {
                         TETRIS
                     </h1>
                 </div>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', textAlign: 'center', fontSize: '1rem' }}>
-                    Trò chơi xếp hình khối thập niên 80, kinh điển mọi thời đại!
-                </p>
-            
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%', marginBottom: '1.5rem' }}>
                     <div style={{ textAlign: 'left' }}>
                         <p style={{ fontSize: '0.85rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Tốc độ khởi điểm rớt khối:</p>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        {['Easy', 'Medium', 'Hard'].map((d) => (
-                            <button 
-                                key={d}
-                                className={difficulty === d ? 'btn-primary' : 'btn-secondary'}
-                                onClick={() => setDifficulty(d)}
-                                style={{ flex: 1, padding: '10px', fontSize: '0.9rem' }}
-                            >
-                                {d === 'Easy' ? 'Chậm' : d === 'Medium' ? 'Vừa' : 'Nhanh'}
-                            </button>
-                        ))}
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            {['Easy', 'Medium', 'Hard'].map((d) => (
+                                <button
+                                    key={d}
+                                    className={difficulty === d ? 'btn-primary' : 'btn-secondary'}
+                                    onClick={() => setDifficulty(d)}
+                                    style={{ flex: 1, padding: '10px', fontSize: '0.9rem' }}
+                                >
+                                    {d === 'Easy' ? 'Chậm' : d === 'Medium' ? 'Vừa' : 'Nhanh'}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
-                </div>
-                
+
                 {/* Play Buttons */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%' }}>
                     <button className="btn-primary" style={{ padding: '12px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 6px 20px rgba(168, 85, 247, 0.3)' }} onClick={() => navigate('/tetris/game', { state: { mode: 'solo', difficulty } })}>

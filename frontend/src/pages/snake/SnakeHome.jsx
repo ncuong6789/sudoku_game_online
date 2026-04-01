@@ -4,18 +4,9 @@ import { ArrowLeft, User, Users, Maximize, Play, Zap, Gamepad } from 'lucide-rea
 
 export default function SnakeHome() {
     const navigate = useNavigate();
-    const [mode, setMode] = useState('solo');
     const [difficulty, setDifficulty] = useState('Medium');
     const [hasBot, setHasBot] = useState(true);
     const [mapSize, setMapSize] = useState(20);
-
-    const handleStart = () => {
-        if (mode === 'solo') {
-            navigate('/snake/game', { state: { mode: 'solo', mapSize, difficulty, hasBot } });
-        } else {
-            navigate('/snake/multiplayer', { state: { autoCreate: true, mapSize } });
-        }
-    };
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 60px)', width: '100%', padding: '1rem' }}>
@@ -29,107 +20,57 @@ export default function SnakeHome() {
                         RẮN SĂN MỒI
                     </h1>
                 </div>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '0', textAlign: 'center', fontSize: '1rem' }}>
-                    Điều khiển chú rắn huyền thoại, sống sót và trở nên khổng lồ!
-                </p>
 
-                {/* Chế độ chơi */}
-                <div style={{ width: '100%', marginBottom: '1.5rem' }}>
-                    <h4 style={{ marginBottom: '0.8rem', color: 'var(--text-secondary)' }}>Chọn chế độ</h4>
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                        <div
-                            onClick={() => setMode('solo')}
-                            style={{
-                                flex: 1, padding: '1.2rem', borderRadius: '12px', cursor: 'pointer',
-                                background: mode === 'solo' ? 'rgba(79, 172, 254, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                                border: `2px solid ${mode === 'solo' ? 'var(--primary-color, #4facfe)' : 'transparent'}`,
-                                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-                                transition: 'all 0.2s ease'
-                            }}
-                        >
-                            <User size={24} color={mode === 'solo' ? '#4facfe' : '#94a3b8'} />
-                            <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Solo</span>
-                        </div>
-                        <div
-                            onClick={() => setMode('multiplayer')}
-                            style={{
-                                flex: 1, padding: '1.2rem', borderRadius: '12px', cursor: 'pointer',
-                                background: mode === 'multiplayer' ? 'rgba(79, 172, 254, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-                                border: `2px solid ${mode === 'multiplayer' ? 'var(--primary-color, #4facfe)' : 'transparent'}`,
-                                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-                                transition: 'all 0.2s ease'
-                            }}
-                        >
-                            <Users size={24} color={mode === 'multiplayer' ? '#4facfe' : '#94a3b8'} />
-                            <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Multiplayer</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Cấu hình Solo */}
-                {mode === 'solo' && (
-                    <div style={{ width: '100%', marginBottom: '0', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                            <span style={{ fontWeight: 'bold' }}>Thách đấu Bot AI</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', width: '100%', marginBottom: '1.5rem' }}>
+                    {/* Bot AI Settings (Solo) */}
+                    <div style={{ textAlign: 'left' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>Thách đấu Bot AI (Solo):</p>
                             <div
                                 onClick={() => setHasBot(!hasBot)}
                                 style={{
-                                    width: '50px', height: '26px', borderRadius: '13px',
+                                    width: '40px', height: '22px', borderRadius: '11px',
                                     background: hasBot ? 'var(--primary-color)' : '#334155',
                                     position: 'relative', cursor: 'pointer', transition: '0.3s'
                                 }}
                             >
                                 <div style={{
-                                    width: '20px', height: '20px', borderRadius: '50%', background: '#fff',
-                                    position: 'absolute', top: '3px', left: hasBot ? '27px' : '3px', transition: '0.3s'
+                                    width: '16px', height: '16px', borderRadius: '50%', background: '#fff',
+                                    position: 'absolute', top: '3px', left: hasBot ? '21px' : '3px', transition: '0.3s'
                                 }} />
                             </div>
                         </div>
-
                         {hasBot && (
-                            <div>
-                                <h4 style={{ marginBottom: '0.8rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Độ khó của Bot</h4>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    {['Easy', 'Medium', 'Hard'].map(d => (
-                                        <button
-                                            key={d}
-                                            onClick={() => setDifficulty(d)}
-                                            style={{
-                                                flex: 1, padding: '8px', borderRadius: '8px', border: 'none',
-                                                background: difficulty === d ? 'rgba(79, 172, 254, 0.2)' : 'transparent',
-                                                color: difficulty === d ? 'var(--primary-color)' : 'var(--text-secondary)',
-                                                border: `1px solid ${difficulty === d ? 'var(--primary-color)' : 'rgba(255,255,255,0.1)'}`,
-                                                cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold'
-                                            }}
-                                        >
-                                            {d === 'Easy' ? 'Dễ' : d === 'Medium' ? 'Vừa' : 'Khó'}
-                                        </button>
-                                    ))}
-                                </div>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                {['Easy', 'Medium', 'Hard'].map((d) => (
+                                    <button
+                                        key={d}
+                                        className={difficulty === d ? 'btn-primary' : 'btn-secondary'}
+                                        onClick={() => setDifficulty(d)}
+                                        style={{ flex: 1, padding: '10px', fontSize: '0.9rem' }}
+                                    >
+                                        {d === 'Easy' ? 'Dễ' : d === 'Medium' ? 'Vừa' : 'Khó'}
+                                    </button>
+                                ))}
                             </div>
                         )}
                     </div>
-                )}
 
-                <div style={{ width: '100%', marginBottom: '1.5rem' }}>
-                    <h4 style={{ marginBottom: '0.8rem', color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <Maximize size={16} /> Kích thước Bản đồ
-                    </h4>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        {[20, 30].map(size => (
-                            <button
-                                key={size}
-                                onClick={() => setMapSize(size)}
-                                style={{
-                                    flex: 1, padding: '10px', borderRadius: '8px', border: 'none',
-                                    background: mapSize === size ? 'var(--primary-color, #4facfe)' : 'rgba(255,255,255,0.1)',
-                                    color: mapSize === size ? '#fff' : 'var(--text-secondary)',
-                                    fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s', fontSize: '0.9rem'
-                                }}
-                            >
-                                {size} x {size}
-                            </button>
-                        ))}
+                    {/* Map Size Settings (General) */}
+                    <div style={{ textAlign: 'left' }}>
+                        <p style={{ fontSize: '0.85rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Kích thước Bản đồ (Chung):</p>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            {[20, 30].map((size) => (
+                                <button
+                                    key={size}
+                                    className={mapSize === size ? 'btn-primary' : 'btn-secondary'}
+                                    onClick={() => setMapSize(size)}
+                                    style={{ flex: 1, padding: '10px', fontSize: '0.9rem' }}
+                                >
+                                    {size} x {size}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
@@ -137,26 +78,26 @@ export default function SnakeHome() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%' }}>
                     <button
                         className="btn-primary"
-                        onClick={handleStart}
-                        style={{
-                            padding: '12px', fontSize: '1.1rem',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                            boxShadow: '0 6px 20px rgba(74, 222, 128, 0.3)'
-                        }}
+                        style={{ padding: '12px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 6px 20px rgba(74, 222, 128, 0.3)' }}
+                        onClick={() => navigate('/snake/game', { state: { mode: 'solo', mapSize, difficulty, hasBot } })}
                     >
-                        {mode === 'solo' ? <Gamepad size={22} /> : <Users size={22} />}
-                        {mode === 'solo' ? 'Bắt Đầu Solo' : 'Tìm Đối Thủ Online'}
+                        <Gamepad size={22} /> Chơi Solo
                     </button>
-
                     <button
                         className="btn-secondary"
-                        onClick={() => navigate('/')}
                         style={{ padding: '12px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                        onClick={() => navigate('/snake/multiplayer', { state: { autoCreate: true, mapSize } })}
+                    >
+                        <Users size={22} /> Tạo phòng Online
+                    </button>
+                    <button
+                        className="btn-secondary"
+                        style={{ padding: '12px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                        onClick={() => navigate('/')}
                     >
                         <ArrowLeft size={18} /> Quay lại Hub
                     </button>
                 </div>
-
             </div>
         </div>
     );
