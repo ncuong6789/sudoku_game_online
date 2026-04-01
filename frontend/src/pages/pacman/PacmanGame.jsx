@@ -616,11 +616,17 @@ export default function PacmanGame() {
                         try { snd.current.playLoseSound(); } catch (e) { }
                     } else {
                         setLives(nl);
-                        setPacman(p => ({ ...p, isProtected: true }));
-                        setGhosts(GHOST_STARTS.map(g => ({
-                            ...g, startX: g.x, startY: g.y,
-                            state: g.exitDelay === 0 ? 'chase' : 'house'
-                        })));
+                        setPacman(p => ({ ...p, isProtected: true, x: p.startX, y: p.startY, dir: { x: -1, y: 0 } }));
+                        setGhosts(s.ghosts.map(g => {
+                            const initG = GHOST_STARTS.find(gs => gs.id === g.id);
+                            return {
+                                ...g,
+                                x: g.startX,
+                                y: g.startY,
+                                dir: initG.dir,
+                                state: g.dotThreshold === 0 ? (g.id === 'PINKY' ? 'exiting' : 'chase') : 'house'
+                            };
+                        }));
                         setFrightenedTimer(0);
                         setProtectedTimer(12);
                         setPhase('ready');
