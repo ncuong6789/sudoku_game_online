@@ -109,8 +109,10 @@ export default function SnakeLobby() {
 
     const handleCancel = () => {
         if (lobbyState === 'finding_match') socket.emit('leaveMatchmaking');
+        if (lobbyState === 'hosting' && myRoom) socket.emit('leaveRoom', { roomId: myRoom });
         setLobbyState('idle');
         setMyRoom('');
+        navigate('/snake');
     };
 
     if (lobbyState !== 'idle') {

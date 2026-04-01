@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Users, Gamepad, Swords } from 'lucide-react';
 
 const sizes = [
     { label: '3x3', value: 3 },
@@ -13,10 +14,21 @@ export default function CaroHome() {
     const [gridSize, setGridSize] = useState(15);
 
     return (
-        <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
-            <h1 style={{ margin: '0 0 0.5rem 0', padding: 0, whiteSpace: 'nowrap', userSelect: 'none' }}>Caro</h1>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '1rem' }}>
+            <div className="glass-panel" style={{ position: 'relative', overflow: 'hidden', padding: '1.5rem', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+
+                <div style={{ width: '70px', height: '70px', background: '#14b8a6', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', boxShadow: '0 0 30px rgba(20, 184, 166, 0.3)', marginTop: '0.5rem' }}>
+                    <Swords size={40} color="#fff" />
+                </div>
+
+                <h1 style={{ fontSize: '2.5rem', marginBottom: '0.2rem', background: 'linear-gradient(135deg, #2dd4bf, #14b8a6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', whiteSpace: 'nowrap', userSelect: 'none' }}>
+                    CARO
+                </h1>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', textAlign: 'center', fontSize: '1rem' }}>
+                    Cờ ca-rô truyền thống - đơn giản nhưng đầy chiến thuật!
+                </p>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%', marginBottom: '1.5rem' }}>
                 {/* Difficulty */}
                 <div style={{ textAlign: 'left' }}>
                     <p style={{ fontSize: '0.8rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Độ khó Solo:</p>
@@ -26,7 +38,7 @@ export default function CaroHome() {
                                 key={d}
                                 className={difficulty === d ? 'btn-primary' : 'btn-secondary'}
                                 onClick={() => setDifficulty(d)}
-                                style={{ flex: 1, padding: '10px', fontSize: '0.8rem' }}
+                                style={{ flex: 1, padding: '10px', fontSize: '0.9rem' }}
                             >
                                 {d === 'Easy' ? 'Dễ' : d === 'Medium' ? 'Vừa' : 'Khó'}
                             </button>
@@ -50,16 +62,20 @@ export default function CaroHome() {
                         ))}
                     </div>
                 </div>
+                </div>
                 
-                <button className="btn-primary" style={{ padding: '14px', marginTop: '0.5rem' }} onClick={() => navigate('/caro/game', { state: { mode: 'solo', difficulty, gridSize } })}>
-                    Chế độ Solo
-                </button>
-                <button className="btn-secondary" style={{ padding: '14px' }} onClick={() => navigate('/caro/multiplayer', { state: { autoCreate: true, gridSize } })}>
-                    Tạo phòng Online
-                </button>
-                <button className="btn-secondary" style={{ marginTop: '0.5rem', padding: '14px', opacity: 0.7, width: 'auto' }} onClick={() => navigate('/')}>
-                    Quay lại Hub
-                </button>
+                {/* Play Buttons */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%' }}>
+                    <button className="btn-primary" style={{ padding: '12px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 6px 20px rgba(20, 184, 166, 0.3)' }} onClick={() => navigate('/caro/game', { state: { mode: 'solo', difficulty, gridSize } })}>
+                        <Gamepad size={22} /> Chơi Solo
+                    </button>
+                    <button className="btn-secondary" style={{ padding: '12px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }} onClick={() => navigate('/caro/multiplayer', { state: { autoCreate: true, gridSize } })}>
+                        <Users size={22} /> Tạo phòng Online
+                    </button>
+                    <button className="btn-secondary" style={{ padding: '12px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }} onClick={() => navigate('/')}>
+                        <ArrowLeft size={18} /> Quay lại Hub
+                    </button>
+                </div>
             </div>
         </div>
     );

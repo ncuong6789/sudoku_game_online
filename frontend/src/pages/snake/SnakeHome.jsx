@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Users, Maximize, Play } from 'lucide-react';
+import { ArrowLeft, User, Users, Maximize, Play, Zap, Gamepad } from 'lucide-react';
 
 export default function SnakeHome() {
     const navigate = useNavigate();
@@ -19,19 +19,21 @@ export default function SnakeHome() {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1rem' }}>
-            <div className="glass-panel" style={{ width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', padding: '2rem' }}>
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                    <h2 style={{ margin: 0, fontSize: '2rem', display: 'flex', alignItems: 'center', gap: '10px', whiteSpace: 'nowrap', userSelect: 'none' }}>
-                        🐍 Rắn Săn Mồi
-                    </h2>
-                    <button className="btn-secondary" onClick={() => navigate('/')} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px', width: 'auto', flexShrink: 0 }}>
-                        <ArrowLeft size={16} /> Thoát
-                    </button>
+            <div className="glass-panel" style={{ position: 'relative', overflow: 'hidden', padding: '1.5rem', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+
+                <div style={{ width: '70px', height: '70px', background: 'var(--accent-color)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', boxShadow: '0 0 30px rgba(74, 222, 128, 0.3)', marginTop: '0.5rem' }}>
+                    <Zap size={40} color="#000" />
                 </div>
 
+                <h1 style={{ fontSize: '2.2rem', marginBottom: '0.2rem', background: 'linear-gradient(135deg, #fbbf24, #f59e0b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                    RẮN SĂN MỒI
+                </h1>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', textAlign: 'center', fontSize: '1rem' }}>
+                    Điều khiển chú rắn huyền thoại, sống sót và trở nên khổng lồ!
+                </p>
+
                 {/* Chế độ chơi */}
-                <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{ width: '100%', marginBottom: '1.5rem' }}>
                     <h4 style={{ marginBottom: '0.8rem', color: 'var(--text-secondary)' }}>Chọn chế độ</h4>
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <div 
@@ -65,7 +67,7 @@ export default function SnakeHome() {
 
                 {/* Cấu hình Solo */}
                 {mode === 'solo' && (
-                    <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ width: '100%', marginBottom: '1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                             <span style={{ fontWeight: 'bold' }}>Thách đấu Bot AI</span>
                             <div 
@@ -108,7 +110,7 @@ export default function SnakeHome() {
                     </div>
                 )}
 
-                <div style={{ marginBottom: '2rem' }}>
+                <div style={{ width: '100%', marginBottom: '1.5rem' }}>
                     <h4 style={{ marginBottom: '0.8rem', color: 'var(--text-secondary)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
                         <Maximize size={16} /> Kích thước Bản đồ
                     </h4>
@@ -130,9 +132,29 @@ export default function SnakeHome() {
                     </div>
                 </div>
 
-                <button className="btn-primary" onClick={handleStart} style={{ padding: '14px', fontSize: '1.1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
-                    <Play size={20} /> {mode === 'solo' ? 'Bắt Đầu Solo' : 'Tìm Đối Thủ Online'}
-                </button>
+                {/* Play Buttons */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%' }}>
+                    <button
+                        className="btn-primary"
+                        onClick={handleStart}
+                        style={{
+                            padding: '12px', fontSize: '1.1rem',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                            boxShadow: '0 6px 20px rgba(74, 222, 128, 0.3)'
+                        }}
+                    >
+                        {mode === 'solo' ? <Gamepad size={22} /> : <Users size={22} />}
+                        {mode === 'solo' ? 'Bắt Đầu Solo' : 'Tìm Đối Thủ Online'}
+                    </button>
+
+                    <button
+                        className="btn-secondary"
+                        onClick={() => navigate('/')}
+                        style={{ padding: '12px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                    >
+                        <ArrowLeft size={18} /> Quay lại Hub
+                    </button>
+                </div>
 
             </div>
         </div>
