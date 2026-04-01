@@ -22,6 +22,23 @@ export default function SnakeHome() {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', width: '100%', marginBottom: '1.5rem' }}>
+                    {/* Map Size Settings (General) */}
+                    <div style={{ textAlign: 'left' }}>
+                        <p style={{ fontSize: '0.85rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Kích thước Bản đồ (Chung):</p>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            {[20, 30].map((size) => (
+                                <button
+                                    key={size}
+                                    className={mapSize === size ? 'btn-primary' : 'btn-secondary'}
+                                    onClick={() => setMapSize(size)}
+                                    style={{ flex: 1, padding: '10px', fontSize: '0.9rem' }}
+                                >
+                                    {size} x {size}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     {/* Bot AI Settings (Solo) */}
                     <div style={{ textAlign: 'left' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
@@ -54,23 +71,6 @@ export default function SnakeHome() {
                                 ))}
                             </div>
                         )}
-                    </div>
-
-                    {/* Map Size Settings (General) */}
-                    <div style={{ textAlign: 'left' }}>
-                        <p style={{ fontSize: '0.85rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Kích thước Bản đồ (Chung):</p>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                            {[20, 30].map((size) => (
-                                <button
-                                    key={size}
-                                    className={mapSize === size ? 'btn-primary' : 'btn-secondary'}
-                                    onClick={() => setMapSize(size)}
-                                    style={{ flex: 1, padding: '10px', fontSize: '0.9rem' }}
-                                >
-                                    {size} x {size}
-                                </button>
-                            ))}
-                        </div>
                     </div>
                 </div>
 
