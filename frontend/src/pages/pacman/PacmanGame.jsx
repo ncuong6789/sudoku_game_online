@@ -740,7 +740,7 @@ export default function PacmanGame() {
                         );
                     })}
 
-                    {ghosts.filter(g => g.state !== 'house').map(g => {
+                    {ghosts.map(g => {
                         const fr = g.state === 'frightened';
                         const flash = fr && frightenedTimer < 8 && frightenedTimer % 2 === 0;
                         const skipTrans = Math.abs(g.x - (g.prevX ?? g.x)) > 1;
