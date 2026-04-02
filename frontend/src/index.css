@@ -787,8 +787,9 @@ h1 {
   }
 
   .full-page-mobile-scroll {
-    height: 100dvh !important;
-    max-height: 100dvh !important;
+    min-height: 100dvh !important;
+    height: auto !important;
+    max-height: none !important;
     overflow-y: auto !important;
     display: flex !important;
     flex-direction: column !important;

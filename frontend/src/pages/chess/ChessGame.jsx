@@ -277,7 +277,7 @@ export default function ChessGame() {
     }, [optionSquares, moveHistory]);
 
     return (
-        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', minHeight: '100vh', padding: '0.5rem', boxSizing: 'border-box', background: '#0d1117' }}>
+        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', minHeight: 'calc(100vh - 80px)', padding: '0.5rem', boxSizing: 'border-box', background: '#0d1117' }}>
             <div className="glass-panel game-play-panel" style={{
                 position: 'relative',
                 overflow: 'hidden',
@@ -444,7 +444,7 @@ export default function ChessGame() {
                             <div style={{
                                 flex: '1 1 0%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                                 background: myColor === 'w' ? '#f8f9fa' : '#1e1e1e',
-                                padding: '12px 4px', borderRadius: '12px', border: 'none',
+                                padding: '12px 4px', borderRadius: '12px', border: myColor === 'w' ? '1px solid rgba(0,0,0,0.15)' : '1px solid rgba(255,255,255,0.15)',
                                 overflow: 'hidden'
                             }}>
                                 <div style={{ fontSize: '2rem', lineHeight: 1, marginBottom: '2px', color: myColor === 'w' ? '#1e1e1e' : '#f8f9fa' }}>{myColor === 'w' ? '♔' : '♚'}</div>
@@ -454,7 +454,7 @@ export default function ChessGame() {
                             <div style={{
                                 flex: '1 1 0%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                                 background: myColor === 'w' ? '#1e1e1e' : '#f8f9fa',
-                                padding: '12px 4px', borderRadius: '12px', border: 'none', 
+                                padding: '12px 4px', borderRadius: '12px', border: myColor === 'w' ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(0,0,0,0.15)', 
                                 overflow: 'hidden'
                             }}>
                                 <div style={{ fontSize: '2rem', lineHeight: 1, marginBottom: '2px', color: myColor === 'w' ? '#f8f9fa' : '#1e1e1e' }}>{myColor === 'w' ? '♚' : '♔'}</div>
