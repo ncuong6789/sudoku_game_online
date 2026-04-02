@@ -58,7 +58,8 @@ function performDash(g, mapSize, isBot = false) {
     const fk = isBot ? 'botDashFlash' : 'dashFlash';
     const now = performance.now();
     if (g[ck] && now < g[ck]) return 'cooldown';
-    if (snake.length < DASH_MIN_LENGTH) return 'too_short';
+    const score = isBot ? g.botScore : g.score;
+    if (score < 5) return 'too_short'; // User requested >= 5 points
     const h = snake[0];
     // Check path (walls + permanent dead bodies)
     for (let i = 1; i <= DASH_DISTANCE; i++) {
@@ -77,10 +78,16 @@ function performDash(g, mapSize, isBot = false) {
         { x: h.x + dir.x, y: h.y + dir.y },
         { x: h.x, y: h.y },
     ];
-    const detached = snake.slice(1); // original body → stone
+    const detached = snake.slice(1); // original body excluding head → stone
     g.deadBodies = [...g.deadBodies, ...detached];
-    if (isBot) { g.botSnake = newSnake; g.botScore = Math.max(0, g.botScore - detached.length); }
-    else { g.snake = newSnake; g.score = Math.max(0, g.score - detached.length); }
+    if (isBot) {
+        g.botSnake = newSnake;
+        // Since initial length was 2, a length-4 snake corresponds to score 2
+        g.botScore = 2;
+    } else {
+        g.snake = newSnake;
+        g.score = 2; // Reset score to match length 4 (2 initial + 2 eaten)
+    }
     g[ck] = now + DASH_COOLDOWN;
     g[fk] = now + 300;
     return 'ok';
@@ -174,7 +181,10 @@ function SnakeCanvas({ gameRef, mapSize }) {
                 ctx.shadowBlur = 0;
                 if (g.goldenItem.timeLeft !== undefined) {
                     ctx.fillStyle = '#fbbf24'; ctx.font = `bold ${Math.max(9, cell * 0.55)}px sans-serif`;
-                    ctx.textAlign = 'center'; ctx.fillText(`⏳${g.goldenItem.timeLeft}`, cx, cy - cell / 2 * p2 - 3);
+                    ctx.textAlign = 'center';
+                    // If at the top row, show timer BELOW the item to prevent cutoff
+                    const yOffset = g.goldenItem.y === 0 ? (cell / 2 * p2 + cell * 0.7) : (-cell / 2 * p2 - 3);
+                    ctx.fillText(`⏳${g.goldenItem.timeLeft}`, cx, cy + yOffset);
                 }
             }
             // Snakes
@@ -260,10 +270,10 @@ function LeftPanel({ gameRef, gameOver, accentColor, resultEmoji, resultTitle, r
             {/* DASH MECHANIC */}
             <div style={cardStyle}>
                 <div style={labelStyle}>⚡ Cơ Chế Lao Nhanh</div>
-                <div style={rowStyle}><span style={{ color: '#fbbf24', flexShrink: 0 }}>➤</span>Đầu rắn tạo vết 3 ô ra phía trước</div>
-                <div style={rowStyle}><span style={{ color: '#f87171', flexShrink: 0 }}>☠</span>Đuôi bỏ lại → hóa đá cản đường</div>
-                <div style={rowStyle}><span style={{ color: '#f87171', flexShrink: 0 }}>−</span>Điểm trừ = số đốt bị mất đi</div>
-                <div style={rowStyle}><span style={{ color: '#94a3b8', flexShrink: 0 }}>!</span>Cần ≥ <b style={{ color: '#fff', margin: '0 3px' }}>5 đốt</b> mới dùng được</div>
+                <div style={rowStyle}><span style={{ color: '#fbbf24', flexShrink: 0 }}>➤</span>Đầu rắn lao nhanh 3 ô về phía trước</div>
+                <div style={rowStyle}><span style={{ color: '#f87171', flexShrink: 0 }}>☠</span>Bỏ lại toàn bộ đuôi → hóa đá cản đường</div>
+                <div style={rowStyle}><span style={{ color: '#f87171', flexShrink: 0 }}>−</span>Điểm số sẽ bị reset về 2 khi dùng</div>
+                <div style={rowStyle}><span style={{ color: '#94a3b8', flexShrink: 0 }}>!</span>Cần ≥ <b style={{ color: '#fff', margin: '0 3px' }}>5 điểm</b> mới dùng được</div>
                 <div style={rowStyle}><span style={{ color: '#60a5fa', flexShrink: 0 }}>⏱</span>Hồi chiêu <b style={{ color: '#fff', margin: '0 3px' }}>3 giây</b> sau mỗi lần dùng</div>
             </div>
 
@@ -309,10 +319,7 @@ function RightPanel({ mode, gameOver, accentColor, handleRestart, navigate }) {
 
             {/* ITEMS */}
             <div style={cardStyle}>
-                {/* <div style={labelStyle}>🎯 Vật Phẩm</div> */}
-                <div style={labelStyle}>
-                    <strong>🎯 Vật Phẩm</strong>
-                </div>
+                <div style={labelStyle}>🎯 Vật Phẩm</div>
                 <div style={{ background: 'rgba(239,68,68,0.08)', borderRadius: '8px', padding: '8px 10px', marginBottom: '8px', border: '1px solid rgba(239,68,68,0.2)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                         <div style={{ width: 13, height: 13, borderRadius: '50%', background: 'radial-gradient(circle,#f87171,#dc2626)', boxShadow: '0 0 6px #f87171', flexShrink: 0 }} />
@@ -519,7 +526,7 @@ export default function SnakeGame() {
                             return nx >= 0 && nx < mapSize && ny >= 0 && ny < mapSize && !obs.has(`${nx},${ny}`);
                         });
                         // Bot dash if trapped
-                        if (valids.length === 0 && g.botSnake.length >= DASH_MIN_LENGTH) {
+                        if (valids.length === 0 && g.botScore >= 5) {
                             performDash(g, mapSize, true);
                             g.blockedCells = computeBlockedCells(g, mapSize);
                         } else if (valids.length > 0) bDir = valids[Math.floor(Math.random() * valids.length)];
@@ -528,7 +535,7 @@ export default function SnakeGame() {
                 // Bot considers dash to dodge player head
                 if (!g.botDashCooldownEnd || performance.now() > g.botDashCooldownEnd) {
                     const nextBotHead = { x: bh.x + bDir.x, y: bh.y + bDir.y };
-                    if (nextBotHead.x === pnx && nextBotHead.y === pny && g.botSnake.length >= DASH_MIN_LENGTH) {
+                    if (nextBotHead.x === pnx && nextBotHead.y === pny && g.botScore >= 5) {
                         performDash(g, mapSize, true);
                         g.blockedCells = computeBlockedCells(g, mapSize);
                     }
