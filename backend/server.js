@@ -397,6 +397,64 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('snakeDash', ({ roomId }) => {
+        const room = rooms[roomId];
+        if (!room || !room.snakeState) return;
+        const state = room.snakeState;
+        const s = state.snakes[socket.id];
+        if (!s || s.isDead || state.status === 'finished') return;
+
+        const now = Date.now();
+        if (s.dashCooldownEnd && now < s.dashCooldownEnd) return;
+        if (s.score < 5) return;
+
+        const h = s.positions[0];
+        const dir = s.direction || s.nextDir;
+        // Check path (3 cells ahead)
+        for (let i = 1; i <= 3; i++) {
+            const nx = h.x + dir.x * i;
+            const ny = h.y + dir.y * i;
+            if (nx < 0 || nx >= room.mapSize || ny < 0 || ny >= room.mapSize) return;
+            if (state.deadBodies.some(b => b.x === nx && b.y === ny)) return;
+        }
+
+        const newHead = { x: h.x + dir.x * 3, y: h.y + dir.y * 3 };
+        // Check vs opponent
+        for (const otherId in state.snakes) {
+            const other = state.snakes[otherId];
+            if (other.positions.some(p => p.x === newHead.x && p.y === newHead.y)) {
+                // He dashed into someone → dead
+                s.isDead = true;
+                state.deadBodies.push(...s.positions);
+                return;
+            }
+        }
+
+        // Perform Dash: [h+3, h+2, h+1, h]
+        const newPositions = [
+            { x: h.x + dir.x * 3, y: h.y + dir.y * 3 },
+            { x: h.x + dir.x * 2, y: h.y + dir.y * 2 },
+            { x: h.x + dir.x, y: h.y + dir.y },
+            { ...h }
+        ];
+
+        const detached = s.positions.slice(1);
+        state.deadBodies.push(...detached);
+        s.positions = newPositions;
+        s.score = 2; // Fixed cost: reset to length 4
+        s.dashCooldownEnd = now + 3000;
+        s.dashFlashEnd = now + 300;
+
+        io.to(roomId).emit('snakeGameState', {
+            snakes: state.snakes,
+            deadBodies: state.deadBodies,
+            item: state.item,
+            goldenItem: state.goldenItem,
+            status: state.status,
+            dashOccurred: { id: socket.id }
+        });
+    });
+
     socket.on('startSnakeGame', ({ roomId, mapSize }) => {
         const room = rooms[roomId];
         if (room && room.players.length === 2 && room.gameType === 'snake') {
@@ -412,8 +470,8 @@ io.on('connection', (socket) => {
                 item: { x: Math.floor(room.mapSize/2), y: Math.floor(room.mapSize/2) },
                 goldenItem: null,
                 snakes: {
-                    [p1Id]: { id: p1Id, positions: [{x: 5, y: 5}, {x: 4, y: 5}, {x: 3, y: 5}], direction: {x: 1, y: 0}, nextDir: {x: 1, y: 0}, score: 0, isDead: false, color: 'green' },
-                    [p2Id]: { id: p2Id, positions: [{x: room.mapSize-6, y: room.mapSize-6}, {x: room.mapSize-5, y: room.mapSize-6}, {x: room.mapSize-4, y: room.mapSize-6}], direction: {x: -1, y: 0}, nextDir: {x: -1, y: 0}, score: 0, isDead: false, color: 'blue' }
+                    [p1Id]: { id: p1Id, positions: [{ x: 5, y: 5 }, { x: 4, y: 5 }], direction: { x: 1, y: 0 }, nextDir: { x: 1, y: 0 }, score: 0, isDead: false, color: 'green', dashCooldownEnd: 0, dashFlashEnd: 0 },
+                    [p2Id]: { id: p2Id, positions: [{ x: room.mapSize - 6, y: room.mapSize - 6 }, { x: room.mapSize - 5, y: room.mapSize - 6 }], direction: { x: -1, y: 0 }, nextDir: { x: -1, y: 0 }, score: 0, isDead: false, color: 'blue', dashCooldownEnd: 0, dashFlashEnd: 0 }
                 }
             };
             
@@ -473,21 +531,20 @@ io.on('connection', (socket) => {
                 } else {
                     const newHead = { x: nx, y: ny };
                     s.positions.unshift(newHead);
-                    
+
                     if (nx === state.item.x && ny === state.item.y) {
                         s.score += 1;
-                        s.positions.push({ ...s.positions[s.positions.length - 1] }); 
+                        // Score +1 means length +1. Since unshift already added one, we DON'T push or pop.
                         someoneAte = true;
                     } 
                     else if (state.goldenItem && nx === state.goldenItem.x && ny === state.goldenItem.y) {
                         s.score += 2;
                         state.goldenItem = null;
-                        // Rút ngắn rắn: pop đuôi 2 lần (vì đầu vừa thêm vào, nên pop 1 lần là giữ nguyên độ dài, pop 2 lần là ngắn lại)
-                        s.positions.pop(); 
-                        if (s.positions.length > 3) s.positions.pop();
+                        // Score +2 means length +2. Unshift gave one, we push one more.
+                        s.positions.push({ ...s.positions[s.positions.length - 1] });
                     }
                     else {
-                        s.positions.pop();
+                        s.positions.pop(); // Standard move: pop tail to maintain length
                     }
                 }
             }

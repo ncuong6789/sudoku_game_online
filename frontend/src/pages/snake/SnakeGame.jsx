@@ -233,13 +233,19 @@ function LeftPanel({ gameRef, gameOver, accentColor, resultEmoji, resultTitle, r
     const [cdRemain, setCdRemain] = useState(0);
     useEffect(() => {
         const t = setInterval(() => {
-            const end = gameRef.current?.dashCooldownEnd || 0;
+            const g = gameRef.current;
+            if (!g) return;
+            const end = g.dashCooldownEnd || 0;
             setCdRemain(Math.max(0, end - performance.now()));
         }, 100);
         return () => clearInterval(t);
     }, [gameRef]);
 
+    const score = gameRef.current?.score || 0;
     const ready = cdRemain <= 0;
+    const hasPoints = score >= 5;
+    const canDash = ready && hasPoints;
+
     const pct = ready ? 1 : 1 - cdRemain / DASH_COOLDOWN;
     const cardStyle = { borderRadius: '10px', padding: '12px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '10px' };
     const labelStyle = { fontSize: '0.72rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' };
@@ -250,31 +256,63 @@ function LeftPanel({ gameRef, gameOver, accentColor, resultEmoji, resultTitle, r
         <div style={{ width: '240px', flexShrink: 0, paddingRight: '12px', display: 'flex', flexDirection: 'column' }}>
 
             {/* CONTROLS */}
-            <div style={cardStyle}>
-                <div style={labelStyle}>🎮 Điều Khiển</div>
-                <div style={rowStyle}><kbd style={kbdStyle}>W A S D</kbd><span>Di chuyển</span></div>
-                <div style={{ ...rowStyle, color: '#64748b', fontSize: '0.76rem', marginTop: '-3px', marginBottom: '8px', paddingLeft: '2px' }}>hoặc phím ↑ ↓ ← →</div>
-                <div style={{ ...rowStyle, background: 'rgba(250,204,21,0.06)', borderRadius: '8px', padding: '8px 10px', border: `1px solid ${ready ? 'rgba(250,204,21,0.35)' : 'rgba(255,255,255,0.07)'}` }}>
-                    <kbd style={{ ...kbdStyle, background: ready ? 'rgba(250,204,21,0.15)' : '#1e293b', color: ready ? '#fbbf24' : '#94a3b8', border: `1px solid ${ready ? '#fbbf24' : '#334155'}`, fontSize: '0.82rem' }}>SPACE</kbd>
+            <div style={{ ...cardStyle, background: 'rgba(96,165,250,0.04)', border: '1px solid rgba(96,165,250,0.2)' }}>
+                <div style={{ ...labelStyle, color: '#60a5fa' }}>🎮 Điều Khiển</div>
+                <div style={rowStyle}>
+                    <kbd style={kbdStyle}>W</kbd>
+                    <kbd style={kbdStyle}>A</kbd>
+                    <kbd style={kbdStyle}>S</kbd>
+                    <kbd style={kbdStyle}>D</kbd>
+                    <span style={{ marginLeft: '4px' }}>Di chuyển</span>
+                </div>
+                <div style={{ ...rowStyle, marginTop: '8px' }}>
+                    <kbd style={kbdStyle}>↑</kbd>
+                    <kbd style={kbdStyle}>↓</kbd>
+                    <kbd style={kbdStyle}>←</kbd>
+                    <kbd style={kbdStyle}>→</kbd>
+                    <span style={{ marginLeft: '4px' }}>Di chuyển</span>
+                </div>
+                <div style={{
+                    ...rowStyle,
+                    background: 'rgba(250,204,21,0.06)',
+                    borderRadius: '8px', padding: '8px 10px',
+                    marginTop: '10px',
+                    border: `1px solid ${canDash ? 'rgba(250,204,21,0.35)' : 'rgba(255,255,255,0.07)'}`,
+                    transition: 'all 0.3s'
+                }}>
+                    <kbd style={{
+                        ...kbdStyle,
+                        background: canDash ? 'rgba(250,204,21,0.15)' : '#1e293b',
+                        color: canDash ? '#fbbf24' : '#64748b',
+                        border: `1px solid ${canDash ? '#fbbf24' : '#334155'}`,
+                        fontSize: '0.82rem',
+                        opacity: hasPoints ? 1 : 0.5
+                    }}>SPACE</kbd>
                     <div>
-                        <div style={{ color: ready ? '#fbbf24' : '#cbd5e1', fontWeight: 700 }}>Lao Nhanh</div>
-                        <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '1px' }}>{ready ? '✓ Sẵn sàng!' : `Hồi chiêu ${(cdRemain / 1000).toFixed(1)}s`}</div>
+                        <div style={{ color: canDash ? '#fbbf24' : (ready ? '#94a3b8' : '#cbd5e1'), fontWeight: 700 }}>Lao Nhanh</div>
+                        <div style={{ fontSize: '0.74rem', color: canDash ? '#fbbf24' : '#64748b', marginTop: '1px' }}>
+                            {!ready ? `Hồi chiêu ${(cdRemain / 1000).toFixed(1)}s` : (!hasPoints ? `Cần 5 điểm (có ${score})` : '✓ Sẵn sàng!')}
+                        </div>
                     </div>
                 </div>
                 {/* Cooldown bar */}
                 <div style={{ background: '#1e293b', borderRadius: '6px', height: '5px', overflow: 'hidden', marginTop: '8px' }}>
-                    <div style={{ height: '100%', width: `${pct * 100}%`, background: ready ? 'linear-gradient(90deg,#4ade80,#22c55e)' : 'linear-gradient(90deg,#f59e0b,#fbbf24)', borderRadius: '6px', transition: 'width 0.15s' }} />
+                    <div style={{
+                        height: '100%', width: `${pct * 100}%`,
+                        background: canDash ? 'linear-gradient(90deg,#4ade80,#22c55e)' : (ready ? '#334155' : 'linear-gradient(90deg,#f59e0b,#fbbf24)'),
+                        borderRadius: '6px', transition: 'width 0.15s'
+                    }} />
                 </div>
             </div>
 
             {/* DASH MECHANIC */}
             <div style={cardStyle}>
                 <div style={labelStyle}>⚡ Cơ Chế Lao Nhanh</div>
-                <div style={rowStyle}><span style={{ color: '#fbbf24', flexShrink: 0 }}>➤</span>Đầu rắn lao nhanh 3 ô về phía trước</div>
-                <div style={rowStyle}><span style={{ color: '#f87171', flexShrink: 0 }}>☠</span>Bỏ lại toàn bộ đuôi → hóa đá cản đường</div>
-                <div style={rowStyle}><span style={{ color: '#f87171', flexShrink: 0 }}>−</span>Điểm số sẽ bị reset về 2 khi dùng</div>
-                <div style={rowStyle}><span style={{ color: '#94a3b8', flexShrink: 0 }}>!</span>Cần ≥ <b style={{ color: '#fff', margin: '0 3px' }}>5 điểm</b> mới dùng được</div>
-                <div style={rowStyle}><span style={{ color: '#60a5fa', flexShrink: 0 }}>⏱</span>Hồi chiêu <b style={{ color: '#fff', margin: '0 3px' }}>3 giây</b> sau mỗi lần dùng</div>
+                <div style={rowStyle}><span style={{ color: '#fbbf24', flexShrink: 0 }}>➤</span>Lao 3 ô về phía trước</div>
+                <div style={rowStyle}><span style={{ color: '#f87171', flexShrink: 0 }}>☠</span>Bỏ đuôi → hóa đá chắn đường</div>
+                <div style={rowStyle}><span style={{ color: '#f87171', flexShrink: 0 }}>−</span>Reset điểm về 2</div>
+                <div style={rowStyle}><span style={{ color: '#94a3b8', flexShrink: 0 }}>!</span>Cần ≥ <b style={{ color: '#fff', margin: '0 3px' }}>5</b> điểm</div>
+                <div style={rowStyle}><span style={{ color: '#60a5fa', flexShrink: 0 }}>⏱</span>Hồi chiêu <b style={{ color: '#fff', margin: '0 3px' }}>3s</b> hồi chiêu</div>
             </div>
 
             {/* GAME OVER RESULT — appears at the bottom of the left panel */}
@@ -309,7 +347,7 @@ function LeftPanel({ gameRef, gameOver, accentColor, resultEmoji, resultTitle, r
 }
 
 // ─── RIGHT PANEL (Items + Map Legend + Buttons) ─────────────────────────────
-function RightPanel({ mode, gameOver, accentColor, handleRestart, navigate }) {
+function RightPanel({ mode, gameOver, accentColor, handleRestart, navigate, playerColor }) {
     const cardStyle = { borderRadius: '10px', padding: '12px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '10px' };
     const labelStyle = { fontSize: '0.72rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' };
     const rowStyle = { display: 'flex', alignItems: 'flex-start', gap: '9px', fontSize: '0.82rem', color: '#cbd5e1', marginBottom: '6px', lineHeight: 1.4 };
@@ -342,24 +380,34 @@ function RightPanel({ mode, gameOver, accentColor, handleRestart, navigate }) {
 
             {/* MAP LEGEND */}
             <div style={cardStyle}>
-                <div style={labelStyle}>🗺 Ký Hiệu Bản Đồ</div>
+                <div style={labelStyle}>🗺 Ký Hiệu</div>
                 <div style={rowStyle}>
                     <div style={{ width: 14, height: 14, background: '#3f3f46', borderRadius: '3px', flexShrink: 0, marginTop: '2px' }} />
-                    <span>Xác rắn — chướng ngại vật vĩnh viễn</span>
+                    <span>Xác rắn — chướng ngại vĩnh viễn</span>
                 </div>
                 <div style={rowStyle}>
                     <div style={{ width: 14, height: 14, background: 'rgba(40,40,55,0.9)', borderRadius: '3px', flexShrink: 0, marginTop: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <span style={{ fontSize: '9px', color: 'rgba(120,120,150,0.9)', lineHeight: 1, fontWeight: 700 }}>✕</span>
                     </div>
-                    <span>Ô cô lập — mồi không thể xuất hiện tại đây</span>
+                    <span>Ô cô lập — không spawn mồi</span>
+                </div>
+                
+                {/* Dynamic Snake Colors */}
+                <div style={rowStyle}>
+                    <div style={{ 
+                        width: 14, height: 14, 
+                        background: playerColor === 'blue' ? '#60a5fa' : '#4ade80', 
+                        borderRadius: '50%', flexShrink: 0, marginTop: '2px' 
+                    }} />
+                    <span>Rắn của bạn</span>
                 </div>
                 <div style={rowStyle}>
-                    <div style={{ width: 14, height: 14, background: '#4ade80', borderRadius: '50%', flexShrink: 0, marginTop: '2px' }} />
-                    <span>Đầu rắn của bạn</span>
-                </div>
-                <div style={rowStyle}>
-                    <div style={{ width: 14, height: 14, background: '#60a5fa', borderRadius: '50%', flexShrink: 0, marginTop: '2px' }} />
-                    <span>Đầu rắn Bot AI</span>
+                    <div style={{ 
+                        width: 14, height: 14, 
+                        background: playerColor === 'blue' ? '#4ade80' : '#60a5fa', 
+                        borderRadius: '50%', flexShrink: 0, marginTop: '2px' 
+                    }} />
+                    <span>{mode === 'solo' ? 'Rắn Bot AI' : 'Rắn đối thủ'}</span>
                 </div>
             </div>
 
@@ -479,7 +527,14 @@ export default function SnakeGame() {
                     playLoseSound();
                 }
             }
-            if (mode === 'multiplayer' && roomId) socket.emit('snakeChangeDirection', { roomId, direction: g.nextDir });
+            // Send input to server in multiplayer
+            if (mode === 'multiplayer' && roomId) {
+                if (e.code === 'Space' || e.key === ' ') {
+                    socket.emit('snakeDash', { roomId });
+                } else if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd', 'W', 'A', 'S', 'D'].includes(e.key)) {
+                    socket.emit('snakeChangeDirection', { roomId, direction: g.nextDir });
+                }
+            }
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
@@ -684,9 +739,25 @@ export default function SnakeGame() {
     const mpRef = useRef(null);
     if (mode === 'multiplayer' && gameState) {
         mpRef.current = {
-            snakes: Object.values(gameState.snakes).map(s => ({ id: s.id, positions: s.positions, prevHead: null, color: s.color === 'green' ? '#4ade80' : '#60a5fa', direction: s.direction || { x: 1, y: 0 }, isDead: s.isDead, isMe: s.id === socket.id, dashFlashEnd: null })),
-            deadBodies: gameState.deadBodies || [], item: gameState.item || { x: -10, y: -10 }, goldenItem: gameState.goldenItem || null,
-            blockedCells: new Set(), currentSpeed: INITIAL_SPEED, lastTickTime: performance.now(),
+            snakes: Object.values(gameState.snakes).map(s => {
+                const isMe = s.id === socket.id;
+                // Sync dash state from server
+                return {
+                    id: s.id, positions: s.positions, prevHead: null,
+                    color: s.color === 'green' ? '#4ade80' : '#60a5fa',
+                    direction: s.direction || { x: 1, y: 0 }, isDead: s.isDead,
+                    isMe,
+                    dashFlashEnd: s.dashFlashEnd,
+                };
+            }),
+            deadBodies: gameState.deadBodies || [],
+            item: gameState.item || { x: -10, y: -10 },
+            goldenItem: gameState.goldenItem || null,
+            blockedCells: new Set(), currentSpeed: INITIAL_SPEED,
+            lastTickTime: performance.now(),
+            // Ensure LeftPanel can see dash state
+            dashCooldownEnd: gameState.snakes[socket.id]?.dashCooldownEnd || 0,
+            score: gameState.snakes[socket.id]?.score || 0
         };
     }
     const canvasRef2use = mode === 'multiplayer' ? mpRef : gameRef;
@@ -750,17 +821,15 @@ export default function SnakeGame() {
 
                 {/* ── MAIN AREA ── */}
                 <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'stretch' }}>
-                    {/* Left panel */}
-                    {mode === 'solo' && (
-                        <LeftPanel
-                            gameRef={gameRef}
-                            gameOver={uiState.gameOver}
-                            accentColor={accentColor}
-                            resultEmoji={resultEmoji}
-                            resultTitle={resultTitle}
-                            resultDetail={resultDetail}
-                        />
-                    )}
+                    {/* Left panel (Controls + Result) */}
+                    <LeftPanel
+                        gameRef={canvasRef2use}
+                        gameOver={uiState.gameOver}
+                        accentColor={accentColor}
+                        resultEmoji={resultEmoji}
+                        resultTitle={resultTitle}
+                        resultDetail={resultDetail}
+                    />
 
                     {/* Board */}
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -799,15 +868,14 @@ export default function SnakeGame() {
                     </div>
 
                     {/* Right panel (items + legend + buttons) */}
-                    {mode === 'solo' && (
-                        <RightPanel
-                            mode={mode}
-                            gameOver={uiState.gameOver}
-                            accentColor={accentColor}
-                            handleRestart={handleRestart}
-                            navigate={navigate}
-                        />
-                    )}
+                    <RightPanel
+                        mode={mode}
+                        gameOver={uiState.gameOver}
+                        accentColor={accentColor}
+                        handleRestart={handleRestart}
+                        navigate={navigate}
+                        playerColor={playerColor}
+                    />
                 </div>
             </div>
         </div>
