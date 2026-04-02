@@ -448,7 +448,6 @@ export default function ChessGame() {
                                 boxShadow: myColor === 'w' ? '0 0 15px rgba(255,255,255,0.1)' : 'none', overflow: 'hidden'
                             }}>
                                 <div style={{ fontSize: '1.4rem', lineHeight: 1, marginBottom: '4px', color: myColor === 'w' ? '#1e1e1e' : '#f8f9fa' }}>{myColor === 'w' ? '♔' : '♚'}</div>
-                                <span style={{ fontSize: '1.1rem', fontWeight: 900, color: myColor === 'w' ? '#1e1e1e' : '#f8f9fa', lineHeight: 1, whiteSpace: 'nowrap' }}>{myColor === 'w' ? 'TRẮNG' : 'ĐEN'}</span>
                                 <span style={{ fontSize: '0.65rem', color: myColor === 'w' ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)', marginTop: '6px', fontWeight: 'bold', letterSpacing: '2px' }}>BẠN</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,0.2)', fontWeight: 'bold' }}>VS</div>
@@ -458,7 +457,6 @@ export default function ChessGame() {
                                 padding: '10px 4px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden'
                             }}>
                                 <div style={{ fontSize: '1.4rem', lineHeight: 1, marginBottom: '4px', color: myColor === 'w' ? '#f8f9fa' : '#1e1e1e' }}>{myColor === 'w' ? '♚' : '♔'}</div>
-                                <span style={{ fontSize: '1.1rem', fontWeight: 900, color: myColor === 'w' ? '#f8f9fa' : '#1e1e1e', lineHeight: 1, whiteSpace: 'nowrap' }}>{myColor === 'w' ? 'ĐEN' : 'TRẮNG'}</span>
                                 <span style={{ fontSize: '0.65rem', color: myColor === 'w' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)', marginTop: '6px', fontWeight: 'bold', letterSpacing: '2px' }}>{mode === 'solo' ? 'AI' : 'ĐỐI THỦ'}</span>
                             </div>
                         </div>
