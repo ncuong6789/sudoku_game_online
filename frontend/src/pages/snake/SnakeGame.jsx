@@ -270,8 +270,8 @@ function LeftPanel({ gameRef }) {
     );
 }
 
-// ─── RIGHT PANEL (Items + Map Legend) ────────────────────────────────────────
-function RightPanel() {
+// ─── RIGHT PANEL (Items + Map Legend + Buttons) ─────────────────────────────
+function RightPanel({ mode, gameOver, accentColor, resultEmoji, resultTitle, resultDetail, handleRestart, navigate }) {
     const cardStyle = { borderRadius: '10px', padding: '12px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '10px' };
     const labelStyle = { fontSize: '0.72rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' };
     const rowStyle = { display: 'flex', alignItems: 'flex-start', gap: '9px', fontSize: '0.82rem', color: '#cbd5e1', marginBottom: '6px', lineHeight: 1.4 };
@@ -322,6 +322,38 @@ function RightPanel() {
                 <div style={rowStyle}>
                     <div style={{ width: 14, height: 14, background: '#60a5fa', borderRadius: '50%', flexShrink: 0, marginTop: '2px' }} />
                     <span>Đầu rắn Bot AI</span>
+                </div>
+            </div>
+
+            {/* RESULT + BUTTONS — always at bottom of right panel */}
+            <div style={{ marginTop: 'auto', paddingTop: '6px' }}>
+                {/* Result card (only when game over) */}
+                {gameOver && (
+                    <div style={{
+                        borderRadius: '10px', padding: '10px 12px', marginBottom: '8px',
+                        border: `2px solid ${accentColor}55`,
+                        background: `linear-gradient(135deg,${accentColor}12,rgba(13,17,23,0.75))`,
+                        display: 'flex', alignItems: 'center', gap: '10px',
+                    }}>
+                        <span style={{ fontSize: '1.8rem', lineHeight: 1, filter: `drop-shadow(0 0 8px ${accentColor})` }}>{resultEmoji}</span>
+                        <div>
+                            <div style={{ fontSize: '1rem', fontWeight: 900, color: accentColor, lineHeight: 1.2 }}>{resultTitle}</div>
+                            {resultDetail && <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>{resultDetail}</div>}
+                        </div>
+                    </div>
+                )}
+                {/* Action buttons */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {mode === 'solo' && (
+                        <button className={gameOver ? 'btn-primary' : 'btn-secondary'} onClick={handleRestart}
+                            style={{ width: '100%', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.9rem' }}>
+                            <RotateCcw size={15} /> Chơi lại
+                        </button>
+                    )}
+                    <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/snake/multiplayer' : '/snake')}
+                        style={{ width: '100%', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.9rem' }}>
+                        <ArrowLeft size={15} /> Thoát
+                    </button>
                 </div>
             </div>
         </div>
@@ -645,55 +677,60 @@ export default function SnakeGame() {
     const resultDetail = uiState.statusMessage.includes('(') ? uiState.statusMessage.split('(')[1]?.replace(')', '') : uiState.statusMessage.split('!').slice(1).join('!').trim();
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1rem' }}>
-            <div className="glass-panel" style={{ position: 'relative', overflow: 'hidden', width: '100%', maxWidth: '1020px', display: 'flex', flexDirection: 'column', padding: '1.5rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 0.5rem' }}>
+            <div className="glass-panel" style={{ position: 'relative', width: '100%', maxWidth: '1050px', display: 'flex', flexDirection: 'column', padding: '1rem' }}>
 
-                {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem', alignItems: 'center', flexWrap: 'nowrap' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
-                        <div className="nav-item active" style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
-                            <Activity size={16} /> Snake {mapSize}
-                        </div>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {mode === 'solo' ? `vs Bot AI (${difficulty})` : `${roomId}`}
+                {/* ── SINGLE HEADER BAR ── */}
+                <div style={{
+                    display: 'grid', gridTemplateColumns: '1fr auto 1fr',
+                    alignItems: 'center', gap: '8px',
+                    background: 'rgba(0,0,0,0.25)', borderRadius: '10px',
+                    padding: '8px 14px', marginBottom: '10px',
+                }}>
+                    {/* Left: game name + mode */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Activity size={16} color="var(--primary-color)" />
+                        <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }}>Snake {mapSize}</span>
+                        <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                            {mode === 'solo' ? `· vs Bot AI (${difficulty})` : `· ${roomId}`}
                         </span>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        {mode === 'solo' && <button className="btn-secondary" onClick={handleRestart} style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '5px', width: 'auto', whiteSpace: 'nowrap', fontSize: '0.9rem' }}><RotateCcw size={14} />Chơi lại</button>}
-                        <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/snake/multiplayer' : '/snake')} style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '5px', width: 'auto', whiteSpace: 'nowrap', fontSize: '0.9rem' }}><ArrowLeft size={14} />Thoát</button>
-                    </div>
-                </div>
 
-                {/* Status */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem', background: 'rgba(0,0,0,0.2)', padding: '0.8rem 1rem', borderRadius: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                            <Trophy size={18} color="#fbbf24" />
-                            <span style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>Bạn: <span style={{ color: '#4ade80' }}>{uiState.score}</span></span>
+                    {/* Center: scores */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', justifyContent: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Trophy size={16} color="#fbbf24" />
+                            <span style={{ fontWeight: 800, fontSize: '1rem' }}>Bạn: <span style={{ color: '#4ade80' }}>{uiState.score}</span></span>
                         </div>
                         {(hasBot || mode === 'multiplayer') && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#60a5fa' }} />
-                                <span style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{mode === 'solo' ? `Bot (${difficulty})` : 'Địch'}: <span style={{ color: '#60a5fa' }}>{oppScore}</span></span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <div style={{ width: 11, height: 11, borderRadius: '50%', background: '#60a5fa' }} />
+                                <span style={{ fontWeight: 800, fontSize: '1rem' }}>
+                                    {mode === 'solo' ? `Bot (${difficulty})` : 'Địch'}: <span style={{ color: '#60a5fa' }}>{oppScore}</span>
+                                </span>
                             </div>
                         )}
                     </div>
-                    {hasBot && gameRef.current?.botDead && !uiState.gameOver && (
-                        <span style={{ fontSize: '0.85rem', color: '#f59e0b', fontWeight: 600 }}>💀 Bot đã chết — tiếp tục ghi điểm!</span>
-                    )}
-                    <span style={{ fontWeight: 'bold', fontSize: '0.9rem', color: uiState.gameOver ? 'var(--error-color)' : 'var(--text-primary)' }}>
-                        {uiState.statusMessage}
-                    </span>
+
+                    {/* Right: status / bot-dead notification */}
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        {hasBot && gameRef.current?.botDead && !uiState.gameOver ? (
+                            <span style={{ fontSize: '0.8rem', color: '#f59e0b', fontWeight: 700 }}>💀 Bot đã chết — tiếp tục ghi điểm!</span>
+                        ) : (
+                            <span style={{ fontSize: '0.82rem', fontWeight: 700, color: uiState.gameOver ? accentColor : 'var(--text-secondary)' }}>
+                                {uiState.gameOver ? `${resultEmoji} ${resultTitle}` : 'Đang chơi...'}
+                            </span>
+                        )}
+                    </div>
                 </div>
 
-                {/* Main area: left panel + board + right panel */}
-                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
+                {/* ── MAIN AREA ── */}
+                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'stretch' }}>
                     {/* Left panel */}
                     {mode === 'solo' && <LeftPanel gameRef={gameRef} />}
 
-                    {/* Board + result zone */}
-                    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-                        {/* Board — fills entire center column */}
+                    {/* Board */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{
                             position: 'relative', width: '100%', aspectRatio: '1/1',
                             border: '4px solid rgba(255,255,255,0.1)', borderRadius: '8px',
@@ -702,12 +739,12 @@ export default function SnakeGame() {
                         }}>
                             <SnakeCanvas gameRef={canvasRef2use} mapSize={mapSize} />
 
-                            {/* Countdown overlay (multiplayer only) */}
+                            {/* Countdown overlay (multiplayer) */}
                             {mode === 'multiplayer' && countdown !== null && (
                                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 60, gap: '16px' }}>
                                     <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-secondary)' }}>Rắn của bạn:</p>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: myColor, boxShadow: `0 0 10px ${myColor}` }} />
+                                        <div style={{ width: 20, height: 20, borderRadius: '50%', background: myColor, boxShadow: `0 0 10px ${myColor}` }} />
                                         <span style={{ fontWeight: 700, fontSize: '1.2rem', color: myColor }}>{myColorLabel}</span>
                                     </div>
                                     <div style={{ fontSize: countdown === 0 ? '2.5rem' : '6rem', fontWeight: 900, color: countdown === 0 ? '#4ade80' : '#fff', textShadow: '0 0 20px currentColor', transition: 'all 0.3s' }}>
@@ -715,41 +752,32 @@ export default function SnakeGame() {
                                     </div>
                                 </div>
                             )}
-                        </div>
 
-                        {/* Fixed-height result zone — always reserves space so layout never shifts */}
-                        <div style={{ height: '72px', marginTop: '10px', display: 'flex', alignItems: 'center' }}>
-                            {uiState.gameOver ? (
+                            {/* Game over: dim overlay — map still visible, no text blocking */}
+                            {uiState.gameOver && (
                                 <div style={{
-                                    width: '100%', borderRadius: '10px',
-                                    border: `2px solid ${accentColor}55`,
-                                    background: `linear-gradient(135deg,${accentColor}10,rgba(13,17,23,0.7))`,
-                                    padding: '10px 16px',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
-                                }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <span style={{ fontSize: '2rem', lineHeight: 1, filter: `drop-shadow(0 0 10px ${accentColor})` }}>{resultEmoji}</span>
-                                        <div>
-                                            <div style={{ fontSize: '1.1rem', fontWeight: 900, color: accentColor, lineHeight: 1.2 }}>{resultTitle}</div>
-                                            {resultDetail && <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '2px' }}>{resultDetail}</div>}
-                                        </div>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                                        {mode === 'solo' && <button className="btn-primary" onClick={handleRestart} style={{ padding: '8px 18px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '7px' }}><RotateCcw size={15} />Chơi lại</button>}
-                                        <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/snake/multiplayer' : '/snake')} style={{ padding: '8px 18px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '7px' }}><ArrowLeft size={15} />Thoát</button>
-                                    </div>
-                                </div>
-                            ) : (
-                                /* Placeholder keeps height reserved */
-                                <div style={{ width: '100%', height: '52px', borderRadius: '10px', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.12)' }}>Kết quả sẽ hiển thị tại đây</span>
-                                </div>
+                                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                                    background: 'rgba(10,14,22,0.42)',
+                                    zIndex: 5, pointerEvents: 'none',
+                                    borderRadius: '4px',
+                                }} />
                             )}
                         </div>
                     </div>
 
-                    {/* Right panel */}
-                    {mode === 'solo' && <RightPanel />}
+                    {/* Right panel (items + legend + buttons) */}
+                    {mode === 'solo' && (
+                        <RightPanel
+                            mode={mode}
+                            gameOver={uiState.gameOver}
+                            accentColor={accentColor}
+                            resultEmoji={resultEmoji}
+                            resultTitle={resultTitle}
+                            resultDetail={resultDetail}
+                            handleRestart={handleRestart}
+                            navigate={navigate}
+                        />
+                    )}
                 </div>
             </div>
         </div>
