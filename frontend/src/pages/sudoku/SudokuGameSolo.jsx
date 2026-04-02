@@ -200,7 +200,7 @@ export default function SoloGame() {
     };
 
     return (
-        <div className="game-container">
+        <div className="game-container full-page-mobile-scroll">
             <div className="sudoku-container glass-panel" style={{ position: 'relative', overflow: 'hidden' }}>
                 <div className="header-info">
                     <span>Difficulty: {difficulty}</span>

@@ -785,4 +785,14 @@ h1 {
     height: var(--board-size-mobile) !important;
     max-height: var(--board-size-mobile) !important;
   }
+
+  .full-page-mobile-scroll {
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+  }
 }

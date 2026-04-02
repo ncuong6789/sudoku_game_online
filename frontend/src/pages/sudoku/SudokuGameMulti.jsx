@@ -304,7 +304,7 @@ export default function MultiplayerGame() {
     if (!initialPuzzle) return null;
 
     return (
-        <div className="game-container">
+        <div className="game-container full-page-mobile-scroll">
             <div className="sudoku-container glass-panel" style={{ position: 'relative', overflow: 'hidden' }}>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>

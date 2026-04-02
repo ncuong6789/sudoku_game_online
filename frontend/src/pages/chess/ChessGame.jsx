@@ -277,7 +277,7 @@ export default function ChessGame() {
     }, [optionSquares, moveHistory]);
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', minHeight: '100vh', padding: '0.5rem', boxSizing: 'border-box', background: '#0d1117' }}>
+        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', minHeight: '100vh', padding: '0.5rem', boxSizing: 'border-box', background: '#0d1117' }}>
             <div className="glass-panel game-play-panel" style={{
                 position: 'relative',
                 overflow: 'hidden',
@@ -442,21 +442,21 @@ export default function ChessGame() {
                         {/* Badge người chơi */}
                         <div style={{ display: 'flex', gap: '12px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '15px' }}>
                             <div style={{
-                                flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
+                                flex: '1 1 0%', display: 'flex', flexDirection: 'column', alignItems: 'center',
                                 background: myColor === 'w' ? '#f8f9fa' : '#1e1e1e',
                                 padding: '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.15)',
                                 boxShadow: myColor === 'w' ? '0 0 15px rgba(255,255,255,0.1)' : 'none'
                             }}>
-                                <span style={{ fontSize: '1.6rem', fontWeight: 900, color: myColor === 'w' ? '#1e1e1e' : '#f8f9fa', lineHeight: 1 }}>{myColor === 'w' ? 'Trắng' : 'Đen'}</span>
+                                <span style={{ fontSize: '1.3rem', fontWeight: 900, color: myColor === 'w' ? '#1e1e1e' : '#f8f9fa', lineHeight: 1 }}>{myColor === 'w' ? 'Trắng' : 'Đen'}</span>
                                 <span style={{ fontSize: '0.7rem', color: myColor === 'w' ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>BẠN</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,0.2)', fontWeight: 'bold' }}>VS</div>
                             <div style={{
-                                flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
+                                flex: '1 1 0%', display: 'flex', flexDirection: 'column', alignItems: 'center',
                                 background: myColor === 'w' ? '#1e1e1e' : '#f8f9fa',
                                 padding: '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)',
                             }}>
-                                <span style={{ fontSize: '1.6rem', fontWeight: 900, color: myColor === 'w' ? '#f8f9fa' : '#1e1e1e', lineHeight: 1 }}>{myColor === 'w' ? 'Đen' : 'Trắng'}</span>
+                                <span style={{ fontSize: '1.3rem', fontWeight: 900, color: myColor === 'w' ? '#f8f9fa' : '#1e1e1e', lineHeight: 1 }}>{myColor === 'w' ? 'Đen' : 'Trắng'}</span>
                                 <span style={{ fontSize: '0.7rem', color: myColor === 'w' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>{mode === 'solo' ? 'AI' : 'ĐỐI THỦ'}</span>
                             </div>
                         </div>
