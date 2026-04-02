@@ -298,9 +298,9 @@ export default function ChessGame() {
 
                 {/* TRÁI: LỊCH SỬ NƯỚC ĐI */}
                 <div style={{
-                    flex: '0 1 230px',
-                    width: '230px',
-                    minWidth: '180px',
+                    flex: '0 1 260px',
+                    width: '260px',
+                    minWidth: '220px',
                     display: 'flex',
                     flexDirection: 'column',
                     maxHeight: '100%',
@@ -428,7 +428,7 @@ export default function ChessGame() {
                 </div>
 
                 {/* PHẢI: BẢNG ĐIỀU KHIỂN */}
-                <div style={{ flex: '0 1 280px', width: '280px', minWidth: '240px', display: 'flex', flexDirection: 'column', gap: '0.8rem', maxHeight: '100%', overflow: 'hidden' }}>
+                <div style={{ flex: '0 1 260px', width: '260px', minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '0.8rem', maxHeight: '100%', overflow: 'hidden' }}>
 
                     {/* Header Sidebar */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
@@ -444,20 +444,21 @@ export default function ChessGame() {
                             <div style={{
                                 flex: '1 1 0%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                                 background: myColor === 'w' ? '#f8f9fa' : '#1e1e1e',
-                                padding: '10px 4px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.15)',
-                                boxShadow: myColor === 'w' ? '0 0 15px rgba(255,255,255,0.1)' : 'none', overflow: 'hidden'
+                                padding: '12px 4px', borderRadius: '12px', border: 'none',
+                                overflow: 'hidden'
                             }}>
-                                <div style={{ fontSize: '1.4rem', lineHeight: 1, marginBottom: '4px', color: myColor === 'w' ? '#1e1e1e' : '#f8f9fa' }}>{myColor === 'w' ? '♔' : '♚'}</div>
-                                <span style={{ fontSize: '0.65rem', color: myColor === 'w' ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)', marginTop: '6px', fontWeight: 'bold', letterSpacing: '2px' }}>BẠN</span>
+                                <div style={{ fontSize: '2rem', lineHeight: 1, marginBottom: '2px', color: myColor === 'w' ? '#1e1e1e' : '#f8f9fa' }}>{myColor === 'w' ? '♔' : '♚'}</div>
+                                <span style={{ fontSize: '0.7rem', color: myColor === 'w' ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.6)', marginTop: '4px', fontWeight: 'bold', letterSpacing: '1px' }}>BẠN</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', color: 'rgba(255,255,255,0.2)', fontWeight: 'bold' }}>VS</div>
                             <div style={{
                                 flex: '1 1 0%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                                 background: myColor === 'w' ? '#1e1e1e' : '#f8f9fa',
-                                padding: '10px 4px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden'
+                                padding: '12px 4px', borderRadius: '12px', border: 'none', 
+                                overflow: 'hidden'
                             }}>
-                                <div style={{ fontSize: '1.4rem', lineHeight: 1, marginBottom: '4px', color: myColor === 'w' ? '#f8f9fa' : '#1e1e1e' }}>{myColor === 'w' ? '♚' : '♔'}</div>
-                                <span style={{ fontSize: '0.65rem', color: myColor === 'w' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)', marginTop: '6px', fontWeight: 'bold', letterSpacing: '2px' }}>{mode === 'solo' ? 'AI' : 'ĐỐI THỦ'}</span>
+                                <div style={{ fontSize: '2rem', lineHeight: 1, marginBottom: '2px', color: myColor === 'w' ? '#f8f9fa' : '#1e1e1e' }}>{myColor === 'w' ? '♚' : '♔'}</div>
+                                <span style={{ fontSize: '0.7rem', color: myColor === 'w' ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)', marginTop: '4px', fontWeight: 'bold', letterSpacing: '1px' }}>{mode === 'solo' ? 'AI' : 'ĐỐI THỦ'}</span>
                             </div>
                         </div>
 
