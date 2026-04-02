@@ -365,8 +365,8 @@ io.on('connection', (socket) => {
                     item: { x: Math.floor(mapSize/2), y: Math.floor(mapSize/2) },
                     goldenItem: null,
                     snakes: {
-                        [opponent.socket.id]: { id: opponent.socket.id, positions: [{x: 5, y: 5}, {x: 4, y: 5}, {x: 3, y: 5}], direction: {x: 1, y: 0}, nextDir: {x: 1, y: 0}, score: 0, isDead: false, color: 'green' },
-                        [socket.id]: { id: socket.id, positions: [{x: mapSize-6, y: mapSize-6}, {x: mapSize-5, y: mapSize-6}, {x: mapSize-4, y: mapSize-6}], direction: {x: -1, y: 0}, nextDir: {x: -1, y: 0}, score: 0, isDead: false, color: 'blue' }
+                        [opponent.socket.id]: { id: opponent.socket.id, positions: [{x: 5, y: 5}, {x: 4, y: 5}, {x: 3, y: 5}], direction: {x: 1, y: 0}, nextDir: {x: 1, y: 0}, directionsQueue: [], score: 0, isDead: false, color: 'green' },
+                        [socket.id]: { id: socket.id, positions: [{x: mapSize-6, y: mapSize-6}, {x: mapSize-5, y: mapSize-6}, {x: mapSize-4, y: mapSize-6}], direction: {x: -1, y: 0}, nextDir: {x: -1, y: 0}, directionsQueue: [], score: 0, isDead: false, color: 'blue' }
                     }
                 };
                 io.to(opponent.socket.id).emit('matchFound', { ...matchData, mapSize, color: 'green' });
@@ -393,7 +393,20 @@ io.on('connection', (socket) => {
     socket.on('snakeChangeDirection', ({ roomId, direction }) => {
         const room = rooms[roomId];
         if (room && room.snakeState && room.snakeState.snakes[socket.id] && !room.snakeState.snakes[socket.id].isDead) {
-            room.snakeState.snakes[socket.id].nextDir = direction;
+            const snake = room.snakeState.snakes[socket.id];
+            if (!snake.directionsQueue) snake.directionsQueue = [];
+            const lastDir = snake.directionsQueue.length > 0 
+                ? snake.directionsQueue[snake.directionsQueue.length - 1] 
+                : snake.direction;
+            
+            // Ngăn quay đầu 180 độ
+            if (direction.x !== 0 && direction.x === -lastDir.x) return;
+            if (direction.y !== 0 && direction.y === -lastDir.y) return;
+
+            if (snake.directionsQueue.length < 3) {
+                snake.directionsQueue.push(direction);
+            }
+            snake.nextDir = direction;
         }
     });
 
@@ -470,8 +483,8 @@ io.on('connection', (socket) => {
                 item: { x: Math.floor(room.mapSize/2), y: Math.floor(room.mapSize/2) },
                 goldenItem: null,
                 snakes: {
-                    [p1Id]: { id: p1Id, positions: [{ x: 5, y: 5 }, { x: 4, y: 5 }], direction: { x: 1, y: 0 }, nextDir: { x: 1, y: 0 }, score: 0, isDead: false, color: 'green', dashCooldownEnd: 0, dashFlashEnd: 0 },
-                    [p2Id]: { id: p2Id, positions: [{ x: room.mapSize - 6, y: room.mapSize - 6 }, { x: room.mapSize - 5, y: room.mapSize - 6 }], direction: { x: -1, y: 0 }, nextDir: { x: -1, y: 0 }, score: 0, isDead: false, color: 'blue', dashCooldownEnd: 0, dashFlashEnd: 0 }
+                    [p1Id]: { id: p1Id, positions: [{ x: 5, y: 5 }, { x: 4, y: 5 }], direction: { x: 1, y: 0 }, nextDir: { x: 1, y: 0 }, directionsQueue: [], score: 0, isDead: false, color: 'green', dashCooldownEnd: 0, dashFlashEnd: 0 },
+                    [p2Id]: { id: p2Id, positions: [{ x: room.mapSize - 6, y: room.mapSize - 6 }, { x: room.mapSize - 5, y: room.mapSize - 6 }], direction: { x: -1, y: 0 }, nextDir: { x: -1, y: 0 }, directionsQueue: [], score: 0, isDead: false, color: 'blue', dashCooldownEnd: 0, dashFlashEnd: 0 }
                 }
             };
             
@@ -504,7 +517,13 @@ io.on('connection', (socket) => {
                 const s = state.snakes[id];
                 if (s.isDead) continue;
 
-                s.direction = s.nextDir;
+                if (s.directionsQueue && s.directionsQueue.length > 0) {
+                    s.direction = s.directionsQueue.shift();
+                } else if (s.nextDir) {
+                    s.direction = s.nextDir;
+                }
+
+                s.nextDir = s.direction;
                 const head = s.positions[0];
                 const nx = head.x + s.direction.x;
                 const ny = head.y + s.direction.y;

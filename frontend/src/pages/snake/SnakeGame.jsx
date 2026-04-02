@@ -458,7 +458,7 @@ export default function SnakeGame() {
     const myColorLabel = playerColor === 'green' ? 'Xanh' : 'Lam';
 
     // A*
-    const astar = useCallback((start, target, occ, ms) => {
+    const astar = useCallback((start, target, occ, ms, oppDir = null) => {
         const open = [{ ...start, g: 0, h: Math.abs(start.x - target.x) + Math.abs(start.y - target.y), p: null }];
         const closed = new Set();
         while (open.length) {
@@ -469,6 +469,9 @@ export default function SnakeGame() {
             }
             closed.add(k);
             for (const d of [{ x: 0, y: -1 }, { x: 0, y: 1 }, { x: -1, y: 0 }, { x: 1, y: 0 }]) {
+                // IMPORTANT NOTE: Dòng này chặn bot quay đầu ngược lại hướng đang đi 180 độ
+                if (c.p === null && oppDir && d.x === oppDir.x && d.y === oppDir.y) continue;
+                
                 const nx = c.x + d.x, ny = c.y + d.y, nk = `${nx},${ny}`;
                 if (nx >= 0 && nx < ms && ny >= 0 && ny < ms && !occ.has(nk) && !closed.has(nk)) {
                     const g2 = c.g + 1, h2 = Math.abs(nx - target.x) + Math.abs(ny - target.y);
@@ -494,6 +497,7 @@ export default function SnakeGame() {
             snake: [{ x: sx, y: sy }, { x: sx - 1, y: sy }],
             botSnake: hasBot ? [{ x: bx, y: by }, { x: bx + 1, y: by }] : [],
             direction: { x: 1, y: 0 }, botDirection: { x: -1, y: 0 }, nextDir: { x: 1, y: 0 },
+            directionsQueue: [],
             item: { x: Math.floor(mapSize / 2), y: Math.floor(mapSize / 2) },
             goldenItem: null, deadBodies: [], blockedCells: new Set(),
             score: 0, botScore: 0, gameOver: false, botDead: false,
@@ -524,11 +528,21 @@ export default function SnakeGame() {
             }
 
             if (g.gameOver) return;
-            const nd = g.nextDir;
-            if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') && nd.y === 0) g.nextDir = { x: 0, y: -1 };
-            if ((e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') && nd.y === 0) g.nextDir = { x: 0, y: 1 };
-            if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && nd.x === 0) g.nextDir = { x: -1, y: 0 };
-            if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && nd.x === 0) g.nextDir = { x: 1, y: 0 };
+
+            // Sử dụng hàng đợi để chống delay và chống tự quay đầu chết
+            if (!g.directionsQueue) g.directionsQueue = [];
+            const lastDir = g.directionsQueue.length > 0 ? g.directionsQueue[g.directionsQueue.length - 1] : g.direction;
+
+            let newDir = null;
+            if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') && lastDir.y === 0) newDir = { x: 0, y: -1 };
+            if ((e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') && lastDir.y === 0) newDir = { x: 0, y: 1 };
+            if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && lastDir.x === 0) newDir = { x: -1, y: 0 };
+            if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && lastDir.x === 0) newDir = { x: 1, y: 0 };
+
+            if (newDir) {
+                if (g.directionsQueue.length < 3) g.directionsQueue.push(newDir);
+                g.nextDir = newDir;
+            }
             if (e.code === 'Space' || e.key === ' ') {
                 const res = performDash(g, mapSize, false);
                 if (res === 'ok') {
@@ -549,8 +563,8 @@ export default function SnakeGame() {
             if (mode === 'multiplayer' && roomId) {
                 if (e.code === 'Space' || e.key === ' ') {
                     socket.emit('snakeDash', { roomId });
-                } else if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd', 'W', 'A', 'S', 'D'].includes(e.key)) {
-                    socket.emit('snakeChangeDirection', { roomId, direction: g.nextDir });
+                } else if (newDir) {
+                    socket.emit('snakeChangeDirection', { roomId, direction: newDir });
                 }
             }
         };
@@ -569,6 +583,12 @@ export default function SnakeGame() {
             g.lastTickTime = performance.now();
             g.currentSpeed = Math.max(MAX_SPEED, INITIAL_SPEED - g.score * 5) * (g.goldenItem ? 1.3 : 1);
 
+            if (g.directionsQueue && g.directionsQueue.length > 0) {
+                g.nextDir = g.directionsQueue.shift();
+            } else {
+                g.nextDir = g.direction;
+            }
+
             const pDir = g.nextDir, h = g.snake[0];
             const pnx = h.x + pDir.x, pny = h.y + pDir.y;
 
@@ -582,18 +602,20 @@ export default function SnakeGame() {
                 g.botSnake.slice(0, -1).forEach(p => obs.add(`${p.x},${p.y}`));
                 g.deadBodies.forEach(p => obs.add(`${p.x},${p.y}`));
                 const tgt = g.goldenItem || g.item;
-                let path = astar(bh, tgt, obs, mapSize);
+                const oppBotDir = { x: -g.botDirection.x, y: -g.botDirection.y };
+                let path = astar(bh, tgt, obs, mapSize, oppBotDir);
                 if (difficulty === 'Easy' && Math.random() < 0.4) path = null;
                 if (difficulty === 'Medium' && Math.random() < 0.1) path = null;
                 if (path?.length) bDir = path[0];
                 else {
                     const tail = g.botSnake[g.botSnake.length - 1];
-                    path = astar(bh, tail, obs, mapSize);
+                    path = astar(bh, tail, obs, mapSize, oppBotDir);
                     if (path?.length) bDir = path[0];
                     else {
                         const dirs = [{ x: 0, y: -1 }, { x: 0, y: 1 }, { x: -1, y: 0 }, { x: 1, y: 0 }];
                         const neck = g.botSnake.length > 1 ? g.botSnake[1] : null;
                         const valids = dirs.filter(d => {
+                            if (d.x === oppBotDir.x && d.y === oppBotDir.y) return false;
                             const nx = bh.x + d.x, ny = bh.y + d.y;
                             if (neck && nx === neck.x && ny === neck.y) return false;
                             return nx >= 0 && nx < mapSize && ny >= 0 && ny < mapSize && !obs.has(`${nx},${ny}`);
