@@ -218,8 +218,8 @@ function SnakeCanvas({ gameRef, mapSize }) {
     return <canvas ref={canvasRef} width={600} height={600} style={{width:'100%',height:'100%',display:'block',imageRendering:'pixelated'}} />;
 }
 
-// ─── INFO PANEL ───────────────────────────────────────────────────────────────
-function InfoPanel({ gameRef }) {
+// ─── LEFT PANEL (Controls + Dash) ────────────────────────────────────────────
+function LeftPanel({ gameRef }) {
     const [cdRemain, setCdRemain] = useState(0);
     useEffect(() => {
         const t = setInterval(() => {
@@ -230,84 +230,98 @@ function InfoPanel({ gameRef }) {
     }, [gameRef]);
 
     const ready = cdRemain <= 0;
-    const pct = ready ? 1 : 1 - cdRemain / DASH_COOLDOWN;
-    const accentGreen = '#4ade80';
-
-    const cardStyle = {
-        borderRadius:'10px', padding:'10px 12px',
-        background:'rgba(255,255,255,0.04)',
-        border:'1px solid rgba(255,255,255,0.08)',
-        marginBottom:'8px'
-    };
-    const labelStyle = { fontSize:'0.75rem', color:'#94a3b8', marginBottom:'6px', fontWeight:600, letterSpacing:'0.05em', textTransform:'uppercase' };
-    const rowStyle   = { display:'flex', alignItems:'center', gap:'8px', fontSize:'0.82rem', color:'#cbd5e1', marginBottom:'4px' };
+    const pct   = ready ? 1 : 1 - cdRemain / DASH_COOLDOWN;
+    const cardStyle  = { borderRadius:'10px', padding:'12px 14px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', marginBottom:'10px' };
+    const labelStyle = { fontSize:'0.72rem', color:'#94a3b8', marginBottom:'8px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase' };
+    const rowStyle   = { display:'flex', alignItems:'flex-start', gap:'8px', fontSize:'0.82rem', color:'#cbd5e1', marginBottom:'5px', lineHeight:1.4 };
+    const kbdStyle   = { background:'#1e293b', border:'1px solid #334155', borderRadius:'5px', padding:'2px 7px', fontSize:'0.78rem', whiteSpace:'nowrap', flexShrink:0 };
 
     return (
-        <div style={{ width:'210px', flexShrink:0, display:'flex', flexDirection:'column', paddingLeft:'12px', overflowY:'auto', maxHeight:'70vh' }}>
-
-            {/* DASH */}
-            <div style={{...cardStyle, border:`1px solid ${ready?'rgba(250,204,21,0.4)':'rgba(255,255,255,0.08)'}`}}>
-                <div style={{...labelStyle, color: ready?'#fbbf24':'#94a3b8'}}>
-                    ⚡ Lao Nhanh — SPACE
-                </div>
-                {/* Cooldown bar */}
-                <div style={{ background:'#1e293b', borderRadius:'6px', height:'8px', overflow:'hidden', marginBottom:'8px' }}>
-                    <div style={{
-                        height:'100%', width:`${pct*100}%`,
-                        background: ready ? 'linear-gradient(90deg,#4ade80,#22c55e)' : 'linear-gradient(90deg,#f59e0b,#fbbf24)',
-                        borderRadius:'6px', transition:'width 0.1s'
-                    }}/>
-                </div>
-                <div style={{ textAlign:'center', fontSize:'0.78rem', color: ready ? '#4ade80' : '#f59e0b', fontWeight:700, marginBottom:'8px' }}>
-                    {ready ? '✓ SẴN SÀNG' : `Hồi chiêu ${(cdRemain/1000).toFixed(1)}s`}
-                </div>
-                <div style={rowStyle}><span style={{color:'#fbbf24'}}>➤</span> Đầu rắn lao <b style={{color:'#fff'}}>3 ô</b> về phía trước</div>
-                <div style={rowStyle}><span style={{color:'#f87171'}}>☠</span> Đuôi bỏ lại → hóa <b style={{color:'#9ca3af'}}>đá cản</b></div>
-                <div style={rowStyle}><span style={{color:'#f87171'}}>—</span> Điểm trừ = số đốt mất</div>
-                <div style={rowStyle}><span style={{color:'#94a3b8'}}>!</span> Cần ≥ <b style={{color:'#fff'}}>5 đốt</b> để dùng</div>
-                <div style={rowStyle}><span style={{color:'#60a5fa'}}>⏱</span> Hồi chiêu <b style={{color:'#fff'}}>3 giây</b></div>
-            </div>
-
-            {/* ITEMS */}
-            <div style={cardStyle}>
-                <div style={labelStyle}>🎯 Vật Phẩm</div>
-                <div style={{...rowStyle, background:'rgba(239,68,68,0.08)', borderRadius:'6px', padding:'6px 8px', marginBottom:'6px'}}>
-                    <div style={{width:14,height:14,borderRadius:'50%',background:'radial-gradient(circle,#f87171,#dc2626)',boxShadow:'0 0 6px #f87171',flexShrink:0}}/>
-                    <div>
-                        <div style={{color:'#f87171',fontWeight:700,fontSize:'0.82rem'}}>Mồi Đỏ — +1 điểm</div>
-                        <div style={{color:'#94a3b8',fontSize:'0.75rem'}}>Rắn dài thêm 1 đốt</div>
-                    </div>
-                </div>
-                <div style={{...rowStyle, background:'rgba(251,191,36,0.08)', borderRadius:'6px', padding:'6px 8px'}}>
-                    <div style={{width:14,height:14,borderRadius:'50%',background:'radial-gradient(circle,#fbbf24,#d97706)',boxShadow:'0 0 8px #fbbf24',flexShrink:0}}/>
-                    <div>
-                        <div style={{color:'#fbbf24',fontWeight:700,fontSize:'0.82rem'}}>Mồi Vàng — +2 điểm</div>
-                        <div style={{color:'#94a3b8',fontSize:'0.75rem'}}>✂ Rút ngắn 2 đốt đuôi</div>
-                        <div style={{color:'#94a3b8',fontSize:'0.75rem'}}>⏳ Biến mất sau 5 giây</div>
-                        <div style={{color:'#94a3b8',fontSize:'0.75rem'}}>🐢 Rắn đi chậm hơn</div>
-                    </div>
-                </div>
-            </div>
+        <div style={{ width:'240px', flexShrink:0, paddingRight:'12px', display:'flex', flexDirection:'column' }}>
 
             {/* CONTROLS */}
             <div style={cardStyle}>
                 <div style={labelStyle}>🎮 Điều Khiển</div>
-                <div style={rowStyle}><kbd style={{background:'#1e293b',border:'1px solid #334155',borderRadius:'4px',padding:'1px 6px',fontSize:'0.75rem'}}>↑↓←→</kbd> Di chuyển</div>
-                <div style={rowStyle}><kbd style={{background:'#1e293b',border:'1px solid #334155',borderRadius:'4px',padding:'1px 6px',fontSize:'0.75rem'}}>SPACE</kbd> Lao nhanh</div>
+                <div style={rowStyle}><kbd style={kbdStyle}>W A S D</kbd><span>Di chuyển</span></div>
+                <div style={{...rowStyle, color:'#64748b', fontSize:'0.76rem', marginTop:'-3px', marginBottom:'8px', paddingLeft:'2px'}}>hoặc phím ↑ ↓ ← →</div>
+                <div style={{...rowStyle, background:'rgba(250,204,21,0.06)', borderRadius:'8px', padding:'8px 10px', border:`1px solid ${ready?'rgba(250,204,21,0.35)':'rgba(255,255,255,0.07)'}`}}>
+                    <kbd style={{...kbdStyle, background: ready?'rgba(250,204,21,0.15)':'#1e293b', color: ready?'#fbbf24':'#94a3b8', border:`1px solid ${ready?'#fbbf24':'#334155'}`, fontSize:'0.82rem'}}>SPACE</kbd>
+                    <div>
+                        <div style={{color: ready?'#fbbf24':'#cbd5e1', fontWeight:700}}>Lao Nhanh</div>
+                        <div style={{fontSize:'0.74rem', color:'#64748b', marginTop:'1px'}}>{ready ? '✓ Sẵn sàng!' : `Hồi chiêu ${(cdRemain/1000).toFixed(1)}s`}</div>
+                    </div>
+                </div>
+                {/* Cooldown bar */}
+                <div style={{ background:'#1e293b', borderRadius:'6px', height:'5px', overflow:'hidden', marginTop:'8px' }}>
+                    <div style={{ height:'100%', width:`${pct*100}%`, background: ready?'linear-gradient(90deg,#4ade80,#22c55e)':'linear-gradient(90deg,#f59e0b,#fbbf24)', borderRadius:'6px', transition:'width 0.15s' }}/>
+                </div>
             </div>
 
-            {/* MAP NOTE */}
+            {/* DASH MECHANIC */}
+            <div style={cardStyle}>
+                <div style={labelStyle}>⚡ Cơ Chế Lao Nhanh</div>
+                <div style={rowStyle}><span style={{color:'#fbbf24',flexShrink:0}}>➤</span>Đầu rắn tạo vết 3 ô ra phía trước</div>
+                <div style={rowStyle}><span style={{color:'#f87171',flexShrink:0}}>☠</span>Đuôi bỏ lại → hóa đá cản đường</div>
+                <div style={rowStyle}><span style={{color:'#f87171',flexShrink:0}}>−</span>Điểm trừ = số đốt bị mất đi</div>
+                <div style={rowStyle}><span style={{color:'#94a3b8',flexShrink:0}}>!</span>Cần ≥ <b style={{color:'#fff',margin:'0 3px'}}>5 đốt</b> mới dùng được</div>
+                <div style={rowStyle}><span style={{color:'#60a5fa',flexShrink:0}}>⏱</span>Hồi chiêu <b style={{color:'#fff',margin:'0 3px'}}>3 giây</b> sau mỗi lần dùng</div>
+            </div>
+        </div>
+    );
+}
+
+// ─── RIGHT PANEL (Items + Map Legend) ────────────────────────────────────────
+function RightPanel() {
+    const cardStyle  = { borderRadius:'10px', padding:'12px 14px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', marginBottom:'10px' };
+    const labelStyle = { fontSize:'0.72rem', color:'#94a3b8', marginBottom:'8px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase' };
+    const rowStyle   = { display:'flex', alignItems:'flex-start', gap:'9px', fontSize:'0.82rem', color:'#cbd5e1', marginBottom:'6px', lineHeight:1.4 };
+
+    return (
+        <div style={{ width:'240px', flexShrink:0, paddingLeft:'12px', display:'flex', flexDirection:'column' }}>
+
+            {/* ITEMS */}
+            <div style={cardStyle}>
+                <div style={labelStyle}>🎯 Vật Phẩm</div>
+                <div style={{ background:'rgba(239,68,68,0.08)', borderRadius:'8px', padding:'8px 10px', marginBottom:'8px', border:'1px solid rgba(239,68,68,0.2)' }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'4px' }}>
+                        <div style={{ width:13,height:13,borderRadius:'50%',background:'radial-gradient(circle,#f87171,#dc2626)',boxShadow:'0 0 6px #f87171',flexShrink:0 }}/>
+                        <span style={{ color:'#f87171', fontWeight:700, fontSize:'0.85rem' }}>Mồi Đỏ +1 điểm</span>
+                    </div>
+                    <div style={{ fontSize:'0.76rem', color:'#94a3b8', paddingLeft:'21px' }}>Rắn dài thêm 1 đốt</div>
+                </div>
+                <div style={{ background:'rgba(251,191,36,0.08)', borderRadius:'8px', padding:'8px 10px', border:'1px solid rgba(251,191,36,0.2)' }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'4px' }}>
+                        <div style={{ width:13,height:13,borderRadius:'50%',background:'radial-gradient(circle,#fbbf24,#d97706)',boxShadow:'0 0 8px #fbbf24',flexShrink:0 }}/>
+                        <span style={{ color:'#fbbf24', fontWeight:700, fontSize:'0.85rem' }}>Mồi Vàng +2 điểm</span>
+                    </div>
+                    <div style={{ fontSize:'0.76rem', color:'#94a3b8', paddingLeft:'21px', lineHeight:1.6 }}>
+                        ✂ Rút ngắn rắn 2 đốt đuôi<br/>
+                        ⏳ Biến mất sau 5 giây<br/>
+                        🐢 Rắn đi chậm lại trong lúc này
+                    </div>
+                </div>
+            </div>
+
+            {/* MAP LEGEND */}
             <div style={cardStyle}>
                 <div style={labelStyle}>🗺 Ký Hiệu Bản Đồ</div>
                 <div style={rowStyle}>
-                    <div style={{width:14,height:14,background:'#3f3f46',borderRadius:'2px',flexShrink:0}}/>
-                    Xác rắn — vật cản
+                    <div style={{ width:14,height:14,background:'#3f3f46',borderRadius:'3px',flexShrink:0,marginTop:'2px' }}/>
+                    <span>Xác rắn — chướng ngại vật vĩnh viễn</span>
                 </div>
                 <div style={rowStyle}>
-                    <div style={{position:'relative',width:14,height:14,background:'rgba(40,40,55,0.85)',borderRadius:'2px',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center'}}>
-                        <span style={{fontSize:'9px',color:'rgba(100,100,130,0.8)',lineHeight:1}}>✕</span>
+                    <div style={{ width:14,height:14,background:'rgba(40,40,55,0.9)',borderRadius:'3px',flexShrink:0,marginTop:'2px',display:'flex',alignItems:'center',justifyContent:'center' }}>
+                        <span style={{ fontSize:'9px',color:'rgba(120,120,150,0.9)',lineHeight:1,fontWeight:700 }}>✕</span>
                     </div>
-                    Ô cô lập — không có mồi
+                    <span>Ô cô lập — mồi không thể xuất hiện tại đây</span>
+                </div>
+                <div style={rowStyle}>
+                    <div style={{ width:14,height:14,background:'#4ade80',borderRadius:'50%',flexShrink:0,marginTop:'2px' }}/>
+                    <span>Đầu rắn của bạn</span>
+                </div>
+                <div style={rowStyle}>
+                    <div style={{ width:14,height:14,background:'#60a5fa',borderRadius:'50%',flexShrink:0,marginTop:'2px' }}/>
+                    <span>Đầu rắn Bot AI</span>
                 </div>
             </div>
         </div>
@@ -389,10 +403,10 @@ export default function SnakeGame() {
             if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space',' '].includes(e.key)||e.code==='Space') e.preventDefault();
             const g=gameRef.current; if(!g||g.gameOver) return;
             const nd=g.nextDir;
-            if(e.key==='ArrowUp'&&nd.y===0)   g.nextDir={x:0,y:-1};
-            if(e.key==='ArrowDown'&&nd.y===0)  g.nextDir={x:0,y:1};
-            if(e.key==='ArrowLeft'&&nd.x===0)  g.nextDir={x:-1,y:0};
-            if(e.key==='ArrowRight'&&nd.x===0) g.nextDir={x:1,y:0};
+            if((e.key==='ArrowUp'   ||e.key==='w'||e.key==='W')&&nd.y===0) g.nextDir={x:0,y:-1};
+            if((e.key==='ArrowDown' ||e.key==='s'||e.key==='S')&&nd.y===0) g.nextDir={x:0,y:1};
+            if((e.key==='ArrowLeft' ||e.key==='a'||e.key==='A')&&nd.x===0) g.nextDir={x:-1,y:0};
+            if((e.key==='ArrowRight'||e.key==='d'||e.key==='D')&&nd.x===0) g.nextDir={x:1,y:0};
             if(e.code==='Space'||e.key===' '){
                 const res=performDash(g,mapSize,false);
                 if(res==='ok'){
@@ -672,17 +686,22 @@ export default function SnakeGame() {
                     </span>
                 </div>
 
-                {/* Main area: board + sidebar */}
-                <div style={{display:'flex',flexDirection:'row',alignItems:'flex-start',gap:0}}>
+                {/* Main area: left panel + board + right panel */}
+                <div style={{display:'flex',flexDirection:'row',alignItems:'flex-start'}}>
+                    {/* Left panel */}
+                    {mode==='solo'&&<LeftPanel gameRef={gameRef}/>}
+
                     {/* Board */}
                     <div style={{flex:1,minWidth:0}}>
                         <div style={{
-                            position:'relative',width:'100%',maxWidth:'65vh',aspectRatio:'1/1',
+                            position:'relative',width:'100%',maxWidth:'62vh',aspectRatio:'1/1',
                             border:'4px solid rgba(255,255,255,0.1)',borderRadius:'8px',
                             boxShadow:'inset 0 0 20px rgba(0,0,0,0.5),0 10px 30px rgba(0,0,0,0.3)',
                             overflow:'hidden',margin:'0 auto'
                         }}>
                             <SnakeCanvas gameRef={canvasRef2use} mapSize={mapSize}/>
+
+                            {/* Countdown overlay (multiplayer) */}
                             {mode==='multiplayer'&&countdown!==null&&(
                                 <div style={{position:'absolute',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,0.75)',backdropFilter:'blur(4px)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',zIndex:60,gap:'16px'}}>
                                     <p style={{margin:0,fontSize:'0.95rem',color:'var(--text-secondary)'}}>Rắn của bạn:</p>
@@ -695,26 +714,29 @@ export default function SnakeGame() {
                                     </div>
                                 </div>
                             )}
-                        </div>
-                        {/* Game over banner */}
-                        {uiState.gameOver&&(
-                            <div style={{marginTop:'1rem',borderRadius:'12px',border:`2px solid ${accentColor}44`,background:`linear-gradient(135deg,${accentColor}12,rgba(13,17,23,0.8))`,padding:'1rem 1.5rem',display:'flex',alignItems:'center',justifyContent:'space-between',gap:'1rem',flexWrap:'wrap'}}>
-                                <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
-                                    <span style={{fontSize:'2.2rem',lineHeight:1}}>{resultEmoji}</span>
-                                    <div>
-                                        <div style={{fontSize:'1.3rem',fontWeight:900,color:accentColor,lineHeight:1.2}}>{resultTitle}</div>
-                                        {resultDetail&&<div style={{fontSize:'0.9rem',color:'var(--text-secondary)',marginTop:'4px'}}>{resultDetail}</div>}
+
+                            {/* Game over overlay ON the board */}
+                            {uiState.gameOver&&(
+                                <div style={{
+                                    position:'absolute',top:0,left:0,right:0,bottom:0,
+                                    background:'rgba(10,14,20,0.72)',backdropFilter:'blur(3px)',
+                                    display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
+                                    zIndex:80,gap:'12px',padding:'1.5rem',textAlign:'center'
+                                }}>
+                                    <span style={{fontSize:'3.5rem',lineHeight:1,filter:`drop-shadow(0 0 16px ${accentColor})`}}>{resultEmoji}</span>
+                                    <div style={{fontSize:'1.6rem',fontWeight:900,color:accentColor,textShadow:`0 0 20px ${accentColor}88`}}>{resultTitle}</div>
+                                    {resultDetail&&<div style={{fontSize:'0.88rem',color:'#94a3b8',maxWidth:'90%'}}>{resultDetail}</div>}
+                                    <div style={{display:'flex',gap:'10px',marginTop:'4px',flexWrap:'wrap',justifyContent:'center'}}>
+                                        {mode==='solo'&&<button className="btn-primary" onClick={handleRestart} style={{padding:'10px 20px',fontSize:'0.95rem',display:'flex',alignItems:'center',gap:'8px'}}><RotateCcw size={16}/>Chơi lại</button>}
+                                        <button className="btn-secondary" onClick={()=>navigate(mode==='multiplayer'?'/snake/multiplayer':'/snake')} style={{padding:'10px 20px',fontSize:'0.95rem',display:'flex',alignItems:'center',gap:'8px'}}><ArrowLeft size={16}/>Thoát</button>
                                     </div>
                                 </div>
-                                <div style={{display:'flex',gap:'10px',flexShrink:0}}>
-                                    {mode==='solo'&&<button className="btn-primary" onClick={handleRestart} style={{padding:'10px 22px',fontSize:'1rem',display:'flex',alignItems:'center',gap:'8px'}}><RotateCcw size={18}/>Chơi lại</button>}
-                                    <button className="btn-secondary" onClick={()=>navigate(mode==='multiplayer'?'/snake/multiplayer':'/snake')} style={{padding:'10px 22px',fontSize:'1rem',display:'flex',alignItems:'center',gap:'8px'}}><ArrowLeft size={18}/>Thoát</button>
-                                </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
-                    {/* Sidebar info panel */}
-                    {mode==='solo'&&<InfoPanel gameRef={gameRef}/>}
+
+                    {/* Right panel */}
+                    {mode==='solo'&&<RightPanel/>}
                 </div>
             </div>
         </div>
