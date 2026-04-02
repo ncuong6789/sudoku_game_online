@@ -414,12 +414,21 @@ function RightPanel({ mode, gameOver, accentColor, handleRestart, navigate, play
             {/* ACTION BUTTONS — right below map legend */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', marginTop: '2px' }}>
                 {mode === 'solo' && (
-                    <button
-                        className={gameOver ? 'btn-primary' : 'btn-secondary'}
-                        onClick={handleRestart}
-                        style={{ width: '100%', padding: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', fontSize: '0.9rem', fontWeight: 700 }}>
-                        <RotateCcw size={15} /> Chơi lại
-                    </button>
+                        <button
+                            className={gameOver ? 'btn-primary' : 'btn-secondary'}
+                            onClick={handleRestart}
+                            style={{ 
+                                width: '100%', padding: '9px', 
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
+                                gap: '2px', fontSize: '0.9rem', fontWeight: 700 
+                            }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                                <RotateCcw size={15} /> Chơi lại
+                            </div>
+                            {gameOver && mode === 'solo' && (
+                                <span style={{ fontSize: '0.65rem', opacity: 0.8, fontWeight: 400 }}>(Phím Space)</span>
+                            )}
+                        </button>
                 )}
                 <button
                     className="btn-secondary"

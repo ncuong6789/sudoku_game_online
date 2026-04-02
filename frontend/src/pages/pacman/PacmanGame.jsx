@@ -828,8 +828,11 @@ export default function PacmanGame() {
                         </h2>
                         <p style={{ fontSize: 'clamp(1rem,3vw,1.5rem)', color: '#fbbf24', margin: 0 }}>SCORE: {score}</p>
                         <div style={{ display: 'flex', gap: '14px', marginTop: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                            <button className="btn-primary" onClick={handleRestart} style={{ padding: '12px 28px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <RotateCcw size={18} /> Chơi Lại
+                            <button className="btn-primary" style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }} onClick={handleRestart}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <RotateCcw size={24} /> Chơi Lại
+                                </div>
+                                <span style={{ fontSize: '0.7rem', opacity: 0.8, fontWeight: 'normal' }}>(Phím Space)</span>
                             </button>
                             <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '12px 28px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <ArrowLeft size={18} /> Về Sảnh

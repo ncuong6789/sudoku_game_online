@@ -328,8 +328,11 @@ export default function TetrisGame() {
                         
                         <div style={{ display: 'flex', gap: '20px' }}>
                             {mode === 'solo' && (
-                                <button className="btn-primary" onClick={() => startGame()} style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <RefreshCw size={24} /> Chơi lại ngay
+                                <button className="btn-primary" style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }} onClick={startGame}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <RefreshCw size={24} /> Chơi lại ngay
+                                    </div>
+                                    <span style={{ fontSize: '0.7rem', opacity: 0.8, fontWeight: 'normal' }}>(Phím Space)</span>
                                 </button>
                             )}
                             <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/tetris/multiplayer' : '/tetris')} style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.1)' }}>

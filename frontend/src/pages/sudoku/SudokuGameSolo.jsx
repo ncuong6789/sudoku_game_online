@@ -250,9 +250,11 @@ export default function SoloGame() {
                             {won ? `Hoàn thành ${difficulty} trong ${Math.floor(time/60)}:${String(time%60).padStart(2,'0')}` : 'Bạn đã sai quá 3 lần. Thử lại nhé!'}
                         </p>
                         <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                            <button className="btn-primary" style={{ padding: '12px 24px', fontSize: '1rem' }}
-                                onClick={() => startNewGame(difficulty)}>
-                                🔄 Chơi lại
+                            <button className="btn-primary" style={{ padding: '0.8rem 1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }} onClick={() => startNewGame(difficulty)}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    🔄 Chơi lại
+                                </div>
+                                <span style={{ fontSize: '0.7rem', opacity: 0.8, fontWeight: 'normal' }}>(Phím Space)</span>
                             </button>
                             <button className="btn-secondary" style={{ padding: '12px 24px', fontSize: '1rem' }}
                                 onClick={() => { navigate('/sudoku'); }}>
