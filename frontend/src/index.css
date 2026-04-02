@@ -752,13 +752,13 @@ h1 {
 }
 
 .chess-board {
-  width: min(calc(100vh - 100px), calc(100vw - 620px), 640px);
-  height: min(calc(100vh - 100px), calc(100vw - 620px), 640px);
+  width: min(calc(100vh - 140px), calc(100vw - 600px), 640px);
+  aspect-ratio: 1 / 1;
 }
 
 .caro-board {
-  width: min(calc(100vh - 150px), calc(100vw - 320px));
-  height: min(calc(100vh - 150px), calc(100vw - 320px));
+  width: min(calc(100vh - 160px), calc(100vw - 340px), 700px);
+  aspect-ratio: 1 / 1;
 }
 
 @media (max-width: 768px) {
@@ -779,10 +779,11 @@ h1 {
   }
 
   .chess-board, .caro-board {
-    --board-size-mobile: calc(100vw - 30px);
+    --board-size-mobile: calc(100vw - 20px);
     width: var(--board-size-mobile) !important;
-    height: var(--board-size-mobile) !important;
-    max-height: var(--board-size-mobile) !important;
+    aspect-ratio: 1 / 1 !important;
+    max-height: none !important;
+    height: auto !important;
   }
 
   .full-page-mobile-scroll {

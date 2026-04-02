@@ -501,14 +501,14 @@ export default function CaroGame() {
 
                         {/* Badge người chơi X/O */}
                         <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '12px' }}>
-                            <div style={{ flex: '1 1 0%', display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(79,172,254,0.1)', padding: '10px', borderRadius: '10px', border: '1px solid rgba(79,172,254,0.3)' }}>
-                                <span style={{ fontSize: '1.6rem', fontWeight: 900, color: realPlayerSymbol === 'X' ? 'var(--primary-color)' : '#ff4757', lineHeight: 1 }}>{realPlayerSymbol || 'X'}</span>
-                                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>Bạn</span>
+                            <div style={{ flex: '1 1 0%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(79,172,254,0.1)', padding: '10px 4px', borderRadius: '10px', border: '1px solid rgba(79,172,254,0.3)', overflow: 'hidden' }}>
+                                <span style={{ fontSize: '1.4rem', fontWeight: 900, color: realPlayerSymbol === 'X' ? 'var(--primary-color)' : '#ff4757', lineHeight: 1, whiteSpace: 'nowrap' }}>{realPlayerSymbol || 'X'}</span>
+                                <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginTop: '6px', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase' }}>BẠN</span>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', color: 'var(--text-secondary)', fontWeight: 'bold' }}>vs</div>
-                            <div style={{ flex: '1 1 0%', display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(255,71,87,0.1)', padding: '10px', borderRadius: '10px', border: '1px solid rgba(255,71,87,0.2)' }}>
-                                <span style={{ fontSize: '1.6rem', fontWeight: 900, color: realPlayerSymbol === 'O' ? 'var(--primary-color)' : '#ff4757', lineHeight: 1 }}>{realPlayerSymbol === 'X' ? 'O' : 'X'}</span>
-                                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>{mode === 'solo' ? 'Bot' : 'Đối thủ'}</span>
+                            <div style={{ display: 'flex', alignItems: 'center', color: 'var(--text-secondary)', fontWeight: 'bold' }}>VS</div>
+                            <div style={{ flex: '1 1 0%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,71,87,0.1)', padding: '10px 4px', borderRadius: '10px', border: '1px solid rgba(255,71,87,0.2)', overflow: 'hidden' }}>
+                                <span style={{ fontSize: '1.4rem', fontWeight: 900, color: realPlayerSymbol === 'O' ? 'var(--primary-color)' : '#ff4757', lineHeight: 1, whiteSpace: 'nowrap' }}>{realPlayerSymbol === 'X' ? 'O' : 'X'}</span>
+                                <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginTop: '6px', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase' }}>{mode === 'solo' ? 'BOT' : 'Đ.THỦ'}</span>
                             </div>
                         </div>
 
