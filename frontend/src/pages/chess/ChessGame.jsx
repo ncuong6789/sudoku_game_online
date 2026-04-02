@@ -3,7 +3,7 @@ import { Chess } from 'chess.js';
 import { useAudio } from '../../utils/useAudio';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { socket } from '../../utils/socket';
-import { ArrowLeft, RotateCcw, Flag } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Flag, Undo2 } from 'lucide-react';
 
 export default function ChessGame() {
     const location = useLocation();
@@ -248,6 +248,30 @@ export default function ChessGame() {
         }
     };
 
+    const handleUndo = () => {
+        if (mode !== 'solo' || gameOver) return;
+        
+        setGame((g) => {
+            const newGame = new Chess();
+            newGame.loadPgn(g.pgn());
+            
+            if (newGame.history().length === 0) return g;
+            
+            // Nếu tới lượt mình, tức là AI vừa đi xong -> Undo cả nước AI và nước của mình
+            if (newGame.turn() === myColor) {
+                newGame.undo();
+                newGame.undo();
+            } else {
+                // Nếu đang lượt AI (mới đánh xong, AI chưa kịp đi) -> Cứ việc Undo trả lại quyền cho mình
+                newGame.undo();
+            }
+            return newGame;
+        });
+        
+        setMoveFrom(null);
+        setOptionSquares({});
+    };
+
     const handleSurrender = () => {
         setGameOver(true);
         setStatusMessage('Bạn đã đầu hàng!');
@@ -479,6 +503,11 @@ export default function ChessGame() {
                             <button className="btn-primary" onClick={handleReset} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%' }}>
                                 <RotateCcw size={18} /> Chơi ván mới
                             </button>
+                            {mode === 'solo' && !gameOver && moveHistory.length > 0 && (
+                                <button className="btn-secondary" onClick={handleUndo} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%', borderColor: 'rgba(255, 255, 255, 0.2)' }}>
+                                    <Undo2 size={18} /> Đi lại
+                                </button>
+                            )}
                             {!gameOver && (
                                 <button className="btn-secondary" onClick={handleSurrender} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%', borderColor: 'rgba(248, 113, 113, 0.5)', color: '#f87171' }}>
                                     <Flag size={18} /> Đầu hàng
