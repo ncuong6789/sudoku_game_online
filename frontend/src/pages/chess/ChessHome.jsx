@@ -72,7 +72,7 @@ export default function ChessHome() {
                     </h1>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', opacity: isFlipping ? 0.3 : 1, transition: 'opacity 0.3s', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', width: '100%', opacity: isFlipping ? 0.3 : 1, transition: 'opacity 0.3s', marginBottom: '1.5rem' }}>
 
                     {/* Difficulty */}
                     <div>

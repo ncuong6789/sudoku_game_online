@@ -47,7 +47,7 @@ export default function SnakeHome() {
                     </h1>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', width: '100%', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', width: '100%', marginBottom: '0.5rem' }}>
                     {/* Map Size Settings */}
                     <div style={{ textAlign: 'left' }}>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>
@@ -69,22 +69,40 @@ export default function SnakeHome() {
 
                     {/* Bot AI Settings */}
                     <div style={{ textAlign: 'left' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                                <Flame size={18} /> Độ Khó Bot AI (Solo)
-                            </label>
-                            <div
-                                onClick={() => setHasBot(!hasBot)}
-                                style={{
-                                    width: '40px', height: '22px', borderRadius: '11px',
-                                    background: hasBot ? 'var(--primary-color)' : '#334155',
-                                    position: 'relative', cursor: 'pointer', transition: '0.3s', flexShrink: 0
-                                }}
-                            >
+                        {/* Toggle Card */}
+                        <div
+                            onClick={() => setHasBot(!hasBot)}
+                            style={{
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                padding: '12px 16px',
+                                borderRadius: '12px',
+                                background: hasBot ? 'rgba(79,172,254,0.08)' : 'rgba(255,255,255,0.03)',
+                                border: `2px solid ${hasBot ? 'rgba(79,172,254,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                                cursor: 'pointer',
+                                transition: 'all 0.25s',
+                                marginBottom: '10px',
+                                userSelect: 'none',
+                            }}
+                        >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <Flame size={18} color={hasBot ? '#4facfe' : 'var(--text-secondary)'} />
+                                <div style={{ fontWeight: 700, fontSize: '0.95rem', color: hasBot ? '#4facfe' : 'var(--text-secondary)' }}>
+                                    Thách Đấu Bot AI
+                                </div>
+                            </div>
+                            <div style={{ flexShrink: 0 }}>
                                 <div style={{
-                                    width: '16px', height: '16px', borderRadius: '50%', background: '#fff',
-                                    position: 'absolute', top: '3px', left: hasBot ? '21px' : '3px', transition: '0.3s'
-                                }} />
+                                    width: '44px', height: '24px', borderRadius: '12px',
+                                    background: hasBot ? '#4facfe' : '#334155',
+                                    position: 'relative', transition: '0.3s',
+                                    boxShadow: hasBot ? '0 0 10px rgba(79,172,254,0.4)' : 'none',
+                                }}>
+                                    <div style={{
+                                        width: '18px', height: '18px', borderRadius: '50%', background: '#fff',
+                                        position: 'absolute', top: '3px', left: hasBot ? '23px' : '3px', transition: '0.3s',
+                                        boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+                                    }} />
+                                </div>
                             </div>
                         </div>
 

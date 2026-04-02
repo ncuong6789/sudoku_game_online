@@ -15,16 +15,16 @@ function GhostArt({ color = '#ef4444', dir = { x: 0, y: 0 }, state = 'chase', si
     const eye = (cx, cy) => isFr
         ? <circle cx={cx} cy={cy} r={2.5} fill={frightenedFlash ? '#1d4ed8' : '#fff'} />
         : isDead
-        ? (<>
-            <ellipse cx={cx} cy={cy} rx={4.5} ry={5.5} fill='white' />
-            <circle cx={cx + px} cy={cy + py} r={2.5} fill='#1d4ed8' />
-            <circle cx={cx + px + 0.8} cy={cy + py - 0.8} r={0.9} fill='white' />
-          </>)
-        : (<>
-            <ellipse cx={cx} cy={cy} rx={4.5} ry={5.5} fill='white' />
-            <circle cx={cx + px} cy={cy + py} r={2.5} fill='#1a1a2e' />
-            <circle cx={cx + px + 0.8} cy={cy + py - 0.8} r={0.9} fill='white' />
-          </>);
+            ? (<>
+                <ellipse cx={cx} cy={cy} rx={4.5} ry={5.5} fill='white' />
+                <circle cx={cx + px} cy={cy + py} r={2.5} fill='#1d4ed8' />
+                <circle cx={cx + px + 0.8} cy={cy + py - 0.8} r={0.9} fill='white' />
+            </>)
+            : (<>
+                <ellipse cx={cx} cy={cy} rx={4.5} ry={5.5} fill='white' />
+                <circle cx={cx + px} cy={cy + py} r={2.5} fill='#1a1a2e' />
+                <circle cx={cx + px + 0.8} cy={cy + py - 0.8} r={0.9} fill='white' />
+            </>);
 
     return (
         <svg width={size} height={size} viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg' style={{ display: 'block', overflow: 'visible' }}>
@@ -75,8 +75,8 @@ const CLASSIC = [
     "|.||||.||.||||||||.||.||||.|",
     "|.||||.||.||||||||.||.||||.|",
     "|......||....||....||......|",
-    "||||||.||||| || |||||.||||||",
-    "_____|.||||| || |||||.|_____",
+    "||||||.|||||.||.|||||.||||||",
+    "_____|.|||||.||.|||||.|_____",
     "_____|.||..........||.|_____",
     "_____|.||.|||--|||.||.|_____",
     "||||||.||.|______|.||.||||||",
@@ -117,13 +117,13 @@ const PROTOTYPE = [
     "..........|______|..........",
     "|.|||.|||.|______|.|||.|||.|",
     "|.|||.|||.||||||||.|||.|||.|",
-    "|.........S................|",
+    "|..........................|",
     "|.||||||.|||.||.|||.||||||.|",
     "|.||||||.|||.||.|||.||||||.|",
     "|............||............|",
     "|.|||||.||||.||.||||.|||||.|",
     "|.|||||.||||.||.||||.|||||.|",
-    "|P.||..................||.P|",
+    "|P.||........S.........||.P|",
     "||.||.||.||||||||||.||.||.||",
     "||.||.||.||||||||||.||.||.||",
     "|.....||.....||.....||.....|",
@@ -146,8 +146,8 @@ const MSMAP1 = [
     "||||||.|||||.||.|||||.||||||",
     "_____|.|||||.||.|||||.|_____",
     "_____|.||..........||.|_____",
-    "_____|.||.|||--||| ||.|_____",
-    "||||||.||.|______| ||.||||||",
+    "_____|.||.|||--|||.||.|_____",
+    "||||||.||.|______|.||.||||||",
     "..........|______|..........",
     "||||||.||.|______|.||.||||||",
     "_____|.||.||||||||.||.|_____",
@@ -295,10 +295,10 @@ const getGlobalMode = (totalTicks) => {
 // Ghost release logic (classic arcade):
 // Blinky: always outside | Pinky: immediately | Inky: 30 dots OR ~4s | Clyde: 60 dots OR ~6s
 const GHOST_STARTS = [
-    { id: 'BLINKY', color: '#ef4444', x: 13, y: 11, dir: { x: -1, y: 0 }, exitDelay: 0,   dotThreshold: 0,  fallbackDelay: 0,  scatter: { x: 26, y: 1 } },
-    { id: 'PINKY',  color: '#f9a8d4', x: 12, y: 14, dir: { x: 0, y: -1 }, exitDelay: 0,   dotThreshold: 0,  fallbackDelay: 0,  scatter: { x: 1,  y: 1 } },
-    { id: 'INKY',   color: '#06b6d4', x: 13, y: 14, dir: { x: 0, y: -1 }, exitDelay: 9999, dotThreshold: 30, fallbackDelay: 24, scatter: { x: 26, y: 29 } },
-    { id: 'CLYDE',  color: '#fb923c', x: 14, y: 14, dir: { x: 0, y: -1 }, exitDelay: 9999, dotThreshold: 60, fallbackDelay: 36, scatter: { x: 1,  y: 29 } },
+    { id: 'BLINKY', color: '#ef4444', x: 13, y: 11, dir: { x: -1, y: 0 }, exitDelay: 0, dotThreshold: 0, fallbackDelay: 0, scatter: { x: 26, y: 1 } },
+    { id: 'PINKY', color: '#f9a8d4', x: 12, y: 14, dir: { x: 0, y: -1 }, exitDelay: 0, dotThreshold: 0, fallbackDelay: 0, scatter: { x: 1, y: 1 } },
+    { id: 'INKY', color: '#06b6d4', x: 13, y: 14, dir: { x: 0, y: -1 }, exitDelay: 9999, dotThreshold: 30, fallbackDelay: 24, scatter: { x: 26, y: 29 } },
+    { id: 'CLYDE', color: '#fb923c', x: 14, y: 14, dir: { x: 0, y: -1 }, exitDelay: 9999, dotThreshold: 60, fallbackDelay: 36, scatter: { x: 1, y: 29 } },
 ];
 
 const DIRS = { UP: { x: 0, y: -1 }, LEFT: { x: -1, y: 0 }, DOWN: { x: 0, y: 1 }, RIGHT: { x: 1, y: 0 } };
@@ -426,7 +426,7 @@ export default function PacmanGame() {
             difficulty === 'hard'
                 ? [0, Math.floor(total * 0.10), Math.floor(total * 0.20), Math.floor(total * 0.30)]
                 : /* medium */
-                  [0, Math.floor(total * 0.20), Math.floor(total * 0.40), Math.floor(total * 0.60)];
+                [0, Math.floor(total * 0.20), Math.floor(total * 0.40), Math.floor(total * 0.60)];
         // Blinky (index 0) = 0 → immediate (always outside)
         // Pinky/Inky/Clyde use dot threshold
 
@@ -777,23 +777,23 @@ export default function PacmanGame() {
                                 animation: isDying ? 'pacDie 1.2s forwards' : isProtected ? 'pacFlash 0.25s infinite' : undefined
                             }}>
                                 <svg width='88%' height='88%' viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg'
-                                style={{
-                                    transform: `rotate(${pacman.dir.x === 1 ? 0 : pacman.dir.y === 1 ? 90 : pacman.dir.x === -1 ? 180 : -90}deg)`,
-                                    display: 'block'
-                                }}>
-                                {/* Pacman body — mouth animated via SMIL */}
-                                <path fill='#fbbf24' d='M14,14 L28,5 A13,13 0 1,0 28,23 Z'>
-                                    {!isDying && !isProtected && (
-                                        <animate
-                                            attributeName='d'
-                                            values='M14,14 L28,5 A13,13 0 1,0 28,23 Z;M14,14 L28,13 A13,13 0 1,0 28,15 Z'
-                                            dur='0.25s'
-                                            repeatCount='indefinite'
-                                            calcMode='linear'
-                                        />
-                                    )}
-                                </path>
-                            </svg>
+                                    style={{
+                                        transform: `rotate(${pacman.dir.x === 1 ? 0 : pacman.dir.y === 1 ? 90 : pacman.dir.x === -1 ? 180 : -90}deg)`,
+                                        display: 'block'
+                                    }}>
+                                    {/* Pacman body — mouth animated via SMIL */}
+                                    <path fill='#fbbf24' d='M14,14 L28,5 A13,13 0 1,0 28,23 Z'>
+                                        {!isDying && !isProtected && (
+                                            <animate
+                                                attributeName='d'
+                                                values='M14,14 L28,5 A13,13 0 1,0 28,23 Z;M14,14 L28,13 A13,13 0 1,0 28,15 Z'
+                                                dur='0.25s'
+                                                repeatCount='indefinite'
+                                                calcMode='linear'
+                                            />
+                                        )}
+                                    </path>
+                                </svg>
                             </div>
                         );
                     })()}

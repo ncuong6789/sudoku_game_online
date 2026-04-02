@@ -53,7 +53,7 @@ export default function CaroHome() {
                 </div>
 
                 {/* Difficulty Selection */}
-                <div style={{ width: '100%', marginBottom: '1.2rem' }}>
+                <div style={{ width: '100%', marginBottom: '0.5rem' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>
                         <Flame size={18} /> Độ Khó AI
                     </label>
@@ -93,7 +93,7 @@ export default function CaroHome() {
                 </div>
 
                 {/* Grid Size */}
-                <div style={{ width: '100%', marginBottom: '1.5rem' }}>
+                <div style={{ width: '100%', marginBottom: '0.5rem' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>
                         Kích Thước Bàn Cờ
                     </label>

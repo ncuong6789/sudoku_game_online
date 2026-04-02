@@ -49,7 +49,7 @@ export default function PacmanHome() {
                 </div>
 
                 {/* Map Type Selection */}
-                <div style={{ width: '100%', marginBottom: '1.2rem' }}>
+                <div style={{ width: '100%', marginBottom: '0.5rem' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>
                         <Map size={18} /> Chọn Bản Đồ
                     </label>
