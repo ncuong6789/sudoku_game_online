@@ -194,10 +194,17 @@ function SnakeCanvas({ gameRef, mapSize }) {
                 for (let i = s.positions.length - 1; i >= 0; i--) {
                     const seg = s.positions[i], isHead = i === 0;
                     let dx = seg.x * cell, dy = seg.y * cell;
-                    if (isHead && s.prevHead && !s.isDead) {
-                        const ddx = seg.x - s.prevHead.x, ddy = seg.y - s.prevHead.y;
-                        if (Math.abs(ddx) <= 1 && Math.abs(ddy) <= 1) { dx = (s.prevHead.x + ddx * t) * cell; dy = (s.prevHead.y + ddy * t) * cell; }
+                    
+                    // Smooth interpolation for ALL segments
+                    if (s.prevPositions && s.prevPositions[i] && !s.isDead) {
+                        const prevSeg = s.prevPositions[i];
+                        const ddx = seg.x - prevSeg.x, ddy = seg.y - prevSeg.y;
+                        if (Math.abs(ddx) <= 1 && Math.abs(ddy) <= 1) { 
+                            dx = (prevSeg.x + ddx * t) * cell; 
+                            dy = (prevSeg.y + ddy * t) * cell; 
+                        }
                     }
+                    
                     if (isHead) {
                         const isDashing = s.dashFlashEnd && now < s.dashFlashEnd;
                         ctx.shadowColor = s.color; ctx.shadowBlur = isDashing ? 25 : 12;
@@ -208,7 +215,10 @@ function SnakeCanvas({ gameRef, mapSize }) {
                             ctx.strokeStyle = s.color; ctx.lineWidth = 2;
                             ctx.beginPath(); ctx.arc(dx + cell / 2, dy + cell / 2, cell * 0.55, 0, Math.PI * 2); ctx.stroke();
                         }
-                        drawEyes(ctx, dx + cell / 2, dy + cell / 2, cell, s.direction || { x: 1, y: 0 }, s.color);
+                        // Draw eyes using instant visual nextDir for more responsive feel 
+                        // if it's the current player, otherwise fallback to direction
+                        const visualDir = s.isMe && s.nextDir ? s.nextDir : (s.direction || { x: 1, y: 0 });
+                        drawEyes(ctx, dx + cell / 2, dy + cell / 2, cell, visualDir, s.color);
                     } else {
                         const len = s.positions.length;
                         const fs = len >= 8 ? 0.25 : (len >= 4 ? 0.1 : 0);
@@ -485,8 +495,8 @@ export default function SnakeGame() {
     function buildSnakeList(g) {
         const now = performance.now();
         const list = [];
-        if (g.snake.length) list.push({ id: 'me', positions: g.snake, prevHead: g.prevHeadPlayer, color: '#4ade80', direction: g.direction, isDead: false, isMe: true, dashFlashEnd: g.dashFlash });
-        if (hasBot && g.botSnake.length) list.push({ id: 'bot', positions: g.botSnake, prevHead: g.prevHeadBot, color: '#60a5fa', direction: g.botDirection, isDead: false, isMe: false, dashFlashEnd: g.botDashFlash });
+        if (g.snake.length) list.push({ id: 'me', positions: g.snake, prevPositions: g.prevSnakePlayer, color: '#4ade80', direction: g.direction, nextDir: g.nextDir, isDead: false, isMe: true, dashFlashEnd: g.dashFlash });
+        if (hasBot && g.botSnake.length) list.push({ id: 'bot', positions: g.botSnake, prevPositions: g.prevSnakeBot, color: '#60a5fa', direction: g.botDirection, nextDir: g.botDirection, isDead: false, isMe: false, dashFlashEnd: g.botDashFlash });
         return list;
     }
 
@@ -503,7 +513,7 @@ export default function SnakeGame() {
             score: 0, botScore: 0, gameOver: false, botDead: false,
             statusMessage: 'Đang chơi...', currentSpeed: INITIAL_SPEED,
             lastTickTime: performance.now(), snakes: [],
-            prevHeadPlayer: null, prevHeadBot: null,
+            prevSnakePlayer: null, prevSnakeBot: null,
             dashCooldownEnd: null, botDashCooldownEnd: null,
             dashFlash: null, botDashFlash: null,
         };
@@ -578,8 +588,8 @@ export default function SnakeGame() {
         const tick = () => {
             const g = gameRef.current;
             if (!g || g.gameOver) return;
-            g.prevHeadPlayer = g.snake[0] ? { ...g.snake[0] } : null;
-            g.prevHeadBot = g.botSnake[0] ? { ...g.botSnake[0] } : null;
+            g.prevSnakePlayer = g.snake.map(p => ({ ...p }));
+            g.prevSnakeBot = g.botSnake.map(p => ({ ...p }));
             g.lastTickTime = performance.now();
             g.currentSpeed = Math.max(MAX_SPEED, INITIAL_SPEED - g.score * 5) * (g.goldenItem ? 1.3 : 1);
 
@@ -781,11 +791,13 @@ export default function SnakeGame() {
         mpRef.current = {
             snakes: Object.values(gameState.snakes).map(s => {
                 const isMe = s.id === socket.id;
+                const oldS = mpRef.current?.snakes?.find(os => os.id === s.id);
                 // Sync dash state from server
                 return {
-                    id: s.id, positions: s.positions, prevHead: null,
+                    id: s.id, positions: s.positions, prevPositions: oldS ? oldS.positions : s.positions,
                     color: s.color === 'green' ? '#4ade80' : '#60a5fa',
                     direction: s.direction || { x: 1, y: 0 }, isDead: s.isDead,
+                    nextDir: s.nextDir,
                     isMe,
                     dashFlashEnd: s.dashFlashEnd,
                 };

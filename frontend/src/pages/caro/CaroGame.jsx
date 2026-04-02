@@ -432,23 +432,20 @@ export default function CaroGame() {
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: 'calc(100vh - 80px)', padding: '0.5rem' }}>
-            <div className="glass-panel" style={{
+            <div className="glass-panel game-play-panel" style={{
                 position: 'relative',
                 overflow: 'hidden',
                 width: 'fit-content',
                 height: 'fit-content',
-                display: 'flex',
-                flexDirection: 'row',
                 padding: '1rem',
                 gap: '1.5rem',
                 alignItems: 'stretch',
-                flexWrap: 'wrap',
                 justifyContent: 'center'
             }}>
 
                 {/* TRÁI: BÀN CỜ GIGANTIC */}
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 0, margin: 0, position: 'relative' }}>
-                    <div style={{
+                    <div className="game-play-board caro-board" style={{
                         display: 'grid',
                         gridTemplateColumns: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
                         gridTemplateRows: `repeat(${BOARD_SIZE}, minmax(0, 1fr))`,
@@ -457,8 +454,6 @@ export default function CaroGame() {
                         border: '1px solid rgba(255, 255, 255, 0.05)',
                         padding: BOARD_SIZE >= 30 ? '0' : '2px',
                         borderRadius: '4px',
-                        width: 'min(calc(100vh - 150px), calc(100vw - 320px))',
-                        height: 'min(calc(100vh - 150px), calc(100vw - 320px))',
                         margin: 0
                     }}>
                         {board.map((row, r) => row.map((cell, c) => {
@@ -473,7 +468,7 @@ export default function CaroGame() {
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        fontSize: `calc(min(calc(100vh - 150px), calc(100vw - 320px)) / ${BOARD_SIZE} * 0.7)`,
+                                        fontSize: `calc(var(--board-size-mobile, min(calc(100vh - 150px), calc(100vw - 320px))) / ${BOARD_SIZE} * 0.7)`,
                                         fontWeight: 900,
                                         cursor: cell === 0 && !isGameOver && !isProcessing ? 'pointer' : 'default',
                                         color: cell === 1 ? 'var(--primary-color)' : '#ff4757',

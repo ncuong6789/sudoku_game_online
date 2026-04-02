@@ -278,11 +278,9 @@ export default function ChessGame() {
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', minHeight: '100vh', padding: '0.5rem', boxSizing: 'border-box', background: '#0d1117' }}>
-            <div className="glass-panel" style={{
+            <div className="glass-panel game-play-panel" style={{
                 position: 'relative',
                 overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'row',
                 padding: '1.2rem',
                 gap: '1.5rem',
                 alignItems: 'stretch',
@@ -351,10 +349,8 @@ export default function ChessGame() {
 
                 {/* GIỮA: BÀN CỜ */}
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 0, margin: 0, flex: '1 0 auto' }}>
-                    <div style={{
+                    <div className="game-play-board chess-board" style={{
                         position: 'relative',
-                        width: 'min(calc(100vh - 100px), calc(100vw - 620px), 640px)',
-                        height: 'min(calc(100vh - 100px), calc(100vw - 620px), 640px)',
                         border: '8px solid rgba(15, 15, 25, 0.95)',
                         borderRadius: '12px',
                         boxShadow: '0 30px 60px rgba(0, 0, 0, 0.6)',

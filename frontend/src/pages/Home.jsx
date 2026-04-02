@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutGrid, Grid3X3, Swords, Trophy, Users, X, Activity, Ghost, Crown, Zap, Layers, Hash } from 'lucide-react';
+import { LayoutGrid, Grid3X3, Swords, Trophy, Users, X, Activity, Ghost, Crown, Zap, Layers, Hash, Menu } from 'lucide-react';
 import { socket } from '../utils/socket';
 
 const games = {
@@ -103,9 +103,17 @@ export default function Home() {
     const [isSearching, setIsSearching] = useState(false);
     const [roomCode, setRoomCode] = useState('');
     const [searchMode, setSearchMode] = useState('active'); // 'active' (selected game) or 'random' (random game)
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth <= 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const game = games[activeGame];
+    const isUnplayableOnMobile = isMobile && ['snake', 'tetris', 'pacman'].includes(activeGame);
 
     useEffect(() => {
         localStorage.setItem('lastGame', activeGame);
@@ -153,7 +161,8 @@ export default function Home() {
 
     return (
         <div className="dashboard-container">
-            <aside className="sidebar">
+            <div className={`mobile-overlay ${isSidebarOpen ? 'open' : ''}`} onClick={() => setIsSidebarOpen(false)} />
+            <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
                 <div className="sidebar-logo">GameOnl</div>
                 <nav className="nav-group">
                     <div className={`nav-item ${activeGame === 'sudoku' ? 'active' : ''}`} onClick={() => { setActiveGame('sudoku'); setShowHelp(false); }}>
@@ -182,8 +191,13 @@ export default function Home() {
                 <div className="sidebar-footer">GameOnl v1.2</div>
             </aside>
 
-            <main className="main-content" style={{ padding: '2rem' }}>
-                <div className="game-detail" style={{ maxWidth: '700px' }}>
+            <main className="main-content" style={{ padding: '3rem', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                {isMobile && (
+                    <button className="hamburger-btn" onClick={() => setIsSidebarOpen(true)} style={{ position: 'absolute', top: '15px', right: '15px', zIndex: 10 }}>
+                        <Menu size={28} />
+                    </button>
+                )}
+                <div className="game-detail" style={{ maxWidth: '700px', width: '100%' }}>
                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem', gap: '15px' }}>
                         <div className="game-icon-container" style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '12px' }}>
                             {activeGame === 'sudoku' && <Grid3X3 size={32} color="var(--accent-color)" />}
@@ -197,9 +211,14 @@ export default function Home() {
                     </div>
                     <p className="game-desc" style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>{game.description}</p>
 
-                    <div className="action-row" style={{ marginBottom: '2rem', gap: '0.8rem' }}>
-                        <button className={!showHelp ? "btn-primary" : "btn-secondary"} onClick={() => showHelp ? setShowHelp(false) : navigate(game.path)} style={{ flex: 1, padding: '14px' }}>
-                            Bắt đầu chơi
+                    <div className="action-row" style={{ marginBottom: '2rem', display: 'flex', gap: '0.8rem' }}>
+                        <button 
+                            className={!showHelp ? "btn-primary" : "btn-secondary"} 
+                            onClick={() => showHelp ? setShowHelp(false) : navigate(game.path)} 
+                            style={{ flex: 1, padding: '14px', opacity: isUnplayableOnMobile ? 0.5 : 1, cursor: isUnplayableOnMobile ? 'not-allowed' : 'pointer' }}
+                            disabled={isUnplayableOnMobile}
+                        >
+                            {isUnplayableOnMobile ? 'Sắp có trên Mobile' : 'Bắt đầu chơi'}
                         </button>
                         <button className={showHelp ? "btn-primary" : "btn-secondary"} onClick={() => setShowHelp(!showHelp)} style={{ flex: 1, padding: '14px' }}>
                             Hướng dẫn
@@ -236,9 +255,9 @@ export default function Home() {
                                 <h3 style={{ margin: 0, fontSize: '1.3rem' }}>Matchmaking Hub</h3>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }}>
+                            <div className="matchmaking-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }}>
                                 {/* Cột 1: Tìm ngẫu nhiên */}
-                                <div style={{ borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '1.5rem' }}>
+                                <div className="matchmaking-col-1" style={{ borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '1.5rem' }}>
                                     <h4 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: 'var(--text-secondary)' }}>Ghép cặp trực tuyến</h4>
                                     <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
                                         <button
@@ -258,8 +277,12 @@ export default function Home() {
                                     </div>
                                     <button
                                         className="btn-primary"
-                                        style={{ width: '100%', padding: '12px', background: isSearching ? '#ef4444' : 'var(--accent-color)' }}
-                                        onClick={() => isSearching ? (socket.emit('leaveMatchmaking'), setIsSearching(false)) : handleFindMatch()}
+                                        style={{ width: '100%', padding: '12px', background: isSearching ? '#ef4444' : 'var(--accent-color)', opacity: isUnplayableOnMobile && searchMode === 'active' ? 0.5 : 1 }}
+                                        onClick={() => {
+                                            if (isUnplayableOnMobile && searchMode === 'active') return alert('Game này chưa tối ưu trên điện thoại!');
+                                            isSearching ? (socket.emit('leaveMatchmaking'), setIsSearching(false)) : handleFindMatch();
+                                        }}
+                                        disabled={isUnplayableOnMobile && searchMode === 'active'}
                                     >
                                         {isSearching ? '⏳ Đang tìm... (Hủy)' : `Tìm đối thủ ${searchMode === 'active' ? game.name : ''}`}
                                     </button>
