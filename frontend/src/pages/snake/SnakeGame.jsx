@@ -218,8 +218,8 @@ function SnakeCanvas({ gameRef, mapSize }) {
     return <canvas ref={canvasRef} width={600} height={600} style={{ width: '100%', height: '100%', display: 'block', imageRendering: 'pixelated' }} />;
 }
 
-// ─── LEFT PANEL (Controls + Dash) ────────────────────────────────────────────
-function LeftPanel({ gameRef }) {
+// ─── LEFT PANEL (Controls + Dash + Game Over Result) ─────────────────────────
+function LeftPanel({ gameRef, gameOver, accentColor, resultEmoji, resultTitle, resultDetail }) {
     const [cdRemain, setCdRemain] = useState(0);
     useEffect(() => {
         const t = setInterval(() => {
@@ -266,12 +266,40 @@ function LeftPanel({ gameRef }) {
                 <div style={rowStyle}><span style={{ color: '#94a3b8', flexShrink: 0 }}>!</span>Cần ≥ <b style={{ color: '#fff', margin: '0 3px' }}>5 đốt</b> mới dùng được</div>
                 <div style={rowStyle}><span style={{ color: '#60a5fa', flexShrink: 0 }}>⏱</span>Hồi chiêu <b style={{ color: '#fff', margin: '0 3px' }}>3 giây</b> sau mỗi lần dùng</div>
             </div>
+
+            {/* GAME OVER RESULT — appears at the bottom of the left panel */}
+            {gameOver && (
+                <div style={{
+                    marginTop: 'auto',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    border: `2px solid ${accentColor}66`,
+                    background: `linear-gradient(160deg, ${accentColor}18 0%, rgba(10,14,22,0.9) 100%)`,
+                    boxShadow: `0 0 24px ${accentColor}22`,
+                }}>
+                    <div style={{ height: '3px', background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }} />
+                    <div style={{ padding: '16px 14px', textAlign: 'center' }}>
+                        <div style={{ fontSize: '3rem', lineHeight: 1, marginBottom: '8px', filter: `drop-shadow(0 0 14px ${accentColor})` }}>
+                            {resultEmoji}
+                        </div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 900, color: accentColor, letterSpacing: '0.02em', textShadow: `0 0 16px ${accentColor}88`, marginBottom: '4px' }}>
+                            {resultTitle}
+                        </div>
+                        {resultDetail && (
+                            <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '4px', lineHeight: 1.5 }}>
+                                {resultDetail}
+                            </div>
+                        )}
+                    </div>
+                    <div style={{ height: '2px', background: `linear-gradient(90deg, transparent, ${accentColor}55, transparent)` }} />
+                </div>
+            )}
         </div>
     );
 }
 
 // ─── RIGHT PANEL (Items + Map Legend + Buttons) ─────────────────────────────
-function RightPanel({ mode, gameOver, accentColor, resultEmoji, resultTitle, resultDetail, handleRestart, navigate }) {
+function RightPanel({ mode, gameOver, accentColor, handleRestart, navigate }) {
     const cardStyle = { borderRadius: '10px', padding: '12px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '10px' };
     const labelStyle = { fontSize: '0.72rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' };
     const rowStyle = { display: 'flex', alignItems: 'flex-start', gap: '9px', fontSize: '0.82rem', color: '#cbd5e1', marginBottom: '6px', lineHeight: 1.4 };
@@ -281,13 +309,16 @@ function RightPanel({ mode, gameOver, accentColor, resultEmoji, resultTitle, res
 
             {/* ITEMS */}
             <div style={cardStyle}>
-                <div style={labelStyle}>🎯 Vật Phẩm</div>
+                {/* <div style={labelStyle}>🎯 Vật Phẩm</div> */}
+                <div style={labelStyle}>
+                    <strong>🎯 Vật Phẩm</strong>
+                </div>
                 <div style={{ background: 'rgba(239,68,68,0.08)', borderRadius: '8px', padding: '8px 10px', marginBottom: '8px', border: '1px solid rgba(239,68,68,0.2)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                         <div style={{ width: 13, height: 13, borderRadius: '50%', background: 'radial-gradient(circle,#f87171,#dc2626)', boxShadow: '0 0 6px #f87171', flexShrink: 0 }} />
                         <span style={{ color: '#f87171', fontWeight: 700, fontSize: '0.85rem' }}>Mồi Đỏ +1 điểm</span>
                     </div>
-                    <div style={{ fontSize: '0.76rem', color: '#94a3b8', paddingLeft: '21px' }}>Rắn dài thêm 1 đốt</div>
+                    <div style={{ fontSize: '0.76rem', color: '#94a3b8' }}>Rắn dài thêm 1 đốt</div>
                 </div>
                 <div style={{ background: 'rgba(251,191,36,0.08)', borderRadius: '8px', padding: '8px 10px', border: '1px solid rgba(251,191,36,0.2)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
@@ -325,36 +356,22 @@ function RightPanel({ mode, gameOver, accentColor, resultEmoji, resultTitle, res
                 </div>
             </div>
 
-            {/* RESULT + BUTTONS — always at bottom of right panel */}
-            <div style={{ marginTop: 'auto', paddingTop: '6px' }}>
-                {/* Result card (only when game over) */}
-                {gameOver && (
-                    <div style={{
-                        borderRadius: '10px', padding: '10px 12px', marginBottom: '8px',
-                        border: `2px solid ${accentColor}55`,
-                        background: `linear-gradient(135deg,${accentColor}12,rgba(13,17,23,0.75))`,
-                        display: 'flex', alignItems: 'center', gap: '10px',
-                    }}>
-                        <span style={{ fontSize: '1.8rem', lineHeight: 1, filter: `drop-shadow(0 0 8px ${accentColor})` }}>{resultEmoji}</span>
-                        <div>
-                            <div style={{ fontSize: '1rem', fontWeight: 900, color: accentColor, lineHeight: 1.2 }}>{resultTitle}</div>
-                            {resultDetail && <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>{resultDetail}</div>}
-                        </div>
-                    </div>
-                )}
-                {/* Action buttons */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {mode === 'solo' && (
-                        <button className={gameOver ? 'btn-primary' : 'btn-secondary'} onClick={handleRestart}
-                            style={{ width: '100%', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.9rem' }}>
-                            <RotateCcw size={15} /> Chơi lại
-                        </button>
-                    )}
-                    <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/snake/multiplayer' : '/snake')}
-                        style={{ width: '100%', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.9rem' }}>
-                        <ArrowLeft size={15} /> Thoát
+            {/* ACTION BUTTONS — right below map legend */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', marginTop: '2px' }}>
+                {mode === 'solo' && (
+                    <button
+                        className={gameOver ? 'btn-primary' : 'btn-secondary'}
+                        onClick={handleRestart}
+                        style={{ width: '100%', padding: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', fontSize: '0.9rem', fontWeight: 700 }}>
+                        <RotateCcw size={15} /> Chơi lại
                     </button>
-                </div>
+                )}
+                <button
+                    className="btn-secondary"
+                    onClick={() => navigate(mode === 'multiplayer' ? '/snake/multiplayer' : '/snake')}
+                    style={{ width: '100%', padding: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', fontSize: '0.9rem' }}>
+                    <ArrowLeft size={15} /> Thoát
+                </button>
             </div>
         </div>
     );
@@ -727,7 +744,16 @@ export default function SnakeGame() {
                 {/* ── MAIN AREA ── */}
                 <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'stretch' }}>
                     {/* Left panel */}
-                    {mode === 'solo' && <LeftPanel gameRef={gameRef} />}
+                    {mode === 'solo' && (
+                        <LeftPanel
+                            gameRef={gameRef}
+                            gameOver={uiState.gameOver}
+                            accentColor={accentColor}
+                            resultEmoji={resultEmoji}
+                            resultTitle={resultTitle}
+                            resultDetail={resultDetail}
+                        />
+                    )}
 
                     {/* Board */}
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -771,9 +797,6 @@ export default function SnakeGame() {
                             mode={mode}
                             gameOver={uiState.gameOver}
                             accentColor={accentColor}
-                            resultEmoji={resultEmoji}
-                            resultTitle={resultTitle}
-                            resultDetail={resultDetail}
                             handleRestart={handleRestart}
                             navigate={navigate}
                         />
