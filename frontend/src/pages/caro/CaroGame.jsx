@@ -416,6 +416,17 @@ export default function CaroGame() {
     };
 
     useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (isGameOver && mode === 'solo' && (e.key === ' ' || e.code === 'Space')) {
+                e.preventDefault();
+                resetGame();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isGameOver, mode]);
+
+    useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 

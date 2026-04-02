@@ -505,7 +505,16 @@ export default function SnakeGame() {
     useEffect(() => {
         const onKey = (e) => {
             if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', ' '].includes(e.key) || e.code === 'Space') e.preventDefault();
-            const g = gameRef.current; if (!g || g.gameOver) return;
+            const g = gameRef.current;
+            if (!g) return;
+
+            // Shortcut to restart in Solo
+            if (g.gameOver && mode === 'solo' && (e.code === 'Space' || e.key === ' ')) {
+                handleRestart();
+                return;
+            }
+
+            if (g.gameOver) return;
             const nd = g.nextDir;
             if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') && nd.y === 0) g.nextDir = { x: 0, y: -1 };
             if ((e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') && nd.y === 0) g.nextDir = { x: 0, y: 1 };

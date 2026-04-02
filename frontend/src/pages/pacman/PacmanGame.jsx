@@ -452,7 +452,14 @@ export default function PacmanGame() {
 
     useEffect(() => {
         const m = { ArrowUp: DIRS.UP, ArrowDown: DIRS.DOWN, ArrowLeft: DIRS.LEFT, ArrowRight: DIRS.RIGHT };
-        const h = e => { if (m[e.key]) { e.preventDefault(); nextDir.current = m[e.key]; } };
+        const h = e => {
+            if (e.key === ' ' && (ref.current.phase === 'over' || ref.current.phase === 'won')) {
+                e.preventDefault();
+                handleRestart();
+                return;
+            }
+            if (m[e.key]) { e.preventDefault(); nextDir.current = m[e.key]; }
+        };
         window.addEventListener('keydown', h);
         return () => window.removeEventListener('keydown', h);
     }, []);

@@ -255,6 +255,17 @@ export default function ChessGame() {
         // Có thể emit sư kiện cho socket nếu đang chơi online
     };
 
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (gameOver && mode === 'solo' && (e.key === ' ' || e.code === 'Space')) {
+                e.preventDefault();
+                handleReset();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [gameOver, mode]);
+
     const customSquareStyles = useMemo(() => {
         const styles = { ...optionSquares };
         if (moveHistory.length > 0) {

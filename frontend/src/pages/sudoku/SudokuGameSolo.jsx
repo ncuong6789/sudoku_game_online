@@ -163,6 +163,11 @@ export default function SoloGame() {
 
     useEffect(() => {
         const handleKeyDown = (e) => {
+            if (isGameOver && e.key === ' ') {
+                e.preventDefault();
+                startNewGame(difficulty);
+                return;
+            }
             if (e.key >= '1' && e.key <= '9') {
                 handleNumberClick(parseInt(e.key));
             } else if (e.key === 'Backspace' || e.key === 'Delete') {

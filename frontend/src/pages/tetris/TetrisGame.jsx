@@ -106,8 +106,13 @@ export default function TetrisGame() {
     // Keyboard handlers
     const move = useCallback((e) => {
         const { keyCode } = e;
-        if (!gameOver && isStarted) {
-            if ([37, 38, 39, 40, 32].includes(keyCode)) {
+        if (isStarted) {
+            if (gameOver && mode === 'solo' && keyCode === 32) {
+                e.preventDefault();
+                startGame();
+                return;
+            }
+            if (!gameOver && [37, 38, 39, 40, 32].includes(keyCode)) {
                 e.preventDefault();
             }
             if (keyCode === 37) {
