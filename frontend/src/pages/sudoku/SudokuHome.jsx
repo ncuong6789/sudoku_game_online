@@ -1,10 +1,36 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, Gamepad, Grid3X3 } from 'lucide-react';
+import { ArrowLeft, Users, Gamepad, Grid3X3, Smile, Flame, Star } from 'lucide-react';
+
+const DIFF_INFO = {
+    Easy: {
+        label: 'Dễ',
+        icon: <Smile size={16} />,
+        color: '#22c55e',
+        glow: 'rgba(34,197,94,0.35)',
+        desc: 'Nhiều ô gợi ý. Phù hợp người mới bắt đầu.',
+    },
+    Medium: {
+        label: 'Thường',
+        icon: <Star size={16} />,
+        color: '#f59e0b',
+        glow: 'rgba(245,158,11,0.35)',
+        desc: 'Cân bằng giữa thử thách và khả năng suy luận.',
+    },
+    Expert: {
+        label: 'Expert',
+        icon: <Flame size={16} />,
+        color: '#ef4444',
+        glow: 'rgba(239,68,68,0.35)',
+        desc: 'Rất ít ô gợi ý. Chỉ dành cho cao thủ!',
+    },
+};
 
 export default function SudokuHome() {
     const navigate = useNavigate();
     const [difficulty, setDifficulty] = useState('Medium');
+
+    const selectedDiff = DIFF_INFO[difficulty];
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 60px)', width: '100%', padding: '1rem' }}>
@@ -19,23 +45,44 @@ export default function SudokuHome() {
                     </h1>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%', marginBottom: '1.5rem' }}>
-                    {/* Difficulty Selection */}
-                    <div style={{ textAlign: 'left' }}>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Độ khó Solo:</p>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
-                            {['Easy', 'Medium', 'Hard', 'Expert'].map(d => (
-                                <button
-                                    key={d}
-                                    className={difficulty === d ? 'btn-primary' : 'btn-secondary'}
-                                    onClick={() => setDifficulty(d)}
-                                    style={{ padding: '10px', fontSize: '0.9rem' }}
-                                >
-                                    {d === 'Easy' ? '😊 Dễ' : d === 'Medium' ? '🤔 Vừa' : d === 'Hard' ? '😤 Khó' : '🔥 Expert'}
-                                </button>
-                            ))}
-                        </div>
+                {/* Difficulty Selection */}
+                <div style={{ width: '100%', marginBottom: '1.5rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                        <Flame size={18} /> Độ Khó
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+                        {Object.entries(DIFF_INFO).map(([key, info]) => (
+                            <button
+                                key={key}
+                                onClick={() => setDifficulty(key)}
+                                style={{
+                                    padding: '14px 8px',
+                                    borderRadius: '12px',
+                                    fontSize: '0.95rem',
+                                    fontWeight: 700,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '6px',
+                                    background: difficulty === key
+                                        ? `linear-gradient(135deg, ${info.color}33, ${info.color}22)`
+                                        : 'rgba(255,255,255,0.05)',
+                                    color: difficulty === key ? info.color : 'var(--text-secondary)',
+                                    border: `2px solid ${difficulty === key ? info.color : 'rgba(255,255,255,0.1)'}`,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                    boxShadow: difficulty === key ? `0 0 18px ${info.glow}` : 'none',
+                                }}
+                            >
+                                {info.icon}
+                                <span>{info.label}</span>
+                            </button>
+                        ))}
                     </div>
+                    <p style={{ fontSize: '0.85rem', color: selectedDiff.color, textAlign: 'center', minHeight: '1.5em', margin: '0.3rem 0', opacity: 0.85 }}>
+                        {selectedDiff.desc}
+                    </p>
                 </div>
 
                 {/* Play Buttons */}

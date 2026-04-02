@@ -1,0 +1,307 @@
+{
+  "scriptCompleted": true,
+  "name": "Sudoku_GameOnl",
+  "rawDescription": "",
+  "readmeHead": "",
+  "languages": [
+    "css",
+    "html",
+    "javascript",
+    "json",
+    "markdown"
+  ],
+  "frameworks": [],
+  "files": [
+    {
+      "path": ".understand-anything/tmp/ua-project-scan.js",
+      "language": "javascript",
+      "sizeLines": 105,
+      "fileCategory": "code"
+    },
+    {
+      "path": "backend/package.json",
+      "language": "json",
+      "sizeLines": 21,
+      "fileCategory": "config"
+    },
+    {
+      "path": "backend/server.js",
+      "language": "javascript",
+      "sizeLines": 602,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/eslint.config.js",
+      "language": "javascript",
+      "sizeLines": 30,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/index.html",
+      "language": "html",
+      "sizeLines": 16,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "frontend/package.json",
+      "language": "json",
+      "sizeLines": 33,
+      "fileCategory": "config"
+    },
+    {
+      "path": "frontend/README.md",
+      "language": "markdown",
+      "sizeLines": 17,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "frontend/src/App.css",
+      "language": "css",
+      "sizeLines": 43,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "frontend/src/App.jsx",
+      "language": "javascript",
+      "sizeLines": 74,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/components/Board.jsx",
+      "language": "javascript",
+      "sizeLines": 61,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/components/Controls.jsx",
+      "language": "javascript",
+      "sizeLines": 36,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/index.css",
+      "language": "css",
+      "sizeLines": 643,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "frontend/src/main.jsx",
+      "language": "javascript",
+      "sizeLines": 8,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/caro/CaroGame.jsx",
+      "language": "javascript",
+      "sizeLines": 613,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/caro/CaroHome.jsx",
+      "language": "javascript",
+      "sizeLines": 81,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/caro/CaroLobby.jsx",
+      "language": "javascript",
+      "sizeLines": 93,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/chess/ChessGame.jsx",
+      "language": "javascript",
+      "sizeLines": 514,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/chess/ChessHome.jsx",
+      "language": "javascript",
+      "sizeLines": 172,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/chess/ChessLobby.jsx",
+      "language": "javascript",
+      "sizeLines": 183,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/Home.jsx",
+      "language": "javascript",
+      "sizeLines": 299,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/pacman/PacmanGame.jsx",
+      "language": "javascript",
+      "sizeLines": 943,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/pacman/PacmanHome.jsx",
+      "language": "javascript",
+      "sizeLines": 140,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/snake/SnakeGame.jsx",
+      "language": "javascript",
+      "sizeLines": 771,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/snake/SnakeHome.jsx",
+      "language": "javascript",
+      "sizeLines": 105,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/snake/SnakeLobby.jsx",
+      "language": "javascript",
+      "sizeLines": 164,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/sudoku/SudokuGameMulti.jsx",
+      "language": "javascript",
+      "sizeLines": 417,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/sudoku/SudokuGameSolo.jsx",
+      "language": "javascript",
+      "sizeLines": 272,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/sudoku/SudokuHome.jsx",
+      "language": "javascript",
+      "sizeLines": 57,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/sudoku/SudokuLobby.jsx",
+      "language": "javascript",
+      "sizeLines": 96,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/tetris/TetrisGame.jsx",
+      "language": "javascript",
+      "sizeLines": 366,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/tetris/TetrisHome.jsx",
+      "language": "javascript",
+      "sizeLines": 56,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/pages/tetris/TetrisLobby.jsx",
+      "language": "javascript",
+      "sizeLines": 94,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/utils/socket.js",
+      "language": "javascript",
+      "sizeLines": 11,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/utils/sudoku.js",
+      "language": "javascript",
+      "sizeLines": 134,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/utils/useAudio.js",
+      "language": "javascript",
+      "sizeLines": 286,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/src/utils/useTetris.js",
+      "language": "javascript",
+      "sizeLines": 331,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/test_chess.js",
+      "language": "javascript",
+      "sizeLines": 22,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/test_chess2.js",
+      "language": "javascript",
+      "sizeLines": 14,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/test_chess3.js",
+      "language": "javascript",
+      "sizeLines": 11,
+      "fileCategory": "code"
+    },
+    {
+      "path": "frontend/vite.config.js",
+      "language": "javascript",
+      "sizeLines": 9,
+      "fileCategory": "code"
+    },
+    {
+      "path": "test_chess.js",
+      "language": "javascript",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    }
+  ],
+  "totalFiles": 41,
+  "estimatedComplexity": "moderate",
+  "importMap": {
+    "test_chess.js": [],
+    ".understand-anything/tmp/ua-project-scan.js": [],
+    "backend/package.json": [],
+    "backend/server.js": [],
+    "frontend/eslint.config.js": [],
+    "frontend/index.html": [],
+    "frontend/package.json": [],
+    "frontend/README.md": [],
+    "frontend/test_chess.js": [],
+    "frontend/test_chess2.js": [],
+    "frontend/test_chess3.js": [],
+    "frontend/vite.config.js": [],
+    "frontend/src/App.css": [],
+    "frontend/src/App.jsx": [],
+    "frontend/src/index.css": [],
+    "frontend/src/main.jsx": [],
+    "frontend/src/components/Board.jsx": [],
+    "frontend/src/components/Controls.jsx": [],
+    "frontend/src/pages/Home.jsx": [],
+    "frontend/src/pages/caro/CaroGame.jsx": [],
+    "frontend/src/pages/caro/CaroHome.jsx": [],
+    "frontend/src/pages/caro/CaroLobby.jsx": [],
+    "frontend/src/pages/chess/ChessGame.jsx": [],
+    "frontend/src/pages/chess/ChessHome.jsx": [],
+    "frontend/src/pages/chess/ChessLobby.jsx": [],
+    "frontend/src/pages/pacman/PacmanGame.jsx": [],
+    "frontend/src/pages/pacman/PacmanHome.jsx": [],
+    "frontend/src/pages/snake/SnakeGame.jsx": [],
+    "frontend/src/pages/snake/SnakeHome.jsx": [],
+    "frontend/src/pages/snake/SnakeLobby.jsx": [],
+    "frontend/src/pages/sudoku/SudokuGameMulti.jsx": [],
+    "frontend/src/pages/sudoku/SudokuGameSolo.jsx": [],
+    "frontend/src/pages/sudoku/SudokuHome.jsx": [],
+    "frontend/src/pages/sudoku/SudokuLobby.jsx": [],
+    "frontend/src/pages/tetris/TetrisGame.jsx": [],
+    "frontend/src/pages/tetris/TetrisHome.jsx": [],
+    "frontend/src/pages/tetris/TetrisLobby.jsx": [],
+    "frontend/src/utils/socket.js": [],
+    "frontend/src/utils/sudoku.js": [],
+    "frontend/src/utils/useAudio.js": [],
+    "frontend/src/utils/useTetris.js": []
+  }
+}

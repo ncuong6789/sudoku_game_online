@@ -1,12 +1,38 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Users, Maximize, Play, Zap, Gamepad } from 'lucide-react';
+import { ArrowLeft, User, Users, Maximize, Gamepad, Zap, Smile, Star, Flame } from 'lucide-react';
+
+const DIFF_INFO = {
+    Easy: {
+        label: 'Dễ',
+        icon: <Smile size={16} />,
+        color: '#22c55e',
+        glow: 'rgba(34,197,94,0.35)',
+        desc: 'Bot AI di chuyển thong thả. Dễ vượt qua.',
+    },
+    Medium: {
+        label: 'Thường',
+        icon: <Star size={16} />,
+        color: '#f59e0b',
+        glow: 'rgba(245,158,11,0.35)',
+        desc: 'Bot AI linh hoạt. Cần tập trung.',
+    },
+    Expert: {
+        label: 'Expert',
+        icon: <Flame size={16} />,
+        color: '#ef4444',
+        glow: 'rgba(239,68,68,0.35)',
+        desc: 'Bot AI rất nhanh & thông minh. Khó thắng!',
+    },
+};
 
 export default function SnakeHome() {
     const navigate = useNavigate();
     const [difficulty, setDifficulty] = useState('Medium');
     const [hasBot, setHasBot] = useState(true);
     const [mapSize, setMapSize] = useState(20);
+
+    const selectedDiff = DIFF_INFO[difficulty];
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 60px)', width: '100%', padding: '1rem' }}>
@@ -22,9 +48,11 @@ export default function SnakeHome() {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', width: '100%', marginBottom: '1.5rem' }}>
-                    {/* Map Size Settings (General) */}
+                    {/* Map Size Settings */}
                     <div style={{ textAlign: 'left' }}>
-                        <p style={{ fontSize: '0.85rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Kích thước Bản đồ (Chung):</p>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                            Kích Thước Bản Đồ
+                        </label>
                         <div style={{ display: 'flex', gap: '8px' }}>
                             {[20, 30].map((size) => (
                                 <button
@@ -39,16 +67,18 @@ export default function SnakeHome() {
                         </div>
                     </div>
 
-                    {/* Bot AI Settings (Solo) */}
+                    {/* Bot AI Settings */}
                     <div style={{ textAlign: 'left' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>Thách đấu Bot AI (Solo):</p>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                                <Flame size={18} /> Độ Khó Bot AI (Solo)
+                            </label>
                             <div
                                 onClick={() => setHasBot(!hasBot)}
                                 style={{
                                     width: '40px', height: '22px', borderRadius: '11px',
                                     background: hasBot ? 'var(--primary-color)' : '#334155',
-                                    position: 'relative', cursor: 'pointer', transition: '0.3s'
+                                    position: 'relative', cursor: 'pointer', transition: '0.3s', flexShrink: 0
                                 }}
                             >
                                 <div style={{
@@ -57,19 +87,43 @@ export default function SnakeHome() {
                                 }} />
                             </div>
                         </div>
+
                         {hasBot && (
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                                {['Easy', 'Medium', 'Hard'].map((d) => (
-                                    <button
-                                        key={d}
-                                        className={difficulty === d ? 'btn-primary' : 'btn-secondary'}
-                                        onClick={() => setDifficulty(d)}
-                                        style={{ flex: 1, padding: '10px', fontSize: '0.9rem' }}
-                                    >
-                                        {d === 'Easy' ? 'Dễ' : d === 'Medium' ? 'Vừa' : 'Khó'}
-                                    </button>
-                                ))}
-                            </div>
+                            <>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+                                    {Object.entries(DIFF_INFO).map(([key, info]) => (
+                                        <button
+                                            key={key}
+                                            onClick={() => setDifficulty(key)}
+                                            style={{
+                                                padding: '14px 8px',
+                                                borderRadius: '12px',
+                                                fontSize: '0.95rem',
+                                                fontWeight: 700,
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '6px',
+                                                background: difficulty === key
+                                                    ? `linear-gradient(135deg, ${info.color}33, ${info.color}22)`
+                                                    : 'rgba(255,255,255,0.05)',
+                                                color: difficulty === key ? info.color : 'var(--text-secondary)',
+                                                border: `2px solid ${difficulty === key ? info.color : 'rgba(255,255,255,0.1)'}`,
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                                boxShadow: difficulty === key ? `0 0 18px ${info.glow}` : 'none',
+                                            }}
+                                        >
+                                            {info.icon}
+                                            <span>{info.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                                <p style={{ fontSize: '0.85rem', color: selectedDiff.color, textAlign: 'center', minHeight: '1.5em', margin: '0.3rem 0', opacity: 0.85 }}>
+                                    {selectedDiff.desc}
+                                </p>
+                            </>
                         )}
                     </div>
                 </div>

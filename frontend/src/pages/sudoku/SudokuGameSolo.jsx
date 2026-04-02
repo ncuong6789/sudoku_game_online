@@ -2,12 +2,13 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { generateSudoku } from '../../utils/sudoku';
 import Board from '../../components/Board';
 import Controls from '../../components/Controls';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAudio } from '../../utils/useAudio';
 
 export default function SoloGame() {
     const navigate = useNavigate();
-    const [difficulty, setDifficulty] = useState('Medium');
+    const location = useLocation();
+    const [difficulty, setDifficulty] = useState(location.state?.difficulty || 'Medium');
     const [initialPuzzle, setInitialPuzzle] = useState(null);
     const [solution, setSolution] = useState(null);
     const [userAnswers, setUserAnswers] = useState(null);
@@ -41,7 +42,7 @@ export default function SoloGame() {
     }, []);
 
     useEffect(() => {
-        startNewGame('Medium');
+        startNewGame(location.state?.difficulty || 'Medium');
     }, [startNewGame]);
 
     useEffect(() => {
@@ -214,17 +215,7 @@ export default function SoloGame() {
                     />
 
                     <div className="glass-panel controls-panel">
-                        <div className="difficulty-selector">
-                            {['Easy', 'Medium', 'Hard', 'Expert'].map(d => (
-                                <button
-                                    key={d}
-                                    className={`diff-btn ${difficulty === d ? 'active' : ''}`}
-                                    onClick={() => startNewGame(d)}
-                                >
-                                    {d}
-                                </button>
-                            ))}
-                        </div>
+
 
                         <Controls
                             onNumberClick={handleNumberClick}

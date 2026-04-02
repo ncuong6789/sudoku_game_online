@@ -1,21 +1,45 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, Gamepad, Crown } from 'lucide-react';
+import { ArrowLeft, Users, Gamepad, Crown, Smile, Star, Flame } from 'lucide-react';
+
+const DIFF_INFO = {
+    Easy: {
+        label: 'Tân Binh',
+        icon: <Smile size={16} />,
+        color: '#22c55e',
+        glow: 'rgba(34,197,94,0.35)',
+        desc: 'AI mức cơ bản. Phù hợp người mới học cờ.',
+    },
+    Medium: {
+        label: 'Nghiệp Dư',
+        icon: <Star size={16} />,
+        color: '#f59e0b',
+        glow: 'rgba(245,158,11,0.35)',
+        desc: 'AI tư duy chiến thuật. Cần suy nghĩ kỹ.',
+    },
+    Expert: {
+        label: 'Đại Kiện Tướng',
+        icon: <Flame size={16} />,
+        color: '#ef4444',
+        glow: 'rgba(239,68,68,0.35)',
+        desc: 'AI mức cao thủ. Gần như không thể thắng!',
+    },
+};
 
 export default function ChessHome() {
     const navigate = useNavigate();
     const [difficulty, setDifficulty] = useState('Medium');
     const [isFlipping, setIsFlipping] = useState(false);
-    const [assignedColor, setAssignedColor] = useState(null); // 'w' or 'b'
-
+    const [assignedColor, setAssignedColor] = useState(null);
     const [soloColor, setSoloColor] = useState('random');
+
+    const selectedDiff = DIFF_INFO[difficulty];
 
     const handleStartSolo = () => {
         setIsFlipping(true);
         setAssignedColor(null);
 
         if (soloColor === 'random') {
-            // Hiệu ứng "lật màu" giả lập trong 1.5 giây
             let flips = 0;
             const interval = setInterval(() => {
                 setAssignedColor(flips % 2 === 0 ? 'w' : 'b');
@@ -26,14 +50,11 @@ export default function ChessHome() {
                 clearInterval(interval);
                 const finalColor = Math.random() < 0.5 ? 'w' : 'b';
                 setAssignedColor(finalColor);
-
-                // Giữ màn hình kết quả lật màu thêm 1 giây trước khi vào game
                 setTimeout(() => {
                     navigate('/chess/game', { state: { mode: 'solo', difficulty, playerColor: finalColor } });
                 }, 1000);
             }, 1500);
         } else {
-            // Nếu đã chọn cố định, chuyển thẳng vào game luôn
             navigate('/chess/game', { state: { mode: 'solo', difficulty, playerColor: soloColor } });
         }
     };
@@ -51,27 +72,52 @@ export default function ChessHome() {
                     </h1>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%', opacity: isFlipping ? 0.3 : 1, transition: 'opacity 0.3s', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', opacity: isFlipping ? 0.3 : 1, transition: 'opacity 0.3s', marginBottom: '1.5rem' }}>
+
                     {/* Difficulty */}
-                    <div style={{ textAlign: 'left' }}>
-                        <p style={{ fontSize: '0.8rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Độ khó AI:</p>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                            {['Easy', 'Medium', 'Hard'].map((d) => (
+                    <div>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                            <Flame size={18} /> Độ Khó AI
+                        </label>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+                            {Object.entries(DIFF_INFO).map(([key, info]) => (
                                 <button
-                                    key={d}
-                                    className={difficulty === d ? 'btn-primary' : 'btn-secondary'}
-                                    onClick={() => setDifficulty(d)}
+                                    key={key}
+                                    onClick={() => setDifficulty(key)}
                                     disabled={isFlipping}
-                                    style={{ flex: 1, padding: '10px', fontSize: '0.8rem' }}
+                                    style={{
+                                        padding: '14px 8px',
+                                        borderRadius: '12px',
+                                        fontSize: '0.85rem',
+                                        fontWeight: 700,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '6px',
+                                        background: difficulty === key
+                                            ? `linear-gradient(135deg, ${info.color}33, ${info.color}22)`
+                                            : 'rgba(255,255,255,0.05)',
+                                        color: difficulty === key ? info.color : 'var(--text-secondary)',
+                                        border: `2px solid ${difficulty === key ? info.color : 'rgba(255,255,255,0.1)'}`,
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        boxShadow: difficulty === key ? `0 0 18px ${info.glow}` : 'none',
+                                    }}
                                 >
-                                    {d === 'Easy' ? 'Tân binh' : d === 'Medium' ? 'Nghiệp dư' : 'Đại kiện tướng'}
+                                    {info.icon}
+                                    <span>{info.label}</span>
                                 </button>
                             ))}
                         </div>
+                        <p style={{ fontSize: '0.85rem', color: selectedDiff.color, textAlign: 'center', minHeight: '1.5em', margin: '0.3rem 0', opacity: 0.85 }}>
+                            {selectedDiff.desc}
+                        </p>
                     </div>
+
                     {/* Solo Color Selection */}
-                    <div style={{ textAlign: 'left', marginTop: '0.2rem' }}>
-                        <p style={{ fontSize: '0.8rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Phe của bạn (Solo):</p>
+                    <div style={{ textAlign: 'left' }}>
+                        <p style={{ fontSize: '0.85rem', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Phe của bạn (Solo):</p>
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
                             <button
                                 onClick={() => setSoloColor('w')}
@@ -126,7 +172,6 @@ export default function ChessHome() {
                             </button>
                         </div>
                     </div>
-
                 </div>
 
                 {/* Play Buttons */}

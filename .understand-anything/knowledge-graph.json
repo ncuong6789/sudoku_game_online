@@ -1,0 +1,594 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "Sudoku_GameOnl",
+    "languages": [
+      "css",
+      "html",
+      "javascript",
+      "json",
+      "markdown"
+    ],
+    "frameworks": [],
+    "description": "Sudoku Game Online platform with multiplayer lobbies.",
+    "analyzedAt": "2026-04-02T02:00:30.184Z",
+    "gitCommitHash": "no-git"
+  },
+  "nodes": [
+    {
+      "id": "file:.understand-anything/tmp/ua-project-scan.js",
+      "type": "file",
+      "name": "ua-project-scan.js",
+      "filePath": ".understand-anything/tmp/ua-project-scan.js",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:backend/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "backend/package.json",
+      "summary": "A config file for the Sudoku_GameOnl project.",
+      "tags": [
+        "json",
+        "config"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:backend/server.js",
+      "type": "file",
+      "name": "server.js",
+      "filePath": "backend/server.js",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:frontend/eslint.config.js",
+      "type": "file",
+      "name": "eslint.config.js",
+      "filePath": "frontend/eslint.config.js",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:frontend/index.html",
+      "type": "file",
+      "name": "index.html",
+      "filePath": "frontend/index.html",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "html",
+        "markup"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:frontend/package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "frontend/package.json",
+      "summary": "A config file for the Sudoku_GameOnl project.",
+      "tags": [
+        "json",
+        "config"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:frontend/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "frontend/README.md",
+      "summary": "A document file for the Sudoku_GameOnl project.",
+      "tags": [
+        "markdown",
+        "docs"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:frontend/src/App.css",
+      "type": "file",
+      "name": "App.css",
+      "filePath": "frontend/src/App.css",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "css",
+        "markup"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:frontend/src/App.jsx",
+      "type": "file",
+      "name": "App.jsx",
+      "filePath": "frontend/src/App.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:frontend/src/components/Board.jsx",
+      "type": "file",
+      "name": "Board.jsx",
+      "filePath": "frontend/src/components/Board.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:frontend/src/components/Controls.jsx",
+      "type": "file",
+      "name": "Controls.jsx",
+      "filePath": "frontend/src/components/Controls.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:frontend/src/index.css",
+      "type": "file",
+      "name": "index.css",
+      "filePath": "frontend/src/index.css",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "css",
+        "markup"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:frontend/src/main.jsx",
+      "type": "file",
+      "name": "main.jsx",
+      "filePath": "frontend/src/main.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:frontend/src/pages/caro/CaroGame.jsx",
+      "type": "file",
+      "name": "CaroGame.jsx",
+      "filePath": "frontend/src/pages/caro/CaroGame.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:frontend/src/pages/caro/CaroHome.jsx",
+      "type": "file",
+      "name": "CaroHome.jsx",
+      "filePath": "frontend/src/pages/caro/CaroHome.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:frontend/src/pages/caro/CaroLobby.jsx",
+      "type": "file",
+      "name": "CaroLobby.jsx",
+      "filePath": "frontend/src/pages/caro/CaroLobby.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:frontend/src/pages/chess/ChessGame.jsx",
+      "type": "file",
+      "name": "ChessGame.jsx",
+      "filePath": "frontend/src/pages/chess/ChessGame.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:frontend/src/pages/chess/ChessHome.jsx",
+      "type": "file",
+      "name": "ChessHome.jsx",
+      "filePath": "frontend/src/pages/chess/ChessHome.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:frontend/src/pages/chess/ChessLobby.jsx",
+      "type": "file",
+      "name": "ChessLobby.jsx",
+      "filePath": "frontend/src/pages/chess/ChessLobby.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:frontend/src/pages/Home.jsx",
+      "type": "file",
+      "name": "Home.jsx",
+      "filePath": "frontend/src/pages/Home.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:frontend/src/pages/pacman/PacmanGame.jsx",
+      "type": "file",
+      "name": "PacmanGame.jsx",
+      "filePath": "frontend/src/pages/pacman/PacmanGame.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:frontend/src/pages/pacman/PacmanHome.jsx",
+      "type": "file",
+      "name": "PacmanHome.jsx",
+      "filePath": "frontend/src/pages/pacman/PacmanHome.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:frontend/src/pages/snake/SnakeGame.jsx",
+      "type": "file",
+      "name": "SnakeGame.jsx",
+      "filePath": "frontend/src/pages/snake/SnakeGame.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:frontend/src/pages/snake/SnakeHome.jsx",
+      "type": "file",
+      "name": "SnakeHome.jsx",
+      "filePath": "frontend/src/pages/snake/SnakeHome.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:frontend/src/pages/snake/SnakeLobby.jsx",
+      "type": "file",
+      "name": "SnakeLobby.jsx",
+      "filePath": "frontend/src/pages/snake/SnakeLobby.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:frontend/src/pages/sudoku/SudokuGameMulti.jsx",
+      "type": "file",
+      "name": "SudokuGameMulti.jsx",
+      "filePath": "frontend/src/pages/sudoku/SudokuGameMulti.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:frontend/src/pages/sudoku/SudokuGameSolo.jsx",
+      "type": "file",
+      "name": "SudokuGameSolo.jsx",
+      "filePath": "frontend/src/pages/sudoku/SudokuGameSolo.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:frontend/src/pages/sudoku/SudokuHome.jsx",
+      "type": "file",
+      "name": "SudokuHome.jsx",
+      "filePath": "frontend/src/pages/sudoku/SudokuHome.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:frontend/src/pages/sudoku/SudokuLobby.jsx",
+      "type": "file",
+      "name": "SudokuLobby.jsx",
+      "filePath": "frontend/src/pages/sudoku/SudokuLobby.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:frontend/src/pages/tetris/TetrisGame.jsx",
+      "type": "file",
+      "name": "TetrisGame.jsx",
+      "filePath": "frontend/src/pages/tetris/TetrisGame.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:frontend/src/pages/tetris/TetrisHome.jsx",
+      "type": "file",
+      "name": "TetrisHome.jsx",
+      "filePath": "frontend/src/pages/tetris/TetrisHome.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:frontend/src/pages/tetris/TetrisLobby.jsx",
+      "type": "file",
+      "name": "TetrisLobby.jsx",
+      "filePath": "frontend/src/pages/tetris/TetrisLobby.jsx",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:frontend/src/utils/socket.js",
+      "type": "file",
+      "name": "socket.js",
+      "filePath": "frontend/src/utils/socket.js",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:frontend/src/utils/sudoku.js",
+      "type": "file",
+      "name": "sudoku.js",
+      "filePath": "frontend/src/utils/sudoku.js",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:frontend/src/utils/useAudio.js",
+      "type": "file",
+      "name": "useAudio.js",
+      "filePath": "frontend/src/utils/useAudio.js",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:frontend/src/utils/useTetris.js",
+      "type": "file",
+      "name": "useTetris.js",
+      "filePath": "frontend/src/utils/useTetris.js",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:frontend/test_chess.js",
+      "type": "file",
+      "name": "test_chess.js",
+      "filePath": "frontend/test_chess.js",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:frontend/test_chess2.js",
+      "type": "file",
+      "name": "test_chess2.js",
+      "filePath": "frontend/test_chess2.js",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:frontend/test_chess3.js",
+      "type": "file",
+      "name": "test_chess3.js",
+      "filePath": "frontend/test_chess3.js",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:frontend/vite.config.js",
+      "type": "file",
+      "name": "vite.config.js",
+      "filePath": "frontend/vite.config.js",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:test_chess.js",
+      "type": "file",
+      "name": "test_chess.js",
+      "filePath": "test_chess.js",
+      "summary": "A file file for the Sudoku_GameOnl project.",
+      "tags": [
+        "javascript",
+        "code"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [],
+  "layers": [
+    {
+      "id": "layer:frontend",
+      "name": "Frontend",
+      "description": "The React client application",
+      "nodeIds": [
+        "file:frontend/eslint.config.js",
+        "file:frontend/index.html",
+        "config:frontend/package.json",
+        "document:frontend/README.md",
+        "file:frontend/src/App.css",
+        "file:frontend/src/App.jsx",
+        "file:frontend/src/components/Board.jsx",
+        "file:frontend/src/components/Controls.jsx",
+        "file:frontend/src/index.css",
+        "file:frontend/src/main.jsx",
+        "file:frontend/src/pages/caro/CaroGame.jsx",
+        "file:frontend/src/pages/caro/CaroHome.jsx",
+        "file:frontend/src/pages/caro/CaroLobby.jsx",
+        "file:frontend/src/pages/chess/ChessGame.jsx",
+        "file:frontend/src/pages/chess/ChessHome.jsx",
+        "file:frontend/src/pages/chess/ChessLobby.jsx",
+        "file:frontend/src/pages/Home.jsx",
+        "file:frontend/src/pages/pacman/PacmanGame.jsx",
+        "file:frontend/src/pages/pacman/PacmanHome.jsx",
+        "file:frontend/src/pages/snake/SnakeGame.jsx",
+        "file:frontend/src/pages/snake/SnakeHome.jsx",
+        "file:frontend/src/pages/snake/SnakeLobby.jsx",
+        "file:frontend/src/pages/sudoku/SudokuGameMulti.jsx",
+        "file:frontend/src/pages/sudoku/SudokuGameSolo.jsx",
+        "file:frontend/src/pages/sudoku/SudokuHome.jsx",
+        "file:frontend/src/pages/sudoku/SudokuLobby.jsx",
+        "file:frontend/src/pages/tetris/TetrisGame.jsx",
+        "file:frontend/src/pages/tetris/TetrisHome.jsx",
+        "file:frontend/src/pages/tetris/TetrisLobby.jsx",
+        "file:frontend/src/utils/socket.js",
+        "file:frontend/src/utils/sudoku.js",
+        "file:frontend/src/utils/useAudio.js",
+        "file:frontend/src/utils/useTetris.js",
+        "file:frontend/test_chess.js",
+        "file:frontend/test_chess2.js",
+        "file:frontend/test_chess3.js",
+        "file:frontend/vite.config.js"
+      ]
+    },
+    {
+      "id": "layer:backend",
+      "name": "Backend",
+      "description": "The backend server API and WebSockets",
+      "nodeIds": [
+        "config:backend/package.json",
+        "file:backend/server.js"
+      ]
+    },
+    {
+      "id": "layer:root-config",
+      "name": "Root Configuration",
+      "description": "Project-level config and documentation",
+      "nodeIds": [
+        "file:.understand-anything/tmp/ua-project-scan.js",
+        "file:test_chess.js"
+      ]
+    }
+  ],
+  "tour": [
+    {
+      "order": 1,
+      "title": "Backend Entry Point",
+      "description": "The Node.js server setup and WebSocket initializers.",
+      "nodeIds": [
+        "file:backend/server.js"
+      ]
+    },
+    {
+      "order": 2,
+      "title": "Frontend Application Root",
+      "description": "Where the React application boots up.",
+      "nodeIds": [
+        "file:frontend/src/App.jsx"
+      ]
+    }
+  ]
+}
