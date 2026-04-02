@@ -749,7 +749,6 @@ h1 {
 .game-play-panel {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
 }
 
 .chess-board {
