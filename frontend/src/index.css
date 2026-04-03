@@ -212,12 +212,9 @@ textarea,
 
 #root {
   width: 100%;
-  max-width: 100%;  /* Bỏ giới hạn max-width cứng 1200px vốn gây scroll ngang */
-  margin: 0;
-  padding: 0;
-  text-align: left;
   height: 100dvh;
   overflow: hidden;
+  /* Không padding, không max-width, không margin — để dashboard-container chiếm full */
 }
 
 h1 {

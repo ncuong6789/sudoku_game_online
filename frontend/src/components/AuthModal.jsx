@@ -108,8 +108,7 @@ export default function AuthModal({ isOpen, onClose }) {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                             <label style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 600 }}>Tên hiển thị</label>
                             <input type="text" name="displayName" value={formData.displayName}
-                                onChange={handleChange} required placeholder="Ví dụ: PiKuro"
-                                style={inputStyle} />
+                                onChange={handleChange} required style={inputStyle} />
                         </div>
                     )}
 
