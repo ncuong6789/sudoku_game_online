@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutGrid, Grid3X3, Swords, Trophy, Users, X, Activity, Ghost, Crown, Zap, Layers, Hash, Menu, User as UserIcon, LogOut } from 'lucide-react';
+import { LayoutGrid, Grid3X3, Swords, Trophy, Users, X, Activity, Ghost, Crown, Zap, Layers, Hash, Menu, User as UserIcon, LogOut, Info } from 'lucide-react';
 import { socket } from '../utils/socket';
 import AuthModal from '../components/AuthModal';
 import { useAuth } from '../context/AuthContext';
