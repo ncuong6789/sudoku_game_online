@@ -230,37 +230,106 @@ export default function Home() {
                 </div>
             </aside>
 
-            <main className="main-content" style={{ padding: '3rem 4rem', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <main className="main-content" style={{ 
+                padding: '3rem', 
+                flex: 1, 
+                overflowY: 'auto', 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                textAlign: 'center' /* Đồng bộ với #root */
+            }}>
                 {isMobile && (
-                    <button className="hamburger-btn" onClick={() => setIsSidebarOpen(true)} style={{ position: 'absolute', top: '15px', right: '15px', zIndex: 10 }}>
+                    <button className="hamburger-btn" onClick={() => setIsSidebarOpen(true)} style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 100 }}>
                         <Menu size={28} />
                     </button>
                 )}
-                <div className="game-detail" style={{ maxWidth: '700px', width: '100%' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem', gap: '15px' }}>
-                        <div className="game-icon-container" style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '12px' }}>
-                            {activeGame === 'sudoku' && <Grid3X3 size={32} color="var(--accent-color)" />}
-                            {activeGame === 'caro' && <Swords size={32} color="var(--accent-color)" />}
-                            {activeGame === 'chess' && <Crown size={32} color="var(--accent-color)" />}
-                            {activeGame === 'snake' && <Zap size={32} color="var(--accent-color)" />}
-                            {activeGame === 'tetris' && <Layers size={32} color="var(--accent-color)" />}
-                            {activeGame === 'pacman' && <Ghost size={32} color="var(--accent-color)" />}
-                        </div>
-                        <h1 className="game-title" style={{ margin: 0, fontSize: '3rem' }}>{game.name}</h1>
+                
+                <div className="game-detail" style={{ maxWidth: '800px', width: '100%', animation: 'fadeIn 0.4s ease-out' }}>
+                    {/* BREADCRUMB / CATEGORY */}
+                    <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        gap: '8px',
+                        marginBottom: '1rem',
+                        color: 'rgba(255,255,255,0.4)',
+                        fontSize: '0.9rem',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.15em'
+                    }}>
+                        <Layers size={14} /> <span>Games</span>
+                        <span style={{ opacity: 0.3 }}>/</span>
+                        <span style={{ color: 'var(--accent-color)' }}>{game.name}</span>
                     </div>
-                    <p className="game-desc" style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>{game.description}</p>
 
-                    <div className="action-row" style={{ marginBottom: '2rem', display: 'flex', gap: '0.8rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem', gap: '1.5rem' }}>
+                        <div className="game-icon-container" style={{ 
+                            background: 'rgba(255,255,255,0.03)', 
+                            padding: '24px', 
+                            borderRadius: '24px',
+                            border: '1px solid rgba(255,255,255,0.05)',
+                            boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)',
+                            transform: 'translateY(-10px)'
+                        }}>
+                            {activeGame === 'sudoku' && <Grid3X3 size={48} color="var(--accent-color)" />}
+                            {activeGame === 'caro' && <Swords size={48} color="var(--accent-color)" />}
+                            {activeGame === 'chess' && <Crown size={48} color="var(--accent-color)" />}
+                            {activeGame === 'snake' && <Zap size={48} color="var(--accent-color)" />}
+                            {activeGame === 'tetris' && <Layers size={48} color="var(--accent-color)" />}
+                            {activeGame === 'pacman' && <Ghost size={48} color="var(--accent-color)" />}
+                        </div>
+                        <h1 className="game-title" style={{ margin: 0, fontSize: '4.5rem', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1 }}>
+                            {game.name}
+                        </h1>
+                    </div>
+
+                    <p className="game-desc" style={{ 
+                        marginBottom: '2.5rem', 
+                        fontSize: '1.25rem', 
+                        lineHeight: '1.6', 
+                        color: 'rgba(255,255,255,0.7)',
+                        maxWidth: '600px',
+                        margin: '0 auto 3rem'
+                    }}>
+                        {game.description}
+                    </p>
+
+                    <div className="action-row" style={{ marginBottom: '3rem', display: 'flex', gap: '1.2rem', justifyContent: 'center' }}>
                         <button 
                             className={!showHelp ? "btn-primary" : "btn-secondary"} 
                             onClick={() => showHelp ? setShowHelp(false) : navigate(game.path)} 
-                            style={{ flex: 1, padding: '14px', opacity: isUnplayableOnMobile ? 0.5 : 1, cursor: isUnplayableOnMobile ? 'not-allowed' : 'pointer' }}
+                            style={{ 
+                                minWidth: '220px',
+                                padding: '18px 32px', 
+                                fontSize: '1.1rem',
+                                fontWeight: 800,
+                                opacity: isUnplayableOnMobile ? 0.5 : 1, 
+                                cursor: isUnplayableOnMobile ? 'not-allowed' : 'pointer',
+                                borderRadius: '16px'
+                            }}
                             disabled={isUnplayableOnMobile}
                         >
-                            {isUnplayableOnMobile ? 'Sắp có trên Mobile' : 'Bắt đầu chơi'}
+                            {isUnplayableOnMobile ? 'Sắp có trên Mobile' : (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center' }}>
+                                    <Zap size={20} /> Bắt đầu chơi ngay
+                                </span>
+                            )}
                         </button>
-                        <button className={showHelp ? "btn-primary" : "btn-secondary"} onClick={() => setShowHelp(!showHelp)} style={{ flex: 1, padding: '14px' }}>
-                            Hướng dẫn
+                        <button 
+                            className={showHelp ? "btn-primary" : "btn-secondary"} 
+                            onClick={() => setShowHelp(!showHelp)} 
+                            style={{ 
+                                minWidth: '180px',
+                                padding: '18px 32px',
+                                fontSize: '1.1rem',
+                                fontWeight: 700,
+                                borderRadius: '16px'
+                            }}
+                        >
+                            <Info size={20} style={{ marginRight: '8px' }} /> Hướng dẫn
                         </button>
                     </div>
 

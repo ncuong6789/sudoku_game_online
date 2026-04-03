@@ -214,7 +214,7 @@ textarea,
   width: 100%;
   height: 100dvh;
   overflow: hidden;
-  /* Không padding, không max-width, không margin — để dashboard-container chiếm full */
+  text-align: center; /* Trả về mặc định để nội dung game không bị lệch trái */
 }
 
 h1 {

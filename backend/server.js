@@ -34,8 +34,18 @@ app.use(express.json());
 // Database Connection
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/gameonl";
 mongoose.connect(MONGO_URI)
-    .then(() => console.log('✅ Connected to MongoDB'))
-    .catch(err => console.error('❌ MongoDB Connection Error:', err));
+    .then(() => {
+        console.log('------------------------------------');
+        console.log('✅ THIẾT LẬP KẾT NỐI MONGODB THÀNH CÔNG');
+        console.log('URL:', MONGO_URI.includes('@') ? MONGO_URI.split('@')[1] : 'Localhost');
+        console.log('------------------------------------');
+    })
+    .catch(err => {
+        console.error('------------------------------------');
+        console.error('❌ LỖI KẾT NỐI MONGODB:');
+        console.error(err.message);
+        console.error('------------------------------------');
+    });
 
 // Routes
 const authRoutes = require('./routes/auth');

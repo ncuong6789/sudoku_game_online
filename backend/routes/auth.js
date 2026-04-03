@@ -46,7 +46,11 @@ router.post('/register', async (req, res) => {
         });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Lỗi server khi đăng ký.' });
+        res.status(500).json({ 
+            error: 'Lỗi server khi đăng ký.',
+            debug: err.message,
+            stack: err.stack
+        });
     }
 });
 
