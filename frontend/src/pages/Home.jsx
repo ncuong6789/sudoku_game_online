@@ -175,8 +175,7 @@ export default function Home() {
                     <div className="sidebar-logo" style={{ marginBottom: '1rem' }}>GameOnl</div>
 
                     {/* Game list — cuộn nếu cần, không làm sidebar phình */}
-                    <nav style={{ display: 'flex', flexDirection: 'column', gap: '2px', overflowY: 'auto', flex: 1 }}>
-                        <div style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', letterSpacing: '0.12em', padding: '2px 0.8rem 6px', fontWeight: 700 }}>🎮 Games</div>
+                    <nav style={{ display: 'flex', flexDirection: 'column', gap: '3px', overflowY: 'auto', flex: 1 }}>
                         {[
                             { id: 'sudoku', label: 'Sudoku', Icon: Grid3X3 },
                             { id: 'caro', label: 'Tic-Tac-Toe', Icon: Swords },
@@ -187,18 +186,17 @@ export default function Home() {
                         ].map(({ id, label, Icon }) => (
                             <div key={id}
                                 className={`nav-item ${activeGame === id ? 'active' : ''}`}
-                                style={{ padding: '0.65rem 1rem' }}
                                 onClick={() => { setActiveGame(id); setShowHelp(false); if (isMobile) setIsSidebarOpen(false); }}>
-                                <Icon size={18} /> {label}
+                                <Icon size={20} /> {label}
                             </div>
                         ))}
 
                         {/* Social — chỉ hiện khi đã đăng nhập */}
                         {user && (
                             <>
-                                <div style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', letterSpacing: '0.12em', padding: '10px 0.8rem 6px', fontWeight: 700, marginTop: '6px', borderTop: '1px solid rgba(255,255,255,0.07)' }}>👥 Xã hội</div>
-                                <div className="nav-item" style={{ padding: '0.65rem 1rem' }}><Trophy size={18} /> Xếp hạng</div>
-                                <div className="nav-item" style={{ padding: '0.65rem 1rem' }}><Users size={18} /> Bạn bè</div>
+                                <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '8px 0' }} />
+                                <div className="nav-item"><Trophy size={20} /> Xếp hạng</div>
+                                <div className="nav-item"><Users size={20} /> Bạn bè</div>
                             </>
                         )}
                     </nav>
@@ -232,7 +230,7 @@ export default function Home() {
                 </div>
             </aside>
 
-            <main className="main-content" style={{ padding: '3rem', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+            <main className="main-content" style={{ padding: '3rem 4rem', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 {isMobile && (
                     <button className="hamburger-btn" onClick={() => setIsSidebarOpen(true)} style={{ position: 'absolute', top: '15px', right: '15px', zIndex: 10 }}>
                         <Menu size={28} />
