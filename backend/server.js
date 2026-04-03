@@ -42,10 +42,20 @@ const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
 const server = http.createServer(app);
+const allowedOriginFn = (origin, callback) => {
+    const allowed = !origin
+        || origin.includes('vercel.app')
+        || origin.includes('localhost')
+        || origin.includes('onrender.com')
+        || origin === process.env.FRONTEND_URL;
+    if (allowed) callback(null, true);
+    else callback(new Error('Not allowed by CORS'));
+};
 const io = new Server(server, {
     cors: {
-        origin: ALLOWED_ORIGINS,
-        methods: ['GET', 'POST']
+        origin: allowedOriginFn,
+        methods: ['GET', 'POST'],
+        credentials: true
     },
     transports: ['websocket']
 });
