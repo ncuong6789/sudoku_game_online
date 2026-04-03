@@ -168,52 +168,66 @@ export default function Home() {
         <div className="dashboard-container">
             <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
             <div className={`mobile-overlay ${isSidebarOpen ? 'open' : ''}`} onClick={() => setIsSidebarOpen(false)} />
-            <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
-                <div className="sidebar-logo">GameOnl</div>
-                <nav className="nav-group">
-                    <div className={`nav-item ${activeGame === 'sudoku' ? 'active' : ''}`} onClick={() => { setActiveGame('sudoku'); setShowHelp(false); }}>
-                        <Grid3X3 size={20} /> Sudoku
-                    </div>
-                    <div className={`nav-item ${activeGame === 'caro' ? 'active' : ''}`} onClick={() => { setActiveGame('caro'); setShowHelp(false); }}>
-                        <Swords size={20} /> Tic-Tac-Toe
-                    </div>
-                    <div className={`nav-item ${activeGame === 'chess' ? 'active' : ''}`} onClick={() => { setActiveGame('chess'); setShowHelp(false); }}>
-                        <Crown size={20} /> Chess
-                    </div>
-                    <div className={`nav-item ${activeGame === 'snake' ? 'active' : ''}`} onClick={() => { setActiveGame('snake'); setShowHelp(false); }}>
-                        <Zap size={20} /> Snake
-                    </div>
-                    <div className={`nav-item ${activeGame === 'tetris' ? 'active' : ''}`} onClick={() => { setActiveGame('tetris'); setShowHelp(false); }}>
-                        <Layers size={20} /> Tetris
-                    </div>
-                    <div className={`nav-item ${activeGame === 'pacman' ? 'active' : ''}`} onClick={() => { setActiveGame('pacman'); setShowHelp(false); }}>
-                        <Ghost size={20} /> Pacman
-                    </div>
-                </nav>
-                <div className="nav-group" style={{ marginTop: '1rem', flex: 'none' }}>
-                    <div className="nav-item"><Trophy size={20} /> Xếp hạng</div>
-                    <div className="nav-item"><Users size={20} /> Bạn bè</div>
+            <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`} style={{ justifyContent: 'space-between' }}>
+
+                {/* ── TOP: Logo + Menu ── */}
+                <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, flex: 1, overflow: 'hidden' }}>
+                    <div className="sidebar-logo" style={{ marginBottom: '1rem' }}>GameOnl</div>
+
+                    {/* Game list — cuộn nếu cần, không làm sidebar phình */}
+                    <nav style={{ display: 'flex', flexDirection: 'column', gap: '2px', overflowY: 'auto', flex: 1 }}>
+                        <div style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', letterSpacing: '0.12em', padding: '2px 0.8rem 6px', fontWeight: 700 }}>🎮 Games</div>
+                        {[
+                            { id: 'sudoku', label: 'Sudoku', Icon: Grid3X3 },
+                            { id: 'caro', label: 'Tic-Tac-Toe', Icon: Swords },
+                            { id: 'chess', label: 'Chess', Icon: Crown },
+                            { id: 'snake', label: 'Snake', Icon: Zap },
+                            { id: 'tetris', label: 'Tetris', Icon: Layers },
+                            { id: 'pacman', label: 'Pacman', Icon: Ghost },
+                        ].map(({ id, label, Icon }) => (
+                            <div key={id}
+                                className={`nav-item ${activeGame === id ? 'active' : ''}`}
+                                style={{ padding: '0.65rem 1rem' }}
+                                onClick={() => { setActiveGame(id); setShowHelp(false); if (isMobile) setIsSidebarOpen(false); }}>
+                                <Icon size={18} /> {label}
+                            </div>
+                        ))}
+
+                        {/* Social — chỉ hiện khi đã đăng nhập */}
+                        {user && (
+                            <>
+                                <div style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', letterSpacing: '0.12em', padding: '10px 0.8rem 6px', fontWeight: 700, marginTop: '6px', borderTop: '1px solid rgba(255,255,255,0.07)' }}>👥 Xã hội</div>
+                                <div className="nav-item" style={{ padding: '0.65rem 1rem' }}><Trophy size={18} /> Xếp hạng</div>
+                                <div className="nav-item" style={{ padding: '0.65rem 1rem' }}><Users size={18} /> Bạn bè</div>
+                            </>
+                        )}
+                    </nav>
                 </div>
-                <div className="sidebar-footer" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '15px' }}>
+
+                {/* ── BOTTOM: User Info / Đăng nhập ── */}
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '14px', flexShrink: 0, marginTop: '8px' }}>
                     {user ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <div style={{ background: 'var(--accent-color)', borderRadius: '50%', padding: '5px' }}>
-                                    <UserIcon size={20} color="#000" />
+                                <div style={{ background: 'linear-gradient(135deg, var(--accent-color), #8b5cf6)', borderRadius: '50%', padding: '7px', flexShrink: 0 }}>
+                                    <UserIcon size={16} color="#fff" />
                                 </div>
-                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{user.displayName}</span>
-                                    <span style={{ fontSize: '0.75rem', color: '#fbbf24' }}>Rank: {user.score}</span>
+                                <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                                    <span style={{ fontWeight: 700, fontSize: '0.88rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.displayName}</span>
+                                    <span style={{ fontSize: '0.72rem', color: '#fbbf24' }}>⭐ {user.score ?? 0} điểm</span>
                                 </div>
                             </div>
-                            <button onClick={logout} className="btn-secondary" style={{ padding: '8px', fontSize: '0.8rem', display: 'flex', justifyContent: 'center', gap: '5px' }}>
+                            <button onClick={logout} className="btn-secondary" style={{ padding: '8px', fontSize: '0.8rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px' }}>
                                 <LogOut size={14} /> Đăng xuất
                             </button>
                         </div>
                     ) : (
-                        <button className="btn-primary" onClick={() => setShowAuthModal(true)} style={{ width: '100%', padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-                            <UserIcon size={16} /> Đăng Nhập
-                        </button>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', textAlign: 'center' }}>Đăng nhập để xem xếp hạng</p>
+                            <button className="btn-primary" onClick={() => setShowAuthModal(true)} style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.88rem' }}>
+                                <UserIcon size={15} /> Đăng Nhập
+                            </button>
+                        </div>
                     )}
                 </div>
             </aside>
