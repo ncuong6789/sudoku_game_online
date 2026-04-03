@@ -15,9 +15,19 @@ const ALLOWED_ORIGINS = [
 
 const app = express();
 app.use(cors({
-    origin: ALLOWED_ORIGINS,
+    origin: (origin, callback) => {
+        // Cho phép: Vercel (gameonl.vercel.app), localhost, và không có origin (Postman/server-to-server)
+        const allowed = !origin
+            || origin.includes('vercel.app')
+            || origin.includes('localhost')
+            || origin.includes('onrender.com')
+            || origin === process.env.FRONTEND_URL;
+        if (allowed) callback(null, true);
+        else callback(new Error('Not allowed by CORS'));
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
 }));
 app.use(express.json());
 

@@ -69,14 +69,18 @@ textarea,
   border-right: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
-  padding: 2rem 1.5rem;
+  padding: 1.5rem 1.2rem;
   z-index: 10;
+  overflow: hidden;  /* CHẶN sidebar phình vượt viewport */
+  height: 100dvh;
+  box-sizing: border-box;
 }
 
 .sidebar-logo {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: 900;
-  margin-bottom: 3rem;
+  margin-bottom: 1rem;  /* Thu gọn từ 3rem → 1rem */
+  flex-shrink: 0;
   background: linear-gradient(135deg, #fff 0%, var(--primary-color) 100%);
   -webkit-background-clip: text;
   background-clip: text;
