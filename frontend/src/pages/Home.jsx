@@ -230,13 +230,13 @@ export default function Home() {
                 </div>
             </aside>
 
-            <main className="main-content" style={{ 
-                padding: '3rem', 
-                flex: 1, 
-                overflowY: 'auto', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
+            <main className="main-content" style={{
+                padding: '3rem',
+                flex: 1,
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
                 justifyContent: 'center',
                 textAlign: 'center' /* Đồng bộ với #root */
             }}>
@@ -245,12 +245,12 @@ export default function Home() {
                         <Menu size={28} />
                     </button>
                 )}
-                
+
                 <div className="game-detail" style={{ maxWidth: '800px', width: '100%', animation: 'fadeIn 0.4s ease-out' }}>
                     {/* BREADCRUMB / CATEGORY */}
-                    <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
                         justifyContent: 'center',
                         gap: '8px',
                         marginBottom: '1rem',
@@ -266,9 +266,9 @@ export default function Home() {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem', gap: '1.5rem' }}>
-                        <div className="game-icon-container" style={{ 
-                            background: 'rgba(255,255,255,0.03)', 
-                            padding: '24px', 
+                        <div className="game-icon-container" style={{
+                            background: 'rgba(255,255,255,0.03)',
+                            padding: '24px',
                             borderRadius: '24px',
                             border: '1px solid rgba(255,255,255,0.05)',
                             boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)',
@@ -286,10 +286,10 @@ export default function Home() {
                         </h1>
                     </div>
 
-                    <p className="game-desc" style={{ 
-                        marginBottom: '2.5rem', 
-                        fontSize: '1.25rem', 
-                        lineHeight: '1.6', 
+                    <p className="game-desc" style={{
+                        marginBottom: '2.5rem',
+                        fontSize: '1.25rem',
+                        lineHeight: '1.6',
                         color: 'rgba(255,255,255,0.7)',
                         maxWidth: '600px',
                         margin: '0 auto 3rem'
@@ -298,15 +298,15 @@ export default function Home() {
                     </p>
 
                     <div className="action-row" style={{ marginBottom: '3rem', display: 'flex', gap: '1.2rem', justifyContent: 'center' }}>
-                        <button 
-                            className={!showHelp ? "btn-primary" : "btn-secondary"} 
-                            onClick={() => showHelp ? setShowHelp(false) : navigate(game.path)} 
-                            style={{ 
+                        <button
+                            className={!showHelp ? "btn-primary" : "btn-secondary"}
+                            onClick={() => showHelp ? setShowHelp(false) : navigate(game.path)}
+                            style={{
                                 minWidth: '220px',
-                                padding: '18px 32px', 
+                                padding: '18px 32px',
                                 fontSize: '1.1rem',
                                 fontWeight: 800,
-                                opacity: isUnplayableOnMobile ? 0.5 : 1, 
+                                opacity: isUnplayableOnMobile ? 0.5 : 1,
                                 cursor: isUnplayableOnMobile ? 'not-allowed' : 'pointer',
                                 borderRadius: '16px'
                             }}
@@ -318,10 +318,10 @@ export default function Home() {
                                 </span>
                             )}
                         </button>
-                        <button 
-                            className={showHelp ? "btn-primary" : "btn-secondary"} 
-                            onClick={() => setShowHelp(!showHelp)} 
-                            style={{ 
+                        <button
+                            className={showHelp ? "btn-primary" : "btn-secondary"}
+                            onClick={() => setShowHelp(!showHelp)}
+                            style={{
                                 minWidth: '180px',
                                 padding: '18px 32px',
                                 fontSize: '1.1rem',
