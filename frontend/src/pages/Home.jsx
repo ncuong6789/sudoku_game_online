@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutGrid, Grid3X3, Swords, Trophy, Users, X, Activity, Ghost, Crown, Zap, Layers, Hash, Menu } from 'lucide-react';
+import { LayoutGrid, Grid3X3, Swords, Trophy, Users, X, Activity, Ghost, Crown, Zap, Layers, Hash, Menu, User as UserIcon, LogOut } from 'lucide-react';
 import { socket } from '../utils/socket';
+import AuthModal from '../components/AuthModal';
+import { useAuth } from '../context/AuthContext';
 
 const games = {
     sudoku: {
@@ -95,6 +97,9 @@ const games = {
 
 export default function Home() {
     const navigate = useNavigate();
+    const auth = useAuth();
+    const { user, logout } = auth || {};
+    const [showAuthModal, setShowAuthModal] = useState(false);
     // Persistence: Get last active game from localStorage
     const [activeGame, setActiveGame] = useState(() => localStorage.getItem('lastGame') || 'sudoku');
     const [showHelp, setShowHelp] = useState(false);
@@ -161,6 +166,7 @@ export default function Home() {
 
     return (
         <div className="dashboard-container">
+            <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
             <div className={`mobile-overlay ${isSidebarOpen ? 'open' : ''}`} onClick={() => setIsSidebarOpen(false)} />
             <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
                 <div className="sidebar-logo">GameOnl</div>
@@ -188,7 +194,28 @@ export default function Home() {
                     <div className="nav-item"><Trophy size={20} /> Xếp hạng</div>
                     <div className="nav-item"><Users size={20} /> Bạn bè</div>
                 </div>
-                <div className="sidebar-footer">GameOnl v1.2</div>
+                <div className="sidebar-footer" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '15px' }}>
+                    {user ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div style={{ background: 'var(--accent-color)', borderRadius: '50%', padding: '5px' }}>
+                                    <UserIcon size={20} color="#000" />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{user.displayName}</span>
+                                    <span style={{ fontSize: '0.75rem', color: '#fbbf24' }}>Rank: {user.score}</span>
+                                </div>
+                            </div>
+                            <button onClick={logout} className="btn-secondary" style={{ padding: '8px', fontSize: '0.8rem', display: 'flex', justifyContent: 'center', gap: '5px' }}>
+                                <LogOut size={14} /> Đăng xuất
+                            </button>
+                        </div>
+                    ) : (
+                        <button className="btn-primary" onClick={() => setShowAuthModal(true)} style={{ width: '100%', padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+                            <UserIcon size={16} /> Đăng Nhập
+                        </button>
+                    )}
+                </div>
             </aside>
 
             <main className="main-content" style={{ padding: '3rem', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>

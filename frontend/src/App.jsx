@@ -1,5 +1,6 @@
 import React from 'react';
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
 import SudokuHome from './pages/sudoku/SudokuHome';
 import SoloGame from './pages/sudoku/SudokuGameSolo';
@@ -32,8 +33,9 @@ import PacmanGame from './pages/pacman/PacmanGame';
 
 function App() {
   return (
-    <HashRouter>
-      <Routes>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
         <Route path="/" element={<Home />} />
         
         {/* Sudoku Module */}
@@ -65,8 +67,9 @@ function App() {
         {/* Pacman Module */}
         <Route path="/pacman" element={<PacmanHome />} />
         <Route path="/pacman/game" element={<PacmanGame />} />
-      </Routes>
-    </HashRouter>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
