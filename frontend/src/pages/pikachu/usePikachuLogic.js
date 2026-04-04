@@ -1,5 +1,17 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 
+// Audio
+const tapSound = new window.Audio('/pikachu_audio/tap.ogg');
+const leadSound = new window.Audio('/pikachu_audio/lead.ogg');
+const bgWinsound = new window.Audio('/pikachu_audio/bg1.ogg'); 
+
+const playSound = (audioObj) => {
+    try {
+        audioObj.currentTime = 0;
+        audioObj.play().catch(() => {});
+    } catch(e) {}
+};
+
 const ROWS = 16;
 const COLS = 16;
 // Grid will be (ROWS + 2) x (COLS + 2) for boundary
@@ -210,12 +222,21 @@ export function usePikachuLogic() {
     const [hints, setHints] = useState(3);
     const [shuffles, setShuffles] = useState(1);
     const [hintPair, setHintPair] = useState(null);
+    const [penaltyFlash, setPenaltyFlash] = useState(false);
     const timerRef = useRef(null);
+
+    // Trigger the red-flash animation on the timer bar
+    const triggerPenalty = useCallback((amount) => {
+        setTimeLeft(prev => Math.max(0, prev - amount));
+        setPenaltyFlash(true);
+        setTimeout(() => setPenaltyFlash(false), 600);
+    }, []);
 
     const checkAndFixDeadlock = useCallback((currentBoard) => {
         let pair = hasValidPair(currentBoard);
         if (pair === 'win') {
             setStatus('won');
+            playSound(bgWinsound);
             return currentBoard;
         }
         let maxTries = 50;
@@ -237,6 +258,8 @@ export function usePikachuLogic() {
         setBoard(b);
         setTimeLeft(100);
         setStatus('playing');
+        bgWinsound.pause();
+        bgWinsound.currentTime = 0;
         setSelected(null);
         setConnectedPath(null);
         setHints(3);
@@ -253,20 +276,24 @@ export function usePikachuLogic() {
         if (status === 'playing') {
             timerRef.current = setInterval(() => {
                 setTimeLeft(prev => {
-                    if (prev <= 1) {
+                    if (prev <= 0) {
                         setStatus('gameover');
                         clearInterval(timerRef.current);
                         return 0;
                     }
-                    return prev - 0.5; // Decrement every second (using 100 as total, so 0.5 is 200s total or we can just decrement. Let's say 150s)
+                    // Giảm % theo thời gian (giả sử tổng 250s cho 1 màn => 0.04% mỗi 100ms)
+                    // Hoặc đơn giản là giảm rất nhỏ để mượt mà
+                    return prev - 0.06; 
                 });
-            }, 1000);
+            }, 100);
         }
         return () => clearInterval(timerRef.current);
     }, [status]);
 
     const handleTileClick = (r, c) => {
         if (status !== 'playing' || board[r][c] === 0 || connectedPath) return;
+
+        playSound(tapSound);
 
         if (!selected) {
             setSelected({ r, c });
@@ -280,11 +307,15 @@ export function usePikachuLogic() {
             const path = findPath(board, selected, { r, c });
             if (path) {
                 setConnectedPath(path);
+                playSound(leadSound);
                 // Draw path, then remove
                 setTimeout(() => {
                     let newBoard = applyLevelMovement(board, selected, { r, c }, level);
                     newBoard = checkAndFixDeadlock(newBoard);
-                    if (hasValidPair(newBoard) === 'win') setStatus('won');
+                    if (hasValidPair(newBoard) === 'win') {
+                        setStatus('won');
+                        playSound(bgWinsound);
+                    }
                     
                     setBoard(newBoard);
                     setScore(s => s + 10);
@@ -293,7 +324,10 @@ export function usePikachuLogic() {
                     setConnectedPath(null);
                 }, 400); // 400ms for path animation
             } else {
-                setSelected({ r, c });
+                // Wrong move — no valid path between the two tiles
+                // Apply time penalty (-10%) and show flash
+                triggerPenalty(10);
+                setSelected({ r, c }); // Switch selection to new tile
             }
         }
     };
@@ -320,7 +354,7 @@ export function usePikachuLogic() {
 
     return {
         board, ROWS, COLS, level, score, timeLeft, status, selected, connectedPath,
-        hints, shuffles, hintPair,
+        hints, shuffles, hintPair, penaltyFlash,
         handleTileClick, useHint, handleShuffle, initGame, checkAndFixDeadlock
     };
 }

@@ -51,6 +51,9 @@ mongoose.connect(MONGO_URI)
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
+const healthRoutes = require('./routes/health');
+app.use('/api/health', healthRoutes);
+
 const server = http.createServer(app);
 const allowedOriginFn = (origin, callback) => {
     const allowed = !origin
@@ -133,6 +136,9 @@ io.on('connection', (socket) => {
         console.log('User disconnected:', socket.id);
     });
 });
+
+// Inject io + roomManager into health route for diagnostics
+healthRoutes.init(io, roomManager);
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {

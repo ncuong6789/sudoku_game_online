@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Trophy, Activity } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Trophy, Activity, Volume2, VolumeX } from 'lucide-react';
 import { socket } from '../../utils/socket';
 import { INITIAL_SPEED, DASH_COOLDOWN } from './snakeAI';
 import { useSnakeLogic } from './useSnakeLogic';
+import { useBgMusic } from '../../hooks/useBgMusic';
 
 // ─── CANVAS ──────────────────────────────────────────────────────────────────
 function roundRect(ctx, x, y, w, h, r) {
@@ -216,7 +217,7 @@ function LeftPanel({ gameRef, gameOver, accentColor, resultEmoji, resultTitle, r
 }
 
 // ─── RIGHT PANEL ─────────────────────────────────────────────────────────────
-function RightPanel({ mode, gameOver, handleRestart, navigate, playerColor }) {
+function RightPanel({ mode, gameOver, handleRestart, navigate, playerColor, muted, toggleMute }) {
     const cardStyle = { borderRadius: '10px', padding: '12px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '10px' };
     const labelStyle = { fontSize: '0.72rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' };
     const rowStyle = { display: 'flex', alignItems: 'flex-start', gap: '9px', fontSize: '0.82rem', color: '#cbd5e1', marginBottom: '6px', lineHeight: 1.4 };
@@ -254,6 +255,9 @@ function RightPanel({ mode, gameOver, handleRestart, navigate, playerColor }) {
                         {gameOver && <span style={{ fontSize: '0.65rem', opacity: 0.8, fontWeight: 400 }}>(Phím Space)</span>}
                     </button>
                 )}
+                <button onClick={toggleMute} style={{ width: '100%', padding: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.9rem', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: muted ? '#ef4444' : '#4ade80', cursor: 'pointer' }}>
+                    {muted ? <VolumeX size={15} /> : <Volume2 size={15} />} {muted ? 'Bật nhạc' : 'Tắt nhạc'}
+                </button>
                 <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/snake/multiplayer' : '/snake')} style={{ width: '100%', padding: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', fontSize: '0.9rem' }}>
                     <ArrowLeft size={15} /> Thoát
                 </button>
@@ -270,6 +274,8 @@ export default function SnakeGame() {
         location.state || { mode: 'solo', mapSize: 20, roomId: null, difficulty: 'Medium', hasBot: false };
         
     const { gameRef, uiState, gameState, countdown, handleRestart } = useSnakeLogic(mode, mapSize, roomId, hasBot, difficulty);
+
+    const { muted, toggleMute } = useBgMusic('/audio/snake_bg.ogg', !uiState.gameOver, 0.28);
 
     const myColor = playerColor === 'green' ? '#4ade80' : '#60a5fa';
     const myColorLabel = playerColor === 'green' ? 'Xanh' : 'Lam';
@@ -347,7 +353,7 @@ export default function SnakeGame() {
                         </div>
                     </div>
 
-                    <RightPanel mode={mode} gameOver={uiState.gameOver} handleRestart={handleRestart} navigate={navigate} playerColor={playerColor} />
+                    <RightPanel mode={mode} gameOver={uiState.gameOver} handleRestart={handleRestart} navigate={navigate} playerColor={playerColor} muted={muted} toggleMute={toggleMute} />
                 </div>
             </div>
         </div>

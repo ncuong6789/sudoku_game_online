@@ -35,6 +35,9 @@ import PacmanGame from './pages/pacman/PacmanGame';
 import PikachuHome from './pages/pikachu/PikachuHome';
 import PikachuGame from './pages/pikachu/PikachuGame';
 
+// Test Dashboard
+import GameTestDashboard from './pages/test/GameTestDashboard';
+
 function App() {
   return (
     <AuthProvider>
@@ -75,6 +78,9 @@ function App() {
         {/* Pikachu Module */}
         <Route path="/pikachu" element={<PikachuHome />} />
         <Route path="/pikachu/game" element={<PikachuGame />} />
+
+        {/* Test Dashboard */}
+        <Route path="/test" element={<GameTestDashboard />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

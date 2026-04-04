@@ -1,7 +1,8 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Heart } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Heart, Volume2, VolumeX } from 'lucide-react';
 import { usePacmanLogic } from './usePacmanLogic';
+import { useBgMusic } from '../../hooks/useBgMusic';
 
 // ─── Custom Cute Ghost SVG ───────────────────────────────────────────────────
 function GhostArt({ color = '#ef4444', dir = { x: 0, y: 0 }, state = 'chase', size = '95%', frightenedFlash = false }) {
@@ -52,6 +53,9 @@ export default function PacmanGame() {
         mapGrid, pacman, ghosts, dots, pills, score, lives, phase,
         frightenedTimer, protectedTimer, totalDotsRef, handleRestart
     } = usePacmanLogic(mapType, difficulty);
+
+    const isPlaying = phase === 'playing' || phase === 'ready';
+    const { muted, toggleMute } = useBgMusic('/audio/pacman_bg.ogg', isPlaying, 0.3);
 
     if (!mapGrid.length || !pacman) return (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
@@ -248,6 +252,9 @@ export default function PacmanGame() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: 'auto' }}>
                     <button className="btn-primary" onClick={handleRestart} style={{ padding: '9px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', width: '100%', fontSize: '0.9rem' }}>
                         <RotateCcw size={15} /> Chơi Lại
+                    </button>
+                    <button onClick={toggleMute} style={{ width: '100%', padding: '9px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontSize: '0.9rem', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: muted ? '#ef4444' : '#4ade80', cursor: 'pointer' }}>
+                        {muted ? <VolumeX size={15} /> : <Volume2 size={15} />} {muted ? 'Bật nhạc' : 'Tắt nhạc'}
                     </button>
                     <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '9px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', width: '100%', fontSize: '0.9rem' }}>
                         <ArrowLeft size={15} /> Về Sảnh

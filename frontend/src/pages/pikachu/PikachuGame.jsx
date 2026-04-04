@@ -1,16 +1,19 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RefreshCw, Lightbulb, FastForward } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Lightbulb, FastForward, Volume2, VolumeX } from 'lucide-react';
 import { usePikachuLogic } from './usePikachuLogic';
+import { useBgMusic } from '../../hooks/useBgMusic';
 
 export default function PikachuGame() {
     const navigate = useNavigate();
     const gameBoardRef = useRef(null);
     const {
         board, ROWS, COLS, level, score, timeLeft, status, selected, connectedPath,
-        hints, shuffles, hintPair,
+        hints, shuffles, hintPair, penaltyFlash,
         handleTileClick, useHint, handleShuffle, initGame
     } = usePikachuLogic();
+
+    const { muted, toggleMute } = useBgMusic('/audio/pikachu_bg.ogg', status === 'playing', 0.3);
 
     const renderPath = () => {
         if (!connectedPath || connectedPath.length < 2 || !gameBoardRef.current) return null;
@@ -49,26 +52,82 @@ export default function PikachuGame() {
     };
 
     return (
-        <div className="full-page-mobile-scroll" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100vw', height: '100vh', padding: '1rem', boxSizing: 'border-box', background: '#0d1117' }}>
+        <div className="full-page-mobile-scroll" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100vw', height: '100vh', padding: '2rem 1rem', boxSizing: 'border-box' }}>
+            <style>{`
+                @keyframes penaltyShake {
+                    0%   { transform: translateX(0); }
+                    20%  { transform: translateX(-6px); }
+                    40%  { transform: translateX(6px); }
+                    60%  { transform: translateX(-4px); }
+                    80%  { transform: translateX(4px); }
+                    100% { transform: translateX(0); }
+                }
+                @keyframes fadeUp {
+                    0%   { opacity: 1; transform: translateY(0); }
+                    100% { opacity: 0; transform: translateY(-14px); }
+                }
+            `}</style>
             
             {/* Header: Timer & Score */}
-            <div style={{ width: '100%', maxWidth: '900px', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1rem', flexShrink: 0 }}>
+            <div style={{ width: '100%', maxWidth: '1000px', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '1rem', flexShrink: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', fontSize: '1.2rem', fontWeight: 'bold' }}>
                     <div>Level: <span style={{ color: '#eab308' }}>{level}</span></div>
-                    <div>Score: <span style={{ color: '#4ade80' }}>{score}</span></div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <button onClick={toggleMute} style={{ background: 'none', border: 'none', cursor: 'pointer', color: muted ? '#ef4444' : '#4ade80', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }}>
+                            {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                        </button>
+                        Score: <span style={{ color: '#4ade80' }}>{score}</span>
+                    </div>
                 </div>
                 {/* Timer Bar */}
-                <div style={{ width: '100%', height: '24px', background: 'rgba(255,255,255,0.1)', borderRadius: '12px', overflow: 'hidden', border: '2px solid rgba(255,255,255,0.2)' }}>
+                <div style={{ 
+                    width: '100%', height: '20px', 
+                    background: '#334155', 
+                    borderRadius: '10px', 
+                    overflow: 'hidden', 
+                    border: penaltyFlash ? '2px solid #ef4444' : '2px solid rgba(255,255,255,0.1)',
+                    boxShadow: penaltyFlash ? '0 0 12px rgba(239,68,68,0.9), inset 0 2px 5px rgba(0,0,0,0.5)' : 'inset 0 2px 5px rgba(0,0,0,0.5)',
+                    animation: penaltyFlash ? 'penaltyShake 0.3s ease' : 'none',
+                    transition: 'border 0.15s, box-shadow 0.15s'
+                }}>
                     <div style={{ 
-                        height: '100%', 
-                        width: `${timeLeft}%`, 
-                        background: timeLeft > 50 ? 'linear-gradient(90deg, #22c55e, #84cc16)' : timeLeft > 20 ? 'linear-gradient(90deg, #eab308, #f59e0b)' : 'linear-gradient(90deg, #ef4444, #dc2626)',
-                        transition: 'width 1s linear, background 0.3s'
+                        height: '100%',
+                        width: `${timeLeft}%`,
+                        background: penaltyFlash
+                            ? '#ef4444'
+                            : (timeLeft > 50 ? '#22c55e' : (timeLeft > 20 ? '#eab308' : '#ef4444')),
+                        transition: penaltyFlash
+                            ? 'width 0.15s cubic-bezier(0.3, 0, 0.7, 1), background 0.1s'
+                            : 'width 0.1s linear, background 0.3s ease',
+                        boxShadow: 'inset 0 5px 5px rgba(255,255,255,0.2)'
                     }} />
                 </div>
+                {/* Penalty indicator text */}
+                {penaltyFlash && (
+                    <div style={{
+                        color: '#ef4444',
+                        fontSize: '0.85rem',
+                        fontWeight: 'bold',
+                        textAlign: 'right',
+                        animation: 'fadeUp 0.6s ease forwards',
+                        userSelect: 'none',
+                        pointerEvents: 'none'
+                    }}>-10% thời gian ⚠️</div>
+                )}
             </div>
 
-            <div className="glass-panel" style={{ width: 'fit-content', padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'flex-start', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div style={{ 
+                width: '100%', maxWidth: '1000px', 
+                background: '#1e293b', 
+                borderRadius: '8px', 
+                padding: '20px', 
+                display: 'flex', 
+                gap: '20px', 
+                alignItems: 'flex-start',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+            }}>
                 
                 {/* Lưới Game */}
                 <div 
@@ -83,10 +142,11 @@ export default function PikachuGame() {
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         borderRadius: '4px',
-                        border: '2px solid rgba(255,255,255,0.2)',
-                        boxShadow: '0 0 20px rgba(0,0,0,0.8)',
-                        width: 'min(85vw, 75vh, 800px)',
-                        height: 'min(85vw, 75vh, 800px)',
+                        border: '2px solid rgba(0,0,0,0.5)',
+                        boxShadow: '0 0 15px rgba(0,0,0,0.6)',
+                        width: 'calc(100% - 240px)', // Chừa phần cho sidebar
+                        aspectRatio: '1/1', // Đảm bảo hình vuông
+                        minWidth: '300px'
                     }}
                 >
                     {renderPath()}
@@ -134,10 +194,10 @@ export default function PikachuGame() {
                 </div>
 
                 {/* Sidebar Controls */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minWidth: '180px' }}>
-                    <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px' }}>
-                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Movement Mode</div>
-                        <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '1.2rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '220px', flexShrink: 0 }}>
+                    <div style={{ background: '#334155', padding: '1.5rem 1rem', borderRadius: '8px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>MOVEMENT MODE</div>
+                        <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '1.3rem' }}>
                             {((level-1)%5) === 0 ? 'STATIC' : 
                              ((level-1)%5) === 1 ? 'GRAVITY DOWN' : 
                              ((level-1)%5) === 2 ? 'SHIFT LEFT' : 
@@ -145,15 +205,17 @@ export default function PikachuGame() {
                         </div>
                     </div>
 
-                    <button className="btn-primary" onClick={useHint} disabled={hints <= 0} style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '8px', opacity: hints <= 0 ? 0.5 : 1 }}>
-                        <Lightbulb size={18} /> Gợi ý (Còn {hints})
-                    </button>
-                    <button className="btn-secondary" onClick={handleShuffle} disabled={shuffles <= 0} style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '8px', opacity: shuffles <= 0 ? 0.5 : 1 }}>
-                        <RefreshCw size={18} /> Đảo hình (Còn {shuffles})
-                    </button>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <button className="btn-primary" onClick={useHint} disabled={hints <= 0} style={{ padding: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: hints <= 0 ? 0.5 : 1, background: '#3b82f6' }}>
+                            <Lightbulb size={18} /> Gợi ý (Còn {hints})
+                        </button>
+                        <button className="btn-secondary" onClick={handleShuffle} disabled={shuffles <= 0} style={{ padding: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: shuffles <= 0 ? 0.5 : 1, background: 'transparent' }}>
+                            <RefreshCw size={18} /> Đảo hình (Còn {shuffles})
+                        </button>
+                    </div>
                     
                     <div style={{ flex: 1 }} />
-                    <button className="btn-secondary" onClick={() => navigate('/pikachu')} style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)' }}>
+                    <button className="btn-secondary" onClick={() => navigate('/pikachu')} style={{ padding: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)', marginTop: '20px' }}>
                         <ArrowLeft size={18} /> Thoát Game
                     </button>
                 </div>

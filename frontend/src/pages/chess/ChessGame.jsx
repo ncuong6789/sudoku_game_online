@@ -301,7 +301,7 @@ export default function ChessGame() {
     }, [optionSquares, moveHistory]);
 
     return (
-        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100vw', height: '100vh', padding: '0.5rem', boxSizing: 'border-box', background: '#0d1117' }}>
+        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100vw', height: '100vh', padding: '0.5rem', boxSizing: 'border-box' }}>
             <div className="glass-panel game-play-panel" style={{
                 position: 'relative',
                 overflow: 'hidden',
