@@ -250,13 +250,13 @@ export default function ChessGame() {
 
     const handleUndo = () => {
         if (mode !== 'solo' || gameOver) return;
-        
+
         setGame((g) => {
             const newGame = new Chess();
             newGame.loadPgn(g.pgn());
-            
+
             if (newGame.history().length === 0) return g;
-            
+
             // Nếu tới lượt mình, tức là AI vừa đi xong -> Undo cả nước AI và nước của mình
             if (newGame.turn() === myColor) {
                 newGame.undo();
@@ -267,7 +267,7 @@ export default function ChessGame() {
             }
             return newGame;
         });
-        
+
         setMoveFrom(null);
         setOptionSquares({});
     };
@@ -478,7 +478,7 @@ export default function ChessGame() {
                             <div style={{
                                 flex: '1 1 0%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                                 background: myColor === 'w' ? '#1e1e1e' : '#f8f9fa',
-                                padding: '12px 4px', borderRadius: '12px', border: myColor === 'w' ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(0,0,0,0.15)', 
+                                padding: '12px 4px', borderRadius: '12px', border: myColor === 'w' ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(0,0,0,0.15)',
                                 overflow: 'hidden'
                             }}>
                                 <div style={{ fontSize: '2rem', lineHeight: 1, marginBottom: '2px', color: myColor === 'w' ? '#f8f9fa' : '#1e1e1e' }}>{myColor === 'w' ? '♚' : '♔'}</div>

@@ -25,6 +25,8 @@
 
 body {
   margin: 0;
+  display: flex;
+  place-items: center;
   width: 100vw;
   height: 100dvh;
   overflow: hidden;
@@ -69,7 +71,8 @@ textarea,
   flex-direction: column;
   padding: 1.5rem 1.2rem;
   z-index: 10;
-  overflow: hidden;  /* CHẶN sidebar phình vượt viewport */
+  overflow: hidden;
+  /* CHẶN sidebar phình vượt viewport */
   height: 100dvh;
   box-sizing: border-box;
 }
@@ -77,7 +80,8 @@ textarea,
 .sidebar-logo {
   font-size: 1.6rem;
   font-weight: 900;
-  margin-bottom: 1rem;  /* Thu gọn từ 3rem → 1rem */
+  margin-bottom: 1rem;
+  /* Thu gọn từ 3rem → 1rem */
   flex-shrink: 0;
   background: linear-gradient(135deg, #fff 0%, var(--primary-color) 100%);
   -webkit-background-clip: text;
@@ -104,7 +108,8 @@ textarea,
   transition: all 0.2s ease;
   cursor: pointer;
   font-weight: 600;
-  font-size: 0.95rem;  /* Tăng từ mặc định lên rõ hơn */
+  font-size: 0.95rem;
+  /* Tăng từ mặc định lên rõ hơn */
   letter-spacing: 0.01em;
 }
 
@@ -212,7 +217,8 @@ textarea,
   width: 100%;
   height: 100dvh;
   overflow: hidden;
-  text-align: center; /* Trả về mặc định để nội dung game không bị lệch trái */
+  text-align: center;
+  /* Trả về mặc định để nội dung game không bị lệch trái */
 }
 
 h1 {
@@ -360,6 +366,7 @@ h1 {
 
 /* ─── MOBILE RESPONSIVE STYLES ─── */
 @media (max-width: 768px) {
+
   /* Sidebar Drawer */
   .sidebar {
     position: fixed;
@@ -372,24 +379,27 @@ h1 {
     background: rgba(15, 23, 42, 0.95);
     backdrop-filter: blur(15px);
   }
-  
+
   .sidebar.open {
     left: 0;
   }
-  
+
   .mobile-overlay {
     display: none;
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: rgba(0, 0, 0, 0.6);
     z-index: 99;
     backdrop-filter: blur(4px);
   }
-  
+
   .mobile-overlay.open {
     display: block;
   }
-  
+
   .hamburger-btn {
     display: flex !important;
   }
@@ -403,46 +413,47 @@ h1 {
   .game-title {
     font-size: 2rem !important;
   }
-  
+
   .action-row {
     margin-bottom: 2rem !important;
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .matchmaking-grid {
     grid-template-columns: 1fr !important;
   }
-  
+
   .matchmaking-col-1 {
     border-right: none !important;
     padding-right: 0 !important;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 1.5rem;
     margin-bottom: 1.5rem;
   }
 
   /* Game sizing adjustments */
-  .sudoku-container, .game-container {
+  .sudoku-container,
+  .game-container {
     width: 100%;
     max-width: 100vw;
   }
-  
+
   .header-info {
     font-size: 0.75rem;
     padding: 6px;
     gap: 8px;
   }
-  
+
   .numpad {
     gap: 6px;
   }
-  
+
   .btn-num {
     padding: 10px 0;
     font-size: 1.4rem;
   }
-  
+
   .controls-panel {
     max-width: 100%;
   }
@@ -457,6 +468,7 @@ h1 {
   padding: 8px;
   border-radius: 8px;
 }
+
 .hamburger-btn:hover {
   background: rgba(255, 255, 255, 0.1);
 }
@@ -774,14 +786,15 @@ h1 {
     border: none !important;
     display: flex !important;
   }
-  
-  .game-play-panel > div {
-    max-height: none !important; 
+
+  .game-play-panel>div {
+    max-height: none !important;
     max-width: 100vw !important;
     flex-shrink: 0 !important;
   }
 
-  .chess-board, .caro-board {
+  .chess-board,
+  .caro-board {
     --board-size-mobile: calc(100vw - 20px);
     width: var(--board-size-mobile) !important;
     aspect-ratio: 1 / 1 !important;
@@ -799,4 +812,4 @@ h1 {
     justify-content: flex-start !important;
     align-items: center !important;
   }
-}
+}

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutGrid, Grid3X3, Swords, Trophy, Users, X, Activity, Ghost, Crown, Zap, Layers, Hash, Menu, User as UserIcon, LogOut, Info } from 'lucide-react';
+import { LayoutGrid, Grid3X3, Swords, Trophy, Users, X, Activity, Ghost, Crown, Zap, Layers, Hash, Menu, User as UserIcon, LogOut, Info, Heart, Puzzle } from 'lucide-react';
 import { socket } from '../utils/socket';
 import AuthModal from '../components/AuthModal';
+import DonateModal from '../components/DonateModal';
 import { useAuth } from '../context/AuthContext';
 
 const games = {
@@ -92,6 +93,20 @@ const games = {
             'Tận dụng các lối đi và cổng dịch chuyển để né tránh hoặc đánh lừa kẻ địch.',
             'Tránh va chạm với ma khi không có sức mạnh, nếu không bạn sẽ thua cuộc.'
         ]
+    },
+    pikachu: {
+        id: 'pikachu',
+        name: 'Pikachu Onet',
+        description: 'Huyền thoại game nối thú kinh điển! Tìm và nối 2 hình giống nhau với tối đa 2 lần rẽ để làm chúng biến mất. Chinh phục các chướng ngại vật thay đổi liên tục qua từng vòng chơi với độ khó tăng dần!',
+        path: '/pikachu',
+        difficulty: 'Dễ - Khó',
+        instructions: [
+            'Nhấp vào 2 hình giống nhau để nối và ghi điểm.',
+            'Đường nối giữa 2 hình không được có vật cản và tối đa 2 lần rẽ vuông góc (tạo thành hình chữ U, Z hoặc L).',
+            'Sử dụng nút Gợi ý (tốn một ít thời gian) hoặc chức năng Đảo hình (Shuffle) khi bế tắc.',
+            'Ở mỗi vòng, sau khi nối ô thì bản đồ có thể rớt khối, dồn sang trái phải để tăng độ khó.',
+            'Dọn dẹp toàn bộ bản đồ trước khi hết giờ để sang vòng tiếp theo.'
+        ]
     }
 };
 
@@ -100,6 +115,7 @@ export default function Home() {
     const auth = useAuth();
     const { user, logout } = auth || {};
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [showDonateModal, setShowDonateModal] = useState(false);
     // Persistence: Get last active game from localStorage
     const [activeGame, setActiveGame] = useState(() => localStorage.getItem('lastGame') || 'sudoku');
     const [showHelp, setShowHelp] = useState(false);
@@ -118,7 +134,7 @@ export default function Home() {
     }, []);
 
     const game = games[activeGame];
-    const isUnplayableOnMobile = isMobile && ['snake', 'tetris', 'pacman'].includes(activeGame);
+    const isUnplayableOnMobile = isMobile && ['snake', 'tetris', 'pacman', 'pikachu'].includes(activeGame);
 
     useEffect(() => {
         localStorage.setItem('lastGame', activeGame);
@@ -167,6 +183,7 @@ export default function Home() {
     return (
         <div className="dashboard-container">
             <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+            <DonateModal isOpen={showDonateModal} onClose={() => setShowDonateModal(false)} />
             <div className={`mobile-overlay ${isSidebarOpen ? 'open' : ''}`} onClick={() => setIsSidebarOpen(false)} />
             <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`} style={{ justifyContent: 'space-between' }}>
 
@@ -183,6 +200,7 @@ export default function Home() {
                             { id: 'snake', label: 'Snake', Icon: Zap },
                             { id: 'tetris', label: 'Tetris', Icon: Layers },
                             { id: 'pacman', label: 'Pacman', Icon: Ghost },
+                            { id: 'pikachu', label: 'Pikachu', Icon: Puzzle },
                         ].map(({ id, label, Icon }) => (
                             <div key={id}
                                 className={`nav-item ${activeGame === id ? 'active' : ''}`}
@@ -199,6 +217,10 @@ export default function Home() {
                                 <div className="nav-item"><Users size={20} /> Bạn bè</div>
                             </>
                         )}
+                        <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '8px 0' }} />
+                        <div className="nav-item" onClick={() => setShowDonateModal(true)} style={{ color: '#ef4444', fontWeight: 'bold' }}>
+                            <Heart size={20} fill="#ef4444" /> Ủng hộ dự án
+                        </div>
                     </nav>
                 </div>
 
@@ -253,6 +275,7 @@ export default function Home() {
                             {activeGame === 'snake' && <Zap size={32} color="var(--accent-color)" />}
                             {activeGame === 'tetris' && <Layers size={32} color="var(--accent-color)" />}
                             {activeGame === 'pacman' && <Ghost size={32} color="var(--accent-color)" />}
+                            {activeGame === 'pikachu' && <Puzzle size={32} color="var(--accent-color)" />}
                         </div>
                         <h1 className="game-title" style={{ margin: 0, fontSize: '3rem' }}>{game.name}</h1>
                     </div>
@@ -314,7 +337,7 @@ export default function Home() {
                         </div>
                     </div>
 
-                    {activeGame !== 'pacman' && (
+                    {activeGame !== 'pacman' && activeGame !== 'pikachu' && (
                         <div className="glass-panel" style={{ marginTop: '2rem', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.2rem' }}>
                                 <Swords size={24} color="var(--accent-color)" />

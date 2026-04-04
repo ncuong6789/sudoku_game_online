@@ -31,6 +31,10 @@ import TetrisGame from './pages/tetris/TetrisGame';
 import PacmanHome from './pages/pacman/PacmanHome';
 import PacmanGame from './pages/pacman/PacmanGame';
 
+// Pikachu Components
+import PikachuHome from './pages/pikachu/PikachuHome';
+import PikachuGame from './pages/pikachu/PikachuGame';
+
 function App() {
   return (
     <AuthProvider>
@@ -67,6 +71,10 @@ function App() {
         {/* Pacman Module */}
         <Route path="/pacman" element={<PacmanHome />} />
         <Route path="/pacman/game" element={<PacmanGame />} />
+
+        {/* Pikachu Module */}
+        <Route path="/pikachu" element={<PikachuHome />} />
+        <Route path="/pikachu/game" element={<PikachuGame />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
