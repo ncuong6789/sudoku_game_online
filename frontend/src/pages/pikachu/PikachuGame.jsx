@@ -68,7 +68,7 @@ export default function PikachuGame() {
                 </div>
             </div>
 
-            <div className="glass-panel" style={{ width: 'fit-content', padding: '1.2rem', display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+            <div className="glass-panel" style={{ width: 'fit-content', padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'flex-start', flexWrap: 'wrap', justifyContent: 'center' }}>
                 
                 {/* Lưới Game */}
                 <div 
@@ -76,13 +76,17 @@ export default function PikachuGame() {
                     style={{
                         position: 'relative',
                         display: 'grid',
-                        gridTemplateColumns: `repeat(${COLS + 2}, minmax(0, 1fr))`,
-                        gridTemplateRows: `repeat(${ROWS + 2}, minmax(0, 1fr))`,
-                        gap: '2px', // khoảng cách nhỏ
-                        background: 'rgba(0,0,0,0.4)',
-                        padding: '10px',
-                        borderRadius: '12px',
-                        border: '2px solid rgba(255,255,255,0.05)'
+                        gridTemplateColumns: `repeat(${COLS + 2}, 1fr)`,
+                        gridTemplateRows: `repeat(${ROWS + 2}, 1fr)`,
+                        gap: '0px',
+                        backgroundImage: 'url(/pikachu_sprites/bg.jpg)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        borderRadius: '4px',
+                        border: '2px solid rgba(255,255,255,0.2)',
+                        boxShadow: '0 0 20px rgba(0,0,0,0.8)',
+                        width: 'min(85vw, 75vh, 800px)',
+                        height: 'min(85vw, 75vh, 800px)',
                     }}
                 >
                     {renderPath()}
@@ -98,25 +102,31 @@ export default function PikachuGame() {
                                 id={`pika-cell-${r}-${c}`}
                                 onClick={() => !isBoundary && handleTileClick(r, c)}
                                 style={{
-                                    width: 'min(4.3vh, 4.3vw)', 
-                                    height: 'min(5vh, 5vw)', // Tỉ lệ hơi chữ nhật một chút
-                                    minWidth: '22px', minHeight: '26px',
-                                    background: isBoundary ? 'transparent' : cell === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.95)',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    position: 'relative',
+                                    width: '100%', 
+                                    height: '100%', 
                                     cursor: (!isBoundary && cell !== 0) ? 'pointer' : 'default',
-                                    borderRadius: '4px',
-                                    border: isSel ? '2px solid #ef4444' : isHnt ? '2px solid #eab308' : (cell !== 0 && !isBoundary) ? '1px solid #ccc' : '1px solid transparent',
-                                    boxShadow: isSel ? '0 0 10px #ef4444' : isHnt ? '0 0 10px #eab308' : (cell !== 0 && !isBoundary) ? 'inset -2px -2px 0px rgba(0,0,0,0.2)' : 'none',
-                                    transition: 'all 0.1s',
+                                    transition: 'opacity 0.1s',
                                     opacity: cell === 0 ? 0 : 1
                                 }}
                             >
                                 {cell !== 0 && !isBoundary && (
-                                    <img 
-                                        src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-viii/icons/${cell}.png`} 
-                                        alt={`Pokemon ${cell}`}
-                                        style={{ width: '90%', height: '90%', objectFit: 'contain' }}
-                                    />
+                                    <>
+                                        <img 
+                                            src={`/pikachu_sprites/${cell}.jpg`} 
+                                            alt={`Pokemon ${cell}`}
+                                            style={{ display: 'block', width: '100%', height: '100%', objectFit: 'fill' }}
+                                        />
+                                        {(isSel || isHnt) && (
+                                            <div style={{
+                                                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                                                border: isSel ? '2px solid #ef4444' : '2px solid #eab308',
+                                                boxShadow: isSel ? 'inset 0 0 10px rgba(239, 68, 68, 0.8)' : 'inset 0 0 10px rgba(234, 179, 8, 0.8)',
+                                                background: isSel ? 'rgba(239, 68, 68, 0.3)' : 'rgba(234, 179, 8, 0.3)',
+                                                zIndex: 2, boxSizing: 'border-box'
+                                            }} />
+                                        )}
+                                    </>
                                 )}
                             </div>
                         );

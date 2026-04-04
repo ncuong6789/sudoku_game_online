@@ -1,18 +1,21 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 
-const ROWS = 9;
+const ROWS = 16;
 const COLS = 16;
 // Grid will be (ROWS + 2) x (COLS + 2) for boundary
 const R = ROWS + 2; 
 const C = COLS + 2;
 
 // Cấp độ tối đa 5 kiểu di chuyển.
-const POKEMON_IDS = Array.from({ length: 36 }, (_, i) => i + 1);
+const NUM_IMAGES = 36;
 
 export function generateInitialBoard() {
     let items = [];
-    for (let id of POKEMON_IDS) {
-        items.push(id, id, id, id);
+    let numPairs = (ROWS * COLS) / 2; // 128
+    for (let i = 0; i < numPairs; i++) {
+        // Pick a random pokemon ID from 1 to 36
+        let id = Math.floor(Math.random() * NUM_IMAGES) + 1;
+        items.push(id, id);
     }
     items.sort(() => Math.random() - 0.5);
 
