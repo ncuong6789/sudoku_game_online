@@ -301,7 +301,7 @@ export default function ChessGame() {
     }, [optionSquares, moveHistory]);
 
     return (
-        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', minHeight: 'calc(100vh - 80px)', padding: '0.5rem', boxSizing: 'border-box', background: '#0d1117' }}>
+        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100vw', height: '100vh', padding: '0.5rem', boxSizing: 'border-box', background: '#0d1117' }}>
             <div className="glass-panel game-play-panel" style={{
                 position: 'relative',
                 overflow: 'hidden',
@@ -311,7 +311,7 @@ export default function ChessGame() {
                 justifyContent: 'center',
                 height: 'fit-content',
                 maxHeight: '96vh',
-                width: 'fit-content',
+                width: 'max-content',
                 maxWidth: '98%',
                 borderRadius: '20px',
                 background: 'rgba(23, 23, 33, 0.85)',
@@ -372,7 +372,7 @@ export default function ChessGame() {
                 </div>
 
                 {/* GIỮA: BÀN CỜ */}
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 0, margin: 0, flex: '1 0 auto' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 0, margin: 0 }}>
                     <div className="game-play-board chess-board" style={{
                         position: 'relative',
                         border: '8px solid rgba(15, 15, 25, 0.95)',
