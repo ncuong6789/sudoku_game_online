@@ -32,9 +32,9 @@ let sudokuModule = null;
 
 async function loadModules() {
     const [pika, caro, sudoku] = await Promise.allSettled([
-        import('../pages/pikachu/usePikachuLogic'),
-        import('../pages/caro/caroAI'),
-        import('../utils/sudoku'),
+        import('../pikachu/usePikachuLogic'),
+        import('../caro/caroAI'),
+        import('../../utils/sudoku'),
     ]);
     if (pika.status === 'fulfilled') pikachuModule = pika.value;
     if (caro.status === 'fulfilled') caroModule = caro.value;
@@ -43,7 +43,7 @@ async function loadModules() {
 
 // ─── Test Suites Definition ───────────────────────────────────────────────────
 
-const ROWS = 16, COLS = 16, R = ROWS + 2, C = COLS + 2;
+const ROWS = 9, COLS = 16, R = ROWS + 2, C = COLS + 2;
 
 function emptyPikachuBoard() {
     return Array.from({ length: R }, () => Array(C).fill(0));

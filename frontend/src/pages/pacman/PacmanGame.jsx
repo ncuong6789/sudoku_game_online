@@ -2,7 +2,6 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, Heart, Volume2, VolumeX } from 'lucide-react';
 import { usePacmanLogic } from './usePacmanLogic';
-import { useBgMusic } from '../../hooks/useBgMusic';
 
 // ─── Custom Cute Ghost SVG ───────────────────────────────────────────────────
 function GhostArt({ color = '#ef4444', dir = { x: 0, y: 0 }, state = 'chase', size = '95%', frightenedFlash = false }) {
@@ -55,7 +54,32 @@ export default function PacmanGame() {
     } = usePacmanLogic(mapType, difficulty);
 
     const isPlaying = phase === 'playing' || phase === 'ready';
-    const { muted, toggleMute } = useBgMusic('/audio/pacman_bg.ogg', isPlaying, 0.3);
+
+    // Global Mute Toggle (used by the UI buttons, but background piano is removed)
+    const [muted, setMuted] = React.useState(false);
+    const toggleMute = () => setMuted(m => !m);
+
+    // Ghost Frightened Mode Background Sound
+    const modeAudioRef = React.useRef(null);
+    React.useEffect(() => {
+        const audio = new window.Audio('/pacman_audio/gs_ghostblue.mp3');
+        audio.loop = true;
+        audio.volume = 0.15; // Nhỏ 1 chút như yêu cầu
+        modeAudioRef.current = audio;
+
+        return () => { audio.pause(); audio.src = ""; };
+    }, []);
+
+    React.useEffect(() => {
+        if (!modeAudioRef.current) return;
+        const isFrightened = frightenedTimer > 0;
+        
+        if (!isPlaying || muted || !isFrightened) {
+            modeAudioRef.current.pause();
+        } else {
+            if (modeAudioRef.current.paused) modeAudioRef.current.play().catch(()=>{});
+        }
+    }, [phase, frightenedTimer, isPlaying, muted]);
 
     if (!mapGrid.length || !pacman) return (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
@@ -70,127 +94,192 @@ export default function PacmanGame() {
     const isDying = phase === 'dying';
     const isProtected = protectedTimer > 0;
 
+    // Generate predefined neon colors based on map names preventing yellow conflict
+    const getMapTheme = () => {
+        const themes = {
+            'Classic':   { border: '#3b82f6', glow: 'rgba(59, 130, 246, 0.35)' }, // True Blue
+            'Prototype': { border: '#e11d48', glow: 'rgba(225, 29, 72, 0.35)' },  // Crimson Red
+            'MsMap1':    { border: '#ec4899', glow: 'rgba(236, 72, 153, 0.35)' }, // Magenta Pink
+            'MsMap2':    { border: '#10b981', glow: 'rgba(16, 185, 129, 0.35)' }, // Emerald Green
+            'MsMap3':    { border: '#0ea5e9', glow: 'rgba(14, 165, 233, 0.35)' }, // Ocean Cyan
+            'MsMap4':    { border: '#8b5cf6', glow: 'rgba(139, 92, 246, 0.35)' }  // Deep Violet
+        };
+        return themes[mapType] || themes['Classic'];
+    };
+    const mapTheme = getMapTheme();
+
     return (
-        <div className="glass-panel" style={{
-            display: 'flex', justifyContent: 'center', alignItems: 'stretch',
-            width: 'fit-content', height: 'fit-content',
-            maxHeight: '94vh', maxWidth: '98vw', margin: 'auto',
-            padding: '1.2rem', boxSizing: 'border-box', gap: '1.5rem',
-            overflow: 'hidden', minWidth: 0, background: 'rgba(23, 23, 33, 0.85)',
-            backdropFilter: 'blur(25px)', borderRadius: '20px',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
-        }}>
+        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100vw', height: '100vh', padding: '2rem 1rem', boxSizing: 'border-box' }}>
+            <div className="glass-panel" style={{ 
+                position: 'relative', 
+                width: '100%', 
+                maxWidth: '1200px', 
+                height: '88vh',
+                display: 'flex', 
+                flexDirection: 'row', 
+                padding: '1.2rem',
+                borderRadius: '20px',
+                background: 'rgba(23, 23, 33, 0.85)',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)',
+                gap: '1.5rem',
+                overflow: 'hidden',
+                boxSizing: 'border-box'
+            }}>
             {/* ── BOARD ── */}
             <div style={{
-                position: 'relative', height: 'min(85vh, 800px)', width: 'min(calc(85vh * 0.9), 720px)',
-                flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center'
+                flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'stretch',
+                background: 'rgba(5, 10, 20, 0.5)', borderRadius: '12px', border: '3px solid rgba(255,255,255,0.06)', overflow: 'hidden'
             }}>
-                <div style={{
-                    width: '100%', height: '100%',
-                    display: 'grid', gridTemplateColumns: `repeat(${cols},1fr)`, gridTemplateRows: `repeat(${rows},1fr)`,
-                    background: '#000', borderRadius: '4px', boxSizing: 'border-box'
-                }}>
-                    {mapGrid.map((row, y) => row.map((cell, x) => {
-                        const isWall = cell === 'W' || cell === '|';
-                        const isGate = cell === 'H' || cell === '-';
-                        return (
-                            <div key={`c${x}${y}`} style={{ background: isWall ? '#1e3a8a' : isGate ? '#78350f' : '#000', border: isWall ? '0.5px solid #1e40af' : 'none', boxSizing: 'border-box' }} />
-                        );
-                    }))}
+                <div style={{ position: 'relative', flex: 1, minHeight: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{
+                        width: cols > rows ? '100%' : 'auto',
+                        height: rows > cols ? '100%' : 'auto',
+                        maxWidth: '100%', maxHeight: '100%',
+                        aspectRatio: `${cols}/${rows}`,
+                        display: 'grid', gridTemplateColumns: `repeat(${cols},1fr)`, gridTemplateRows: `repeat(${rows},1fr)`,
+                        background: '#000', borderRadius: '4px', boxSizing: 'border-box', position: 'relative'
+                    }}>
+                        {mapGrid.map((row, y) => row.map((cell, x) => {
+                            const isWall = cell === 'W' || cell === '|';
+                            const isGate = cell === 'H' || cell === '-';
+                            
+                            if (isGate) {
+                                return (
+                                    <div key={`c${x}${y}`} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <div style={{ 
+                                            width: '100%', 
+                                            height: '25%', 
+                                            background: '#fbcfe8', // Lighter pink stroke center
+                                            boxShadow: '0 0 6px #f43f5e' // Rose/Red glow
+                                            // No border-radius makes blocks merge fully into 1 continuous line
+                                        }} />
+                                    </div>
+                                );
+                            } else if (isWall) {
+                                // Auto-Tiling Logic for hollow tubular arcade styling
+                                const cW = (r, c) => r >= 0 && r < rows && c >= 0 && c < cols && (mapGrid[r][c] === 'W' || mapGrid[r][c] === '|');
+                                const tw = cW(y - 1, x);
+                                const bw = cW(y + 1, x);
+                                const lw = cW(y, x - 1);
+                                const rw = cW(y, x + 1);
 
-                    {Array.from(dots).map(k => {
-                        const [x, y] = k.split(',').map(Number); return (
-                            <div key={`d${k}`} style={{
-                                position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
-                                left: `${(x / cols) * 100}%`, top: `${(y / rows) * 100}%`,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none'
-                            }}>
-                                <div style={{ width: '35%', height: '35%', background: '#fbbf24', borderRadius: '50%' }} />
-                            </div>
-                        );
-                    })}
+                                const bd = `2px solid ${mapTheme.border}`;
+                                const style = {
+                                    width: '100%', height: '100%',
+                                    boxSizing: 'border-box',
+                                    background: '#000', // Hollow interior
+                                    borderTop: !tw ? bd : 'none',
+                                    borderBottom: !bw ? bd : 'none',
+                                    borderLeft: !lw ? bd : 'none',
+                                    borderRight: !rw ? bd : 'none',
+                                    borderTopLeftRadius: (!tw && !lw) ? '50%' : '0',
+                                    borderTopRightRadius: (!tw && !rw) ? '50%' : '0',
+                                    borderBottomLeftRadius: (!bw && !lw) ? '50%' : '0',
+                                    borderBottomRightRadius: (!bw && !rw) ? '50%' : '0',
+                                    boxShadow: `inset 0 0 12px ${mapTheme.glow}`,
+                                    zIndex: 1
+                                };
+                                return <div key={`c${x}${y}`} style={style} />;
+                            }
+                            
+                            return <div key={`c${x}${y}`} style={{ width: '100%', height: '100%', background: 'transparent' }} />;
+                        }))}
 
-                    {Array.from(pills).map(k => {
-                        const [x, y] = k.split(',').map(Number); return (
-                            <div key={`p${k}`} style={{
-                                position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
-                                left: `${(x / cols) * 100}%`, top: `${(y / rows) * 100}%`,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none'
-                            }}>
-                                <div style={{ width: '70%', height: '70%', background: '#ef4444', borderRadius: '50%', animation: 'pacPulse 0.6s infinite alternate', position: 'relative', boxShadow: '0 0 10px rgba(239,68,68,0.5)' }}>
-                                    <div style={{ position: 'absolute', top: '-25%', left: '40%', width: '20%', height: '40%', background: '#22c55e', borderRadius: '4px', transform: 'rotate(20deg)' }} />
+                        {Array.from(dots).map(k => {
+                            const [x, y] = k.split(',').map(Number); return (
+                                <div key={`d${k}`} style={{
+                                    position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
+                                    left: `${(x / cols) * 100}%`, top: `${(y / rows) * 100}%`,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none'
+                                }}>
+                                    <div style={{ width: '35%', height: '35%', background: '#fbbf24', borderRadius: '50%' }} />
                                 </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })}
 
-                    {ghosts.map(g => {
-                        const fr = g.state === 'frightened';
-                        const flash = fr && frightenedTimer < 8 && frightenedTimer % 2 === 0;
-                        const skipTrans = Math.abs(g.x - (g.prevX ?? g.x)) > 1;
-                        return (
-                            <div key={g.id} style={{
-                                position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
-                                left: `${(g.x / cols) * 100}%`, top: `${(g.y / rows) * 100}%`,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10,
-                                transition: skipTrans ? 'none' : `left ${fr ? 0.3 : 0.1}s linear, top ${fr ? 0.3 : 0.1}s linear`, pointerEvents: 'none'
-                            }}>
-                                <GhostArt color={g.color} dir={g.dir} state={g.state} frightenedFlash={flash} size='95%' />
-                            </div>
-                        );
-                    })}
+                        {Array.from(pills).map(k => {
+                            const [x, y] = k.split(',').map(Number); return (
+                                <div key={`p${k}`} style={{
+                                    position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
+                                    left: `${(x / cols) * 100}%`, top: `${(y / rows) * 100}%`,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none'
+                                }}>
+                                    <div style={{ width: '70%', height: '70%', background: '#ef4444', borderRadius: '50%', animation: 'pacPulse 0.6s infinite alternate', position: 'relative', boxShadow: '0 0 10px rgba(239,68,68,0.5)' }}>
+                                        <div style={{ position: 'absolute', top: '-25%', left: '40%', width: '20%', height: '40%', background: '#22c55e', borderRadius: '4px', transform: 'rotate(20deg)' }} />
+                                    </div>
+                                </div>
+                            );
+                        })}
 
-                    {(() => {
-                        const skipTrans = Math.abs(pacman.x - (pacman.prevX ?? pacman.x)) > 1;
-                        return (
-                            <div style={{
-                                position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
-                                left: `${(pacman.x / cols) * 100}%`, top: `${(pacman.y / rows) * 100}%`,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 11,
-                                transition: (isDying || skipTrans) ? 'none' : 'left 0.1s linear,top 0.1s linear',
-                                pointerEvents: 'none', animation: isDying ? 'pacDie 1.2s forwards' : isProtected ? 'pacFlash 0.25s infinite' : undefined
-                            }}>
-                                <svg width='88%' height='88%' viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg' style={{ transform: `rotate(${pacman.dir.x === 1 ? 0 : pacman.dir.y === 1 ? 90 : pacman.dir.x === -1 ? 180 : -90}deg)`, display: 'block' }}>
-                                    <path fill='#fbbf24' d='M14,14 L28,5 A13,13 0 1,0 28,23 Z'>
-                                        {!isDying && !isProtected && (
-                                            <animate attributeName='d' values='M14,14 L28,5 A13,13 0 1,0 28,23 Z;M14,14 L28,13 A13,13 0 1,0 28,15 Z' dur='0.25s' repeatCount='indefinite' calcMode='linear' />
-                                        )}
-                                    </path>
-                                </svg>
-                            </div>
-                        );
-                    })()}
+                        {ghosts.map(g => {
+                            const fr = g.state === 'frightened';
+                            const flash = fr && frightenedTimer < 8 && frightenedTimer % 2 === 0;
+                            const skipTrans = Math.abs(g.x - (g.prevX ?? g.x)) > 1;
+                            return (
+                                <div key={g.id} style={{
+                                    position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
+                                    left: `${(g.x / cols) * 100}%`, top: `${(g.y / rows) * 100}%`,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10,
+                                    transition: skipTrans ? 'none' : `left ${fr ? 0.3 : 0.1}s linear, top ${fr ? 0.3 : 0.1}s linear`, pointerEvents: 'none'
+                                }}>
+                                    <GhostArt color={g.color} dir={g.dir} state={g.state} frightenedFlash={flash} size='95%' />
+                                </div>
+                            );
+                        })}
 
-                    {phase === 'ready' && !isDying && (
-                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.65)', zIndex: 20, borderRadius: '4px' }}>
-                            <h2 style={{ color: '#fbbf24', fontSize: 'clamp(1rem,4vw,2.5rem)', animation: 'pacFlash 0.8s infinite', margin: 0 }}>READY!</h2>
+                        {(() => {
+                            const skipTrans = Math.abs(pacman.x - (pacman.prevX ?? pacman.x)) > 1;
+                            return (
+                                <div style={{
+                                    position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
+                                    left: `${(pacman.x / cols) * 100}%`, top: `${(pacman.y / rows) * 100}%`,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 11,
+                                    transition: (isDying || skipTrans) ? 'none' : 'left 0.1s linear,top 0.1s linear',
+                                    pointerEvents: 'none', animation: isDying ? 'pacDie 1.2s forwards' : isProtected ? 'pacFlash 0.25s infinite' : undefined
+                                }}>
+                                    <svg width='88%' height='88%' viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg' style={{ transform: `rotate(${pacman.dir.x === 1 ? 0 : pacman.dir.y === 1 ? 90 : pacman.dir.x === -1 ? 180 : -90}deg)`, display: 'block' }}>
+                                        <path fill='#fbbf24' d='M14,14 L28,5 A13,13 0 1,0 28,23 Z'>
+                                            {!isDying && !isProtected && (
+                                                <animate attributeName='d' values='M14,14 L28,5 A13,13 0 1,0 28,23 Z;M14,14 L28,13 A13,13 0 1,0 28,15 Z' dur='0.25s' repeatCount='indefinite' calcMode='linear' />
+                                            )}
+                                        </path>
+                                    </svg>
+                                </div>
+                            );
+                        })()}
+
+                        {phase === 'ready' && !isDying && (
+                            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.65)', zIndex: 20, borderRadius: '4px' }}>
+                                <h2 style={{ color: '#fbbf24', fontSize: 'clamp(1rem,4vw,2.5rem)', animation: 'pacFlash 0.8s infinite', margin: 0 }}>READY!</h2>
+                            </div>
+                        )}
+                    </div>
+
+                    {(phase === 'over' || phase === 'won') && (
+                        <div style={{
+                            position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
+                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                            zIndex: 100, gap: '16px'
+                        }}>
+                            <div style={{ fontSize: '5rem', marginBottom: '0.5rem', animation: phase === 'won' ? 'wonBounce 1s infinite' : 'none' }}>{phase === 'won' ? '🏆' : '💀'}</div>
+                            <h2 style={{ fontSize: '3.5rem', margin: 0, color: phase === 'won' ? '#4ade80' : '#ef4444', fontWeight: 900, textShadow: phase === 'won' ? '0 0 20px rgba(74,222,128,0.5)' : '0 0 20px rgba(239,68,68,0.5)' }}>
+                                {phase === 'won' ? 'VICTORY!' : 'GAME OVER!'}
+                            </h2>
+                            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px 30px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textTransform: 'uppercase' }}>Final Score: </span>
+                                <b style={{ fontSize: '1.8rem', color: '#fbbf24' }}>{score}</b>
+                            </div>
+                            <div style={{ display: 'flex', gap: '14px', marginTop: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                                <button className="btn-primary" style={{ padding: '14px 40px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px', background: phase === 'won' ? '#4ade80' : '#ef4444', color: phase === 'won' ? '#000' : '#fff' }} onClick={handleRestart}>
+                                    <RotateCcw size={22} /> CHƠI LẠI
+                                </button>
+                                <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '14px 40px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <ArrowLeft size={22} /> THOÁT
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>
-
-                {(phase === 'over' || phase === 'won') && (
-                    <div style={{
-                        position: 'absolute', inset: 0, background: 'rgba(13,17,23,0.95)', backdropFilter: 'blur(8px)',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                        zIndex: 100, gap: '16px', borderRadius: '8px'
-                    }}>
-                        <div style={{ fontSize: 'clamp(3rem,8vw,5rem)' }}>{phase === 'won' ? '🏆' : '💀'}</div>
-                        <h2 style={{ fontSize: 'clamp(1.5rem,5vw,3rem)', margin: 0, color: phase === 'won' ? '#4ade80' : '#f87171' }}>
-                            {phase === 'won' ? 'VICTORY!' : 'GAME OVER!'}
-                        </h2>
-                        <p style={{ fontSize: 'clamp(1rem,3vw,1.5rem)', color: '#fbbf24', margin: 0 }}>SCORE: {score}</p>
-                        <div style={{ display: 'flex', gap: '14px', marginTop: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                            <button className="btn-primary" style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }} onClick={handleRestart}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><RotateCcw size={24} /> Chơi Lại</div>
-                                <span style={{ fontSize: '0.7rem', opacity: 0.8, fontWeight: 'normal' }}>(Phím Space)</span>
-                            </button>
-                            <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '12px 28px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <ArrowLeft size={18} /> Về Sảnh
-                            </button>
-                        </div>
-                    </div>
-                )}
             </div>
 
             {/* ── SIDEBAR ── */}
@@ -266,7 +355,9 @@ export default function PacmanGame() {
                 @keyframes pacDie { 0% { transform:scale(1) rotate(0deg); opacity:1; } 60% { transform:scale(1.3) rotate(180deg); opacity:0.7; } 100%{ transform:scale(0) rotate(360deg); opacity:0; } }
                 @keyframes pacFlash { 0%,100%{opacity:1} 50%{opacity:0.2} }
                 @keyframes pacPulse { 0%{transform:scale(0.8)} 100%{transform:scale(1.2)} }
+                @keyframes wonBounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
             `}</style>
         </div>
+    </div>
     );
 }

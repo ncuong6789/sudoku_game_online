@@ -1,11 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Ghost, ArrowLeft, Gamepad, Map, Zap, Flame } from 'lucide-react';
 
 export default function PacmanHome() {
     const navigate = useNavigate();
-    const [mapType, setMapType] = useState('Classic');
-    const [difficulty, setDifficulty] = useState('medium'); // 'medium' | 'hard'
+    const [mapType, setMapType] = useState(() => localStorage.getItem('pacmanMap') || 'Classic');
+    const [difficulty, setDifficulty] = useState(() => localStorage.getItem('pacmanDiff') || 'medium'); // 'medium' | 'hard'
+
+    useEffect(() => {
+        localStorage.setItem('pacmanMap', mapType);
+    }, [mapType]);
+
+    useEffect(() => {
+        localStorage.setItem('pacmanDiff', difficulty);
+    }, [difficulty]);
 
     const MAP_INFO = {
         Classic: 'Bản đồ Pac-Man arcade huyền thoại.',

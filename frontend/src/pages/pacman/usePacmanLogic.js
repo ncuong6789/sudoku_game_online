@@ -58,7 +58,7 @@ export function usePacmanLogic(mapType, difficulty) {
         nextDir.current = { x: -1, y: 0 };
         setPhase('ready');
         try { playPacmanStartSound(); } catch (e) { }
-        setTimeout(() => setPhase('playing'), 2000);
+        setTimeout(() => setPhase('playing'), 4300);
     }, [mapType, difficulty, playPacmanStartSound]);
 
     useEffect(() => { initGame(); }, [initGame]); 
@@ -246,7 +246,7 @@ export function usePacmanLogic(mapType, difficulty) {
                         }));
                         setFrightenedTimer(0); setProtectedTimer(12); setPhase('ready');
                         try { playPacmanStartSound(); } catch (e) { }
-                        setTimeout(() => setPhase('playing'), 2000);
+                        setTimeout(() => setPhase('playing'), 4300);
                     }
                 }, 1200);
                 setGhosts(finalGhosts);

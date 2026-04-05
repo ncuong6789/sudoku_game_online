@@ -1,9 +1,12 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 
-// Audio
-const tapSound = new window.Audio('/pikachu_audio/tap.ogg');
-const leadSound = new window.Audio('/pikachu_audio/lead.ogg');
-const bgWinsound = new window.Audio('/pikachu_audio/bg1.ogg'); 
+// Audio mappings based on SG11
+const tapSound = new window.Audio('/pikachu_audio/click.mp3');
+const leadSound = new window.Audio('/pikachu_audio/linked.mp3');
+const bgWinsound = new window.Audio('/pikachu_audio/win.mp3'); 
+const finishSound = new window.Audio('/pikachu_audio/finish.mp3');
+const noMoveSound = new window.Audio('/pikachu_audio/no_move.mp3');
+const errorSound = new window.Audio('/pikachu_audio/oho.mp3');
 
 const playSound = (audioObj) => {
     try {
@@ -12,7 +15,7 @@ const playSound = (audioObj) => {
     } catch(e) {}
 };
 
-const ROWS = 16;
+const ROWS = 9;
 const COLS = 16;
 // Grid will be (ROWS + 2) x (COLS + 2) for boundary
 const R = ROWS + 2; 
@@ -23,12 +26,24 @@ const NUM_IMAGES = 36;
 
 export function generateInitialBoard() {
     let items = [];
-    let numPairs = (ROWS * COLS) / 2; // 128
-    for (let i = 0; i < numPairs; i++) {
-        // Pick a random pokemon ID from 1 to 36
+    let numPairs = (ROWS * COLS) / 2;
+    
+    // Ensure all 36 images are equally distributed as much as possible
+    let pairsPerImage = Math.floor(numPairs / NUM_IMAGES);
+    let remainderPairs = numPairs % NUM_IMAGES;
+
+    for (let id = 1; id <= NUM_IMAGES; id++) {
+        for (let j = 0; j < pairsPerImage; j++) {
+            items.push(id, id);
+        }
+    }
+    
+    // Fill the remaining pairs with random distinct images
+    for (let i = 0; i < remainderPairs; i++) {
         let id = Math.floor(Math.random() * NUM_IMAGES) + 1;
         items.push(id, id);
     }
+    
     items.sort(() => Math.random() - 0.5);
 
     let board = Array.from({ length: R }, () => Array(C).fill(0));
@@ -154,90 +169,89 @@ export function applyLevelMovement(board, p1, p2, level) {
     newBoard[p1.r][p1.c] = 0;
     newBoard[p2.r][p2.c] = 0;
 
-    let mode = (level - 1) % 5; 
-    // 0: static
-    // 1: gravity down
-    // 2: shift left
-    // 3: shift right
-    // 4: center horizontal
+    let mode = level; // Levels 1 to 11
 
-    if (mode === 0) return newBoard; 
+    if (mode === 1) return newBoard; 
 
-    const rowsAffected = [...new Set([p1.r, p2.r])];
-    const colsAffected = [...new Set([p1.c, p2.c])];
+    // Helper functions for full-board shifting
+    const shiftCol = (c, dir) => {
+        let colData = [];
+        for (let r = 1; r <= ROWS; r++) if (newBoard[r][c] !== 0) colData.push(newBoard[r][c]);
+        for (let r = 1; r <= ROWS; r++) newBoard[r][c] = 0; // Clear
+        let start = dir === 1 ? ROWS - colData.length + 1 : 1; // 1 means gravity down (to bottom)
+        for (let i = 0; i < colData.length; i++) newBoard[start + i][c] = colData[i];
+    };
+    const shiftRow = (r, dir) => {
+        let rowData = [];
+        for (let c = 1; c <= COLS; c++) if (newBoard[r][c] !== 0) rowData.push(newBoard[r][c]);
+        for (let c = 1; c <= COLS; c++) newBoard[r][c] = 0; // Clear
+        let start = dir === 1 ? COLS - rowData.length + 1 : 1; // 1 means gravity right (to edge)
+        for (let i = 0; i < rowData.length; i++) newBoard[r][start + i] = rowData[i];
+    };
 
-    if (mode === 1) { // Gravity Down
-        for (let c of colsAffected) {
-            let colData = [];
-            for (let r = 1; r <= ROWS; r++) if (newBoard[r][c] !== 0) colData.push(newBoard[r][c]);
-            let zeroCount = ROWS - colData.length;
-            for (let r = 1; r <= zeroCount; r++) newBoard[r][c] = 0;
-            for (let i = 0; i < colData.length; i++) newBoard[zeroCount + 1 + i][c] = colData[i];
-        }
-    } else if (mode === 2) { // Shift Left
-        for (let r of rowsAffected) {
-            let rowData = [];
-            for (let c = 1; c <= COLS; c++) if (newBoard[r][c] !== 0) rowData.push(newBoard[r][c]);
-            for (let i = 0; i < rowData.length; i++) newBoard[r][i + 1] = rowData[i];
-            for (let c = rowData.length + 1; c <= COLS; c++) newBoard[r][c] = 0;
-        }
-    } else if (mode === 3) { // Shift Right
-        for (let r of rowsAffected) {
-            let rowData = [];
-            for (let c = 1; c <= COLS; c++) if (newBoard[r][c] !== 0) rowData.push(newBoard[r][c]);
-            let zeroCount = COLS - rowData.length;
-            for (let c = 1; c <= zeroCount; c++) newBoard[r][c] = 0;
-            for (let i = 0; i < rowData.length; i++) newBoard[r][zeroCount + 1 + i] = rowData[i];
-        }
-    } else if (mode === 4) { // Center Horizontal
-        for (let r of rowsAffected) {
+    if (mode === 2) { for(let c = 1; c <= COLS; c++) shiftCol(c, -1); } // Up
+    else if (mode === 3) { for(let c = 1; c <= COLS; c++) shiftCol(c, 1); } // Down
+    else if (mode === 4) { for(let r = 1; r <= ROWS; r++) shiftRow(r, 1); } // Right
+    else if (mode === 5) { for(let r = 1; r <= ROWS; r++) shiftRow(r, -1); } // Left
+    else if (mode === 6) { for(let r = 1; r <= ROWS; r++) shiftRow(r, -1); for(let c = 1; c <= COLS; c++) shiftCol(c, -1); } // Top-Left
+    else if (mode === 7) { for(let r = 1; r <= ROWS; r++) shiftRow(r, 1);  for(let c = 1; c <= COLS; c++) shiftCol(c, -1); } // Top-Right
+    else if (mode === 8) { for(let r = 1; r <= ROWS; r++) shiftRow(r, 1);  for(let c = 1; c <= COLS; c++) shiftCol(c, 1); } // Bottom-Right
+    else if (mode === 9) { for(let r = 1; r <= ROWS; r++) shiftRow(r, -1); for(let c = 1; c <= COLS; c++) shiftCol(c, 1); } // Bottom-Left
+    else if (mode === 10) { // Center Horizontal
+        for (let r = 1; r <= ROWS; r++) {
             let leftHalf = [], rightHalf = [];
             let mid = Math.floor(COLS / 2);
             for (let c = 1; c <= mid; c++) if (newBoard[r][c] !== 0) leftHalf.push(newBoard[r][c]);
             for (let c = COLS; c > mid; c--) if (newBoard[r][c] !== 0) rightHalf.push(newBoard[r][c]);
-
             for (let c = 1; c <= COLS; c++) newBoard[r][c] = 0;
-            
-            for (let i = 0; i < leftHalf.length; i++) {
-                newBoard[r][mid - i] = leftHalf[leftHalf.length - 1 - i];
-            }
-            for (let i = 0; i < rightHalf.length; i++) {
-                newBoard[r][mid + 1 + i] = rightHalf[rightHalf.length - 1 - i];
-            }
+            for (let i = 0; i < leftHalf.length; i++) newBoard[r][mid - i] = leftHalf[leftHalf.length - 1 - i];
+            for (let i = 0; i < rightHalf.length; i++) newBoard[r][mid + 1 + i] = rightHalf[rightHalf.length - 1 - i];
+        }
+    }
+    else if (mode === 11) { // Split Edges Horizontal
+        for (let r = 1; r <= ROWS; r++) {
+            let leftHalf = [], rightHalf = [];
+            let mid = Math.floor(COLS / 2);
+            for (let c = 1; c <= mid; c++) if (newBoard[r][c] !== 0) leftHalf.push(newBoard[r][c]);
+            for (let c = mid + 1; c <= COLS; c++) if (newBoard[r][c] !== 0) rightHalf.push(newBoard[r][c]);
+            for (let c = 1; c <= COLS; c++) newBoard[r][c] = 0;
+            for (let i = 0; i < leftHalf.length; i++) newBoard[r][i + 1] = leftHalf[i];
+            for (let i = 0; i < rightHalf.length; i++) newBoard[r][COLS - rightHalf.length + 1 + i] = rightHalf[i];
         }
     }
 
     return newBoard;
 }
 
-export function usePikachuLogic() {
+export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true) {
     const [board, setBoard] = useState([]);
     const [level, setLevel] = useState(1);
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(100);
-    const [status, setStatus] = useState('playing'); // playing, won, gameover
+    const [status, setStatus] = useState('playing'); // playing, won, gameover, finished
     
     const [selected, setSelected] = useState(null);
     const [connectedPath, setConnectedPath] = useState(null);
-    const [hints, setHints] = useState(3);
-    const [shuffles, setShuffles] = useState(1);
+    const [hints, setHints] = useState(gameMode === 'classic' ? 9 : 7);
+    const [shuffles, setShuffles] = useState(gameMode === 'classic' ? 22 : 12);
     const [hintPair, setHintPair] = useState(null);
     const [penaltyFlash, setPenaltyFlash] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
     const timerRef = useRef(null);
 
     // Trigger the red-flash animation on the timer bar
     const triggerPenalty = useCallback((amount) => {
+        if (!timeLimitEnabled || status !== 'playing' || isPaused) return;
+        playSound(errorSound);
         setTimeLeft(prev => Math.max(0, prev - amount));
         setPenaltyFlash(true);
         setTimeout(() => setPenaltyFlash(false), 600);
-    }, []);
+    }, [timeLimitEnabled, status, isPaused]);
 
     const checkAndFixDeadlock = useCallback((currentBoard) => {
         let pair = hasValidPair(currentBoard);
         if (pair === 'win') {
-            setStatus('won');
-            playSound(bgWinsound);
-            return currentBoard;
+            return { board: currentBoard, isWin: true };
         }
         let maxTries = 50;
         let b = currentBoard;
@@ -245,27 +259,51 @@ export function usePikachuLogic() {
             b = shuffleBoard(b);
             pair = hasValidPair(b);
             maxTries--;
+            if (maxTries === 0 && !pair) {
+                // Completely deadlocked
+                playSound(noMoveSound);
+            }
         }
-        return b;
+        return { board: b, isWin: false };
     }, []);
 
     const initGame = useCallback((nextLevel = false) => {
         const newLvl = nextLevel ? level + 1 : 1;
-        setLevel(newLvl);
-        if (!nextLevel) setScore(0);
+        
+        let targetLevel = newLvl;
+        if (gameMode === 'classic' && targetLevel === 6) {
+            targetLevel = 10; // Skip 6,7,8,9 in classic mode according to sg11
+        }
+        
+        if (targetLevel > 11) {
+            setStatus('finished');
+            playSound(finishSound);
+            return;
+        }
+
+        setLevel(targetLevel);
+        if (!nextLevel) {
+            setScore(0);
+            setHints(gameMode === 'classic' ? 9 : 7);
+            setShuffles(gameMode === 'classic' ? 22 : 12);
+        } else if (gameMode === 'full') {
+            // Full mode grants rewards per level
+            setHints(h => h + 2);
+            setShuffles(s => s + 3);
+        }
+
         let b = generateInitialBoard();
-        b = checkAndFixDeadlock(b);
-        setBoard(b);
+        let fixState = checkAndFixDeadlock(b);
+        setBoard(fixState.board);
         setTimeLeft(100);
         setStatus('playing');
-        bgWinsound.pause();
-        bgWinsound.currentTime = 0;
+        setIsPaused(false);
+        bgWinsound.pause(); bgWinsound.currentTime = 0;
+        finishSound.pause(); finishSound.currentTime = 0;
         setSelected(null);
         setConnectedPath(null);
-        setHints(3);
-        setShuffles(1);
         setHintPair(null);
-    }, [level, checkAndFixDeadlock]);
+    }, [level, gameMode, checkAndFixDeadlock]);
 
     useEffect(() => {
         initGame();
@@ -273,25 +311,24 @@ export function usePikachuLogic() {
     }, []);
 
     useEffect(() => {
-        if (status === 'playing') {
+        if (status === 'playing' && timeLimitEnabled && !isPaused) {
             timerRef.current = setInterval(() => {
                 setTimeLeft(prev => {
                     if (prev <= 0) {
                         setStatus('gameover');
+                        playSound(noMoveSound);
                         clearInterval(timerRef.current);
                         return 0;
                     }
-                    // Giảm % theo thời gian (giả sử tổng 250s cho 1 màn => 0.04% mỗi 100ms)
-                    // Hoặc đơn giản là giảm rất nhỏ để mượt mà
-                    return prev - 0.06; 
+                    return prev - 0.05; 
                 });
             }, 100);
         }
         return () => clearInterval(timerRef.current);
-    }, [status]);
+    }, [status, timeLimitEnabled, isPaused]);
 
     const handleTileClick = (r, c) => {
-        if (status !== 'playing' || board[r][c] === 0 || connectedPath) return;
+        if (status !== 'playing' || isPaused || board[r][c] === 0 || connectedPath) return;
 
         playSound(tapSound);
 
@@ -311,40 +348,41 @@ export function usePikachuLogic() {
                 // Draw path, then remove
                 setTimeout(() => {
                     let newBoard = applyLevelMovement(board, selected, { r, c }, level);
-                    newBoard = checkAndFixDeadlock(newBoard);
-                    if (hasValidPair(newBoard) === 'win') {
+                    let fixState = checkAndFixDeadlock(newBoard);
+                    newBoard = fixState.board;
+                    
+                    if (fixState.isWin) {
                         setStatus('won');
                         playSound(bgWinsound);
                     }
                     
                     setBoard(newBoard);
                     setScore(s => s + 10);
-                    setTimeLeft(prev => Math.min(100, prev + 2));
+                    if (timeLimitEnabled) setTimeLeft(prev => Math.min(100, prev + 2));
                     setSelected(null);
                     setConnectedPath(null);
                 }, 400); // 400ms for path animation
             } else {
                 // Wrong move — no valid path between the two tiles
-                // Apply time penalty (-10%) and show flash
                 triggerPenalty(10);
-                setSelected({ r, c }); // Switch selection to new tile
+                setSelected(null); // Switch selection to null (Clear)
             }
         }
     };
 
     const useHint = () => {
-        if (hints > 0 && status === 'playing' && !hintPair) {
+        if (hints > 0 && status === 'playing' && !isPaused && !hintPair) {
             const pair = hasValidPair(board);
             if (pair && pair !== 'win') {
                 setHintPair(pair);
                 setHints(h => h - 1);
-                setTimeLeft(prev => Math.max(0, prev - 5)); // Penalty
+                if (timeLimitEnabled) setTimeLeft(prev => Math.max(0, prev - 5)); // Penalty
             }
         }
     };
 
     const handleShuffle = () => {
-        if (shuffles > 0 && status === 'playing') {
+        if (shuffles > 0 && status === 'playing' && !isPaused) {
             setBoard(shuffleBoard(board));
             setShuffles(s => s - 1);
             setHintPair(null);
@@ -352,9 +390,13 @@ export function usePikachuLogic() {
         }
     };
 
+    const togglePause = () => {
+        if (status === 'playing') setIsPaused(!isPaused);
+    };
+    
     return {
         board, ROWS, COLS, level, score, timeLeft, status, selected, connectedPath,
-        hints, shuffles, hintPair, penaltyFlash,
+        hints, shuffles, hintPair, penaltyFlash, isPaused, togglePause,
         handleTileClick, useHint, handleShuffle, initGame, checkAndFixDeadlock
     };
 }

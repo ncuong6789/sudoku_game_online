@@ -184,25 +184,7 @@ export const useAudio = () => {
     }, []);
 
     const playPacmanStartSound = useCallback(() => {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const now = audioCtx.currentTime;
-        // Bíp bip bip tăng dần (Start song)
-        const playNote = (time, freq, dur) => {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(freq, time);
-            gain.gain.setValueAtTime(0.1, time);
-            gain.gain.linearRampToValueAtTime(0, time + dur);
-            osc.start(time);
-            osc.stop(time + dur);
-        };
-        playNote(now, 440, 0.1);
-        playNote(now + 0.15, 660, 0.1);
-        playNote(now + 0.3, 880, 0.2);
+        try { new window.Audio('/pacman_audio/gs_start.mp3').play().catch(()=>{}); } catch(e){}
     }, []);
 
     const playPacmanWakaSound = useCallback(() => {
@@ -260,20 +242,7 @@ export const useAudio = () => {
     }, []);
 
     const playPacmanDieSound = useCallback(() => {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.type = 'sawtooth';
-        const now = audioCtx.currentTime;
-        osc.frequency.setValueAtTime(600, now);
-        osc.frequency.exponentialRampToValueAtTime(100, now + 0.8);
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.8);
-        osc.start(now);
-        osc.stop(now + 0.8);
+        try { new window.Audio('/pacman_audio/gs_pacmandies.mp3').play().catch(()=>{}); } catch(e){}
     }, []);
 
     return { 
