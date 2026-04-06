@@ -267,7 +267,7 @@ export default function TankGame() {
                             </div>
                         )}
                         
-                        {map.length === 0 && !gameState === 'finished' && (
+                        {map.length === 0 && gameState !== 'finished' && (
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,14,22,0.95)', zIndex: 10, gap: '15px' }}>
                                 <RefreshCw className="animate-spin" size={48} color="var(--accent-color)" />
                                 <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ĐANG KẾT NỐI CHIẾN TRƯỜNG...</span>

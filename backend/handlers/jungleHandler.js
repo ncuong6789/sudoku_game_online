@@ -61,20 +61,23 @@ const jungleHandler = (io, socket, roomManager) => {
     
     socket.on(EVENTS.START_JUNGLE_GAME, ({ roomId, mode, difficulty }) => {
         const rooms = roomManager.getAllRooms();
-        let room = rooms[roomId];
+        const actualRoomId = roomId === 'local' ? `local_${socket.id}` : roomId;
+        let room = rooms[actualRoomId];
         
-        // Auto-initialize 'local' room for Solo play if it doesn't exist
-        if (!room && roomId === 'local') {
-            rooms['local'] = {
-                id: 'local',
+        // Auto-initialize unique local room for Solo play if it doesn't exist
+        if (!room && actualRoomId.startsWith('local_')) {
+            socket.join(actualRoomId);
+            rooms[actualRoomId] = {
+                id: actualRoomId,
                 gameType: 'jungle',
                 players: [socket.id],
                 mode: 'solo'
             };
-            room = rooms['local'];
+            room = rooms[actualRoomId];
         }
 
         if (room && room.gameType === 'jungle') {
+            socket.join(actualRoomId); // Ensure socket is in room
             const p1Id = room.players[0];
             const p2Id = mode === 'solo' ? 'CPU' : room.players[1];
 

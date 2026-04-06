@@ -108,18 +108,21 @@ module.exports = (io, socket, roomManager) => {
 
     socket.on(EVENTS.START_TANK_GAME, ({ roomId }) => {
         const rooms = roomManager.getAllRooms();
-        let room = rooms[roomId];
+        const actualRoomId = roomId === 'local' ? `local_${socket.id}` : roomId;
+        let room = rooms[actualRoomId];
 
-        if (!room && roomId === 'local') {
-            rooms['local'] = {
-                id: 'local',
+        if (!room && actualRoomId.startsWith('local_')) {
+            socket.join(actualRoomId);
+            rooms[actualRoomId] = {
+                id: actualRoomId,
                 gameType: 'tank',
                 players: [socket.id, 'CPU']
             };
-            room = rooms['local'];
+            room = rooms[actualRoomId];
         }
 
         if (room && room.gameType === 'tank') {
+            socket.join(actualRoomId); // Ensure socket is in room
             const p1Id = room.players[0];
             const p2Id = room.players[1] || 'CPU';
 
