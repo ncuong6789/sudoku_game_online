@@ -1,4 +1,4 @@
-// Bản sao của backend/utils/constants.js
+// Bản sao của backend/utils/constants.js để tránh việc import ngoài thư mục frontend (gây lỗi khi build trên Vercel/Render)
 export const EVENTS = {
     CONNECTION: 'connection',
     DISCONNECT: 'disconnect',
@@ -60,5 +60,24 @@ export const EVENTS = {
     SNAKE_GAME_STARTED: 'snakeGameStarted',
     SNAKE_CHANGE_DIRECTION: 'snakeChangeDirection',
     SNAKE_DASH: 'snakeDash',
-    SNAKE_GAME_STATE: 'snakeGameState'
+    SNAKE_GAME_STATE: 'snakeGameState',
+
+    // Tank
+    START_TANK_GAME: 'startTankGame',
+    TANK_GAME_STARTED: 'tankGameStarted',
+    TANK_UPDATE: 'tankUpdate',
+    TANK_SHOOT: 'tankShoot',
+    TANK_EXPLOSION: 'tankExplosion',
+    TANK_GAME_OVER: 'tankGameOver',
+    TANK_GAME_STATE: 'tankGameState',
+
+    // Jungle Chess Events
+    START_JUNGLE_GAME: 'startJungleGame',
+    JUNGLE_GAME_STARTED: 'jungleGameStarted',
+    JUNGLE_MOVE_PIECE: 'jungleMovePiece',
+    JUNGLE_PIECE_CAPTURED: 'junglePieceCaptured',
+    JUNGLE_GAME_OVER: 'jungleGameOver',
+    JUNGLE_GAME_STATE: 'jungleGameState',
+    JUNGLE_GET_HINT: 'jungleGetHint',
+    JUNGLE_HINT_RECEIVED: 'jungleHintReceived'
 };

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { socket } from '../../utils/socket';
-import { EVENTS } from '../../../../backend/utils/constants';
+import { EVENTS } from '../../utils/constants';
 
 const TANK_SIZE = 40;
 const BULLET_SIZE = 8;

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { socket } from '../../utils/socket';
-import { EVENTS } from '../../../../backend/utils/constants';
+import { EVENTS } from '../../utils/constants';
 
 export function useJungleLogic(roomId, mode = 'multiplayer', difficulty = 'medium', onHintReceived) {
     const [pieces, setPieces] = useState([]);
