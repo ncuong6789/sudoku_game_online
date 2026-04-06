@@ -263,7 +263,14 @@ export default function JungleGame() {
 
                     {/* Middle Column */}
                     <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                        <div style={{ position: 'relative', border: '5px solid rgba(255,255,255,0.05)', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
+                        <div style={{ position: 'relative', border: '5px solid rgba(255,255,255,0.05)', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', background: '#0f172a' }}>
+                            {pieces.length === 0 && !gameOver && (
+                                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 10, background: 'rgba(15, 23, 42, 0.9)' }}>
+                                    <RefreshCw className="animate-spin" size={48} color="#4ade80" style={{ marginBottom: '15px' }} />
+                                    <span style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>ĐANG KẾT NỐI VỚI RỪNG XANH...</span>
+                                </div>
+                            )}
+                            
                             <canvas 
                                 ref={canvasRef} 
                                 width={MAP_SIZE_W} 

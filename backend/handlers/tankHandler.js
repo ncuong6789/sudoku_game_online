@@ -108,10 +108,20 @@ module.exports = (io, socket, roomManager) => {
 
     socket.on(EVENTS.START_TANK_GAME, ({ roomId }) => {
         const rooms = roomManager.getAllRooms();
-        const room = rooms[roomId];
-        if (room && room.players.length === 2 && room.gameType === 'tank') {
+        let room = rooms[roomId];
+
+        if (!room && roomId === 'local') {
+            rooms['local'] = {
+                id: 'local',
+                gameType: 'tank',
+                players: [socket.id, 'CPU']
+            };
+            room = rooms['local'];
+        }
+
+        if (room && room.gameType === 'tank') {
             const p1Id = room.players[0];
-            const p2Id = room.players[1];
+            const p2Id = room.players[1] || 'CPU';
 
             // 20x20 Grid (40px per tile)
             // 0: Empty, 1: Brick, 2: Stone, 3: Water, 4: Bush
