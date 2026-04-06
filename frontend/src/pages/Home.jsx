@@ -107,6 +107,20 @@ const games = {
             'Ở mỗi vòng, sau khi nối ô thì bản đồ có thể rớt khối, dồn sang trái phải để tăng độ khó.',
             'Dọn dẹp toàn bộ bản đồ trước khi hết giờ để sang vòng tiếp theo.'
         ]
+    },
+    tank: {
+        id: 'tank',
+        name: 'Tanks',
+        description: 'Cuộc chiến xe tăng nảy lửa! Điều khiển xe tăng của bạn, né tránh đạn và tiêu diệt đối thủ trong chiến trường cổ điển. Sử dụng địa hình để ẩn nấp và phản công bất ngờ!',
+        path: '/tank',
+        difficulty: 'Vừa - Cao',
+        instructions: [
+            'Sử dụng các phím WASD hoặc Mũi tên để di chuyển xe tăng.',
+            'Nhấn SPACE để bắn đạn vào đối phương.',
+            'Lợi dụng các chướng ngại vật để che chắn khỏi làn đạn.',
+            'Mỗi xe tăng có một lượng máu nhất định, hãy bảo toàn máu của bạn.',
+            'Tiêu diệt đối thủ để giành chiến thắng trong trận đấu.'
+        ]
     }
 };
 
@@ -134,7 +148,7 @@ export default function Home() {
     }, []);
 
     const game = games[activeGame];
-    const isUnplayableOnMobile = isMobile && ['snake', 'tetris', 'pacman', 'pikachu'].includes(activeGame);
+    const isUnplayableOnMobile = isMobile && ['snake', 'tetris', 'pacman', 'pikachu', 'tank'].includes(activeGame);
 
     useEffect(() => {
         localStorage.setItem('lastGame', activeGame);
@@ -201,6 +215,7 @@ export default function Home() {
                             { id: 'tetris', label: 'Tetris', Icon: Layers },
                             { id: 'pacman', label: 'Pacman', Icon: Ghost },
                             { id: 'pikachu', label: 'Pikachu', Icon: Puzzle },
+                            { id: 'tank', label: 'Tanks', Icon: Target },
                         ].map(({ id, label, Icon }) => (
                             <div key={id}
                                 className={`nav-item ${activeGame === id ? 'active' : ''}`}
@@ -276,6 +291,7 @@ export default function Home() {
                             {activeGame === 'tetris' && <Layers size={32} color="var(--accent-color)" />}
                             {activeGame === 'pacman' && <Ghost size={32} color="var(--accent-color)" />}
                             {activeGame === 'pikachu' && <Puzzle size={32} color="var(--accent-color)" />}
+                            {activeGame === 'tank' && <Target size={32} color="var(--accent-color)" />}
                         </div>
                         <h1 className="game-title" style={{ margin: 0, fontSize: '3rem' }}>{game.name}</h1>
                     </div>

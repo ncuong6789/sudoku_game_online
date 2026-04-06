@@ -31,9 +31,12 @@ import TetrisGame from './pages/tetris/TetrisGame';
 import PacmanHome from './pages/pacman/PacmanHome';
 import PacmanGame from './pages/pacman/PacmanGame';
 
-// Pikachu Components
 import PikachuHome from './pages/pikachu/PikachuHome';
 import PikachuGame from './pages/pikachu/PikachuGame';
+
+// Tank Components
+import TankHome from './pages/tank/TankHome';
+import TankGame from './pages/tank/TankGame';
 
 // Test Dashboard
 import GameTestDashboard from './pages/test/GameTestDashboard';
@@ -78,6 +81,10 @@ function App() {
         {/* Pikachu Module */}
         <Route path="/pikachu" element={<PikachuHome />} />
         <Route path="/pikachu/game" element={<PikachuGame />} />
+
+        {/* Tank Module */}
+        <Route path="/tank" element={<TankHome />} />
+        <Route path="/tank/game" element={<TankGame />} />
 
         {/* Test Dashboard */}
         <Route path="/test" element={<GameTestDashboard />} />

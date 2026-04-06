@@ -60,7 +60,16 @@ const EVENTS = {
     SNAKE_GAME_STARTED: 'snakeGameStarted',
     SNAKE_CHANGE_DIRECTION: 'snakeChangeDirection',
     SNAKE_DASH: 'snakeDash',
-    SNAKE_GAME_STATE: 'snakeGameState'
+    SNAKE_GAME_STATE: 'snakeGameState',
+    
+    // Tank
+    START_TANK_GAME: 'startTankGame',
+    TANK_GAME_STARTED: 'tankGameStarted',
+    TANK_UPDATE: 'tankUpdate',
+    TANK_SHOOT: 'tankShoot',
+    TANK_EXPLOSION: 'tankExplosion',
+    TANK_GAME_OVER: 'tankGameOver',
+    TANK_GAME_STATE: 'tankGameState'
 };
 
 module.exports = { EVENTS };
