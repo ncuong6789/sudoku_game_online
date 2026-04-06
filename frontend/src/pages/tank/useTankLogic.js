@@ -3,6 +3,7 @@ import { socket } from '../../utils/socket';
 import { EVENTS } from '../../utils/constants';
 
 const TANK_SIZE = 40;
+const TILE_SIZE = 40;
 const BULLET_SIZE = 8;
 const MOVE_SPEED = 3;
 const ROTATION_SPEED = 90; // Degrees per frame? No, let's stick to 4 directions
