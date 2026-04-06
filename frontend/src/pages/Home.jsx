@@ -121,6 +121,20 @@ const games = {
             'Mỗi xe tăng có một lượng máu nhất định, hãy bảo toàn máu của bạn.',
             'Tiêu diệt đối thủ để giành chiến thắng trong trận đấu.'
         ]
+    },
+    jungle: {
+        id: 'jungle',
+        name: 'Cờ Thú',
+        description: 'Trò chơi chiến thuật cổ điển với 8 loài mãnh thú. Hãy sử dụng tư duy để đưa quân vào hang đối phương và giành chiến thắng trên bàn cờ rực rỡ.',
+        path: '/jungle',
+        difficulty: 'Dễ - Khó',
+        instructions: [
+            'Mỗi bên có 8 quân thú với cấp bậc từ 1 (Chuột) đến 8 (Voi).',
+            'Cấp cao hơn ăn được cấp thấp hơn, ngoại trừ Chuột ăn được Voi.',
+            'Hổ và Sư tử có thể nhảy qua sông nếu không có quân nào chắn đường.',
+            'Chuột là quân duy nhất có thể đi vào ô sông (nướ́c).',
+            'Chiến thắng bằng cách đưa bất kỳ quân nào vào Hang (Den) của đối phương.'
+        ]
     }
 };
 
@@ -148,7 +162,7 @@ export default function Home() {
     }, []);
 
     const game = games[activeGame];
-    const isUnplayableOnMobile = isMobile && ['snake', 'tetris', 'pacman', 'pikachu', 'tank'].includes(activeGame);
+    const isUnplayableOnMobile = isMobile && ['snake', 'tetris', 'pacman', 'pikachu', 'tank', 'jungle'].includes(activeGame);
 
     useEffect(() => {
         localStorage.setItem('lastGame', activeGame);
@@ -216,6 +230,7 @@ export default function Home() {
                             { id: 'pacman', label: 'Pacman', Icon: Ghost },
                             { id: 'pikachu', label: 'Pikachu', Icon: Puzzle },
                             { id: 'tank', label: 'Tanks', Icon: Target },
+                            { id: 'jungle', label: 'Cờ Thú', Icon: TreePine },
                         ].map(({ id, label, Icon }) => (
                             <div key={id}
                                 className={`nav-item ${activeGame === id ? 'active' : ''}`}
@@ -292,6 +307,7 @@ export default function Home() {
                             {activeGame === 'pacman' && <Ghost size={32} color="var(--accent-color)" />}
                             {activeGame === 'pikachu' && <Puzzle size={32} color="var(--accent-color)" />}
                             {activeGame === 'tank' && <Target size={32} color="var(--accent-color)" />}
+                            {activeGame === 'jungle' && <TreePine size={32} color="var(--accent-color)" />}
                         </div>
                         <h1 className="game-title" style={{ margin: 0, fontSize: '3rem' }}>{game.name}</h1>
                     </div>

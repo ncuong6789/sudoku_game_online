@@ -38,6 +38,10 @@ import PikachuGame from './pages/pikachu/PikachuGame';
 import TankHome from './pages/tank/TankHome';
 import TankGame from './pages/tank/TankGame';
 
+// Jungle Components
+import JungleHome from './pages/jungle/JungleHome';
+import JungleGame from './pages/jungle/JungleGame';
+
 // Test Dashboard
 import GameTestDashboard from './pages/test/GameTestDashboard';
 
@@ -85,6 +89,10 @@ function App() {
         {/* Tank Module */}
         <Route path="/tank" element={<TankHome />} />
         <Route path="/tank/game" element={<TankGame />} />
+
+        {/* Jungle Module */}
+        <Route path="/jungle" element={<JungleHome />} />
+        <Route path="/jungle/game" element={<JungleGame />} />
 
         {/* Test Dashboard */}
         <Route path="/test" element={<GameTestDashboard />} />

@@ -69,7 +69,17 @@ const EVENTS = {
     TANK_SHOOT: 'tankShoot',
     TANK_EXPLOSION: 'tankExplosion',
     TANK_GAME_OVER: 'tankGameOver',
-    TANK_GAME_STATE: 'tankGameState'
+    TANK_GAME_STATE: 'tankGameState',
+
+    // Jungle Chess Events
+    START_JUNGLE_GAME: 'startJungleGame',
+    JUNGLE_GAME_STARTED: 'jungleGameStarted',
+    JUNGLE_MOVE_PIECE: 'jungleMovePiece',
+    JUNGLE_PIECE_CAPTURED: 'junglePieceCaptured',
+    JUNGLE_GAME_OVER: 'jungleGameOver',
+    JUNGLE_GAME_STATE: 'jungleGameState',
+    JUNGLE_GET_HINT: 'jungleGetHint',
+    JUNGLE_HINT_RECEIVED: 'jungleHintReceived'
 };
 
 module.exports = { EVENTS };
