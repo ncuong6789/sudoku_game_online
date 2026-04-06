@@ -202,11 +202,13 @@ const jungleHandler = (io, socket, roomManager) => {
     }
 
     socket.on(EVENTS.JUNGLE_MOVE_PIECE, ({ roomId, from, to }) => {
-        processMove(roomId, io, roomManager, socket.id, from, to);
+        const actualRoomId = roomId === 'local' ? `local_${socket.id}` : roomId;
+        processMove(actualRoomId, io, roomManager, socket.id, from, to);
     });
 
     socket.on(EVENTS.JUNGLE_GET_HINT, ({ roomId }) => {
-        const room = roomManager.getAllRooms()[roomId];
+        const actualRoomId = roomId === 'local' ? `local_${socket.id}` : roomId;
+        const room = roomManager.getAllRooms()[actualRoomId];
         if (!room || !room.jungleState || room.jungleState.status !== 'playing') return;
         const state = room.jungleState;
         

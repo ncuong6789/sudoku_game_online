@@ -65,8 +65,9 @@ const startTankGameLoop = (roomId, io, roomManager) => {
 
 module.exports = (io, socket, roomManager) => {
     socket.on(EVENTS.TANK_UPDATE, ({ roomId, x, y, rotation }) => {
+        const actualRoomId = roomId === 'local' ? `local_${socket.id}` : roomId;
         const rooms = roomManager.getAllRooms();
-        const room = rooms[roomId];
+        const room = rooms[actualRoomId];
         if (room && room.tankState && room.tankState.tanks[socket.id]) {
             const tank = room.tankState.tanks[socket.id];
             if (!tank.isDestroyed) {
@@ -78,12 +79,12 @@ module.exports = (io, socket, roomManager) => {
     });
 
     socket.on(EVENTS.TANK_SHOOT, ({ roomId, x, y, rotation }) => {
+        const actualRoomId = roomId === 'local' ? `local_${socket.id}` : roomId;
         const rooms = roomManager.getAllRooms();
-        const room = rooms[roomId];
+        const room = rooms[actualRoomId];
         if (room && room.tankState && room.tankState.tanks[socket.id]) {
             const tank = room.tankState.tanks[socket.id];
             if (!tank.isDestroyed) {
-                // Limit one bullet at a time or cooldown
                 const now = Date.now();
                 if (!tank.lastShootTime || now - tank.lastShootTime > 500) {
                     tank.lastShootTime = now;
@@ -91,16 +92,16 @@ module.exports = (io, socket, roomManager) => {
                     const rad = (rotation * Math.PI) / 180;
                     const dx = Math.sin(rad) * BULLET_SPEED;
                     const dy = -Math.cos(rad) * BULLET_SPEED;
-
-                    room.tankState.bullets.push({
-                        ownerId: socket.id,
-                        x: x,
-                        y: y,
-                        dx: dx,
-                        dy: dy
-                    });
-
-                    socket.to(roomId).emit(EVENTS.TANK_SHOOT, { ownerId: socket.id, x, y, rotation });
+                    if (room.tankState.bullets) {
+                        room.tankState.bullets.push({
+                            ownerId: socket.id,
+                            x: x,
+                            y: y,
+                            dx: dx,
+                            dy: dy
+                        });
+                    }
+                    socket.to(actualRoomId).emit(EVENTS.TANK_SHOOT, { ownerId: socket.id, x, y, rotation });
                 }
             }
         }
@@ -148,14 +149,14 @@ module.exports = (io, socket, roomManager) => {
                 bullets: []
             };
 
-            io.to(roomId).emit(EVENTS.TANK_GAME_STARTED, { 
-                roomId, 
+            io.to(actualRoomId).emit(EVENTS.TANK_GAME_STARTED, { 
+                roomId: actualRoomId, 
                 tanks: room.tankState.tanks,
                 map: room.tankState.map
             });
 
             setTimeout(() => {
-                startTankGameLoop(roomId, io, roomManager);
+                startTankGameLoop(actualRoomId, io, roomManager);
             }, 1000);
         }
     });

@@ -177,36 +177,29 @@ export default function TankGame() {
                 
                 {/* ─── HEADER BAR ────────────────────────────────────── */}
                 <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: '1fr auto 1fr', 
-                    alignItems: 'center', 
-                    gap: '12px', 
-                    background: 'rgba(0,0,0,0.3)', 
-                    borderRadius: '12px', 
-                    padding: '10px 18px', 
+                    display: 'flex', 
+                    flexDirection: 'column',
+                    gap: '10px',
                     marginBottom: '12px',
-                    border: '1px solid rgba(255,255,255,0.05)'
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <Activity size={18} color="var(--accent-color)" />
-                        <span style={{ fontWeight: 800, fontSize: '1rem', color: '#fff', letterSpacing: '0.5px' }}>TANK WARS</span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px' }}>
-                            {roomId}
-                        </span>
-                    </div>
+                    {/* Top Row: Title & Status */}
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        background: 'rgba(0,0,0,0.3)', 
+                        borderRadius: '12px', 
+                        padding: '10px 18px', 
+                        border: '1px solid rgba(255,255,255,0.05)'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <Activity size={18} color="var(--accent-color)" />
+                            <span style={{ fontWeight: 800, fontSize: '1rem', color: '#fff', letterSpacing: '0.5px' }}>TANK WARS</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px' }}>
+                                {roomId}
+                            </span>
+                        </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '24px', justifyContent: 'center' }}>
-                        {Object.values(tanks).map(tank => (
-                            <div key={tank.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: tank.color === 'green' ? '#4ade80' : '#60a5fa', boxShadow: `0 0 10px ${tank.color === 'green' ? '#4ade80' : '#60a5fa'}` }} />
-                                <span style={{ fontWeight: 800, fontSize: '1rem', color: '#fff' }}>
-                                    {tank.id === myId ? 'BẠN' : 'ĐỐI THỦ'}: <span style={{ color: tank.health > 20 ? (tank.color === 'green' ? '#4ade80' : '#60a5fa') : '#f87171' }}>{tank.health}%</span>
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <div style={{ 
                             padding: '4px 12px', 
                             borderRadius: '20px', 
@@ -218,6 +211,27 @@ export default function TankGame() {
                         }}>
                             {gameState === 'finished' ? 'TRẬN ĐẤU KẾT THÚC' : 'ĐANG CHIẾN ĐẤU...'}
                         </div>
+                    </div>
+
+                    {/* Second Row: Player Stats (Moving Up relative to board) */}
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        gap: '40px',
+                        padding: '8px',
+                        background: 'rgba(255,255,255,0.02)',
+                        borderRadius: '12px',
+                        border: '1px solid rgba(255,255,255,0.03)'
+                    }}>
+                        {Object.values(tanks).map(tank => (
+                            <div key={tank.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: tank.color === 'green' ? '#4ade80' : '#60a5fa', boxShadow: `0 0 10px ${tank.color === 'green' ? '#4ade80' : '#60a5fa'}` }} />
+                                <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#fff' }}>
+                                    {tank.id === myId ? 'BẠN' : 'ĐỐI THỦ'}: <span style={{ color: tank.health > 20 ? (tank.color === 'green' ? '#4ade80' : '#60a5fa') : '#f87171' }}>{tank.health}%</span>
+                                </span>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
@@ -256,6 +270,10 @@ export default function TankGame() {
                                 </div>
                             </div>
                         </div>
+
+                        <button className="btn-secondary" onClick={() => navigate('/tank')} style={{ padding: '14px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}>
+                            <ArrowLeft size={18} /> THOÁT TRẬN
+                        </button>
                     </div>
 
                     {/* ─── MIDDLE COLUMN: GAME CANVAS ───────────────────── */}
@@ -351,10 +369,6 @@ export default function TankGame() {
                                 {gameState === 'playing' ? 'Trận chiến đang diễn ra khốc liệt! Hãy cẩn thận khi đối mặt trực tiếp.' : 'Trận đấu đã khép lại. Nhấn thoát để tìm trận mới.'}
                             </div>
                         </div>
-
-                        <button className="btn-secondary" onClick={() => navigate('/tank')} style={{ padding: '14px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                            <ArrowLeft size={18} /> THOÁT TRẬN
-                        </button>
                     </div>
                 </div>
             </div>
