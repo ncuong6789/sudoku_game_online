@@ -148,7 +148,7 @@ export default function JungleHome() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', width: '100%', maxWidth: '450px' }}>
                     <button
                         className="btn-primary"
-                        onClick={() => navigate('/jungle/game', { state: { roomId: 'local', mode: 'single', difficulty } })}
+                        onClick={() => navigate('/jungle/game', { state: { roomId: 'local', mode: 'solo', difficulty } })}
                         style={{
                             padding: '16px', fontSize: '1.2rem', fontWeight: 900,
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',

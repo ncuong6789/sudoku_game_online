@@ -8,7 +8,7 @@ export function useJungleLogic(roomId, mode = 'multiplayer', difficulty = 'mediu
     const [selectedPiece, setSelectedPiece] = useState(null);
     const [validMoves, setValidMoves] = useState([]);
     const [gameOver, setGameOver] = useState(null);
-    const myId = socket.id;
+    const [myId, setMyId] = useState(socket.id);
 
     const initGame = useCallback((data) => {
         setPieces(data.pieces);
@@ -17,6 +17,18 @@ export function useJungleLogic(roomId, mode = 'multiplayer', difficulty = 'mediu
     }, []);
 
     useEffect(() => {
+        const onConnect = () => {
+            setMyId(socket.id);
+            socket.emit(EVENTS.START_JUNGLE_GAME, { roomId, mode, difficulty });
+        };
+
+        if (socket.connected) {
+            setMyId(socket.id);
+            socket.emit(EVENTS.START_JUNGLE_GAME, { roomId, mode, difficulty });
+        } else {
+            socket.on('connect', onConnect);
+        }
+
         socket.on(EVENTS.JUNGLE_GAME_STARTED, initGame);
         socket.on(EVENTS.JUNGLE_GAME_STATE, (data) => {
             setPieces(data.pieces);
@@ -28,16 +40,19 @@ export function useJungleLogic(roomId, mode = 'multiplayer', difficulty = 'mediu
         socket.on(EVENTS.JUNGLE_HINT_RECEIVED, (move) => {
             if (onHintReceived) onHintReceived(move);
         });
-
-        socket.emit(EVENTS.START_JUNGLE_GAME, { roomId, mode, difficulty });
+        socket.on(EVENTS.JUNGLE_GAME_OVER, (data) => {
+            setGameOver(data.winner);
+        });
 
         return () => {
+            socket.off('connect', onConnect);
             socket.off(EVENTS.JUNGLE_GAME_STARTED);
             socket.off(EVENTS.JUNGLE_GAME_STATE);
             socket.off(EVENTS.JUNGLE_PIECE_CAPTURED);
             socket.off(EVENTS.JUNGLE_GAME_OVER);
+            socket.off(EVENTS.JUNGLE_HINT_RECEIVED);
         };
-    }, [roomId, initGame]);
+    }, [roomId, mode, difficulty, initGame, onHintReceived]);
 
     const isRiver = (x, y) => {
         const rivers = [

@@ -1,7 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useJungleLogic } from './useJungleLogic';
-import { Swords, Trophy, Activity, ArrowLeft, RefreshCw, Heart, Target, Shield, Info, HelpCircle } from 'lucide-react';
+import { Swords, Trophy, Activity, ArrowLeft, RotateCcw, RefreshCw, HelpCircle } from 'lucide-react';
+import { socket } from '../../utils/socket';
+import { EVENTS } from '../../utils/constants';
 
 const MAP_WIDTH = 7;
 const MAP_HEIGHT = 9;
@@ -32,7 +34,7 @@ const DENS = [
 export default function JungleGame() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { roomId, mode, difficulty } = location.state || { roomId: 'local', mode: 'single', difficulty: 'medium' };
+    const { roomId, mode, difficulty } = location.state || { roomId: 'local', mode: 'solo', difficulty: 'medium' };
     
     const canvasRef = useRef(null);
     const [activeHint, setActiveHint] = useState(null);
@@ -46,6 +48,12 @@ export default function JungleGame() {
 
     const getHint = () => {
         socket.emit(EVENTS.JUNGLE_GET_HINT, { roomId });
+    };
+
+    const handleReset = () => {
+        // Simple reload to reset the state for local logic to rebuild
+        // For actual implementation, it could emit another START event.
+        socket.emit(EVENTS.START_JUNGLE_GAME, { roomId, mode, difficulty });
     };
 
     // Drawing Loop
@@ -128,7 +136,7 @@ export default function JungleGame() {
                 // Glow effect for selected or playable piece
                 if (isSelected) {
                     ctx.shadowBlur = 15;
-                    ctx.shadowColor = p.owner === 0 ? '#4ade80' : '#60a5fa';
+                    ctx.shadowColor = p.ownerId === myId ? '#4ade80' : '#60a5fa';
                 }
 
                 // Piece Base (Glassmorphism Disc)
@@ -141,7 +149,7 @@ export default function JungleGame() {
                 ctx.arc(0, 0, TILE_SIZE/2 - 8, 0, Math.PI * 2);
                 ctx.fill();
                 
-                ctx.strokeStyle = isSelected ? '#fff' : (p.owner === 0 ? '#4ade80' : '#60a5fa');
+                ctx.strokeStyle = isSelected ? '#fff' : (p.ownerId === myId ? '#4ade80' : '#60a5fa');
                 ctx.lineWidth = isSelected ? 3 : 1.5;
                 ctx.stroke();
 
@@ -194,7 +202,7 @@ export default function JungleGame() {
 
         render(0);
         return () => cancelAnimationFrame(frameId);
-    }, [pieces, selectedPiece, validMoves, turn, myId]);
+    }, [pieces, selectedPiece, validMoves, turn, myId, activeHint]);
 
     const handleCanvasClick = (e) => {
         const rect = canvasRef.current.getBoundingClientRect();
@@ -208,106 +216,156 @@ export default function JungleGame() {
     const isMyTurn = turn === myId;
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 0.5rem' }}>
-            <div className="glass-panel" style={{ position: 'relative', width: '100%', maxWidth: '1100px', display: 'flex', flexDirection: 'column', padding: '1rem' }}>
+        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100vw', height: '100vh', padding: '0.5rem', boxSizing: 'border-box' }}>
+            <div className="glass-panel game-play-panel" style={{
+                position: 'relative',
+                overflow: 'hidden',
+                padding: '1.2rem',
+                gap: '1.5rem',
+                alignItems: 'stretch',
+                justifyContent: 'center',
+                height: 'fit-content',
+                maxHeight: '96vh',
+                width: 'max-content',
+                maxWidth: '98%',
+                borderRadius: '20px',
+                background: 'rgba(23, 23, 33, 0.85)',
+                backdropFilter: 'blur(25px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
+            }}>
                 
-                {/* Header Section */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '10px 18px', marginBottom: '12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <Activity size={18} color="#4ade80" />
-                        <span style={{ fontWeight: 800, fontSize: '1rem', color: '#fff' }}>Cờ Thú Online</span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>· {roomId}</span>
-                    </div>
+                {/* LEFT: INFO & RULES */}
+                <div style={{
+                    flex: '0 1 260px',
+                    width: '260px',
+                    minWidth: '220px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    maxHeight: '100%',
+                    overflow: 'hidden',
+                    background: 'rgba(255,255,255,0.03)',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    padding: '1.2rem',
+                    boxSizing: 'border-box'
+                }}>
+                    <h3 style={{ margin: '0 0 15px 0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)' }}>
+                        <span style={{ fontSize: '1.2rem' }}>📊</span> Cấp bậc & Quyền
+                    </h3>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '30px', justifyContent: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: turn === myId ? 1 : 0.5 }}>
-                            <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 10px #4ade80' }} />
-                            <span style={{ fontWeight: 800, fontSize: '1rem', color: turn === myId ? '#4ade80' : '#fff' }}>BẠN {turn === myId ? '(Đang đi)' : ''}</span>
+                    <div style={{
+                        flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)',
+                        borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.05)',
+                        scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.1) transparent',
+                        display: 'flex', flexDirection: 'column', gap: '10px'
+                    }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.9rem' }}>
+                            {[8,7,6,5,4,3,2,1].map(v => (
+                                <div key={v} style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: '4px' }}>
+                                    <span style={{ color: '#94a3b8' }}>{v}. {PIECE_NAMES[v]}</span>
+                                    {v === 8 && <span style={{ fontSize: '0.75rem', color: '#ef4444' }}>(&gt;1)</span>}
+                                    {v === 1 && <span style={{ fontSize: '0.75rem', color: '#4ade80' }}>(&gt;8)</span>}
+                                </div>
+                            ))}
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: turn !== myId ? 1 : 0.5 }}>
-                            <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#60a5fa', boxShadow: '0 0 10px #60a5fa' }} />
-                            <span style={{ fontWeight: 800, fontSize: '1rem', color: turn !== myId ? '#60a5fa' : '#fff' }}>ĐỐI THỦ {turn !== myId ? '(Đang đi)' : ''}</span>
-                        </div>
-                    </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#fbbf24', background: 'rgba(251,191,36,0.1)', padding: '4px 12px', borderRadius: '20px', border: '1px solid #fbbf2433' }}>
-                            {difficulty.toUpperCase()}
+                        <div style={{ marginTop: '10px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', lineHeight: '1.5' }}>
+                            <strong style={{ color: '#fbbf24' }}>Gợi ý:</strong> Nhảy qua sông bằng Hổ/Sư tử. Chuột có thể bơi dưới sông. Đưa quân vào Hang đối phương để thắng!
                         </div>
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'stretch', gap: '12px' }}>
-                    
-                    {/* Left Column */}
-                    <div style={{ width: '220px', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
-                        <div style={{ borderRadius: '12px', padding: '15px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '12px' }}>
-                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', marginBottom: '12px' }}>📊 Cấp bậc (Mạnh &rarr; Yếu)</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.85rem' }}>
-                                {[8,7,6,5,4,3,2,1].map(v => (
-                                    <div key={v} style={{ display: 'flex', justifyContent: 'space-between', color: '#fff' }}>
-                                        <span style={{ color: '#94a3b8' }}>{v}. {PIECE_NAMES[v]}</span>
-                                        {v === 8 && <span style={{ fontSize: '0.7rem', color: '#ef4444' }}>(&gt;1)</span>}
-                                        {v === 1 && <span style={{ fontSize: '0.7rem', color: '#4ade80' }}>(&gt;8)</span>}
-                                    </div>
-                                ))}
+                {/* MIDDLE: BOARD */}
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: 0, margin: 0 }}>
+                    {/* Status Header */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', width: '100%', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '10px 18px', marginBottom: '16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <Activity size={18} color="#4ade80" />
+                            <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#fff' }}>Cờ Thú</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', justifyContent: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: turn === myId ? 1 : 0.5 }}>
+                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 10px #4ade80' }} />
+                                <span style={{ fontWeight: 800, fontSize: '0.9rem', color: turn === myId ? '#4ade80' : '#fff' }}>BẠN {turn === myId ? '(Đang đi)' : ''}</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: turn !== myId ? 1 : 0.5 }}>
+                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#60a5fa', boxShadow: '0 0 10px #60a5fa' }} />
+                                <span style={{ fontWeight: 800, fontSize: '0.9rem', color: turn !== myId ? '#60a5fa' : '#fff' }}>ĐỐI THỦ {turn !== myId && turn !== null ? '(Đang đi)' : ''}</span>
                             </div>
                         </div>
-                        <div style={{ borderRadius: '12px', padding: '15px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', marginBottom: '8px' }}>💡 Gợi ý</div>
-                            <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', lineHeight: '1.5', margin: 0 }}>
-                                Nhảy qua sông bằng Hổ/Sư tử. Chuột có thể bơi dưới sông. Đưa quân vào Hang đối phương để thắng!
-                            </p>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fbbf24', background: 'rgba(251,191,36,0.1)', padding: '4px 12px', borderRadius: '20px', border: '1px solid #fbbf2433' }}>
+                                {difficulty.toUpperCase()}
+                            </div>
                         </div>
                     </div>
 
-                    {/* Middle Column */}
-                    <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                        <div style={{ position: 'relative', border: '5px solid rgba(255,255,255,0.05)', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', background: '#0f172a' }}>
-                            {pieces.length === 0 && !gameOver && (
-                                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 10, background: 'rgba(15, 23, 42, 0.9)' }}>
-                                    <RefreshCw className="animate-spin" size={48} color="#4ade80" style={{ marginBottom: '15px' }} />
-                                    <span style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>ĐANG KẾT NỐI VỚI RỪNG XANH...</span>
-                                </div>
-                            )}
-                            
-                            <canvas 
-                                ref={canvasRef} 
-                                width={MAP_SIZE_W} 
-                                height={MAP_SIZE_H} 
-                                onClick={handleCanvasClick}
-                                style={{ display: 'block', cursor: isMyTurn ? 'pointer' : 'default' }} 
-                            />
-
-                            {/* Game Over Overlay */}
-                            {gameOver && (
-                                <div style={{ position: 'absolute', inset: 0, background: 'rgba(10,14,22,0.9)', zIndex: 50, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', animation: 'fadeIn 0.5s' }}>
-                                    <Trophy size={80} color={gameOver === myId ? '#fbbf24' : '#94a3b8'} style={{ marginBottom: '20px' }} />
-                                    <h2 style={{ fontSize: '3rem', fontWeight: 900, color: gameOver === myId ? '#fbbf24' : '#fff', margin: 0 }}>{gameOver === myId ? 'CHIẾN THẮNG!' : 'THẤT BẠI...'}</h2>
-                                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', marginBottom: '30px' }}>{gameOver === myId ? 'Bạn đã chinh phục hang ổ đối phương.' : 'Hang ổ của bạn đã bị chiếm đóng.'}</p>
-                                    <button className="btn-primary" onClick={() => navigate('/jungle')} style={{ maxWidth: '200px' }}>Quay lại sảnh</button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Right Column */}
-                    <div style={{ width: '220px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <div style={{ borderRadius: '12px', padding: '15px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', flex: 1 }}>
-                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', marginBottom: '12px' }}>🛡 Phòng Thủ</div>
-                            <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', lineHeight: '1.6', marginBottom: '20px' }}>
-                                Hãy cẩn thận với <b>Bẫy (Traps)</b> xung quanh Hang. Bất kỳ quân nào sa vào bẫy đều sẽ bị giảm sức mạnh!
-                            </p>
-                            
-                            <button className="btn-secondary" onClick={getHint} style={{ width: '100%', marginBottom: '10px' }}>
-                                <HelpCircle size={18} /> GỢI Ý MÁY (AI)
-                            </button>
-                        </div>
-                        <button className="btn-secondary" onClick={() => navigate('/jungle')} style={{ padding: '12px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                            <ArrowLeft size={18} /> THOÁT GAME
-                        </button>
+                    <div className="game-play-board jungle-board" style={{
+                        position: 'relative',
+                        border: '8px solid rgba(15, 15, 25, 0.95)',
+                        borderRadius: '12px',
+                        boxShadow: '0 30px 60px rgba(0, 0, 0, 0.6)',
+                        overflow: 'hidden',
+                        background: '#0f172a'
+                    }}>
+                        {pieces.length === 0 && !gameOver && (
+                            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 10, background: 'rgba(15, 23, 42, 0.9)' }}>
+                                <RefreshCw className="animate-spin" size={48} color="#4ade80" style={{ marginBottom: '15px' }} />
+                                <span style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>ĐANG KẾT NỐI...</span>
+                            </div>
+                        )}
+                        
+                        <canvas 
+                            ref={canvasRef} 
+                            width={MAP_SIZE_W} 
+                            height={MAP_SIZE_H} 
+                            onClick={handleCanvasClick}
+                            style={{ 
+                                display: 'block', 
+                                cursor: isMyTurn ? 'pointer' : 'default',
+                                maxWidth: '100%',
+                                objectFit: 'contain'
+                            }} 
+                        />
                     </div>
                 </div>
+
+                {/* RIGHT: CONTROLS */}
+                <div style={{ flex: '0 1 260px', width: '260px', minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '0.8rem', maxHeight: '100%', overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.2rem', color: '#fff' }}>CỜ THÚ</div>
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <button className="btn-primary" onClick={handleReset}><RotateCcw size={18} /> Chơi ván mới</button>
+                            
+                            <button className="btn-secondary" onClick={getHint} disabled={turn !== myId} style={{ borderColor: '#fbbf24', color: '#fbbf24' }}>
+                                <HelpCircle size={18} /> Gợi ý nước đi (AI)
+                            </button>
+                            
+                            <button className="btn-secondary" onClick={() => navigate('/jungle')}><ArrowLeft size={18} /> Thoát</button>
+                        </div>
+                    </div>
+
+                    <div style={{ borderRadius: '12px', padding: '15px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', flex: 1 }}>
+                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', marginBottom: '12px' }}>🛡 Phòng Thủ</div>
+                        <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', lineHeight: '1.6' }}>
+                            Hãy cẩn thận với <b>Bẫy (Traps)</b> xung quanh Hang. Bất kỳ quân nào sa vào bẫy đều sẽ bị giảm sức mạnh và ai cũng ăn được!
+                        </p>
+                    </div>
+                </div>
+
+                {/* GAME OVER SYNC OVERLAY */}
+                {gameOver && (
+                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(13, 17, 23, 0.95)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100, gap: '20px' }}>
+                        <Trophy size={80} color={gameOver === myId ? '#fbbf24' : '#94a3b8'} style={{ marginBottom: '-10px' }} />
+                        <h2 style={{ fontSize: '3rem', fontWeight: 900, color: gameOver === myId ? '#fbbf24' : '#fff', margin: 0 }}>
+                            {gameOver === myId ? 'CHIẾN THẮNG!' : 'THẤT BẠI...'}
+                        </h2>
+                        <button className="btn-primary" onClick={handleReset}>Chơi lại</button>
+                        <button className="btn-secondary" onClick={() => navigate('/jungle')}>Trở về sảnh</button>
+                    </div>
+                )}
             </div>
         </div>
     );
