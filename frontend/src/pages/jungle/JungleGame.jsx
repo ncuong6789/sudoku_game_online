@@ -138,37 +138,42 @@ export default function JungleGame() {
 
                 // Glow effect for selected or playable piece
                 if (isSelected) {
-                    ctx.shadowBlur = 15;
+                    ctx.shadowBlur = 20;
                     ctx.shadowColor = p.ownerId === myId ? '#4ade80' : '#60a5fa';
+                } else {
+                    ctx.shadowBlur = 5;
+                    ctx.shadowColor = 'rgba(0,0,0,0.5)';
                 }
 
-                // Piece Base (Glassmorphism Disc)
-                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, TILE_SIZE/2 - 5);
-                gradient.addColorStop(0, 'rgba(255,255,255,0.15)');
-                gradient.addColorStop(1, 'rgba(255,255,255,0.02)');
+                // Piece Base (3D Coin Style)
+                const gradOuter = ctx.createLinearGradient(-30, -30, 30, 30);
+                gradOuter.addColorStop(0, p.ownerId === myId ? '#166534' : '#1e3a8a');
+                gradOuter.addColorStop(1, p.ownerId === myId ? '#052e16' : '#172554');
                 
-                ctx.fillStyle = gradient;
+                ctx.fillStyle = gradOuter;
                 ctx.beginPath();
-                ctx.arc(0, 0, TILE_SIZE/2 - 8, 0, Math.PI * 2);
+                ctx.arc(0, 0, TILE_SIZE/2 - 6, 0, Math.PI * 2);
                 ctx.fill();
                 
                 ctx.strokeStyle = isSelected ? '#fff' : (p.ownerId === myId ? '#4ade80' : '#60a5fa');
-                ctx.lineWidth = isSelected ? 3 : 1.5;
+                ctx.lineWidth = isSelected ? 3 : 2;
                 ctx.stroke();
 
-                // Inner Ring
-                ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+                // Inner Ring (Gold/Silver Trim)
+                ctx.strokeStyle = p.ownerId === myId ? 'rgba(74, 222, 128, 0.4)' : 'rgba(96, 165, 250, 0.4)';
                 ctx.beginPath();
-                ctx.arc(0, 0, TILE_SIZE/2 - 14, 0, Math.PI * 2);
+                ctx.arc(0, 0, TILE_SIZE/2 - 12, 0, Math.PI * 2);
                 ctx.stroke();
 
                 // Animal Icon (Emoji/SVG)
                 const icons = { 1: '🐀', 2: '🐱', 3: '🐕', 4: '🐺', 5: '🐆', 6: '🐅', 7: '🦁', 8: '🐘' };
-                ctx.shadowBlur = 0;
-                ctx.font = `${TILE_SIZE/2.2}px "Segoe UI Emoji"`;
+                ctx.shadowBlur = 4;
+                ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                ctx.font = `${TILE_SIZE/2.2}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(icons[p.type], 0, 2);
+                // Adjusting Y-offset to make it look centered in the coin
+                ctx.fillText(icons[p.type], 0, 3);
 
                 // Rank Badge
                 ctx.fillStyle = 'rgba(0,0,0,0.5)';
@@ -370,11 +375,11 @@ export default function JungleGame() {
                 </div>
 
                 {/* GAME OVER SYNC OVERLAY */}
-                {gameOver && (
+                {gameOver !== null && (
                     <div style={{ position: 'absolute', inset: 0, background: 'rgba(13, 17, 23, 0.95)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100, gap: '20px' }}>
                         <Trophy size={80} color={gameOver === myId ? '#fbbf24' : '#94a3b8'} style={{ marginBottom: '-10px' }} />
                         <h2 style={{ fontSize: '3rem', fontWeight: 900, color: gameOver === myId ? '#fbbf24' : '#fff', margin: 0 }}>
-                            {gameOver === myId ? 'CHIẾN THẮNG!' : 'THẤT BẠI...'}
+                            {gameOver === myId ? 'BẠN ĐÃ THẮNG!' : 'BẠN ĐÃ THUA...'}
                         </h2>
                         <button className="btn-primary" onClick={handleReset}>Chơi lại</button>
                         <button className="btn-secondary" onClick={() => navigate('/jungle')}>Trở về sảnh</button>

@@ -61,14 +61,24 @@ export function useTankLogic(roomId, mode = 'multiplayer') {
             }, 500);
         };
 
+        const onConnect = () => {
+            setMyId(socket.id);
+            socket.emit(EVENTS.START_TANK_GAME, { roomId });
+        };
+
         socket.on(EVENTS.TANK_GAME_STARTED, handleStarted);
         socket.on(EVENTS.TANK_GAME_STATE, handleUpdate);
         socket.on(EVENTS.TANK_EXPLOSION, handleExplosion);
 
         // If room is already active
-        socket.emit(EVENTS.START_TANK_GAME, { roomId });
+        if (socket.connected) {
+            onConnect();
+        } else {
+            socket.on('connect', onConnect);
+        }
 
         return () => {
+            socket.off('connect', onConnect);
             socket.off(EVENTS.TANK_GAME_STARTED, handleStarted);
             socket.off(EVENTS.TANK_GAME_STATE, handleUpdate);
             socket.off(EVENTS.TANK_EXPLOSION, handleExplosion);
