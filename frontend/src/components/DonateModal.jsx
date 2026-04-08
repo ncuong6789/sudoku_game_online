@@ -39,9 +39,9 @@ export default function DonateModal({ isOpen, onClose }) {
                 background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98))',
                 border: '1px solid rgba(255, 255, 255, 0.15)',
                 borderRadius: '32px',
-                padding: '2.5rem',
+                padding: '1.5rem',
                 width: '100%',
-                maxWidth: '440px',
+                maxWidth: '400px',
                 position: 'relative',
                 boxShadow: '0 40px 100px -20px rgba(0, 0, 0, 0.8), inset 0 0 40px rgba(255,255,255,0.02)',
                 display: 'flex',
@@ -52,13 +52,13 @@ export default function DonateModal({ isOpen, onClose }) {
                     onClick={onClose}
                     style={{
                         position: 'absolute',
-                        top: '1.5rem',
-                        right: '1.5rem',
+                        top: '1rem',
+                        right: '1rem',
                         background: 'rgba(255,255,255,0.05)',
                         border: 'none',
                         color: 'rgba(255,255,255,0.5)',
                         cursor: 'pointer',
-                        padding: '10px',
+                        padding: '8px',
                         borderRadius: '50%',
                         display: 'flex',
                         alignItems: 'center',
@@ -74,23 +74,23 @@ export default function DonateModal({ isOpen, onClose }) {
                         e.currentTarget.style.color = 'rgba(255,255,255,0.5)';
                     }}
                 >
-                    <X size={20} />
+                    <X size={18} />
                 </button>
 
-                <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
                     <div className="heart-pulse" style={{
-                        width: '70px', height: '70px',
+                        width: '50px', height: '50px',
                         background: 'rgba(239, 68, 68, 0.15)',
                         borderRadius: '50%',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        margin: '0 auto 1.2rem auto',
-                        boxShadow: '0 0 30px rgba(239, 68, 68, 0.2)'
+                        margin: '0 auto 0.8rem auto',
+                        boxShadow: '0 0 20px rgba(239, 68, 68, 0.2)'
                     }}>
-                        <Heart size={36} fill="#ef4444" color="#ef4444" />
+                        <Heart size={28} fill="#ef4444" color="#ef4444" />
                     </div>
-                    <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.8rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>Ủng hộ dự án</h2>
-                    <p style={{ margin: 0, fontSize: '0.95rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.6 }}>
-                        Sự đóng góp của bạn là động lực vô giá giúp mình duy trì server và phát triển thêm nhiều trò chơi thú vị. ❤️
+                    <h2 style={{ margin: '0 0 0.3rem 0', fontSize: '1.5rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>Ủng hộ dự án</h2>
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.4 }}>
+                        Giúp mình duy trì server và phát triển game nhé. ❤️
                     </p>
                 </div>
 
@@ -98,16 +98,16 @@ export default function DonateModal({ isOpen, onClose }) {
                 <div style={{
                     width: '100%',
                     background: 'rgba(0,0,0,0.4)',
-                    padding: '1.5rem',
+                    padding: '1rem',
                     borderRadius: '24px',
                     border: '1px solid rgba(255,255,255,0.05)',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.2rem'
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem'
                 }}>
                     <div style={{
                         background: '#fff',
-                        padding: '12px',
-                        borderRadius: '20px',
-                        width: '240px', height: '240px',
+                        padding: '10px',
+                        borderRadius: '16px',
+                        width: '280px', height: '280px',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
                         position: 'relative',
@@ -118,63 +118,59 @@ export default function DonateModal({ isOpen, onClose }) {
                             alt="VietQR"
                             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                             onError={(e) => {
-                                e.target.src = 'https://via.placeholder.com/240?text=QR+Error';
+                                e.target.src = 'https://via.placeholder.com/280?text=QR+Error';
                             }}
                         />
                     </div>
 
-                    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '12px 16px', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '10px 14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px' }}>Số tài khoản ({DONATE_CONFIG.bankId})</span>
-                                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#4ade80', fontFamily: 'monospace' }}>{DONATE_CONFIG.accountNo}</span>
+                                <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>Số tài khoản ({DONATE_CONFIG.bankId})</span>
+                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#4ade80', fontFamily: 'monospace' }}>{DONATE_CONFIG.accountNo}</span>
                             </div>
-                            <button 
+                            <button
                                 onClick={handleCopy}
                                 style={{
                                     background: copied ? '#4ade8022' : 'rgba(255,255,255,0.05)',
                                     border: 'none',
                                     color: copied ? '#4ade80' : '#fff',
-                                    padding: '10px',
-                                    borderRadius: '10px',
+                                    padding: '8px',
+                                    borderRadius: '8px',
                                     cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', gap: '6px',
+                                    display: 'flex', alignItems: 'center', gap: '4px',
                                     transition: 'all 0.2s'
                                 }}
                             >
-                                {copied ? <Check size={16} /> : <Copy size={16} />}
-                                <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{copied ? 'Đã chép' : 'Sao chép'}</span>
+                                {copied ? <Check size={14} /> : <Copy size={14} />}
+                                <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>{copied ? 'Xong' : 'Copy'}</span>
                             </button>
-                        </div>
-                        
-                        <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>
-                            Scan bằng ứng dụng Ngân hàng
                         </div>
                     </div>
                 </div>
 
-                <div style={{ marginTop: '1.5rem', width: '100%', display: 'flex', justifyContent: 'center' }}>
-                    <button 
+                <div style={{ marginTop: '0.8rem', width: '100%', display: 'flex', justifyContent: 'center' }}>
+                    <button
                         onClick={onClose}
                         style={{
                             background: 'transparent',
                             border: '1px solid rgba(255,255,255,0.1)',
-                            color: 'rgba(255,255,255,0.6)',
-                            padding: '10px 24px',
-                            borderRadius: '12px',
+                            color: 'rgba(255,255,255,0.4)',
+                            padding: '8px 20px',
+                            borderRadius: '10px',
                             cursor: 'pointer',
-                            fontSize: '0.9rem',
+                            fontSize: '0.85rem',
                             fontWeight: 600,
                             transition: 'all 0.2s'
                         }}
                         onMouseEnter={(e) => e.target.style.background = 'rgba(255,255,255,0.05)'}
                         onMouseLeave={(e) => e.target.style.background = 'transparent'}
                     >
-                        Để sau vậy
+                        Đóng
                     </button>
                 </div>
             </div>
-            
+
             <style>{`
                 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
                 .heart-pulse { animation: pulse 2s infinite; }
