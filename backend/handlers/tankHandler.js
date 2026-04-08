@@ -1,50 +1,278 @@
 const { EVENTS } = require('../utils/constants');
 
-const TANK_SPEED = 3;
-const BULLET_SPEED = 6;
-const MAP_SIZE = 800; // 800x800 canvas
-const TANK_SIZE = 40;
+const MAP_COLS = 26;
+const MAP_ROWS = 26;
+// Logical size, can be translated to TILE_SIZE on client (e.g. 32px -> 832x832)
+const TANK_SIZE = 1.8; // Almost 2x2 grid, slightly smaller to squeeze through gaps
+const TANK_SPEED_BASIC = 0.15;
+const TANK_SPEED_FAST = 0.25;
+const BULLET_SPEED_BASIC = 0.4;
+const BULLET_SPEED_FAST = 0.6;
 
-const startTankGameLoop = (roomId, io, roomManager) => {
-    const rooms = roomManager.getAllRooms();
-    const room = rooms[roomId];
-    if (!room || !room.tankState) return;
+// Char to ID map
+const TILE_MAP = {
+    '.': 0, '#': 1, '@': 2, '~': 3, '%': 4, '-': 5
+};
 
-    const loop = () => {
-        const state = room.tankState;
-        if (state.status === 'finished') {
-            if (state.intervalId) clearInterval(state.intervalId);
-            return;
+const STAGE_1 = [
+    "..........................",
+    "..........................",
+    "..##..##..##..##..##..##..",
+    "..##..##..##..##..##..##..",
+    "..##..##..##..##..##..##..",
+    "..##..##..##..##..##..##..",
+    "..##..##..##@@##..##..##..",
+    "..##..##..##@@##..##..##..",
+    "..##..##..##..##..##..##..",
+    "..##..##..........##..##..",
+    "..##..##..........##..##..",
+    "..........##..##..........",
+    "..........##..##..........",
+    "##..####..........####..##",
+    "@@..####..........####..@@",
+    "..........##..##..........",
+    "..........######..........",
+    "..##..##..######..##..##..",
+    "..##..##..##..##..##..##..",
+    "..##..##..##..##..##..##..",
+    "..##..##..##..##..##..##..",
+    "..##..##..........##..##..",
+    "..##..##..........##..##..",
+    "..##..##...####...##..##..",
+    "...........#..#...........",
+    "...........#..#..........."
+];
+
+class TankServer {
+    constructor() {
+        this.status = 'playing';
+        this.intervalId = null;
+        this.map = this.parseMap(STAGE_1);
+        this.baseId = 'base';
+        this.base = { x: 12, y: 24, w: 2, h: 2, destroyed: false };
+        this.players = {};
+        this.enemies = {};
+        this.bullets = [];
+        this.items = {}; // id -> { type, x, y }
+        
+        this.enemySpawnPoints = [ {x:0,y:0}, {x:12,y:0}, {x:24,y:0} ];
+        this.enemySpawnQueue = 20; // 20 enemies per stage
+        this.enemiesOnScreen = 0;
+        this.lastEnemySpawnTime = 0;
+        this.enemyIdCounter = 0;
+        this.itemIdCounter = 0;
+    }
+
+    parseMap(strArr) {
+        const m = [];
+        for (let r = 0; r < MAP_ROWS; r++) {
+            const row = [];
+            for (let c = 0; c < MAP_COLS; c++) {
+                row.push(TILE_MAP[strArr[r][c]] || 0);
+            }
+            m.push(row);
+        }
+        return m;
+    }
+
+    addPlayer(id, spawnIdx) {
+        const spawns = [ {x: 8, y: 24}, {x: 16, y: 24} ];
+        const sp = spawns[spawnIdx % 2];
+        this.players[id] = {
+            id, type: 'player', isCPU: false,
+            x: sp.x, y: sp.y, w: TANK_SIZE, h: TANK_SIZE,
+            dir: 'up', speed: TANK_SPEED_BASIC,
+            lives: 3, hp: 1, invulnerableTime: Date.now() + 3000,
+            starLevel: 0, // 0: basic, 1: fast bullet, 2: 2 bullets, 3: armor piercing
+        };
+    }
+
+    spawnEnemy() {
+        if (this.enemySpawnQueue <= 0 || this.enemiesOnScreen >= 4) return;
+        const now = Date.now();
+        if (now - this.lastEnemySpawnTime < 3000) return;
+        
+        const sp = this.enemySpawnPoints[this.enemySpawnQueue % 3];
+        // Check if spawn point is occupied
+        // Simplified check:
+        let randType = Math.random();
+        let eType = 'basic';
+        let hp = 1, spd = TANK_SPEED_BASIC;
+        let isFlashing = Math.random() < 0.2; // 20% drops item
+
+        if (randType < 0.5) { eType = 'basic'; }
+        else if (randType < 0.75) { eType = 'fast'; spd = TANK_SPEED_FAST; }
+        else if (randType < 0.9) { eType = 'power'; }
+        else { eType = 'armor'; hp = 4; }
+
+        const eid = 'cpu_' + (++this.enemyIdCounter);
+        this.enemies[eid] = {
+            id: eid, type: eType, isCPU: true,
+            x: sp.x, y: sp.y, w: TANK_SIZE, h: TANK_SIZE,
+            dir: 'down', speed: spd, hp: hp,
+            isFlashing: isFlashing,
+            lastShootTime: 0, lastTurnTime: now
+        };
+        
+        this.enemySpawnQueue--;
+        this.enemiesOnScreen++;
+        this.lastEnemySpawnTime = now;
+    }
+
+    rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2) {
+        return x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2;
+    }
+
+    checkWallCollision(x, y, w, h, tank) {
+        // Bounds
+        if (x < 0 || x + w > MAP_COLS || y < 0 || y + h > MAP_ROWS) return true;
+        
+        // Grid tiles
+        const sr = Math.floor(y), er = Math.floor(y + h - 0.01);
+        const sc = Math.floor(x), ec = Math.floor(x + w - 0.01);
+        
+        for (let r = sr; r <= er; r++) {
+            for (let c = sc; c <= ec; c++) {
+                if (r >= 0 && r < MAP_ROWS && c >= 0 && c < MAP_COLS) {
+                    const t = this.map[r][c];
+                    // 1: Brick, 2: Stone, 3: Water (Blocks tanks)
+                    if (t === 1 || t === 2 || (t === 3 && !tank.canCrossWater)) return true;
+                }
+            }
         }
 
-        // Move bullets
-        state.bullets = state.bullets.filter(bullet => {
-            bullet.x += bullet.dx;
-            bullet.y += bullet.dy;
+        // Check base
+        if (!this.base.destroyed && this.rectIntersect(x, y, w, h, this.base.x, this.base.y, this.base.w, this.base.h)) {
+            return true;
+        }
 
-            // Boundary check
-            if (bullet.x < 0 || bullet.x > MAP_SIZE || bullet.y < 0 || bullet.y > MAP_SIZE) {
+        return false;
+    }
+
+    checkTankCollisions(x, y, w, h, ignoreId) {
+        const allTanks = [...Object.values(this.players), ...Object.values(this.enemies)];
+        for (const t of allTanks) {
+            if (t.id === ignoreId || t.hp <= 0) continue;
+            if (this.rectIntersect(x, y, w, h, t.x, t.y, t.w, t.h)) return true;
+        }
+        return false;
+    }
+
+    moveTank(tank, targetX, targetY) {
+        if (!this.checkWallCollision(targetX, targetY, tank.w, tank.h, tank) &&
+            !this.checkTankCollisions(targetX, targetY, tank.w, tank.h, tank.id)) {
+            tank.x = targetX;
+            tank.y = targetY;
+            return true;
+        }
+        return false;
+    }
+
+    updateAI(now, io, roomId) {
+        this.spawnEnemy();
+
+        for (let eid in this.enemies) {
+            const e = this.enemies[eid];
+            if (e.hp <= 0) continue;
+
+            // Random Shooting
+            if (now - e.lastShootTime > 1500 && Math.random() < 0.05) {
+                e.lastShootTime = now;
+                this.bullets.push({
+                    ownerId: e.id, isCPU: true,
+                    x: e.x + e.w/2 - 0.25, y: e.y + e.h/2 - 0.25,
+                    dir: e.dir, type: e.type === 'power' ? 'fast' : 'basic',
+                    speed: e.type === 'power' ? BULLET_SPEED_FAST : BULLET_SPEED_BASIC
+                });
+                io.to(roomId).emit(EVENTS.TANK_SHOOT, { ownerId: e.id, x: e.x, y: e.y, dir: e.dir });
+            }
+
+            // Movement & Turing
+            let moved = false;
+            let nx = e.x, ny = e.y;
+            if (e.dir === 'up') ny -= e.speed;
+            else if (e.dir === 'down') ny += e.speed;
+            else if (e.dir === 'left') nx -= e.speed;
+            else if (e.dir === 'right') nx += e.speed;
+
+            moved = this.moveTank(e, nx, ny);
+
+            // If stuck or time to turn
+            if (!moved || (now - e.lastTurnTime > 2000 && Math.random() < 0.05)) {
+                e.lastTurnTime = now;
+                const dirs = ['up', 'down', 'left', 'right'];
+                let pref = [];
+                // Weight moving down towards base
+                if (e.y < 20) pref = ['down', 'down', 'left', 'right', 'up'];
+                else pref = dirs;
+                e.dir = pref[Math.floor(Math.random() * pref.length)];
+                
+                // Align to grid partially to help fit through gaps
+                e.x = Math.round(e.x * 2) / 2;
+                e.y = Math.round(e.y * 2) / 2;
+            }
+        }
+    }
+
+    updateBullets(io, roomId) {
+        this.bullets = this.bullets.filter(b => {
+            b.x += (b.dir === 'left' ? -b.speed : b.dir === 'right' ? b.speed : 0);
+            b.y += (b.dir === 'up' ? -b.speed : b.dir === 'down' ? b.speed : 0);
+
+            // Bounds
+            let bw = 0.5, bh = 0.5;
+            if (b.x < 0 || b.x > MAP_COLS || b.y < 0 || b.y > MAP_ROWS) return false;
+
+            // Hit Map
+            const r = Math.floor(b.y), c = Math.floor(b.x);
+            if (r >= 0 && r < MAP_ROWS && c >= 0 && c < MAP_COLS) {
+                const t = this.map[r][c];
+                if (t === 1 || t === 2) {
+                    if (t === 1) this.map[r][c] = 0; // Destroy brick
+                    else if (t === 2 && b.pierce) this.map[r][c] = 0; // Destroy stone if pierce
+                    io.to(roomId).emit(EVENTS.TANK_EXPLOSION, { x: b.x, y: b.y, isSmall: true });
+                    return false;
+                }
+            }
+
+            // Hit Base
+            if (!this.base.destroyed && this.rectIntersect(b.x, b.y, bw, bh, this.base.x, this.base.y, this.base.w, this.base.h)) {
+                this.base.destroyed = true;
+                this.status = 'finished';
+                io.to(roomId).emit(EVENTS.TANK_EXPLOSION, { x: this.base.x + 1, y: this.base.y + 1, isBase: true });
                 return false;
             }
 
-            // Hit check
-            for (const id in state.tanks) {
-                const tank = state.tanks[id];
-                if (id !== bullet.ownerId && !tank.isDestroyed) {
-                    const dist = Math.sqrt((bullet.x - tank.x) ** 2 + (bullet.y - tank.y) ** 2);
-                    if (dist < TANK_SIZE / 2) {
-                        // Tank hit
-                        tank.health -= 25;
-                        if (tank.health <= 0) {
-                            tank.isDestroyed = true;
-                            tank.health = 0;
-                            // Check game over
-                            const aliveTanks = Object.values(state.tanks).filter(t => !t.isDestroyed);
-                            if (aliveTanks.length <= 1) {
-                                state.status = 'finished';
+            // Hit Tanks
+            const allTanks = [...Object.values(this.players), ...Object.values(this.enemies)];
+            for (const t of allTanks) {
+                if (t.hp > 0 && t.id !== b.ownerId && b.isCPU !== t.isCPU) {
+                    if (this.rectIntersect(b.x, b.y, bw, bh, t.x, t.y, t.w, t.h)) {
+                        // Ignore if invulnerable
+                        if (t.isCPU || Date.now() > t.invulnerableTime) {
+                            t.hp -= 1;
+                            io.to(roomId).emit(EVENTS.TANK_EXPLOSION, { x: t.x + 1, y: t.y + 1 });
+                            if (t.hp <= 0 && t.isCPU) {
+                                this.enemiesOnScreen--;
+                                if (t.isFlashing) this.spawnItem();
+                            } else if (t.hp <= 0 && !t.isCPU) {
+                                t.lives -= 1;
+                                t.starLevel = 0;
+                                if (t.lives > 0) {
+                                    // Respawn logic
+                                    t.hp = 1;
+                                    t.invulnerableTime = Date.now() + 3000;
+                                    // Reset pos
+                                    t.x = Object.keys(this.players).indexOf(t.id) === 0 ? 8 : 16;
+                                    t.y = 24;
+                                } else {
+                                    // Check if all players dead
+                                    if (Object.values(this.players).every(p => p.lives <= 0)) {
+                                        this.status = 'finished';
+                                    }
+                                }
                             }
                         }
-                        io.to(roomId).emit(EVENTS.TANK_EXPLOSION, { x: bullet.x, y: bullet.y, targetId: id });
                         return false;
                     }
                 }
@@ -53,55 +281,145 @@ const startTankGameLoop = (roomId, io, roomManager) => {
             return true;
         });
 
+        // Check level win
+        if (this.enemySpawnQueue === 0 && this.enemiesOnScreen === 0 && this.status === 'playing') {
+            this.status = 'win';
+        }
+    }
+
+    spawnItem() {
+        const types = ['star', 'grenade', 'helmet', 'tank', 'clock', 'shovel'];
+        const t = types[Math.floor(Math.random() * types.length)];
+        const id = 'item_' + (++this.itemIdCounter);
+        // Random blank space
+        let c, r;
+        do {
+            c = Math.floor(Math.random() * (MAP_COLS - 2));
+            r = Math.floor(Math.random() * (MAP_ROWS - 2));
+        } while(this.map[r][c] !== 0);
+
+        this.items[id] = { id, type: t, x: c, y: r, w: 1.5, h: 1.5 };
+    }
+
+    checkItems() {
+        for (let pid in this.players) {
+            const p = this.players[pid];
+            if (p.hp <= 0) continue;
+            for (let iid in this.items) {
+                const item = this.items[iid];
+                if (this.rectIntersect(p.x, p.y, p.w, p.h, item.x, item.y, item.w, item.h)) {
+                    // Collect item
+                    this.applyItem(p, item.type);
+                    delete this.items[iid];
+                }
+            }
+        }
+    }
+
+    applyItem(player, type) {
+        if (type === 'star') {
+            player.starLevel = Math.min(3, player.starLevel + 1);
+        } else if (type === 'helmet') {
+            player.invulnerableTime = Date.now() + 10000;
+        } else if (type === 'tank') {
+            player.lives++;
+        } else if (type === 'grenade') {
+            for (let eid in this.enemies) {
+                this.enemies[eid].hp = 0;
+                this.enemiesOnScreen--;
+            }
+        } else if (type === 'clock') {
+            for (let eid in this.enemies) {
+                this.enemies[eid].lastTurnTime = Date.now() + 5000;
+            }
+        } else if (type === 'shovel') {
+            const surrounds = [[23,11],[23,12],[23,13],[23,14], [24,11],[24,14], [25,11],[25,14]];
+            for (let s of surrounds) {
+                this.map[s[0]][s[1]] = 2; // Stone
+            }
+            setTimeout(() => {
+                if(this.status !== 'playing') return;
+                for (let s of surrounds) {
+                    if(this.map[s[0]][s[1]] === 2) this.map[s[0]][s[1]] = 1; // back to brick
+                }
+            }, 10000);
+        }
+    }
+}
+
+const startTankGameLoop = (roomId, io, roomManager) => {
+    const rooms = roomManager.getAllRooms();
+    const room = rooms[roomId];
+    if (!room || !room.tankState) return;
+
+    const loop = () => {
+        const server = room.tankState;
+        if (server.status === 'finished' || server.status === 'win') {
+            io.to(roomId).emit(EVENTS.TANK_GAME_STATE, {
+                players: server.players, enemies: server.enemies,
+                bullets: server.bullets, items: server.items,
+                base: server.base, status: server.status, map: server.map
+            });
+            if (server.intervalId) clearInterval(server.intervalId);
+            return;
+        }
+
+        const now = Date.now();
+        server.updateAI(now, io, roomId);
+        server.updateBullets(io, roomId);
+        server.checkItems();
+
         io.to(roomId).emit(EVENTS.TANK_GAME_STATE, {
-            tanks: state.tanks,
-            bullets: state.bullets,
-            status: state.status
+            players: server.players,
+            enemies: server.enemies,
+            bullets: server.bullets,
+            items: server.items,
+            base: server.base,
+            status: server.status,
+            map: server.map, // Map might change if destroyed
+            enemiesLeft: server.enemySpawnQueue + server.enemiesOnScreen
         });
     };
 
-    room.tankState.intervalId = setInterval(loop, 1000 / 30); // 30 FPS sync
+    room.tankState.intervalId = setInterval(loop, 1000 / 20); // 20 FPS — stays under server rate limit (20 events/sec)
 };
 
-module.exports = (io, socket, roomManager) => {
-    socket.on(EVENTS.TANK_UPDATE, ({ roomId, x, y, rotation }) => {
+const registerTankHandler = (io, socket, roomManager) => {
+    socket.on(EVENTS.TANK_UPDATE, ({ roomId, x, y, dir }) => {
         const actualRoomId = roomId === 'local' ? `local_${socket.id}` : roomId;
         const rooms = roomManager.getAllRooms();
         const room = rooms[actualRoomId];
-        if (room && room.tankState && room.tankState.tanks[socket.id]) {
-            const tank = room.tankState.tanks[socket.id];
-            if (!tank.isDestroyed) {
+        if (room && room.tankState && room.tankState.players[socket.id]) {
+            const tank = room.tankState.players[socket.id];
+            if (tank.hp > 0 && room.tankState.status === 'playing') {
                 tank.x = x;
                 tank.y = y;
-                tank.rotation = rotation;
+                tank.dir = dir;
             }
         }
     });
 
-    socket.on(EVENTS.TANK_SHOOT, ({ roomId, x, y, rotation }) => {
+    socket.on(EVENTS.TANK_SHOOT, ({ roomId, x, y, dir }) => {
         const actualRoomId = roomId === 'local' ? `local_${socket.id}` : roomId;
         const rooms = roomManager.getAllRooms();
         const room = rooms[actualRoomId];
-        if (room && room.tankState && room.tankState.tanks[socket.id]) {
-            const tank = room.tankState.tanks[socket.id];
-            if (!tank.isDestroyed) {
+        if (room && room.tankState && room.tankState.players[socket.id]) {
+            const tank = room.tankState.players[socket.id];
+            const server = room.tankState;
+            if (tank.hp > 0 && server.status === 'playing') {
                 const now = Date.now();
-                if (!tank.lastShootTime || now - tank.lastShootTime > 500) {
+                let cooldown = tank.starLevel >= 1 ? 200 : 300;
+                if (!tank.lastShootTime || now - tank.lastShootTime > cooldown) {
                     tank.lastShootTime = now;
-                    
-                    const rad = (rotation * Math.PI) / 180;
-                    const dx = Math.sin(rad) * BULLET_SPEED;
-                    const dy = -Math.cos(rad) * BULLET_SPEED;
-                    if (room.tankState.bullets) {
-                        room.tankState.bullets.push({
-                            ownerId: socket.id,
-                            x: x,
-                            y: y,
-                            dx: dx,
-                            dy: dy
-                        });
-                    }
-                    socket.to(actualRoomId).emit(EVENTS.TANK_SHOOT, { ownerId: socket.id, x, y, rotation });
+                    server.bullets.push({
+                        ownerId: socket.id, isCPU: false,
+                        x: x + tank.w/2 - 0.25, y: y + tank.h/2 - 0.25,
+                        dir: dir,
+                        type: tank.starLevel >= 1 ? 'fast' : 'basic',
+                        speed: tank.starLevel >= 1 ? BULLET_SPEED_FAST : BULLET_SPEED_BASIC,
+                        pierce: tank.starLevel >= 3
+                    });
+                    socket.to(actualRoomId).emit(EVENTS.TANK_SHOOT, { ownerId: socket.id, x, y, dir });
                 }
             }
         }
@@ -117,42 +435,27 @@ module.exports = (io, socket, roomManager) => {
             rooms[actualRoomId] = {
                 id: actualRoomId,
                 gameType: 'tank',
-                players: [socket.id, 'CPU']
+                players: [socket.id]
             };
             room = rooms[actualRoomId];
         }
 
         if (room && room.gameType === 'tank') {
-            socket.join(actualRoomId); // Ensure socket is in room
-            const p1Id = room.players[0];
-            const p2Id = room.players[1] || 'CPU';
+            socket.join(actualRoomId);
 
-            if (!room.tankState || room.tankState.status !== 'playing') {
+            if (!room.tankState || (room.tankState.status !== 'playing' && room.tankState.status !== 'win')) {
                 if (room.tankState && room.tankState.intervalId) {
                     clearInterval(room.tankState.intervalId);
                 }
 
-                // 20x20 Grid (40px per tile)
-                // 0: Empty, 1: Brick, 2: Stone, 3: Water, 4: Bush
-                const map = Array(20).fill(0).map(() => Array(20).fill(0));
-                // Add some obstacles
-                for(let i=0; i<20; i++) {
-                    if(i % 4 === 2) {
-                        for(let j=2; j<18; j++) map[j][i] = 1; // Brick lines
+                room.tankState = new TankServer();
+                
+                let idx = 0;
+                for (let pid of room.players) {
+                    if (pid && pid !== 'CPU') {
+                        room.tankState.addPlayer(pid, idx++);
                     }
                 }
-                map[10][10] = 2; map[10][9] = 2; // Some stone in middle
-
-                room.tankState = {
-                    status: 'playing',
-                    intervalId: null,
-                    map: map,
-                    tanks: {
-                        [p1Id]: { id: p1Id, x: 60, y: 60, rotation: 180, health: 100, isDestroyed: false, color: 'green' },
-                        [p2Id]: { id: p2Id, x: 740, y: 740, rotation: 0, health: 100, isDestroyed: false, color: 'blue' }
-                    },
-                    bullets: []
-                };
 
                 setTimeout(() => {
                     startTankGameLoop(actualRoomId, io, roomManager);
@@ -161,11 +464,26 @@ module.exports = (io, socket, roomManager) => {
 
             io.to(actualRoomId).emit(EVENTS.TANK_GAME_STARTED, { 
                 roomId: actualRoomId, 
-                tanks: room.tankState.tanks,
-                map: room.tankState.map
+                map: room.tankState.map,
+                players: room.tankState.players
             });
+        }
+    });
+    // Clean up tank game loop on disconnect
+    socket.on('disconnect', () => {
+        const rooms = roomManager.getAllRooms();
+        for (const rId in rooms) {
+            const room = rooms[rId];
+            if (room && room.tankState && room.tankState.players && room.tankState.players[socket.id]) {
+                if (room.tankState.intervalId) {
+                    clearInterval(room.tankState.intervalId);
+                    room.tankState.intervalId = null;
+                }
+                break;
+            }
         }
     });
 };
 
+module.exports = registerTankHandler;
 module.exports.startTankGameLoop = startTankGameLoop;

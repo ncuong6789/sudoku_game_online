@@ -2,40 +2,35 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { socket } from '../../utils/socket';
 import { EVENTS } from '../../utils/constants';
 
-const TANK_SIZE = 40;
-const TILE_SIZE = 40;
-const BULLET_SIZE = 8;
-const MOVE_SPEED = 3;
-const ROTATION_SPEED = 90; // Degrees per frame? No, let's stick to 4 directions
-
-const SPRITE_SIZE = 16; // Original size
-const SCALE = 2.5; // 16 * 2.5 = 40px
-
 export function useTankLogic(roomId, mode = 'multiplayer') {
-    const [gameState, setGameState] = useState('waiting'); // waiting, playing, finished
-    const [tanks, setTanks] = useState({});
+    const [gameState, setGameState] = useState('waiting'); // waiting, playing, finished, win
+    const [players, setPlayers] = useState({});
+    const [enemies, setEnemies] = useState({});
     const [bullets, setBullets] = useState([]);
+    const [items, setItems] = useState({});
     const [explosions, setExplosions] = useState([]);
     const [map, setMap] = useState([]);
+    const [base, setBase] = useState(null);
+    const [enemiesLeft, setEnemiesLeft] = useState(20);
     const [myId, setMyId] = useState(socket.id);
 
     const requestRef = useRef();
     const lastUpdateRef = useRef(0);
     const keysPressed = useRef({});
 
+    // Client-side prediction for local player
     const localTank = useRef({
-        x: 100,
-        y: 100,
-        rotation: 0,
-        health: 100,
+        x: 8,
+        y: 24,
+        dir: 'up',
+        hp: 1,
         lastShootTime: 0
     });
 
     const initGame = useCallback((data) => {
-        setTanks(data.tanks);
         setMap(data.map);
-        if (data.tanks[socket.id]) {
-            localTank.current = { ...data.tanks[socket.id], lastShootTime: 0 };
+        if (data.players && data.players[socket.id]) {
+            localTank.current = { ...data.players[socket.id], lastShootTime: 0 };
         }
         setGameState('playing');
     }, []);
@@ -46,19 +41,32 @@ export function useTankLogic(roomId, mode = 'multiplayer') {
         };
 
         const handleUpdate = (data) => {
-            setTanks(prev => ({
-                ...prev,
-                ...data.tanks
-            }));
-            setBullets(data.bullets);
-            if (data.status === 'finished') setGameState('finished');
+            setPlayers(data.players || {});
+            setEnemies(data.enemies || {});
+            setBullets(data.bullets || []);
+            setItems(data.items || {});
+            setMap(data.map || []);
+            setBase(data.base || null);
+            setEnemiesLeft(data.enemiesLeft || 0);
+
+            if (data.status === 'finished' || data.status === 'win') {
+                setGameState(data.status);
+            }
+
+            // Sync server position if our prediction is wildly off, 
+            // but for simplicity let's just let server dictate or client dictate 
+            // In a simple setup, trust the client's local position, but if killed, update it.
+            if (data.players && data.players[socket.id] && data.players[socket.id].hp <= 0) {
+                 // Dead, rely on server
+                 localTank.current.hp = 0;
+            }
         };
 
         const handleExplosion = (data) => {
-            setExplosions(prev => [...prev, { ...data, id: Date.now() }]);
+            setExplosions(prev => [...prev, { ...data, id: Date.now() + Math.random() }]);
             setTimeout(() => {
                 setExplosions(prev => prev.filter(e => e.id !== data.id));
-            }, 500);
+            }, 300);
         };
 
         const onConnect = () => {
@@ -70,7 +78,6 @@ export function useTankLogic(roomId, mode = 'multiplayer') {
         socket.on(EVENTS.TANK_GAME_STATE, handleUpdate);
         socket.on(EVENTS.TANK_EXPLOSION, handleExplosion);
 
-        // If room is already active
         if (socket.connected) {
             onConnect();
         } else {
@@ -86,6 +93,10 @@ export function useTankLogic(roomId, mode = 'multiplayer') {
     }, [roomId, initGame]);
 
     const handleKeyDown = (e) => {
+        // Prevent default scrolling for arrows and space
+        if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].indexOf(e.code) > -1) {
+            e.preventDefault();
+        }
         keysPressed.current[e.code] = true;
     };
 
@@ -94,7 +105,7 @@ export function useTankLogic(roomId, mode = 'multiplayer') {
     };
 
     useEffect(() => {
-        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keydown', handleKeyDown, { passive: false });
         window.addEventListener('keyup', handleKeyUp);
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
@@ -102,95 +113,77 @@ export function useTankLogic(roomId, mode = 'multiplayer') {
         };
     }, []);
 
-    const update = useCallback((time) => {
+    const update = useCallback(() => {
         if (gameState !== 'playing') {
             requestRef.current = requestAnimationFrame(update);
             return;
         }
 
         const tank = localTank.current;
-        if (tank.isDestroyed) return;
+        // Don't move if dead
+        if (tank.hp <= 0 || !players[myId] || players[myId].hp <= 0) {
+             requestRef.current = requestAnimationFrame(update);
+             return;
+        }
 
+        // Client-side prediction — use localTank for smooth movement
+        // Server runs at 20fps (speed 0.15/tick). Client runs at 60fps.
+        // Per-frame client speed = 0.15 * (20/60) = 0.050 units
+        const speed = 0.050;
         let moved = false;
         let newX = tank.x;
         let newY = tank.y;
-        let newRot = tank.rotation;
+        let newDir = tank.dir;
 
         if (keysPressed.current['ArrowUp'] || keysPressed.current['KeyW']) {
-            newY -= MOVE_SPEED;
-            newRot = 0;
+            newY -= speed;
+            newDir = 'up';
             moved = true;
         } else if (keysPressed.current['ArrowDown'] || keysPressed.current['KeyS']) {
-            newY += MOVE_SPEED;
-            newRot = 180;
+            newY += speed;
+            newDir = 'down';
             moved = true;
         } else if (keysPressed.current['ArrowLeft'] || keysPressed.current['KeyA']) {
-            newX -= MOVE_SPEED;
-            newRot = 270;
+            newX -= speed;
+            newDir = 'left';
             moved = true;
         } else if (keysPressed.current['ArrowRight'] || keysPressed.current['KeyD']) {
-            newX += MOVE_SPEED;
-            newRot = 90;
+            newX += speed;
+            newDir = 'right';
             moved = true;
         }
 
-        // Map collision
-        const isPassable = (x, y) => {
-            const tx = Math.floor(x / TILE_SIZE);
-            const ty = Math.floor(y / TILE_SIZE);
-            
-            // Check 4 corners of tank
-            const corners = [
-                {x: x - TANK_SIZE/2 + 2, y: y - TANK_SIZE/2 + 2},
-                {x: x + TANK_SIZE/2 - 2, y: y - TANK_SIZE/2 + 2},
-                {x: x - TANK_SIZE/2 + 2, y: y + TANK_SIZE/2 - 2},
-                {x: x + TANK_SIZE/2 - 2, y: y + TANK_SIZE/2 - 2}
-            ];
-
-            for (const c of corners) {
-                const ctx = Math.floor(c.x / TILE_SIZE);
-                const cty = Math.floor(c.y / TILE_SIZE);
-                if (ctx < 0 || ctx >= 20 || cty < 0 || cty >= 20) return false;
-                const tile = map[cty][ctx];
-                if (tile === 1 || tile === 2 || tile === 3) return false; // Water blocks movement too
-            }
-            return true;
-        };
+        // Clamp to map bounds
+        newX = Math.max(0, Math.min(24.2, newX));
+        newY = Math.max(0, Math.min(24.2, newY));
 
         if (moved) {
-            if (isPassable(newX, newY)) {
-                tank.x = newX;
-                tank.y = newY;
-                tank.rotation = newRot;
-            } else {
-                // Allow rotation even if blocked
-                tank.rotation = newRot;
-                moved = true; // Still need to sync rotation
-            }
-        } else if (newRot !== tank.rotation) {
-            tank.rotation = newRot;
-            moved = true;
-        }
+            tank.x = newX;
+            tank.y = newY;
+            tank.dir = newDir;
 
-        if (moved) {
-            // Sync with server every 50ms or so
             const now = Date.now();
-            if (now - lastUpdateRef.current > 50) {
-                socket.emit(EVENTS.TANK_UPDATE, { roomId, x: newX, y: newY, rotation: newRot });
+            // Throttle to ~15 updates/sec to stay well under server 20/sec rate limit
+            if (now - lastUpdateRef.current > 67) {
+                socket.emit(EVENTS.TANK_UPDATE, { roomId, x: newX, y: newY, dir: newDir });
                 lastUpdateRef.current = now;
             }
+        } else if (newDir !== tank.dir) {
+            tank.dir = newDir;
+            socket.emit(EVENTS.TANK_UPDATE, { roomId, x: newX, y: newY, dir: newDir }); // direction-only sync
         }
 
         if (keysPressed.current['Space']) {
             const now = Date.now();
-            if (!tank.lastShootTime || now - tank.lastShootTime > 500) {
+            const cooldown = (players[myId].starLevel >= 1) ? 200 : 300;
+            if (!tank.lastShootTime || now - tank.lastShootTime > cooldown) {
                 tank.lastShootTime = now;
-                socket.emit(EVENTS.TANK_SHOOT, { roomId, x: tank.x, y: tank.y, rotation: tank.rotation });
+                socket.emit(EVENTS.TANK_SHOOT, { roomId, ...players[myId], dir: tank.dir });
             }
         }
 
         requestRef.current = requestAnimationFrame(update);
-    }, [gameState, roomId]);
+    }, [gameState, roomId, players, myId]);
 
     useEffect(() => {
         requestRef.current = requestAnimationFrame(update);
@@ -199,11 +192,15 @@ export function useTankLogic(roomId, mode = 'multiplayer') {
 
     return {
         gameState,
-        tanks,
+        players,
+        enemies,
         bullets,
+        items,
         explosions,
         map,
+        base,
+        enemiesLeft,
         myId,
-        localTank: localTank.current
+        localTankRef: localTank  // return the ref itself, not .current, so render never stales
     };
 }

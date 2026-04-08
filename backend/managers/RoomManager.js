@@ -75,6 +75,14 @@ class RoomManager {
                     if (this.rooms[roomId].snakeState.intervalId) clearInterval(this.rooms[roomId].snakeState.intervalId);
                 }
 
+                if (this.rooms[roomId].gameType === 'tank' && this.rooms[roomId].tankState) {
+                    this.rooms[roomId].tankState.status = 'finished';
+                    if (this.rooms[roomId].tankState.intervalId) {
+                        clearInterval(this.rooms[roomId].tankState.intervalId);
+                        this.rooms[roomId].tankState.intervalId = null;
+                    }
+                }
+
                 socket.to(roomId).emit(EVENTS.OPPONENT_DISCONNECTED);
                 if (this.rooms[roomId].players.length === 0) {
                     delete this.rooms[roomId];
@@ -93,6 +101,14 @@ class RoomManager {
                 if (this.rooms[roomId].gameType === 'snake' && this.rooms[roomId].snakeState && this.rooms[roomId].snakeState.status !== 'finished') {
                     this.rooms[roomId].snakeState.status = 'finished';
                     if (this.rooms[roomId].snakeState.intervalId) clearInterval(this.rooms[roomId].snakeState.intervalId);
+                }
+
+                if (this.rooms[roomId].gameType === 'tank' && this.rooms[roomId].tankState) {
+                    this.rooms[roomId].tankState.status = 'finished';
+                    if (this.rooms[roomId].tankState.intervalId) {
+                        clearInterval(this.rooms[roomId].tankState.intervalId);
+                        this.rooms[roomId].tankState.intervalId = null;
+                    }
                 }
 
                 socket.to(roomId).emit(EVENTS.OPPONENT_DISCONNECTED);

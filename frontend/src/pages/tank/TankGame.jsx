@@ -1,400 +1,659 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTankLogic } from './useTankLogic';
-import { Swords, Trophy, Activity, ArrowLeft, RefreshCw, Heart, Target, Shield, Info } from 'lucide-react';
 
-const MAP_SIZE = 800;
-const TANK_SIZE = 40;
-const TILE_SIZE = 40;
+// ─── Constants ──────────────────────────────────────────────────
+const MAP_COLS = 26;
+const MAP_ROWS = 26;
+const TILE = 24; // pixels per grid cell
+const CANVAS_W = MAP_COLS * TILE; // 624
+const CANVAS_H = MAP_ROWS * TILE; // 624
+
+// Tile types: 0=empty 1=brick 2=steel 3=water 4=bush 5=ice 6=base
+// Colors palette matching original Battle City NES look
+const PALETTE = {
+    bg:     '#0a0a10',
+    brick:  { top: '#d4471a', mid: '#b03a14', mortar: '#602010' },
+    steel:  { top: '#a0b0c0', mid: '#6080a0', shine: '#d0e0f0' },
+    water1: '#1060a0',
+    water2: '#2080c0',
+    bush:   '#1a6020',
+    bush2:  '#2a8030',
+    ice:    '#a0d8f0',
+    ice2:   '#c8eeff',
+};
+
+// Enemy type colors
+const ENEMY_COLORS = {
+    basic: '#c8c8c8',
+    fast:  '#e0b010',
+    power: '#d03030',
+    armor: '#40a040',
+};
+
+// Item type icons/colors
+const ITEM_DEFS = {
+    star:    { icon: '⭐', glow: '#ffd700' },
+    grenade: { icon: '💣', glow: '#ff4444' },
+    helmet:  { icon: '⛑️',  glow: '#44aaff' },
+    tank:    { icon: '🔋', glow: '#44ff88' },
+    clock:   { icon: '⏱', glow: '#aa44ff' },
+    shovel:  { icon: '🪛', glow: '#ff8844' },
+};
+
+// ─── Pure Drawing Utilities ──────────────────────────────────────
+
+function drawBrick(ctx, x, y, w, h) {
+    const { top, mid, mortar } = PALETTE.brick;
+    ctx.fillStyle = mid;
+    ctx.fillRect(x, y, w, h);
+    // Mortar lines
+    ctx.fillStyle = mortar;
+    ctx.fillRect(x, y + Math.floor(h * 0.5), w, 1);
+    ctx.fillRect(x, y, 1, h);
+    const hw = Math.floor(w / 2);
+    ctx.fillRect(x + hw, y, 1, Math.floor(h * 0.5));
+    ctx.fillRect(x, y + Math.floor(h * 0.5), hw, 1);
+    ctx.fillRect(x + hw, y + Math.floor(h * 0.5) + 1, w - hw, Math.floor(h * 0.5));
+    // Highlight top-left
+    ctx.fillStyle = top;
+    ctx.fillRect(x + 1, y + 1, hw - 2, 2);
+    ctx.fillRect(x + hw + 1, y + Math.floor(h * 0.5) + 1, w - hw - 2, 2);
+}
+
+function drawSteel(ctx, x, y, w, h) {
+    ctx.fillStyle = PALETTE.steel.mid;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = PALETTE.steel.top;
+    ctx.fillRect(x, y, w - 2, 2);
+    ctx.fillRect(x, y, 2, h - 2);
+    ctx.fillStyle = '#304050';
+    ctx.fillRect(x + w - 2, y, 2, h);
+    ctx.fillRect(x, y + h - 2, w, 2);
+    ctx.fillStyle = PALETTE.steel.shine;
+    ctx.fillRect(x + 2, y + 2, 3, 3);
+}
+
+function drawWater(ctx, x, y, w, h, tick) {
+    const alt = Math.floor(tick / 30) % 2 === 0;
+    ctx.fillStyle = alt ? PALETTE.water1 : PALETTE.water2;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = alt ? PALETTE.water2 : PALETTE.water1;
+    // Draw wave pattern
+    for (let i = 0; i < h; i += 4) {
+        ctx.fillRect(x, y + i, w, 2);
+    }
+}
+
+function drawBush(ctx, x, y, w, h) {
+    ctx.fillStyle = PALETTE.bush;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = PALETTE.bush2;
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    ctx.fillRect(x, y + 4, 2, h - 8);
+    ctx.fillRect(x + w - 2, y + 4, 2, h - 8);
+}
+
+function drawIce(ctx, x, y, w, h) {
+    ctx.fillStyle = PALETTE.ice;
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = PALETTE.ice2;
+    ctx.fillRect(x + 2, y + 2, 4, 2);
+    ctx.fillRect(x + w/2, y + h/2, 5, 2);
+}
+
+function drawEagle(ctx, x, y, w, h, destroyed) {
+    // Draw base / Eagle icon
+    const cx = x + w / 2;
+    const cy = y + h / 2;
+    // Base plate
+    ctx.fillStyle = destroyed ? '#442200' : '#1a1a2e';
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = destroyed ? '#662200' : '#ffd700';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x + 2, y + 2, w - 4, h - 4);
+    // Eagle shape
+    if (!destroyed) {
+        ctx.fillStyle = '#ffd700';
+        ctx.font = `${Math.floor(h * 0.7)}px serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🦅', cx, cy);
+    } else {
+        ctx.fillStyle = '#ff4400';
+        ctx.font = `${Math.floor(h * 0.7)}px serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('💀', cx, cy);
+    }
+}
+
+function drawTank(ctx, tank, TILE, isPlayer, starLevel = 0, invulnerable = false) {
+    const px = tank.x * TILE;
+    const py = tank.y * TILE;
+    const sz = tank.w * TILE;
+
+    // Invulnerability blink
+    if (invulnerable && Math.floor(Date.now() / 150) % 2 === 0) return;
+
+    // Flashing enemies (carries item)
+    if (tank.isFlashing && Math.floor(Date.now() / 200) % 2 === 0) {
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(px - 2, py - 2, sz + 4, sz + 4);
+    }
+
+    ctx.save();
+    ctx.translate(px + sz / 2, py + sz / 2);
+
+    const dirAngles = { up: 0, right: Math.PI / 2, down: Math.PI, left: -Math.PI / 2 };
+    ctx.rotate(dirAngles[tank.dir] || 0);
+
+    const color = isPlayer
+        ? (starLevel === 0 ? '#4ade80' : starLevel === 1 ? '#60d060' : starLevel === 2 ? '#ffd700' : '#ff8c00')
+        : ENEMY_COLORS[tank.type] || '#aaa';
+
+    const dark = isPlayer ? '#22602e' : '#445566';
+    const h = sz;
+
+    // Tracks (left + right stripes)
+    ctx.fillStyle = '#333';
+    ctx.fillRect(-h / 2, -h / 2, 4, h);
+    ctx.fillRect(h / 2 - 4, -h / 2, 4, h);
+    ctx.fillStyle = '#555';
+    for (let i = 0; i < 3; i++) {
+        ctx.fillRect(-h / 2 + 1, -h / 2 + 4 + i * (h - 8) / 3, 2, 4);
+        ctx.fillRect(h / 2 - 3, -h / 2 + 4 + i * (h - 8) / 3, 2, 4);
+    }
+
+    // Body
+    ctx.fillStyle = color;
+    ctx.fillRect(-h / 2 + 5, -h / 2, h - 10, h);
+    ctx.fillStyle = dark;
+    ctx.fillRect(-h / 2 + 7, -h / 2 + 4, h - 14, h - 8);
+
+    // Turret
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, h * 0.3, h * 0.28, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cannon barrel (pointing up = -y direction after rotation)
+    ctx.fillStyle = color;
+    ctx.fillRect(-2, -h / 2, 4, h * 0.36);
+    // Barrel tip
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(-2, -h / 2, 4, 3);
+
+    ctx.restore();
+
+    // Armor HP bar for armor-type enemies
+    if (!isPlayer && tank.type === 'armor' && tank.hp > 0) {
+        const barW = sz;
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.fillRect(px, py - 5, barW, 4);
+        ctx.fillStyle = '#40a040';
+        ctx.fillRect(px, py - 5, barW * (tank.hp / 4), 4);
+    }
+}
+
+function drawBullet(ctx, b, TILE) {
+    const px = b.x * TILE;
+    const py = b.y * TILE;
+    const r = 3;
+    ctx.save();
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = b.isCPU ? '#ff8080' : '#ffffa0';
+    ctx.fillStyle = b.isCPU ? '#ff6060' : '#ffff80';
+    ctx.beginPath();
+    ctx.arc(px, py, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawExplosion(ctx, exp, TILE) {
+    const px = exp.x * TILE;
+    const py = exp.y * TILE;
+    const elapsed = (Date.now() - exp.id) / 300; // normalized 0-1
+    const radius = exp.isBase ? (TILE * 3 * elapsed) : (TILE * 1.5 * elapsed);
+    if (elapsed > 1) return;
+    ctx.globalAlpha = 1 - elapsed;
+    // Outer ring
+    ctx.fillStyle = '#ff4400';
+    ctx.beginPath();
+    ctx.arc(px, py, radius, 0, Math.PI * 2);
+    ctx.fill();
+    // Inner bright
+    ctx.fillStyle = '#ffdd00';
+    ctx.beginPath();
+    ctx.arc(px, py, radius * 0.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(px, py, radius * 0.25, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+}
+
+function drawItem(ctx, item, TILE, tick) {
+    const def = ITEM_DEFS[item.type];
+    if (!def) return;
+    const px = item.x * TILE;
+    const py = item.y * TILE;
+    const sz = item.w * TILE;
+
+    // Flash background
+    const flash = Math.floor(tick / 20) % 2 === 0;
+    ctx.fillStyle = flash ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.3)';
+    ctx.strokeStyle = def.glow;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(px, py, sz, sz, 4);
+    ctx.fill();
+    ctx.stroke();
+
+    // Icon
+    ctx.font = `${sz * 0.75}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = def.glow;
+    ctx.fillText(def.icon, px + sz / 2, py + sz / 2);
+    ctx.shadowBlur = 0;
+}
+
+// ─── Component ───────────────────────────────────────────────────
 
 export default function TankGame() {
     const location = useLocation();
     const navigate = useNavigate();
     const { roomId, mode } = location.state || { roomId: 'local', mode: 'single' };
-    
+
     const canvasRef = useRef(null);
-    const { gameState, tanks, bullets, explosions, map, myId, localTank } = useTankLogic(roomId, mode);
-    
-    const [images, setImages] = useState({});
-    const [assetsLoaded, setAssetsLoaded] = useState(false);
+    const tickRef = useRef(0);
 
-    // Load assets
-    useEffect(() => {
-        const assetList = {
-            'tank': '/assets/tank/texture.png',
-            'brick': '/assets/tank/brick.png',
-            'stone': '/assets/tank/stone.png',
-            'water': '/assets/tank/water.png',
-            'bush': '/assets/tank/bush.png',
-            'ice': '/assets/tank/ice.png'
-        };
+    const {
+        gameState, players, enemies, bullets, items,
+        explosions, map, base, enemiesLeft, myId, localTankRef
+    } = useTankLogic(roomId, mode);
 
-        const loaded = {};
-        let count = 0;
-        const total = Object.keys(assetList).length;
+    const myPlayer = players[myId];
 
-        Object.entries(assetList).forEach(([name, src]) => {
-            const img = new Image();
-            img.src = src;
-            img.onload = () => {
-                loaded[name] = img;
-                count++;
-                if (count === total) {
-                    setImages(loaded);
-                    setAssetsLoaded(true);
-                }
-            };
-            img.onerror = () => {
-                count++;
-                if (count === total) {
-                    setImages(loaded);
-                    setAssetsLoaded(true);
-                }
-            };
-        });
-    }, []);
+    // ── Render Loop ──────────────────────────────────────────────
+    const renderRef = useRef();
 
-    // Drawing Loop
-    useEffect(() => {
-        if (!assetsLoaded || !canvasRef.current) return;
-
+    const render = useCallback(() => {
         const canvas = canvasRef.current;
+        if (!canvas) return;
         const ctx = canvas.getContext('2d');
-        let frameId;
+        const tick = ++tickRef.current;
 
-        const render = () => {
-            // 1. Clear Canvas
-            ctx.fillStyle = '#0a0a10';
-            ctx.fillRect(0, 0, MAP_SIZE, MAP_SIZE);
+        // Background
+        ctx.fillStyle = PALETTE.bg;
+        ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-            // 2. Draw Map Tiles
-            if (map && map.length > 0) {
-                map.forEach((row, y) => {
-                    row.forEach((tile, x) => {
-                        if (tile === 0) return;
-                        const tx = x * TILE_SIZE;
-                        const ty = y * TILE_SIZE;
-                        let img = null;
-                        if (tile === 1) img = images.brick;
-                        else if (tile === 2) img = images.stone;
-                        else if (tile === 3) img = images.water;
-                        else if (tile === 4) img = images.bush;
-                        else if (tile === 5) img = images.ice;
+        // Draw border (outer wall of Battle City)
+        ctx.fillStyle = '#222233';
+        ctx.fillRect(0, 0, CANVAS_W, 2);
+        ctx.fillRect(0, CANVAS_H - 2, CANVAS_W, 2);
+        ctx.fillRect(0, 0, 2, CANVAS_H);
+        ctx.fillRect(CANVAS_W - 2, 0, 2, CANVAS_H);
 
-                        if (img) ctx.drawImage(img, tx, ty, TILE_SIZE, TILE_SIZE);
-                        else {
-                            ctx.fillStyle = tile === 1 ? '#922' : tile === 2 ? '#666' : tile === 3 ? '#229' : '#141';
-                            ctx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
-                        }
-                    });
-                });
+        // ── Draw Map ──
+        if (map && map.length > 0) {
+            // Draw non-bush tiles first (bush drawn last to overlap tanks)
+            for (let r = 0; r < MAP_ROWS; r++) {
+                for (let c = 0; c < MAP_COLS; c++) {
+                    const tile = map[r]?.[c];
+                    const px = c * TILE;
+                    const py = r * TILE;
+                    if (tile === 1) drawBrick(ctx, px, py, TILE, TILE);
+                    else if (tile === 2) drawSteel(ctx, px, py, TILE, TILE);
+                    else if (tile === 3) drawWater(ctx, px, py, TILE, TILE, tick);
+                    else if (tile === 5) drawIce(ctx, px, py, TILE, TILE);
+                }
             }
+        }
 
-            // 3. Draw Bullets
-            bullets.forEach(bullet => {
-                ctx.fillStyle = '#fff';
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#fff';
-                ctx.beginPath();
-                ctx.arc(bullet.x, bullet.y, 3, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-            });
+        // ── Draw Base (Eagle) ──
+        if (base) {
+            drawEagle(ctx, base.x * TILE, base.y * TILE, base.w * TILE, base.h * TILE, base.destroyed);
+        }
 
-            // 4. Draw Tanks
-            Object.values(tanks).forEach(tank => {
-                if (tank.isDestroyed) return;
-                ctx.save();
-                ctx.translate(tank.x, tank.y);
-                ctx.rotate((tank.rotation * Math.PI) / 180);
-                
-                // Draw Tank Body
-                ctx.fillStyle = tank.color === 'green' ? '#4ade80' : '#60a5fa';
-                ctx.fillRect(-15, -15, 30, 30);
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(-15, -15, 30, 30);
-                
-                // Draw Barrel
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(-2, -22, 4, 15);
-                ctx.restore();
+        // ── Draw Items ──
+        Object.values(items).forEach(item => drawItem(ctx, item, TILE, tick));
 
-                // Health Bar
-                const barWidth = 34;
-                ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                ctx.fillRect(tank.x - barWidth/2, tank.y - 28, barWidth, 4);
-                ctx.fillStyle = tank.health > 50 ? '#4ade80' : tank.health > 20 ? '#fbbf24' : '#ef4444';
-                ctx.fillRect(tank.x - barWidth/2, tank.y - 28, (tank.health / 100) * barWidth, 4);
-            });
+        // ── Draw Bullets ──
+        bullets.forEach(b => drawBullet(ctx, b, TILE));
 
-            // 5. Draw Explosions
-            explosions.forEach(exp => {
-                ctx.fillStyle = 'rgba(239, 68, 68, 0.6)';
-                ctx.beginPath(); ctx.arc(exp.x, exp.y, 25, 0, Math.PI * 2); ctx.fill();
-                ctx.fillStyle = 'rgba(251, 191, 36, 0.4)';
-                ctx.beginPath(); ctx.arc(exp.x, exp.y, 15, 0, Math.PI * 2); ctx.fill();
-            });
+        // ── Draw Enemy Tanks ──
+        Object.values(enemies).forEach(tank => {
+            if (tank.hp <= 0) return;
+            drawTank(ctx, tank, TILE, false, 0, false);
+        });
 
-            frameId = requestAnimationFrame(render);
-        };
+        // ── Draw Player Tanks (use localTank for own position = smooth 60fps) ──
+        Object.values(players).forEach(tank => {
+            if (tank.hp <= 0) return;
+            const isInvuln = tank.invulnerableTime && Date.now() < tank.invulnerableTime;
+            // For own tank, use client-predicted position for smooth rendering
+            const renderTank = tank.id === myId && localTankRef.current
+                ? { ...tank, x: localTankRef.current.x, y: localTankRef.current.y, dir: localTankRef.current.dir }
+                : tank;
+            drawTank(ctx, renderTank, TILE, true, tank.starLevel || 0, isInvuln);
+        });
 
-        render();
-        return () => cancelAnimationFrame(frameId);
-    }, [assetsLoaded, tanks, bullets, explosions, images, map]);
+        // ── Draw Bush over everything (camouflage effect) ──
+        if (map && map.length > 0) {
+            for (let r = 0; r < MAP_ROWS; r++) {
+                for (let c = 0; c < MAP_COLS; c++) {
+                    if (map[r]?.[c] === 4) {
+                        drawBush(ctx, c * TILE, r * TILE, TILE, TILE);
+                    }
+                }
+            }
+        }
 
-    const myTank = tanks[myId];
-    const isWin = gameState === 'finished' && myTank && !myTank.isDestroyed;
+        // ── Draw Explosions (on top of everything) ──
+        explosions.forEach(exp => drawExplosion(ctx, exp, TILE));
 
-    const panelStyle = { 
-        borderRadius: '12px', 
-        padding: '14px', 
-        background: 'rgba(255,255,255,0.04)', 
-        border: '1px solid rgba(255,255,255,0.08)', 
-        marginBottom: '12px' 
-    };
-    const labelStyle = { 
-        fontSize: '0.72rem', 
-        color: '#94a3b8', 
-        marginBottom: '10px', 
-        fontWeight: 700, 
-        letterSpacing: '0.08em', 
-        textTransform: 'uppercase' 
-    };
+        renderRef.current = requestAnimationFrame(render);
+    }, [map, players, enemies, bullets, items, explosions, base]);
+
+    useEffect(() => {
+        renderRef.current = requestAnimationFrame(render);
+        return () => cancelAnimationFrame(renderRef.current);
+    }, [render]);
+
+    // ── HUD helpers ──
+    const livesIcons = (n) => Array.from({ length: Math.max(0, n) }, (_, i) => (
+        <span key={i} style={{ fontSize: '1rem' }}>🚗</span>
+    ));
+
+    const starLabel = ['●', '★', '★★', '★★★'];
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1rem' }}>
-            <div className="glass-panel" style={{ 
-                position: 'relative', 
-                width: '100%', 
-                maxWidth: '1200px', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                padding: '1.2rem',
-                border: '1px solid rgba(255,255,255,0.1)',
-                boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+        <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            minHeight: '100vh', width: '100%', padding: '0.5rem',
+            background: 'radial-gradient(ellipse at 50% 0%, #1a1a2e 0%, #0d0d16 70%)'
+        }}>
+            {/* ── Title bar ── */}
+            <div style={{
+                display: 'flex', alignItems: 'center', gap: '14px',
+                marginBottom: '0.5rem', width: '100%', maxWidth: '1000px'
             }}>
-                
-                {/* ─── HEADER BAR ────────────────────────────────────── */}
-                <div style={{ 
-                    display: 'flex', 
-                    flexDirection: 'column',
-                    gap: '10px',
-                    marginBottom: '12px',
+                <button
+                    onClick={() => navigate('/tank')}
+                    style={{
+                        background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
+                        color: '#aaa', borderRadius: '8px', padding: '6px 14px', cursor: 'pointer',
+                        fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px'
+                    }}
+                >
+                    ◀ Thoát
+                </button>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{
+                        fontWeight: 900, fontSize: '1.1rem', color: '#ffd700',
+                        letterSpacing: '2px', textShadow: '0 0 12px #ffd70088'
+                    }}>🎖 TANKS: BATTLE CITY</span>
+                    <span style={{
+                        fontSize: '0.7rem', background: 'rgba(255,255,255,0.06)',
+                        border: '1px solid rgba(255,255,255,0.1)', color: '#888',
+                        padding: '2px 8px', borderRadius: '4px'
+                    }}>{mode === 'single' ? 'Solo' : 'Multiplayer'}</span>
+                </div>
+                {/* Enemies remaining */}
+                <div style={{
+                    background: 'rgba(255,0,0,0.1)', border: '1px solid #ff444466',
+                    borderRadius: '8px', padding: '4px 12px', color: '#ff6666',
+                    fontSize: '0.85rem', fontWeight: 700
                 }}>
-                    {/* Top Row: Title & Status */}
-                    <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center',
-                        background: 'rgba(0,0,0,0.3)', 
-                        borderRadius: '12px', 
-                        padding: '10px 18px', 
-                        border: '1px solid rgba(255,255,255,0.05)'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <Activity size={18} color="var(--accent-color)" />
-                            <span style={{ fontWeight: 800, fontSize: '1rem', color: '#fff', letterSpacing: '0.5px' }}>TANK WARS</span>
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px' }}>
-                                {roomId}
-                            </span>
-                        </div>
+                    💀 Quân địch còn lại: <strong>{enemiesLeft}</strong>
+                </div>
+            </div>
 
-                        <div style={{ 
-                            padding: '4px 12px', 
-                            borderRadius: '20px', 
-                            fontSize: '0.8rem', 
-                            fontWeight: 700,
-                            background: gameState === 'finished' ? 'rgba(251,191,36,0.1)' : 'rgba(74,222,128,0.1)',
-                            color: gameState === 'finished' ? '#fbbf24' : '#4ade80',
-                            border: `1px solid ${gameState === 'finished' ? '#fbbf2433' : '#4ade8033'}`
-                        }}>
-                            {gameState === 'finished' ? 'TRẬN ĐẤU KẾT THÚC' : 'ĐANG CHIẾN ĐẤU...'}
-                        </div>
+            {/* ── Main Layout ── */}
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', width: '100%', maxWidth: '1000px' }}>
+
+                {/* ─── LEFT PANEL: Player HUD ─── */}
+                <div style={{
+                    width: '170px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '10px'
+                }}>
+                    {/* Controls */}
+                    <div style={{
+                        background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: '10px', padding: '12px'
+                    }}>
+                        <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>🎮 Điều Khiển</div>
+                        {[['WASD / ←↑→↓', 'Di chuyển'], ['SPACE', 'Bắn đạn']].map(([k, v]) => (
+                            <div key={k} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                                <kbd style={{
+                                    background: '#1e293b', padding: '2px 6px', borderRadius: '4px',
+                                    border: '1px solid #334155', color: '#e2e8f0', fontSize: '0.7rem', whiteSpace: 'nowrap'
+                                }}>{k}</kbd>
+                                <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{v}</span>
+                            </div>
+                        ))}
                     </div>
 
-                    {/* Second Row: Player Stats (Moving Up relative to board) */}
-                    <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'center', 
-                        alignItems: 'center', 
-                        gap: '40px',
-                        padding: '8px',
-                        background: 'rgba(255,255,255,0.02)',
-                        borderRadius: '12px',
-                        border: '1px solid rgba(255,255,255,0.03)'
+                    {/* Map Legend */}
+                    <div style={{
+                        background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: '10px', padding: '12px'
                     }}>
-                        {Object.values(tanks).map(tank => (
-                            <div key={tank.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: tank.color === 'green' ? '#4ade80' : '#60a5fa', boxShadow: `0 0 10px ${tank.color === 'green' ? '#4ade80' : '#60a5fa'}` }} />
-                                <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#fff' }}>
-                                    {tank.id === myId ? 'BẠN' : 'ĐỐI THỦ'}: <span style={{ color: tank.health > 20 ? (tank.color === 'green' ? '#4ade80' : '#60a5fa') : '#f87171' }}>{tank.health}%</span>
-                                </span>
+                        <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>🗺 Địa Hình</div>
+                        {[
+                            ['#b03a14', 'Gạch (phá được)'],
+                            ['#6080a0', 'Thép (bất tử)'],
+                            ['#1060a0', 'Nước (cản xe)'],
+                            ['#1a6020', 'Rừng (ẩn thân)'],
+                            ['#a0d8f0', 'Băng (trơn)'],
+                        ].map(([c, label]) => (
+                            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '5px' }}>
+                                <div style={{ width: 12, height: 12, borderRadius: 2, background: c, flexShrink: 0 }} />
+                                <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{label}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Items Legend */}
+                    <div style={{
+                        background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: '10px', padding: '12px'
+                    }}>
+                        <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>🎁 Vật Phẩm</div>
+                        {Object.entries(ITEM_DEFS).map(([type, def]) => (
+                            <div key={type} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '5px' }}>
+                                <span style={{ fontSize: '0.9rem' }}>{def.icon}</span>
+                                <span style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'capitalize' }}>{
+                                    type === 'star' ? 'Nâng cấp súng' :
+                                    type === 'grenade' ? 'Diệt sạch quái' :
+                                    type === 'helmet' ? 'Bất tử 10s' :
+                                    type === 'tank' ? 'Thêm mạng' :
+                                    type === 'clock' ? 'Đóng băng' :
+                                    'Bọc thép căn cứ'
+                                }</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'stretch', gap: '12px' }}>
-                    
-                    {/* ─── LEFT COLUMN: CONTROLS & TERRAIN ───────────────── */}
-                    <div style={{ width: '220px', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
-                        <div style={{ ...panelStyle, background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.2)' }}>
-                            <div style={labelStyle}>🎮 Điều Khiển</div>
-                            <div style={{ fontSize: '0.85rem', color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <kbd style={{ background: '#1e293b', padding: '2px 8px', borderRadius: '5px', border: '1px solid #334155', color: '#fff' }}>WASD</kbd>
-                                    <span>Di chuyển</span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <kbd style={{ background: '#1e293b', padding: '2px 8px', borderRadius: '5px', border: '1px solid #334155', color: '#fff' }}>SPACE</kbd>
-                                    <span>Bắn đạn</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style={panelStyle}>
-                            <div style={labelStyle}>🗺 Chú Giải Bản Đồ</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.8rem', color: '#94a3b8' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <div style={{ width: 16, height: 16, background: '#922', borderRadius: '3px' }} />
-                                    <span>Gạch (Phá được)</span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <div style={{ width: 16, height: 16, background: '#666', borderRadius: '3px' }} />
-                                    <span>Đá (Bất tử)</span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <div style={{ width: 16, height: 16, background: '#229', borderRadius: '3px' }} />
-                                    <span>Nước (Cản xe)</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button className="btn-secondary" onClick={() => navigate('/tank')} style={{ padding: '14px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}>
-                            <ArrowLeft size={18} /> THOÁT TRẬN
-                        </button>
-                    </div>
-
-                    {/* ─── MIDDLE COLUMN: GAME CANVAS ───────────────────── */}
-                    <div style={{ 
-                        flex: 1, 
-                        display: 'flex', 
-                        justifyContent: 'center', 
-                        alignItems: 'center',
-                        maxWidth: '800px', // Prevent it from getting larger than its native size
-                        maxHeight: 'calc(100vh - 220px)', // Ensure it fits the screen height
-                        margin: '0 auto'
+                {/* ─── CENTER: Canvas ─── */}
+                <div style={{ flex: 1, position: 'relative', display: 'flex', justifyContent: 'center' }}>
+                    <div style={{
+                        position: 'relative',
+                        border: '3px solid #ffd70033',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        boxShadow: '0 0 30px rgba(255,215,0,0.1), inset 0 0 20px rgba(0,0,0,0.8)',
+                        lineHeight: 0,      // Remove inline-block gap
                     }}>
-                        <div style={{ 
-                            position: 'relative', 
-                            width: '100%', 
-                            aspectRatio: '1 / 1', 
-                            maxHeight: '100%',
-                            border: '4px solid rgba(255,255,255,0.05)', 
-                            borderRadius: '12px', 
-                            overflow: 'hidden', 
-                            background: '#0a0a10', 
-                            boxShadow: 'inset 0 0 40px rgba(0,0,0,0.8), 0 10px 40px rgba(0,0,0,0.5)',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center'
-                        }}>
-                            {!assetsLoaded && (
-                                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,14,22,0.95)', zIndex: 10, gap: '15px' }}>
-                                    <RefreshCw className="animate-spin" size={48} color="var(--accent-color)" />
-                                    <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ĐANG TẢI TÀI NGUYÊN...</span>
-                                </div>
-                            )}
-                            
-                            {map.length === 0 && gameState !== 'finished' && (
-                                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,14,22,0.95)', zIndex: 10, gap: '15px' }}>
-                                    <RefreshCw className="animate-spin" size={48} color="var(--accent-color)" />
-                                    <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ĐANG KẾT NỐI CHIẾN TRƯỜNG...</span>
-                                </div>
-                            )}
-                            
-                            <canvas 
-                                ref={canvasRef} 
-                                width={MAP_SIZE} 
-                                height={MAP_SIZE} 
-                                style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', imageRendering: 'pixelated' }} 
-                            />
+                        {/* Loading overlay */}
+                        {(map.length === 0 && gameState === 'waiting') && (
+                            <div style={{
+                                position: 'absolute', inset: 0, zIndex: 30,
+                                background: 'rgba(10,10,20,0.95)',
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px'
+                            }}>
+                                <div style={{
+                                    width: 50, height: 50, border: '4px solid #ffd700',
+                                    borderTopColor: 'transparent', borderRadius: '50%',
+                                    animation: 'spin 0.8s linear infinite'
+                                }} />
+                                <span style={{ color: '#ffd700', fontWeight: 700, letterSpacing: '2px' }}>ĐANG KẾT NỐI...</span>
+                            </div>
+                        )}
 
-                            {/* Game Over Overlay */}
-                            {gameState === 'finished' && (
-                                <div style={{ 
-                                    position: 'absolute', 
-                                    inset: 0, 
-                                    display: 'flex', 
-                                    flexDirection: 'column', 
-                                    alignItems: 'center', 
-                                    justifyContent: 'center', 
-                                    background: 'rgba(10,14,22,0.9)', 
-                                    zIndex: 40, 
-                                    textAlign: 'center',
-                                    backdropFilter: 'blur(4px)',
-                                    animation: 'fadeIn 0.6s ease'
+                        {/* Game Over overlay */}
+                        {(gameState === 'finished' || gameState === 'win') && (
+                            <div style={{
+                                position: 'absolute', inset: 0, zIndex: 40,
+                                background: 'rgba(5,5,15,0.92)',
+                                backdropFilter: 'blur(4px)',
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                gap: '16px', animation: 'fadeIn 0.5s ease'
+                            }}>
+                                <div style={{
+                                    textAlign: 'center', padding: '40px 50px',
+                                    background: 'rgba(255,255,255,0.03)',
+                                    border: `2px solid ${gameState === 'win' ? '#ffd70055' : '#ff444455'}`,
+                                    borderRadius: '20px',
+                                    boxShadow: `0 0 50px ${gameState === 'win' ? '#ffd70033' : '#ff444433'}`
                                 }}>
-                                    <div style={{ 
-                                        padding: '40px', 
-                                        borderRadius: '24px', 
-                                        background: 'rgba(255,255,255,0.03)', 
-                                        border: `2px solid ${isWin ? '#fbbf2444' : '#f8717144'}`,
-                                        boxShadow: `0 0 40px ${isWin ? '#fbbf2422' : '#f8717122'}`
-                                    }}>
-                                        <Trophy size={80} color={isWin ? '#fbbf24' : '#94a3b8'} style={{ marginBottom: '20px', filter: isWin ? 'drop-shadow(0 0 15px #fbbf24)' : 'none' }} />
-                                        <h2 style={{ fontSize: '3.5rem', fontWeight: 900, margin: '0 0 10px 0', color: isWin ? '#fbbf24' : '#fff', letterSpacing: '2px' }}>
-                                            {isWin ? 'VICTORY!' : 'DEFEAT...'}
-                                        </h2>
-                                        <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', marginBottom: '30px', fontWeight: 500 }}>
-                                            {isWin ? 'Bạn đã hủy diệt đối thủ hoàn toàn.' : 'Xe tăng của bạn đã nổ tung.'}
-                                        </p>
-                                        <button className="btn-primary" onClick={() => navigate('/tank')} style={{ padding: '14px 40px', fontSize: '1.1rem', fontWeight: 700 }}>QUAY LẠI SẢNH</button>
+                                    <div style={{ fontSize: '5rem', marginBottom: '8px' }}>
+                                        {gameState === 'win' ? '🏆' : '💥'}
                                     </div>
+                                    <h2 style={{
+                                        fontSize: '3rem', fontWeight: 900, margin: '0 0 8px 0',
+                                        color: gameState === 'win' ? '#ffd700' : '#ff6666',
+                                        letterSpacing: '3px',
+                                        textShadow: `0 0 20px ${gameState === 'win' ? '#ffd700' : '#ff4444'}`
+                                    }}>
+                                        {gameState === 'win' ? 'CHIẾN THẮNG!' : 'THẤT BẠI!'}
+                                    </h2>
+                                    <p style={{ color: '#94a3b8', fontSize: '1rem', marginBottom: '28px' }}>
+                                        {gameState === 'win'
+                                            ? '🎖 Xuất sắc! Bạn đã bảo vệ Căn Cứ thành công!'
+                                            : base?.destroyed ? '💀 Căn Cứ Đại Bàng đã bị phá hủy...' : '💀 Bạn đã hết sinh mệnh...'}
+                                    </p>
+                                    <button
+                                        className="btn-primary"
+                                        onClick={() => navigate('/tank')}
+                                        style={{ padding: '12px 36px', fontSize: '1rem', fontWeight: 700, letterSpacing: '1px' }}
+                                    >
+                                        QUAY LẠI SẢNH
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        <canvas
+                            ref={canvasRef}
+                            width={CANVAS_W}
+                            height={CANVAS_H}
+                            style={{
+                                display: 'block',
+                                maxWidth: 'calc(100vw - 420px)',
+                                maxHeight: 'calc(100vh - 130px)',
+                                imageRendering: 'pixelated',
+                            }}
+                        />
+                    </div>
+                </div>
+
+                {/* ─── RIGHT PANEL: Scoreboard / Status ─── */}
+                <div style={{
+                    width: '170px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '10px'
+                }}>
+                    {/* Player status */}
+                    {Object.values(players).map(p => (
+                        <div key={p.id} style={{
+                            background: 'rgba(255,255,255,0.04)', border: `1px solid ${p.id === myId ? 'rgba(74,222,128,0.3)' : 'rgba(96,165,250,0.3)'}`,
+                            borderRadius: '10px', padding: '12px'
+                        }}>
+                            <div style={{
+                                fontSize: '0.65rem', color: p.id === myId ? '#4ade80' : '#60a5fa',
+                                fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '10px'
+                            }}>
+                                {p.id === myId ? '👤 BẠN' : '👥 ĐỒNG ĐỘI'}
+                            </div>
+                            {/* Lives */}
+                            <div style={{ marginBottom: '6px' }}>
+                                <span style={{ fontSize: '0.7rem', color: '#888' }}>Sinh mệnh: </span>
+                                <span style={{ fontSize: '0.85rem' }}>{livesIcons(p.lives)}</span>
+                            </div>
+                            {/* Stars */}
+                            <div style={{ marginBottom: '6px' }}>
+                                <span style={{ fontSize: '0.7rem', color: '#888' }}>Cấp súng: </span>
+                                <span style={{ color: '#ffd700', fontSize: '0.8rem', fontWeight: 700 }}>
+                                    {starLabel[p.starLevel || 0]}
+                                </span>
+                            </div>
+                            {/* Invulnerable indicator */}
+                            {p.invulnerableTime && Date.now() < p.invulnerableTime && (
+                                <div style={{ color: '#44aaff', fontSize: '0.72rem', marginTop: '4px' }}>
+                                    ⛑️ Bất tử!
                                 </div>
                             )}
+                        </div>
+                    ))}
+
+                    {/* Enemy count summary */}
+                    <div style={{
+                        background: 'rgba(255,60,60,0.06)', border: '1px solid rgba(255,60,60,0.2)',
+                        borderRadius: '10px', padding: '12px'
+                    }}>
+                        <div style={{ fontSize: '0.65rem', color: '#ff8888', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>
+                            💀 Kẻ Thù
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: '#ddd', marginBottom: '4px' }}>
+                            Trên sân: <strong style={{ color: '#ff6666' }}>{Object.values(enemies).filter(e => e.hp > 0).length}</strong>
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: '#ddd' }}>
+                            Còn lại: <strong style={{ color: '#ff9966' }}>{enemiesLeft}</strong>
                         </div>
                     </div>
 
-                    {/* ─── RIGHT COLUMN: STATUS & EXIT ───────────────────── */}
-                    <div style={{ width: '220px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <div style={panelStyle}>
-                            <div style={labelStyle}>🛡 Trình Trạng Đội</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                {Object.values(tanks).map(tank => (
-                                    <div key={tank.id} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: tank.color === 'green' ? '#4ade80' : '#60a5fa' }}>
-                                                {tank.id === myId ? 'BẠN' : 'ĐỊCH'}
-                                            </span>
-                                            <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)' }}>
-                                                {tank.isDestroyed ? 'DEAD' : 'ALIVE'}
-                                            </span>
-                                        </div>
-                                        <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '3px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <div style={{ 
-                                                height: '100%', 
-                                                width: `${tank.health}%`, 
-                                                background: tank.color === 'green' ? 'linear-gradient(90deg, #22c55e, #4ade80)' : 'linear-gradient(90deg, #3b82f6, #60a5fa)', 
-                                                transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                                                boxShadow: `0 0 8px ${tank.color === 'green' ? '#4ade8066' : '#60a5fa66'}`
-                                            }} />
-                                        </div>
-                                    </div>
-                                ))}
+                    {/* Enemy type legend */}
+                    <div style={{
+                        background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: '10px', padding: '12px'
+                    }}>
+                        <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>☠️ Loại Địch</div>
+                        {Object.entries(ENEMY_COLORS).map(([type, color]) => (
+                            <div key={type} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '5px' }}>
+                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: color, flexShrink: 0, boxShadow: `0 0 6px ${color}` }} />
+                                <span style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'capitalize' }}>
+                                    {type === 'basic' ? 'Cơ bản' : type === 'fast' ? 'Tốc độ' : type === 'power' ? 'Hỏa lực' : 'Bọc thép'}
+                                </span>
                             </div>
-                        </div>
+                        ))}
+                    </div>
 
-                        <div style={{ ...panelStyle, marginTop: '0', flex: 1 }}>
-                            <div style={labelStyle}>📢 Thông báo</div>
-                            <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', lineHeight: '1.5' }}>
-                                {gameState === 'playing' ? 'Trận chiến đang diễn ra khốc liệt! Hãy cẩn thận khi đối mặt trực tiếp.' : 'Trận đấu đã khép lại. Nhấn thoát để tìm trận mới.'}
-                            </div>
+                    {/* Game status */}
+                    <div style={{
+                        background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
+                        borderRadius: '10px', padding: '12px'
+                    }}>
+                        <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>📡 Trạng Thái</div>
+                        <div style={{
+                            display: 'inline-block', padding: '4px 10px', borderRadius: '20px',
+                            fontSize: '0.72rem', fontWeight: 700,
+                            background: gameState === 'playing' ? 'rgba(74,222,128,0.1)' : gameState === 'win' ? 'rgba(255,215,0,0.1)' : 'rgba(239,68,68,0.1)',
+                            color: gameState === 'playing' ? '#4ade80' : gameState === 'win' ? '#ffd700' : '#ef4444',
+                        }}>
+                            {gameState === 'playing' ? '⚔️ Đang Đánh' : gameState === 'win' ? '🏆 Chiến Thắng' : gameState === 'finished' ? '💀 Thất Bại' : '⏳ Chờ...'}
                         </div>
                     </div>
                 </div>
             </div>
+
+            <style>{`
+                @keyframes spin { to { transform: rotate(360deg); } }
+                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+            `}</style>
         </div>
     );
 }
