@@ -17,14 +17,16 @@ export function useJungleLogic(roomId, mode = 'multiplayer', difficulty = 'mediu
     }, []);
 
     useEffect(() => {
+        const getEffectiveRoom = () => roomId === 'local' ? `local_${socket.id}` : roomId;
+
         const onConnect = () => {
             setMyId(socket.id);
-            socket.emit(EVENTS.START_JUNGLE_GAME, { roomId, mode, difficulty });
+            socket.emit(EVENTS.START_JUNGLE_GAME, { roomId: getEffectiveRoom(), mode, difficulty });
         };
 
         if (socket.connected) {
             setMyId(socket.id);
-            socket.emit(EVENTS.START_JUNGLE_GAME, { roomId, mode, difficulty });
+            socket.emit(EVENTS.START_JUNGLE_GAME, { roomId: getEffectiveRoom(), mode, difficulty });
         } else {
             socket.on('connect', onConnect);
         }

@@ -277,61 +277,84 @@ export default function TankGame() {
                     </div>
 
                     {/* ─── MIDDLE COLUMN: GAME CANVAS ───────────────────── */}
-                    <div style={{ flex: 1, position: 'relative', border: '4px solid rgba(255,255,255,0.05)', borderRadius: '12px', overflow: 'hidden', background: '#000', boxShadow: 'inset 0 0 40px rgba(0,0,0,0.8)' }}>
-                        {!assetsLoaded && (
-                            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,14,22,0.95)', zIndex: 10, gap: '15px' }}>
-                                <RefreshCw className="animate-spin" size={48} color="var(--accent-color)" />
-                                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ĐANG TẢI TÀI NGUYÊN...</span>
-                            </div>
-                        )}
-                        
-                        {map.length === 0 && gameState !== 'finished' && (
-                            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,14,22,0.95)', zIndex: 10, gap: '15px' }}>
-                                <RefreshCw className="animate-spin" size={48} color="var(--accent-color)" />
-                                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ĐANG KẾT NỐI CHIẾN TRƯỜNG...</span>
-                            </div>
-                        )}
-                        
-                        <canvas 
-                            ref={canvasRef} 
-                            width={MAP_SIZE} 
-                            height={MAP_SIZE} 
-                            style={{ width: '100%', height: '100%', display: 'block', imageRendering: 'pixelated' }} 
-                        />
-
-                        {/* Game Over Overlay */}
-                        {gameState === 'finished' && (
-                            <div style={{ 
-                                position: 'absolute', 
-                                inset: 0, 
-                                display: 'flex', 
-                                flexDirection: 'column', 
-                                alignItems: 'center', 
-                                justifyContent: 'center', 
-                                background: 'rgba(10,14,22,0.9)', 
-                                zIndex: 40, 
-                                textAlign: 'center',
-                                backdropFilter: 'blur(4px)',
-                                animation: 'fadeIn 0.6s ease'
-                            }}>
-                                <div style={{ 
-                                    padding: '40px', 
-                                    borderRadius: '24px', 
-                                    background: 'rgba(255,255,255,0.03)', 
-                                    border: `2px solid ${isWin ? '#fbbf2444' : '#f8717144'}`,
-                                    boxShadow: `0 0 40px ${isWin ? '#fbbf2422' : '#f8717122'}`
-                                }}>
-                                    <Trophy size={80} color={isWin ? '#fbbf24' : '#94a3b8'} style={{ marginBottom: '20px', filter: isWin ? 'drop-shadow(0 0 15px #fbbf24)' : 'none' }} />
-                                    <h2 style={{ fontSize: '3.5rem', fontWeight: 900, margin: '0 0 10px 0', color: isWin ? '#fbbf24' : '#fff', letterSpacing: '2px' }}>
-                                        {isWin ? 'VICTORY!' : 'DEFEAT...'}
-                                    </h2>
-                                    <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', marginBottom: '30px', fontWeight: 500 }}>
-                                        {isWin ? 'Bạn đã hủy diệt đối thủ hoàn toàn.' : 'Xe tăng của bạn đã nổ tung.'}
-                                    </p>
-                                    <button className="btn-primary" onClick={() => navigate('/tank')} style={{ padding: '14px 40px', fontSize: '1.1rem', fontWeight: 700 }}>QUAY LẠI SẢNH</button>
+                    <div style={{ 
+                        flex: 1, 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center',
+                        maxWidth: '800px', // Prevent it from getting larger than its native size
+                        maxHeight: 'calc(100vh - 220px)', // Ensure it fits the screen height
+                        margin: '0 auto'
+                    }}>
+                        <div style={{ 
+                            position: 'relative', 
+                            width: '100%', 
+                            aspectRatio: '1 / 1', 
+                            maxHeight: '100%',
+                            border: '4px solid rgba(255,255,255,0.05)', 
+                            borderRadius: '12px', 
+                            overflow: 'hidden', 
+                            background: '#0a0a10', 
+                            boxShadow: 'inset 0 0 40px rgba(0,0,0,0.8), 0 10px 40px rgba(0,0,0,0.5)',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}>
+                            {!assetsLoaded && (
+                                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,14,22,0.95)', zIndex: 10, gap: '15px' }}>
+                                    <RefreshCw className="animate-spin" size={48} color="var(--accent-color)" />
+                                    <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ĐANG TẢI TÀI NGUYÊN...</span>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                            
+                            {map.length === 0 && gameState !== 'finished' && (
+                                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,14,22,0.95)', zIndex: 10, gap: '15px' }}>
+                                    <RefreshCw className="animate-spin" size={48} color="var(--accent-color)" />
+                                    <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>ĐANG KẾT NỐI CHIẾN TRƯỜNG...</span>
+                                </div>
+                            )}
+                            
+                            <canvas 
+                                ref={canvasRef} 
+                                width={MAP_SIZE} 
+                                height={MAP_SIZE} 
+                                style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', imageRendering: 'pixelated' }} 
+                            />
+
+                            {/* Game Over Overlay */}
+                            {gameState === 'finished' && (
+                                <div style={{ 
+                                    position: 'absolute', 
+                                    inset: 0, 
+                                    display: 'flex', 
+                                    flexDirection: 'column', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center', 
+                                    background: 'rgba(10,14,22,0.9)', 
+                                    zIndex: 40, 
+                                    textAlign: 'center',
+                                    backdropFilter: 'blur(4px)',
+                                    animation: 'fadeIn 0.6s ease'
+                                }}>
+                                    <div style={{ 
+                                        padding: '40px', 
+                                        borderRadius: '24px', 
+                                        background: 'rgba(255,255,255,0.03)', 
+                                        border: `2px solid ${isWin ? '#fbbf2444' : '#f8717144'}`,
+                                        boxShadow: `0 0 40px ${isWin ? '#fbbf2422' : '#f8717122'}`
+                                    }}>
+                                        <Trophy size={80} color={isWin ? '#fbbf24' : '#94a3b8'} style={{ marginBottom: '20px', filter: isWin ? 'drop-shadow(0 0 15px #fbbf24)' : 'none' }} />
+                                        <h2 style={{ fontSize: '3.5rem', fontWeight: 900, margin: '0 0 10px 0', color: isWin ? '#fbbf24' : '#fff', letterSpacing: '2px' }}>
+                                            {isWin ? 'VICTORY!' : 'DEFEAT...'}
+                                        </h2>
+                                        <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', marginBottom: '30px', fontWeight: 500 }}>
+                                            {isWin ? 'Bạn đã hủy diệt đối thủ hoàn toàn.' : 'Xe tăng của bạn đã nổ tung.'}
+                                        </p>
+                                        <button className="btn-primary" onClick={() => navigate('/tank')} style={{ padding: '14px 40px', fontSize: '1.1rem', fontWeight: 700 }}>QUAY LẠI SẢNH</button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* ─── RIGHT COLUMN: STATUS & EXIT ───────────────────── */}

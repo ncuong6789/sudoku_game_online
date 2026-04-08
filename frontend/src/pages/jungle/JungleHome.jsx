@@ -1,184 +1,106 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Target, ArrowLeft, Gamepad, Map, Zap, Shield, Swords, TreePine, Waves } from 'lucide-react';
+import { Target, ArrowLeft, Gamepad, Users, Shield, Zap, Swords } from 'lucide-react';
+
+const DIFF_INFO = {
+    easy: {
+        label: 'Tập sự',
+        icon: <Shield size={16} />,
+        color: '#4ade80',
+        glow: 'rgba(74,222,128,0.35)',
+        desc: 'Gợi ý nước đi chi tiết. Phù hợp cho người mới bắt đầu.',
+    },
+    medium: {
+        label: 'Thợ săn',
+        icon: <Zap size={16} />,
+        color: '#fbbf24',
+        glow: 'rgba(251,191,36,0.35)',
+        desc: 'Độ khó tiêu chuẩn cho những trận đấu trí căng thẳng.',
+    },
+    hard: {
+        label: 'Vua Rừng Xanh',
+        icon: <Swords size={16} />,
+        color: '#ef4444',
+        glow: 'rgba(239,68,68,0.35)',
+        desc: 'Thử thách trí tuệ đỉnh cao. Sai một ly đi một dặm.',
+    },
+};
 
 export default function JungleHome() {
     const navigate = useNavigate();
     const [difficulty, setDifficulty] = useState('medium');
 
-    const DIFF_INFO = {
-        easy: {
-            label: 'Tập sự',
-            icon: <Shield size={16} />,
-            color: '#4ade80',
-            glow: 'rgba(74,222,128,0.2)',
-            desc: 'Gợi ý nước đi chi tiết. Phù hợp để làm quen với cấp bậc các loài thú.',
-        },
-        medium: {
-            label: 'Thợ săn',
-            icon: <Zap size={16} />,
-            color: '#fbbf24',
-            glow: 'rgba(251,191,36,0.2)',
-            desc: 'Độ khó tiêu chuẩn cho những trận đấu trí căng thẳng.',
-        },
-        hard: {
-            label: 'Vua Rừng Xanh',
-            icon: <Swords size={16} />,
-            color: '#ef4444',
-            glow: 'rgba(239,68,68,0.2)',
-            desc: 'Thử thách trí tuệ đỉnh cao. Sai một ly đi một dặm.',
-        },
-    };
-
     const selectedDiff = DIFF_INFO[difficulty];
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 60px)', width: '100%', padding: '1rem' }}>
-            <div className="glass-panel" style={{ 
-                position: 'relative', 
-                overflow: 'hidden', 
-                padding: '2.5rem', 
-                width: '100%', 
-                maxWidth: '650px', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center',
-                border: '1px solid rgba(255,255,255,0.1)',
-                boxShadow: '0 25px 50px rgba(0,0,0,0.6)'
-            }}>
+            <div className="glass-panel" style={{ position: 'relative', overflow: 'hidden', padding: '1.5rem', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
-                {/* Decorative Background Icons */}
-                <TreePine size={120} style={{ position: 'absolute', top: -20, left: -20, opacity: 0.05, transform: 'rotate(-15deg)' }} />
-                <Waves size={100} style={{ position: 'absolute', bottom: -10, right: -10, opacity: 0.05 }} />
-
-                {/* Header Section */}
-                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '20px', marginBottom: '2rem' }}>
-                    <div style={{ 
-                        width: '80px', 
-                        height: '80px', 
-                        background: 'linear-gradient(135deg, #22c55e, #16a34a)', 
-                        borderRadius: '24px', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        boxShadow: '0 10px 40px rgba(34, 197, 94, 0.4)' 
-                    }}>
-                        <Target size={48} color="#000" />
+                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', marginBottom: '0.5rem', marginTop: '0.5rem' }}>
+                    <div style={{ width: '60px', height: '60px', background: '#22c55e', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 30px rgba(34, 197, 94, 0.3)' }}>
+                        <Target size={36} color="#fff" />
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <h1 style={{ 
-                            fontSize: '3.2rem', 
-                            margin: 0, 
-                            lineHeight: 0.9,
-                            background: 'linear-gradient(135deg, #fff, #4ade80)', 
-                            WebkitBackgroundClip: 'text', 
-                            WebkitTextFillColor: 'transparent', 
-                            fontWeight: 900,
-                            letterSpacing: '-2px'
-                        }}>
+                        <h1 style={{ fontSize: '2.5rem', margin: 0, background: 'linear-gradient(135deg, #4ade80, #22c55e)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', whiteSpace: 'nowrap', userSelect: 'none', lineHeight: 1 }}>
                             CỜ THÚ
                         </h1>
-                        <span style={{ fontSize: '1rem', color: '#4ade80', fontWeight: 800, letterSpacing: '4px', marginTop: '5px' }}>
+                        <span style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 800, letterSpacing: '4px', marginTop: '4px' }}>
                             JUNGLE CHESS
                         </span>
                     </div>
                 </div>
 
-                <p style={{ 
-                    fontSize: '1.05rem', 
-                    color: 'var(--text-secondary)', 
-                    textAlign: 'center', 
-                    lineHeight: '1.7', 
-                    marginBottom: '2.5rem',
-                    maxWidth: '500px'
-                }}>
-                    Vận dụng cấp bậc của 8 loài mãnh thú để chinh phục hang ổ đối phương. 
-                    Chuột có thể hạ Voi, Sư tử có thể nhảy qua sông - Chiến thuật là chìa khóa!
-                </p>
-
-                {/* Difficulty Grid */}
-                <div style={{ width: '100%', marginBottom: '2.5rem' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px', color: '#94a3b8', fontSize: '0.9rem', fontWeight: 800, textTransform: 'uppercase' }}>
-                        <Map size={18} /> Cấp Độ Thử Thách
+                {/* Difficulty Selection */}
+                <div style={{ width: '100%', marginBottom: '0.5rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                        <Target size={18} /> Cấp Độ Thử Thách
                     </label>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', marginBottom: '15px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '10px' }}>
                         {Object.entries(DIFF_INFO).map(([key, info]) => (
                             <button
                                 key={key}
                                 onClick={() => setDifficulty(key)}
                                 style={{
-                                    padding: '16px 10px',
-                                    borderRadius: '16px',
+                                    padding: '14px 8px',
+                                    borderRadius: '12px',
+                                    fontSize: '0.95rem',
+                                    fontWeight: 700,
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
-                                    gap: '8px',
-                                    background: difficulty === key ? `${info.color}15` : 'rgba(255,255,255,0.03)',
+                                    justifyContent: 'center',
+                                    gap: '6px',
+                                    background: difficulty === key
+                                        ? `linear-gradient(135deg, ${info.color}33, ${info.color}22)`
+                                        : 'rgba(255,255,255,0.05)',
                                     color: difficulty === key ? info.color : 'var(--text-secondary)',
-                                    border: `2px solid ${difficulty === key ? info.color : 'rgba(255,255,255,0.08)'}`,
+                                    border: `2px solid ${difficulty === key ? info.color : 'rgba(255,255,255,0.1)'}`,
                                     cursor: 'pointer',
-                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    boxShadow: difficulty === key ? `0 0 25px ${info.glow}` : 'none',
-                                    transform: difficulty === key ? 'translateY(-4px)' : 'none'
+                                    transition: 'all 0.2s',
+                                    boxShadow: difficulty === key ? `0 0 18px ${info.glow}` : 'none',
                                 }}
                             >
                                 {info.icon}
-                                <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>{info.label}</span>
+                                <span>{info.label}</span>
                             </button>
                         ))}
                     </div>
-                    <div style={{ 
-                        fontSize: '0.85rem', 
-                        color: 'rgba(255,255,255,0.5)', 
-                        textAlign: 'center', 
-                        padding: '15px',
-                        background: 'rgba(0,0,0,0.2)',
-                        borderRadius: '12px',
-                        minHeight: '3.5em',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        border: '1px solid rgba(255,255,255,0.05)'
-                    }}>
+                    <p style={{ fontSize: '0.85rem', color: selectedDiff.color, textAlign: 'center', minHeight: '1.5em', margin: '0.3rem 0', opacity: 0.85 }}>
                         {selectedDiff.desc}
-                    </div>
+                    </p>
                 </div>
 
-                {/* Actions */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', width: '100%', maxWidth: '450px' }}>
-                    <button
-                        className="btn-primary"
-                        onClick={() => navigate('/jungle/game', { state: { roomId: 'local', mode: 'solo', difficulty } })}
-                        style={{
-                            padding: '16px', fontSize: '1.2rem', fontWeight: 900,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',
-                            boxShadow: '0 10px 30px rgba(34, 197, 94, 0.3)',
-                            background: 'linear-gradient(135deg, #22c55e, #16a34a)'
-                        }}
-                    >
-                        <Gamepad size={24} /> BẮT ĐẦU CHIẾN ĐẤU
+                {/* Play Buttons */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%' }}>
+                    <button className="btn-primary" style={{ padding: '12px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 6px 20px rgba(34, 197, 94, 0.3)', background: 'linear-gradient(135deg, #22c55e, #16a34a)' }} onClick={() => navigate('/jungle/game', { state: { roomId: 'local', mode: 'solo', difficulty } })}>
+                        <Gamepad size={22} /> Chơi Solo
                     </button>
-
-                    <button
-                        className="btn-secondary"
-                        onClick={() => navigate('/')}
-                        style={{ 
-                            padding: '14px', 
-                            fontSize: '1.1rem', 
-                            fontWeight: 700, 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center', 
-                            gap: '10px',
-                            background: 'rgba(255,255,255,0.02)'
-                        }}
-                    >
-                        <ArrowLeft size={20} /> QUAY LẠI SẢNH CHỜ
+                    <button className="btn-secondary" style={{ padding: '12px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }} onClick={() => navigate('/jungle/multiplayer', { state: { autoCreate: true, difficulty } })}>
+                        <Users size={22} /> Tạo phòng Online
                     </button>
-                </div>
-
-                <div style={{ marginTop: '2rem', fontSize: '0.8rem', color: 'rgba(255,255,255,0.2)', textAlign: 'center' }}>
-                    Sử dụng tính năng <b>Matchmaking</b> tại trang chủ để thi đấu Online
+                    <button className="btn-secondary" style={{ padding: '12px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }} onClick={() => navigate('/')}>
+                        <ArrowLeft size={18} /> Quay lại Hub
+                    </button>
                 </div>
             </div>
         </div>

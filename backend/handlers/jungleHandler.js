@@ -85,25 +85,27 @@ const jungleHandler = (io, socket, roomManager) => {
                 room.players.push('CPU');
             }
 
-            room.mode = mode || 'multiplayer';
-            room.difficulty = difficulty || 'medium';
-            room.jungleState = {
-                status: 'playing',
-                turn: p1Id,
-                pieces: JSON.parse(JSON.stringify(INITIAL_PIECES)).map(p => ({
-                    ...p,
-                    ownerId: p.owner === 0 ? p1Id : p2Id
-                }))
-            };
+            if (!room.jungleState || room.jungleState.status !== 'playing') {
+                room.mode = mode || 'multiplayer';
+                room.difficulty = difficulty || 'medium';
+                room.jungleState = {
+                    status: 'playing',
+                    turn: p1Id,
+                    pieces: JSON.parse(JSON.stringify(INITIAL_PIECES)).map(p => ({
+                        ...p,
+                        ownerId: p.owner === 0 ? p1Id : p2Id
+                    }))
+                };
+            }
 
-            io.to(roomId).emit(EVENTS.JUNGLE_GAME_STARTED, {
-                roomId,
+            io.to(actualRoomId).emit(EVENTS.JUNGLE_GAME_STARTED, {
+                roomId: actualRoomId,
                 turn: room.jungleState.turn,
                 pieces: room.jungleState.pieces
             });
 
             if (room.mode === 'solo' && room.jungleState.turn === 'CPU') {
-                handleAIMove(roomId, io, roomManager);
+                handleAIMove(actualRoomId, io, roomManager);
             }
         }
     });

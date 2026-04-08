@@ -127,37 +127,43 @@ module.exports = (io, socket, roomManager) => {
             const p1Id = room.players[0];
             const p2Id = room.players[1] || 'CPU';
 
-            // 20x20 Grid (40px per tile)
-            // 0: Empty, 1: Brick, 2: Stone, 3: Water, 4: Bush
-            const map = Array(20).fill(0).map(() => Array(20).fill(0));
-            // Add some obstacles
-            for(let i=0; i<20; i++) {
-                if(i % 4 === 2) {
-                    for(let j=2; j<18; j++) map[j][i] = 1; // Brick lines
+            if (!room.tankState || room.tankState.status !== 'playing') {
+                if (room.tankState && room.tankState.intervalId) {
+                    clearInterval(room.tankState.intervalId);
                 }
-            }
-            map[10][10] = 2; map[10][9] = 2; // Some stone in middle
 
-            room.tankState = {
-                status: 'playing',
-                intervalId: null,
-                map: map,
-                tanks: {
-                    [p1Id]: { id: p1Id, x: 60, y: 60, rotation: 180, health: 100, isDestroyed: false, color: 'green' },
-                    [p2Id]: { id: p2Id, x: 740, y: 740, rotation: 0, health: 100, isDestroyed: false, color: 'blue' }
-                },
-                bullets: []
-            };
+                // 20x20 Grid (40px per tile)
+                // 0: Empty, 1: Brick, 2: Stone, 3: Water, 4: Bush
+                const map = Array(20).fill(0).map(() => Array(20).fill(0));
+                // Add some obstacles
+                for(let i=0; i<20; i++) {
+                    if(i % 4 === 2) {
+                        for(let j=2; j<18; j++) map[j][i] = 1; // Brick lines
+                    }
+                }
+                map[10][10] = 2; map[10][9] = 2; // Some stone in middle
+
+                room.tankState = {
+                    status: 'playing',
+                    intervalId: null,
+                    map: map,
+                    tanks: {
+                        [p1Id]: { id: p1Id, x: 60, y: 60, rotation: 180, health: 100, isDestroyed: false, color: 'green' },
+                        [p2Id]: { id: p2Id, x: 740, y: 740, rotation: 0, health: 100, isDestroyed: false, color: 'blue' }
+                    },
+                    bullets: []
+                };
+
+                setTimeout(() => {
+                    startTankGameLoop(actualRoomId, io, roomManager);
+                }, 1000);
+            }
 
             io.to(actualRoomId).emit(EVENTS.TANK_GAME_STARTED, { 
                 roomId: actualRoomId, 
                 tanks: room.tankState.tanks,
                 map: room.tankState.map
             });
-
-            setTimeout(() => {
-                startTankGameLoop(actualRoomId, io, roomManager);
-            }, 1000);
         }
     });
 };

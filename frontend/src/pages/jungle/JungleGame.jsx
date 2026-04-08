@@ -51,11 +51,14 @@ export default function JungleGame() {
     };
 
     const handleReset = () => {
-        // Simple reload to reset the state for local logic to rebuild
-        // For actual implementation, it could emit another START event.
-        socket.emit(EVENTS.START_JUNGLE_GAME, { roomId, mode, difficulty });
+        const resetRoomId = roomId === 'local' ? `local_${socket.id}` : roomId;
+        socket.emit(EVENTS.START_JUNGLE_GAME, { roomId: resetRoomId, mode, difficulty });
     };
 
+    // Coordinate converters
+    const getRenderX = (x) => myId === 1 ? 6 - x : x;
+    const getRenderY = (y) => myId === 1 ? y : 8 - y;
+    
     // Drawing Loop
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -71,8 +74,8 @@ export default function JungleGame() {
             // 2. Draw Grid & Special Tiles
             for (let y = 0; y < MAP_HEIGHT; y++) {
                 for (let x = 0; x < MAP_WIDTH; x++) {
-                    const tx = x * TILE_SIZE;
-                    const ty = (8 - y) * TILE_SIZE; // Flip Y for player perspective (P1 at bottom)
+                    const tx = getRenderX(x) * TILE_SIZE;
+                    const ty = getRenderY(y) * TILE_SIZE;
 
                     // Base Tile
                     ctx.strokeStyle = 'rgba(255,255,255,0.05)';
@@ -114,8 +117,8 @@ export default function JungleGame() {
 
             // 3. Draw Valid Move Indicators
             validMoves.forEach(m => {
-                const tx = m.x * TILE_SIZE;
-                const ty = (8 - m.y) * TILE_SIZE;
+                const tx = getRenderX(m.x) * TILE_SIZE;
+                const ty = getRenderY(m.y) * TILE_SIZE;
                 ctx.fillStyle = 'rgba(74, 222, 128, 0.3)';
                 ctx.beginPath();
                 ctx.arc(tx + TILE_SIZE/2, ty + TILE_SIZE/2, 8, 0, Math.PI * 2);
@@ -124,8 +127,8 @@ export default function JungleGame() {
 
             // 4. Draw Pieces
             pieces.forEach(p => {
-                const tx = p.x * TILE_SIZE;
-                const ty = (8 - p.y) * TILE_SIZE;
+                const tx = getRenderX(p.x) * TILE_SIZE;
+                const ty = getRenderY(p.y) * TILE_SIZE;
                 const isSelected = selectedPiece && selectedPiece.x === p.x && selectedPiece.y === p.y;
                 const isMyTurn = turn === myId;
                 const isMyPiece = p.ownerId === myId;
@@ -182,10 +185,10 @@ export default function JungleGame() {
             // 5. Draw Hint (if any)
             if (activeHint) {
                 const { from, to } = activeHint;
-                const fx = from.x * TILE_SIZE + TILE_SIZE/2;
-                const fy = (8 - from.y) * TILE_SIZE + TILE_SIZE/2;
-                const tx = to.x * TILE_SIZE + TILE_SIZE/2;
-                const ty = (8 - to.y) * TILE_SIZE + TILE_SIZE/2;
+                const fx = getRenderX(from.x) * TILE_SIZE + TILE_SIZE/2;
+                const fy = getRenderY(from.y) * TILE_SIZE + TILE_SIZE/2;
+                const tx = getRenderX(to.x) * TILE_SIZE + TILE_SIZE/2;
+                const ty = getRenderY(to.y) * TILE_SIZE + TILE_SIZE/2;
 
                 ctx.strokeStyle = '#fbbf24';
                 ctx.lineWidth = 4;
@@ -208,8 +211,10 @@ export default function JungleGame() {
         const rect = canvasRef.current.getBoundingClientRect();
         const scaleX = canvasRef.current.width / rect.width;
         const scaleY = canvasRef.current.height / rect.height;
-        const x = Math.floor(((e.clientX - rect.left) * scaleX) / TILE_SIZE);
-        const y = 8 - Math.floor(((e.clientY - rect.top) * scaleY) / TILE_SIZE);
+        const rawX = Math.floor(((e.clientX - rect.left) * scaleX) / TILE_SIZE);
+        const rawY = Math.floor(((e.clientY - rect.top) * scaleY) / TILE_SIZE);
+        const x = myId === 1 ? 6 - rawX : rawX;
+        const y = myId === 1 ? rawY : 8 - rawY;
         handleSelect(x, y);
     };
 

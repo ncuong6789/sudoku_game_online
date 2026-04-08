@@ -36,10 +36,12 @@ import PikachuGame from './pages/pikachu/PikachuGame';
 
 // Tank Components
 import TankHome from './pages/tank/TankHome';
+import TankLobby from './pages/tank/TankLobby';
 import TankGame from './pages/tank/TankGame';
 
 // Jungle Components
 import JungleHome from './pages/jungle/JungleHome';
+import JungleLobby from './pages/jungle/JungleLobby';
 import JungleGame from './pages/jungle/JungleGame';
 
 // Test Dashboard
@@ -88,10 +90,12 @@ function App() {
 
         {/* Tank Module */}
         <Route path="/tank" element={<TankHome />} />
+        <Route path="/tank/multiplayer" element={<TankLobby />} />
         <Route path="/tank/game" element={<TankGame />} />
 
         {/* Jungle Module */}
         <Route path="/jungle" element={<JungleHome />} />
+        <Route path="/jungle/multiplayer" element={<JungleLobby />} />
         <Route path="/jungle/game" element={<JungleGame />} />
 
         {/* Test Dashboard */}
