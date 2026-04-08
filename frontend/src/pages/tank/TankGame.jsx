@@ -277,6 +277,29 @@ export default function TankGame() {
         explosions, map, base, enemiesLeft, myId, localTankRef
     } = useTankLogic(roomId, mode);
 
+    const { playSound } = useTankSounds();
+    const lastBulletCount = useRef(0);
+    const lastExplosionCount = useRef(0);
+
+    // Play sounds on events
+    useEffect(() => {
+        if (gameState === 'playing' && bullets.length > lastBulletCount.current) {
+            playSound('FIRE');
+        }
+        lastBulletCount.current = bullets.length;
+    }, [bullets.length, gameState]);
+
+    useEffect(() => {
+        if (gameState === 'playing' && explosions.length > lastExplosionCount.current) {
+            playSound('EXPLOSION');
+        }
+        lastExplosionCount.current = explosions.length;
+    }, [explosions.length, gameState]);
+
+    useEffect(() => {
+        if (gameState === 'playing') playSound('START');
+    }, [gameState]);
+
     const myPlayer = players[myId];
 
     // ── Render Loop ──────────────────────────────────────────────

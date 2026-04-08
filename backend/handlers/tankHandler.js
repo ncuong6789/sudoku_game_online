@@ -171,12 +171,34 @@ class TankServer {
     updateAI(now, io, roomId) {
         this.spawnEnemy();
 
+        const targets = [
+            { x: this.base.x, y: this.base.y, w: 2, h: 2 }, // Base
+            ...Object.values(this.players).filter(p => p.hp > 0).map(p => ({ x: p.x, y: p.y, w: p.w, h: p.h }))
+        ];
+
         for (let eid in this.enemies) {
             const e = this.enemies[eid];
             if (e.hp <= 0) continue;
 
-            // Random Shooting
-            if (now - e.lastShootTime > 1500 && Math.random() < 0.05) {
+            // 1. Line of Sight Shooting Logic
+            let shouldShoot = false;
+            for (let t of targets) {
+                const centerX = t.x + t.w/2;
+                const centerY = t.y + t.h/2;
+                const myCenterX = e.x + e.w/2;
+                const myCenterY = e.y + e.h/2;
+
+                if (e.dir === 'up' && Math.abs(myCenterX - centerX) < 1.5 && centerY < myCenterY) shouldShoot = true;
+                if (e.dir === 'down' && Math.abs(myCenterX - centerX) < 1.5 && centerY > myCenterY) shouldShoot = true;
+                if (e.dir === 'left' && Math.abs(myCenterY - centerY) < 1.5 && centerX < myCenterX) shouldShoot = true;
+                if (e.dir === 'right' && Math.abs(myCenterY - centerY) < 1.5 && centerX > myCenterX) shouldShoot = true;
+                
+                if (shouldShoot) break;
+            }
+
+            // Normal random fire + LOS fire
+            const fireCooldown = e.type === 'power' ? 800 : 1500;
+            if (now - e.lastShootTime > fireCooldown && (shouldShoot || Math.random() < 0.02)) {
                 e.lastShootTime = now;
                 this.bullets.push({
                     ownerId: e.id, isCPU: true,
@@ -187,27 +209,47 @@ class TankServer {
                 io.to(roomId).emit(EVENTS.TANK_SHOOT, { ownerId: e.id, x: e.x, y: e.y, dir: e.dir });
             }
 
-            // Movement & Turing
-            let moved = false;
+            // 2. Movement & Intelligence
             let nx = e.x, ny = e.y;
             if (e.dir === 'up') ny -= e.speed;
             else if (e.dir === 'down') ny += e.speed;
             else if (e.dir === 'left') nx -= e.speed;
             else if (e.dir === 'right') nx += e.speed;
 
-            moved = this.moveTank(e, nx, ny);
+            const moved = this.moveTank(e, nx, ny);
 
-            // If stuck or time to turn
-            if (!moved || (now - e.lastTurnTime > 2000 && Math.random() < 0.05)) {
+            // Change direction if stuck OR randomly (more frequent for fast tanks)
+            const turnFreq = e.type === 'fast' ? 0.08 : 0.03;
+            if (!moved || (now - e.lastTurnTime > 1500 && Math.random() < turnFreq)) {
                 e.lastTurnTime = now;
-                const dirs = ['up', 'down', 'left', 'right'];
-                let pref = [];
-                // Weight moving down towards base
-                if (e.y < 20) pref = ['down', 'down', 'left', 'right', 'up'];
-                else pref = dirs;
-                e.dir = pref[Math.floor(Math.random() * pref.length)];
                 
-                // Align to grid partially to help fit through gaps
+                // Smart Pathfinding: Weigh choices towards the Base (12, 24)
+                const dirs = ['up', 'down', 'left', 'right'];
+                let weights = [1, 1, 1, 1]; // up, down, left, right
+                
+                // Target the eagle base at (12, 24)
+                if (e.y < 24) weights[1] += 3; // weight DOWN
+                if (e.x < 12) weights[3] += 2; // weight RIGHT
+                if (e.x > 12) weights[2] += 2; // weight LEFT
+                
+                // If stuck, give more weight to lateral moves
+                if (!moved) {
+                    if (e.dir === 'down' || e.dir === 'up') { weights[2] += 5; weights[3] += 5; }
+                    else { weights[0] += 5; weights[1] += 5; }
+                }
+
+                // Weighted random pick
+                const total = weights.reduce((a, b) => a + b, 0);
+                let rand = Math.random() * total;
+                for (let i = 0; i < dirs.length; i++) {
+                    if (rand < weights[i]) {
+                        e.dir = dirs[i];
+                        break;
+                    }
+                    rand -= weights[i];
+                }
+
+                // Grid Snapping helper: alignment to 0.5 units helps path through narrow 1-tile bricks
                 e.x = Math.round(e.x * 2) / 2;
                 e.y = Math.round(e.y * 2) / 2;
             }
