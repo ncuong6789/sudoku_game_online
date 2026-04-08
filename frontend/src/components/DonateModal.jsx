@@ -3,9 +3,9 @@ import { X, Heart, Copy, Check, ExternalLink } from 'lucide-react';
 
 // CẤU HÌNH TÀI KHOẢN CỦA BẠN TẠI ĐÂY
 const DONATE_CONFIG = {
-    bankId: 'MB', // Ví dụ: MB, VCB, ICB...
-    accountNo: '0383377287', // Số tài khoản của bạn
-    accountName: 'NGUYEN LE HUNG CUONG', // Tên chủ tài khoản
+    bankId: 'TCB', // Techcombank
+    accountNo: '19038495256012', // Số tài khoản mới
+    accountName: 'NGUYEN LE HUNG CUONG',
     description: 'Ung ho GameOnl',
 };
 
@@ -148,7 +148,7 @@ export default function DonateModal({ isOpen, onClose }) {
                         </div>
                         
                         <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>
-                            Scan bằng ứng dụng Ngân hàng hoặc Momo
+                            Scan bằng ứng dụng Ngân hàng
                         </div>
                     </div>
                 </div>
