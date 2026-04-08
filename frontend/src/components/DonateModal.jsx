@@ -57,12 +57,12 @@ export default function DonateModal({ isOpen, onClose }) {
                 </button>
 
                 <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                    <div style={{ 
-                        width: '60px', height: '60px', 
-                        background: 'rgba(239, 68, 68, 0.1)', 
-                        borderRadius: '50%', 
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                        margin: '0 auto 1rem auto' 
+                    <div style={{
+                        width: '60px', height: '60px',
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        borderRadius: '50%',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        margin: '0 auto 1rem auto'
                     }}>
                         <Heart size={30} fill="#ef4444" color="#ef4444" />
                     </div>
@@ -72,30 +72,30 @@ export default function DonateModal({ isOpen, onClose }) {
                     </p>
                 </div>
 
-                <div style={{ 
-                    background: 'rgba(0,0,0,0.3)', 
-                    padding: '1.5rem', 
-                    borderRadius: '16px', 
+                <div style={{
+                    background: 'rgba(0,0,0,0.3)',
+                    padding: '1.5rem',
+                    borderRadius: '16px',
                     border: '1px solid rgba(255,255,255,0.05)',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem'
                 }}>
-                    <div style={{ 
-                        background: '#fff', 
-                        padding: '10px', 
+                    <div style={{
+                        background: '#fff',
+                        padding: '10px',
                         borderRadius: '16px',
                         width: '220px', height: '220px',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
                     }}>
-                        <img 
-                            src="/donate_qr.png" 
-                            alt="Donate QR Code" 
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} 
+                        <img
+                            src="/donate_qr.png"
+                            alt="Donate QR Code"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
                         />
                     </div>
-                    
+
                     <div style={{ textAlign: 'center', width: '100%' }}>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Hoặc chuyển khoản qua Momo/ZaloPay</div>
+                        {/* <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Hoặc chuyển khoản qua Momo/ZaloPay</div>
                         <div style={{ 
                             background: 'rgba(255,255,255,0.05)', 
                             padding: '10px', 
@@ -107,7 +107,7 @@ export default function DonateModal({ isOpen, onClose }) {
                             color: '#4ade80'
                         }}>
                             0987123xyz
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </div>

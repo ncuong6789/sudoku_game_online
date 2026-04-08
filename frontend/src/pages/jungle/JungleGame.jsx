@@ -282,9 +282,9 @@ export default function JungleGame() {
                 </div>
 
                 {/* MIDDLE: BOARD */}
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: 0, margin: 0 }}>
+                <div style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '320px', padding: 0, margin: 0, maxHeight: '100%' }}>
                     {/* Status Header */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', width: '100%', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '10px 18px', marginBottom: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', width: '100%', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '10px 18px', marginBottom: '10px', flexShrink: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <Activity size={18} color="#4ade80" />
                             <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#fff' }}>Cờ Thú</span>
@@ -308,11 +308,19 @@ export default function JungleGame() {
 
                     <div className="game-play-board jungle-board" style={{
                         position: 'relative',
-                        border: '8px solid rgba(15, 15, 25, 0.95)',
+                        border: '6px solid rgba(15, 15, 25, 0.95)',
                         borderRadius: '12px',
                         boxShadow: '0 30px 60px rgba(0, 0, 0, 0.6)',
                         overflow: 'hidden',
-                        background: '#0f172a'
+                        background: '#0f172a',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        /* Add responsive logic */
+                        width: '100%',
+                        maxHeight: 'calc(100vh - 120px)',
+                        aspectRatio: '7 / 9',
+                        flex: '1 1 auto'
                     }}>
                         {pieces.length === 0 && !gameOver && (
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 10, background: 'rgba(15, 23, 42, 0.9)' }}>
@@ -329,7 +337,8 @@ export default function JungleGame() {
                             style={{ 
                                 display: 'block', 
                                 cursor: isMyTurn ? 'pointer' : 'default',
-                                maxWidth: '100%',
+                                width: '100%',
+                                height: '100%',
                                 objectFit: 'contain'
                             }} 
                         />
