@@ -1,63 +1,51 @@
 const { EVENTS } = require('../utils/constants');
+const { BATTLE_CITY_MAPS } = require('../data/tankStages');
 
 const MAP_COLS = 26;
 const MAP_ROWS = 26;
-// Logical size, can be translated to TILE_SIZE on client (e.g. 32px -> 832x832)
-const TANK_SIZE = 1.8; // Almost 2x2 grid, slightly smaller to squeeze through gaps
+const TANK_SIZE = 1.8;
 const TANK_SPEED_BASIC = 0.15;
 const TANK_SPEED_FAST = 0.25;
 const BULLET_SPEED_BASIC = 0.4;
 const BULLET_SPEED_FAST = 0.6;
 
-// Char to ID map
 const TILE_MAP = {
     '.': 0, '#': 1, '@': 2, '~': 3, '%': 4, '-': 5
 };
 
-const STAGE_1 = [
-    "..........................",
-    "..........................",
-    "..##..##..##..##..##..##..",
-    "..##..##..##..##..##..##..",
-    "..##..##..##..##..##..##..",
-    "..##..##..##..##..##..##..",
-    "..##..##..##@@##..##..##..",
-    "..##..##..##@@##..##..##..",
-    "..##..##..##..##..##..##..",
-    "..##..##..........##..##..",
-    "..##..##..........##..##..",
-    "..........##..##..........",
-    "..........##..##..........",
-    "##..####..........####..##",
-    "@@..####..........####..@@",
-    "..........##..##..........",
-    "..........######..........",
-    "..##..##..######..##..##..",
-    "..##..##..##..##..##..##..",
-    "..##..##..##..##..##..##..",
-    "..##..##..##..##..##..##..",
-    "..##..##..........##..##..",
-    "..##..##..........##..##..",
-    "..##..##...####...##..##..",
-    "...........#..#...........",
-    "...........#..#..........."
-];
-
 class TankServer {
-    constructor() {
+    constructor(level = 1) {
         this.status = 'playing';
         this.intervalId = null;
-        this.map = this.parseMap(STAGE_1);
+        this.level = level;
+        this.currentMapIndex = Math.min(level, BATTLE_CITY_MAPS.length - 1);
+        this.map = this.parseMap(BATTLE_CITY_MAPS[this.currentMapIndex]);
         this.baseId = 'base';
         this.base = { x: 12, y: 24, w: 2, h: 2, destroyed: false };
         this.players = {};
         this.enemies = {};
         this.bullets = [];
-        this.items = {}; // id -> { type, x, y }
+        this.items = {};
         
         this.enemySpawnPoints = [ {x:0,y:0}, {x:12,y:0}, {x:24,y:0} ];
-        this.enemySpawnQueue = 20; // 20 enemies per stage
+        this.enemySpawnQueue = 20;
         this.enemiesOnScreen = 0;
+        this.lastEnemySpawnTime = 0;
+        this.enemyIdCounter = 0;
+        this.itemIdCounter = 0;
+    }
+
+    nextLevel() {
+        this.level++;
+        this.currentMapIndex = Math.min(this.level, BATTLE_CITY_MAPS.length - 1);
+        this.map = this.parseMap(BATTLE_CITY_MAPS[this.currentMapIndex]);
+        this.base = { x: 12, y: 24, w: 2, h: 2, destroyed: false };
+        this.enemies = {};
+        this.bullets = [];
+        this.items = {};
+        this.enemySpawnQueue = 20;
+        this.enemiesOnScreen = 0;
+        this.status = 'playing';
         this.lastEnemySpawnTime = 0;
         this.enemyIdCounter = 0;
         this.itemIdCounter = 0;
@@ -381,9 +369,23 @@ class TankServer {
             return true;
         });
 
-        // Check level win
+        // Check level win - advance to next level
         if (this.enemySpawnQueue === 0 && this.enemiesOnScreen === 0 && this.status === 'playing') {
-            this.status = 'win';
+            io.to(roomId).emit(EVENTS.TANK_EXPLOSION, { x: 12, y: 24, isBase: true });
+            // Check if there are more levels
+            if (this.level < BATTLE_CITY_MAPS.length) {
+                this.nextLevel();
+                // Notify client about level advance
+                io.to(roomId).emit(EVENTS.TANK_GAME_STARTED, {
+                    roomId,
+                    map: this.map,
+                    players: this.players,
+                    level: this.level,
+                    isLevelComplete: true
+                });
+            } else {
+                this.status = 'win'; // All levels completed
+            }
         }
     }
 
@@ -495,7 +497,7 @@ const registerTankHandler = (io, socket, roomManager) => {
                 // Validate the movement - check for wall collisions and tank collisions
                 const dx = Math.abs(x - tank.x);
                 const dy = Math.abs(y - tank.y);
-                const maxMove = TANK_SPEED_BASIC * 2; // Allow some prediction buffer
+                const maxMove = TANK_SPEED_BASIC * 6; // Increased to 0.9 to prevent lag/high-FPS rubberbanding
                 
                 // If move is too large, it's likely cheating or lag - clamp it
                 let newX = x;
@@ -560,7 +562,7 @@ const registerTankHandler = (io, socket, roomManager) => {
         }
     });
 
-    socket.on(EVENTS.START_TANK_GAME, ({ roomId }) => {
+    socket.on(EVENTS.START_TANK_GAME, ({ roomId, level }) => {
         const rooms = roomManager.getAllRooms();
         const actualRoomId = roomId === 'local' ? `local_${socket.id}` : roomId;
         let room = rooms[actualRoomId];
@@ -583,7 +585,8 @@ const registerTankHandler = (io, socket, roomManager) => {
                     clearInterval(room.tankState.intervalId);
                 }
 
-                room.tankState = new TankServer();
+                const startLevel = level || 1;
+                room.tankState = new TankServer(startLevel);
                 
                 let idx = 0;
                 for (let pid of room.players) {
@@ -600,7 +603,9 @@ const registerTankHandler = (io, socket, roomManager) => {
             io.to(actualRoomId).emit(EVENTS.TANK_GAME_STARTED, { 
                 roomId: actualRoomId, 
                 map: room.tankState.map,
-                players: room.tankState.players
+                players: room.tankState.players,
+                level: room.tankState.level,
+                maxLevel: BATTLE_CITY_MAPS.length
             });
         }
     });

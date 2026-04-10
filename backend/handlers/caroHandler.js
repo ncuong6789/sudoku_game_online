@@ -16,7 +16,7 @@ module.exports = (io, socket, roomManager) => {
         const rooms = roomManager.getAllRooms();
         const room = rooms[roomId];
         if (!room || !roomManager.isPlayerInRoom(roomId, socket.id)) return;
-        
+
         const playerSymbol = room.players[0] === socket.id ? 1 : 2;
         if (room.caroTurn !== playerSymbol) return;
 

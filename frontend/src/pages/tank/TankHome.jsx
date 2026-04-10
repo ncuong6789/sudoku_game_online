@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Target, ArrowLeft, Gamepad, Users, Shield, Zap, Swords } from 'lucide-react';
+import { Target, ArrowLeft, Gamepad, Users, Shield, Zap, Swords, Map, ChevronDown, ChevronUp } from 'lucide-react';
 
 const DIFF_INFO = {
     easy: {
@@ -26,11 +26,20 @@ const DIFF_INFO = {
     },
 };
 
+const MAX_LEVEL = 36;
+
 export default function TankHome() {
     const navigate = useNavigate();
     const [difficulty, setDifficulty] = useState('medium');
+    const [selectedLevel, setSelectedLevel] = useState(1);
+    const [showMapSelect, setShowMapSelect] = useState(false);
 
     const selectedDiff = DIFF_INFO[difficulty];
+
+    const handleLevelSelect = (level) => {
+        setSelectedLevel(level);
+        setShowMapSelect(false);
+    };
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 60px)', width: '100%', padding: '1rem' }}>
@@ -48,6 +57,71 @@ export default function TankHome() {
                             BATTLE CITY
                         </span>
                     </div>
+                </div>
+
+                {/* Map/Level Selection - Compact Dropdown */}
+                <div style={{ width: '100%', marginBottom: '0.5rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                        <Map size={18} /> Chọn Màn Chơi
+                    </label>
+                    
+                    <button
+                        onClick={() => setShowMapSelect(!showMapSelect)}
+                        style={{
+                            width: '100%',
+                            padding: '12px 16px',
+                            borderRadius: '12px',
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '2px solid rgba(255,255,255,0.1)',
+                            color: '#fff',
+                            fontSize: '1rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        <span>Màn {selectedLevel} / {MAX_LEVEL}</span>
+                        {showMapSelect ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                    </button>
+
+                    {showMapSelect && (
+                        <div style={{
+                            marginTop: '8px',
+                            maxHeight: '200px',
+                            overflowY: 'auto',
+                            background: 'rgba(0,0,0,0.5)',
+                            borderRadius: '12px',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            padding: '8px'
+                        }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px' }}>
+                                {Array.from({ length: MAX_LEVEL }, (_, i) => i + 1).map(level => (
+                                    <button
+                                        key={level}
+                                        onClick={() => handleLevelSelect(level)}
+                                        style={{
+                                            padding: '8px 4px',
+                                            borderRadius: '8px',
+                                            background: selectedLevel === level 
+                                                ? 'linear-gradient(135deg, #3b82f6, #2563eb)' 
+                                                : 'rgba(255,255,255,0.05)',
+                                            border: 'none',
+                                            color: selectedLevel === level ? '#fff' : '#aaa',
+                                            fontSize: '0.85rem',
+                                            fontWeight: 600,
+                                            cursor: 'pointer',
+                                            transition: 'all 0.15s'
+                                        }}
+                                    >
+                                        {level}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Difficulty Selection */}
@@ -92,10 +166,10 @@ export default function TankHome() {
 
                 {/* Play Buttons */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '100%' }}>
-                    <button className="btn-primary" style={{ padding: '12px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 6px 20px rgba(59, 130, 246, 0.3)', background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }} onClick={() => navigate('/tank/game', { state: { roomId: 'local', mode: 'single', difficulty } })}>
+                    <button className="btn-primary" style={{ padding: '12px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: '0 6px 20px rgba(59, 130, 246, 0.3)', background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }} onClick={() => navigate('/tank/game', { state: { roomId: 'local', mode: 'single', difficulty, level: selectedLevel } })}>
                         <Gamepad size={22} /> Chơi Solo
                     </button>
-                    <button className="btn-secondary" style={{ padding: '12px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }} onClick={() => navigate('/tank/multiplayer', { state: { autoCreate: true, difficulty } })}>
+                    <button className="btn-secondary" style={{ padding: '12px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }} onClick={() => navigate('/tank/multiplayer', { state: { autoCreate: true, difficulty, level: selectedLevel } })}>
                         <Users size={22} /> Tạo phòng Online
                     </button>
                     <button className="btn-secondary" style={{ padding: '12px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }} onClick={() => navigate('/')}>

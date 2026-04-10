@@ -234,15 +234,15 @@ function drawItem(ctx, item, TILE, tick) {
 export default function TankGame() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { roomId, mode } = location.state || { roomId: 'local', mode: 'single' };
+    const { roomId, mode, level = 1 } = location.state || { roomId: 'local', mode: 'single', level: 1 };
 
     const canvasRef = useRef(null);
     const tickRef = useRef(0);
 
     const {
         gameState, players, enemies, bullets, items,
-        explosions, map, base, enemiesLeft, myId, localTankRef
-    } = useTankLogic(roomId, mode);
+        explosions, map, base, enemiesLeft, myId, localTankRef, level: currentLevel, maxLevel
+    } = useTankLogic(roomId, mode, level);
 
     const { playSound } = useTankSounds();
     const lastBulletCount = useRef(0);
@@ -398,6 +398,12 @@ export default function TankGame() {
                         {(gameState === 'finished' || gameState === 'win') && (
                             <div style={{ position: 'absolute', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
                                 <h1 style={{ color: gameState === 'win' ? '#ffd700' : '#ff4444', fontSize: '3rem', margin: 0 }}>{gameState === 'win' ? 'VICTORY' : 'GAME OVER'}</h1>
+                                {gameState === 'win' && currentLevel >= maxLevel && (
+                                    <p style={{ color: '#fbbf24', fontSize: '1.2rem', marginTop: '10px' }}>🎉 Bạn đã vượt qua tất cả {maxLevel} màn!</p>
+                                )}
+                                {gameState === 'win' && currentLevel < maxLevel && (
+                                    <p style={{ color: '#60a5fa', fontSize: '1.2rem', marginTop: '10px' }}>Đã hoàn thành màn {currentLevel}!</p>
+                                )}
                                 <button className="btn-primary" onClick={() => navigate('/tank')} style={{ marginTop: '20px' }}>EXIT</button>
                             </div>
                         )}
@@ -410,6 +416,10 @@ export default function TankGame() {
                     <div style={{ background: 'linear-gradient(180deg, rgba(74,222,128,0.1), transparent)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(74,222,128,0.2)' }}>
                         <div style={{ fontSize: '0.7rem', color: '#4ade80', fontWeight: 800, marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <Target size={16} /> TRẠNG THÁI
+                        </div>
+                        <div style={{ marginBottom: '12px' }}>
+                            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '5px' }}>Màn:</div>
+                            <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#fbbf24' }}>{currentLevel} / {maxLevel}</div>
                         </div>
                         <div style={{ marginBottom: '12px' }}>
                             <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '5px' }}>Sinh mệnh:</div>

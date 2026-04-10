@@ -11,7 +11,7 @@ const TILE_MAP = {
     '.': 0, '#': 1, '@': 2, '~': 3, '%': 4, '-': 5
 };
 
-export function useTankLogic(roomId, mode = 'multiplayer') {
+export function useTankLogic(roomId, mode = 'multiplayer', startLevel = 1) {
     const [gameState, setGameState] = useState('waiting');
     const [players, setPlayers] = useState({});
     const [enemies, setEnemies] = useState({});
@@ -22,6 +22,8 @@ export function useTankLogic(roomId, mode = 'multiplayer') {
     const [base, setBase] = useState(null);
     const [enemiesLeft, setEnemiesLeft] = useState(20);
     const [myId, setMyId] = useState(socket.id);
+    const [level, setLevel] = useState(startLevel);
+    const [maxLevel, setMaxLevel] = useState(35);
 
     const requestRef = useRef();
     const lastUpdateRef = useRef(0);
@@ -71,6 +73,8 @@ export function useTankLogic(roomId, mode = 'multiplayer') {
         if (data.players && data.players[socket.id]) {
             localTank.current = { ...data.players[socket.id], lastShootTime: 0 };
         }
+        if (data.level) setLevel(data.level);
+        if (data.maxLevel) setMaxLevel(data.maxLevel);
         setGameState('playing');
     }, []);
 
@@ -118,7 +122,7 @@ export function useTankLogic(roomId, mode = 'multiplayer') {
 
         const onConnect = () => {
             setMyId(socket.id);
-            socket.emit(EVENTS.START_TANK_GAME, { roomId });
+            socket.emit(EVENTS.START_TANK_GAME, { roomId, level: startLevel });
         };
 
         socket.on(EVENTS.TANK_GAME_STARTED, handleStarted);
@@ -197,8 +201,34 @@ export function useTankLogic(roomId, mode = 'multiplayer') {
 
         // Client-side collision detection
         if (moved) {
-            const canMove = !checkWallCollision(newX, newY, TANK_SIZE, TANK_SIZE, map) &&
+            let canMove = !checkWallCollision(newX, newY, TANK_SIZE, TANK_SIZE, map) &&
                            !checkTankCollision(newX, newY, TANK_SIZE, TANK_SIZE, myId, players, enemies);
+            
+            // Auto corner-slip assist
+            if (!canMove) {
+                const trySlides = [0.05, 0.1, 0.15, 0.2, 0.25];
+                if (newDir === 'up' || newDir === 'down') {
+                    for (let s of trySlides) {
+                        if (!checkWallCollision(newX - s, newY, TANK_SIZE, TANK_SIZE, map) && !checkTankCollision(newX - s, newY, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
+                            newX -= speed; // Slide left slowly
+                            canMove = true; break;
+                        } else if (!checkWallCollision(newX + s, newY, TANK_SIZE, TANK_SIZE, map) && !checkTankCollision(newX + s, newY, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
+                            newX += speed; // Slide right slowly
+                            canMove = true; break;
+                        }
+                    }
+                } else if (newDir === 'left' || newDir === 'right') {
+                    for (let s of trySlides) {
+                        if (!checkWallCollision(newX, newY - s, TANK_SIZE, TANK_SIZE, map) && !checkTankCollision(newX, newY - s, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
+                            newY -= speed; // Slide up slowly
+                            canMove = true; break;
+                        } else if (!checkWallCollision(newX, newY + s, TANK_SIZE, TANK_SIZE, map) && !checkTankCollision(newX, newY + s, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
+                            newY += speed; // Slide down slowly
+                            canMove = true; break;
+                        }
+                    }
+                }
+            }
             
             if (canMove) {
                 tank.x = newX;
@@ -261,6 +291,8 @@ export function useTankLogic(roomId, mode = 'multiplayer') {
         base,
         enemiesLeft,
         myId,
-        localTankRef: localTank
+        localTankRef: localTank,
+        level,
+        maxLevel
     };
 }
