@@ -153,19 +153,27 @@ class TankServer {
         const allTanks = [...Object.values(this.players), ...Object.values(this.enemies)];
         for (const t of allTanks) {
             if (t.id === ignoreId || t.hp <= 0) continue;
-            if (this.rectIntersect(x, y, w, h, t.x, t.y, t.w, t.h)) return true;
+            // Use smaller collision box to avoid edge cases
+            if (this.rectIntersect(x + 0.1, y + 0.1, w - 0.2, h - 0.2, t.x + 0.1, t.y + 0.1, t.w - 0.2, t.h - 0.2)) return true;
         }
         return false;
     }
 
-    moveTank(tank, targetX, targetY) {
-        if (!this.checkWallCollision(targetX, targetY, tank.w, tank.h, tank) &&
-            !this.checkTankCollisions(targetX, targetY, tank.w, tank.h, tank.id)) {
-            tank.x = targetX;
-            tank.y = targetY;
-            return true;
+    moveTank(tank, targetX, targetY, force = false) {
+        // For players, validate on server side
+        if (!force) {
+            if (!this.checkWallCollision(targetX, targetY, tank.w, tank.h, tank) &&
+                !this.checkTankCollisions(targetX, targetY, tank.w, tank.h, tank.id)) {
+                tank.x = targetX;
+                tank.y = targetY;
+                return true;
+            }
+            return false;
         }
-        return false;
+        // For AI or forced moves
+        tank.x = targetX;
+        tank.y = targetY;
+        return true;
     }
 
     updateAI(now, io, roomId) {
@@ -200,13 +208,23 @@ class TankServer {
             const fireCooldown = e.type === 'power' ? 800 : 1500;
             if (now - e.lastShootTime > fireCooldown && (shouldShoot || Math.random() < 0.02)) {
                 e.lastShootTime = now;
+                
+                // Calculate bullet spawn position based on direction (from gun, not center)
+                let bx = e.x + e.w/2 - 0.25;
+                let by = e.y + e.h/2 - 0.25;
+                const barrelOffset = e.w * 0.5;
+                if (e.dir === 'up') by -= barrelOffset;
+                else if (e.dir === 'down') by += barrelOffset;
+                else if (e.dir === 'left') bx -= barrelOffset;
+                else if (e.dir === 'right') bx += barrelOffset;
+                
                 this.bullets.push({
                     ownerId: e.id, isCPU: true,
-                    x: e.x + e.w/2 - 0.25, y: e.y + e.h/2 - 0.25,
+                    x: bx, y: by,
                     dir: e.dir, type: e.type === 'power' ? 'fast' : 'basic',
                     speed: e.type === 'power' ? BULLET_SPEED_FAST : BULLET_SPEED_BASIC
                 });
-                io.to(roomId).emit(EVENTS.TANK_SHOOT, { ownerId: e.id, x: e.x, y: e.y, dir: e.dir });
+                io.to(roomId).emit(EVENTS.TANK_SHOOT, { ownerId: e.id, x: bx, y: by, dir: e.dir });
             }
 
             // 2. Movement & Intelligence
@@ -216,7 +234,7 @@ class TankServer {
             else if (e.dir === 'left') nx -= e.speed;
             else if (e.dir === 'right') nx += e.speed;
 
-            const moved = this.moveTank(e, nx, ny);
+            const moved = this.moveTank(e, nx, ny, true);
 
             // Change direction if stuck OR randomly (more frequent for fast tanks)
             const turnFreq = e.type === 'fast' ? 0.08 : 0.03;
@@ -232,21 +250,61 @@ class TankServer {
                 if (e.x < 12) weights[3] += 2; // weight RIGHT
                 if (e.x > 12) weights[2] += 2; // weight LEFT
                 
-                // If stuck, give more weight to lateral moves
+                // If stuck, try to go around - add extra weight to opposite direction
                 if (!moved) {
                     if (e.dir === 'down' || e.dir === 'up') { weights[2] += 5; weights[3] += 5; }
                     else { weights[0] += 5; weights[1] += 5; }
+                    
+                    // Try to find a clear direction by testing small movements
+                    for (let testDir of dirs) {
+                        let tx = e.x, ty = e.y;
+                        if (testDir === 'up') ty -= 0.5;
+                        else if (testDir === 'down') ty += 0.5;
+                        else if (testDir === 'left') tx -= 0.5;
+                        else if (testDir === 'right') tx += 0.5;
+                        
+                        if (!this.checkWallCollision(tx, ty, e.w, e.h, e) && 
+                            !this.checkTankCollisions(tx, ty, e.w, e.h, e.id)) {
+                            // Found a clear direction - boost its weight significantly
+                            if (testDir === 'up') weights[0] += 20;
+                            else if (testDir === 'down') weights[1] += 20;
+                            else if (testDir === 'left') weights[2] += 20;
+                            else if (testDir === 'right') weights[3] += 20;
+                        }
+                    }
                 }
 
+                // Avoid other enemies - add negative weights for occupied paths
+                for (let otherId in this.enemies) {
+                    if (otherId === eid) continue;
+                    const other = this.enemies[otherId];
+                    if (other.hp <= 0) continue;
+                    
+                    const dx = other.x - e.x;
+                    const dy = other.y - e.y;
+                    
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        // Horizontal collision - avoid going same direction
+                        if (dx > 0) weights[3] -= 3; // right blocked
+                        else weights[2] -= 3; // left blocked
+                    } else {
+                        // Vertical collision
+                        if (dy > 0) weights[1] -= 3; // down blocked
+                        else weights[0] -= 3; // up blocked
+                    }
+                }
+                
                 // Weighted random pick
-                const total = weights.reduce((a, b) => a + b, 0);
+                let total = weights.reduce((a, b) => a + Math.max(0, b), 0);
+                if (total <= 0) total = 1; // Fallback
+                
                 let rand = Math.random() * total;
                 for (let i = 0; i < dirs.length; i++) {
-                    if (rand < weights[i]) {
+                    if (weights[i] > 0 && rand < weights[i]) {
                         e.dir = dirs[i];
                         break;
                     }
-                    rand -= weights[i];
+                    rand -= Math.max(0, weights[i]);
                 }
 
                 // Grid Snapping helper: alignment to 0.5 units helps path through narrow 1-tile bricks
@@ -434,8 +492,33 @@ const registerTankHandler = (io, socket, roomManager) => {
         if (room && room.tankState && room.tankState.players[socket.id]) {
             const tank = room.tankState.players[socket.id];
             if (tank.hp > 0 && room.tankState.status === 'playing') {
-                tank.x = x;
-                tank.y = y;
+                // Validate the movement - check for wall collisions and tank collisions
+                const dx = Math.abs(x - tank.x);
+                const dy = Math.abs(y - tank.y);
+                const maxMove = TANK_SPEED_BASIC * 2; // Allow some prediction buffer
+                
+                // If move is too large, it's likely cheating or lag - clamp it
+                let newX = x;
+                let newY = y;
+                if (dx > maxMove || dy > maxMove) {
+                    // Keep old position, just update direction
+                    newX = tank.x;
+                    newY = tank.y;
+                } else {
+                    // Validate wall collision
+                    if (!room.tankState.checkWallCollision(x, y, tank.w, tank.h, tank) &&
+                        !room.tankState.checkTankCollisions(x, y, tank.w, tank.h, tank.id)) {
+                        newX = x;
+                        newY = y;
+                    } else {
+                        // Can't move there, keep old position
+                        newX = tank.x;
+                        newY = tank.y;
+                    }
+                }
+                
+                tank.x = newX;
+                tank.y = newY;
                 tank.dir = dir;
             }
         }
@@ -453,15 +536,25 @@ const registerTankHandler = (io, socket, roomManager) => {
                 let cooldown = tank.starLevel >= 1 ? 200 : 300;
                 if (!tank.lastShootTime || now - tank.lastShootTime > cooldown) {
                     tank.lastShootTime = now;
+                    
+                    // Calculate bullet spawn position based on direction (from gun)
+                    let bx = x + tank.w/2 - 0.25;
+                    let by = y + tank.h/2 - 0.25;
+                    const barrelOffset = tank.w * 0.5;
+                    if (dir === 'up') by -= barrelOffset;
+                    else if (dir === 'down') by += barrelOffset;
+                    else if (dir === 'left') bx -= barrelOffset;
+                    else if (dir === 'right') bx += barrelOffset;
+                    
                     server.bullets.push({
                         ownerId: socket.id, isCPU: false,
-                        x: x + tank.w/2 - 0.25, y: y + tank.h/2 - 0.25,
+                        x: bx, y: by,
                         dir: dir,
                         type: tank.starLevel >= 1 ? 'fast' : 'basic',
                         speed: tank.starLevel >= 1 ? BULLET_SPEED_FAST : BULLET_SPEED_BASIC,
                         pierce: tank.starLevel >= 3
                     });
-                    socket.to(actualRoomId).emit(EVENTS.TANK_SHOOT, { ownerId: socket.id, x, y, dir });
+                    socket.to(actualRoomId).emit(EVENTS.TANK_SHOOT, { ownerId: socket.id, x: bx, y: by, dir });
                 }
             }
         }
