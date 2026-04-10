@@ -1,96 +1,70 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { socket } from '../../utils/socket';
+import { EVENTS } from '../../utils/constants';
 
 export default function TankLobby() {
     const navigate = useNavigate();
     const location = useLocation();
-    const [difficulty, setDifficulty] = useState(location.state?.difficulty || 'medium');
+    const { difficulty = 'medium' } = location.state || {};
+    
     const [inRoom, setInRoom] = useState(false);
     const [myRoom, setMyRoom] = useState('');
     const [playerCount, setPlayerCount] = useState(1);
     const [isConnected, setIsConnected] = useState(socket.connected);
 
-    const handleCreateRoom = useCallback(() => {
-        if (!socket.connected) return;
-        socket.emit('createRoom', { difficulty, gameType: 'tank' }, (res) => {
-            setMyRoom(res.roomId);
-            setInRoom(true);
-            setPlayerCount(1);
-        });
-    }, [difficulty]);
-
     useEffect(() => {
-        function onConnect() { setIsConnected(true); }
-        function onDisconnect() { setIsConnected(false); }
+        const onConnect = () => {
+            setIsConnected(true);
+            const roomId = `local_${socket.id}`;
+            setMyRoom(roomId);
+            setInRoom(true);
+            socket.emit(EVENTS.START_TANK_GAME, { roomId });
+        };
+        
+        const onDisconnect = () => setIsConnected(false);
 
         socket.on('connect', onConnect);
         socket.on('disconnect', onDisconnect);
 
-        // Auto create if requested
-        if (location.state?.autoCreate && !inRoom && !myRoom) {
-            if (socket.connected) {
-                handleCreateRoom();
-            }
+        if (socket.connected) {
+            onConnect();
         }
 
         return () => {
             socket.off('connect', onConnect);
             socket.off('disconnect', onDisconnect);
         };
-    }, [location.state, inRoom, myRoom, handleCreateRoom]);
+    }, []);
 
     useEffect(() => {
-        const handlePlayerJoined = ({ players }) => {
-            setPlayerCount(players);
-            if (players === 2) {
-                // Host initiates game start
-                socket.emit('startTankGame', { roomId: myRoom });
-            }
-        };
-
         const handleGameStarted = (data) => {
-            if (data.roomId === myRoom) {
-                navigate('/tank/game', { state: { mode: 'multiplayer', roomId: myRoom, difficulty, initialState: data } });
-            }
+            navigate('/tank/game', { state: { roomId: myRoom, mode: 'solo', difficulty } });
         };
 
-        socket.on('playerJoined', handlePlayerJoined);
-        socket.on('tankGameStarted', handleGameStarted);
-
+        socket.on(EVENTS.TANK_GAME_STARTED, handleGameStarted);
+        
         return () => {
-            socket.off('playerJoined', handlePlayerJoined);
-            socket.off('tankGameStarted', handleGameStarted);
+            socket.off(EVENTS.TANK_GAME_STARTED, handleGameStarted);
         };
-    }, [difficulty, navigate, myRoom]);
-
-    if (inRoom) {
-        return (
-            <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
-                <h2 style={{ userSelect: 'text', cursor: 'text' }}>Phòng: {myRoom}</h2>
-                <p>Độ khó: {difficulty.toUpperCase()}</p>
-                <p>Người chơi: {playerCount}/2</p>
-                {playerCount < 2 ? (
-                    <p style={{ color: 'var(--accent-color)', fontWeight: 600 }}>Đang chờ đối thủ...</p>
-                ) : (
-                    <p style={{ color: 'var(--success-color)', fontWeight: 600 }}>Bắt đầu trận đấu!</p>
-                )}
-                <button className="btn-secondary" style={{ marginTop: '20px', width: 'auto' }} onClick={() => {
-                    setInRoom(false);
-                    setMyRoom('');
-                    socket.emit('leaveRoom', myRoom);
-                    navigate('/tank');
-                }}>Rời phòng</button>
-            </div>
-        );
-    }
+    }, [myRoom, difficulty, navigate]);
 
     return (
-        <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
-            <h2>Đang tạo phòng...</h2>
-            <div className="loader" style={{ margin: '20px auto' }}></div>
-            {!isConnected && <p style={{ color: 'var(--error-color)' }}>⚠️ Mất kết nối server...</p>}
-            <button className="btn-secondary" style={{ marginTop: '1rem', width: 'auto' }} onClick={() => navigate('/tank')}>Hủy</button>
+        <div style={{
+            display: 'flex', justifyContent: 'center', alignItems: 'center',
+            width: '100vw', height: '100vh', background: 'radial-gradient(circle at center, #1a1a2e 0%, #05050a 100%)'
+        }}>
+            <div className="glass-panel" style={{
+                padding: '2rem', borderRadius: '20px', display: 'flex', flexDirection: 'column',
+                alignItems: 'center', gap: '1rem', maxWidth: '400px', textAlign: 'center'
+            }}>
+                <h2 style={{ color: '#ffd700', margin: 0 }}>TANK WARS</h2>
+                <p style={{ color: '#888' }}>Đang kết nối...</p>
+                <div className="loader" style={{ width: '30px', height: '30px', border: '3px solid #333', borderTopColor: '#ffd700', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                {!isConnected && <p style={{ color: '#ef4444' }}>⚠️ Mất kết nối server</p>}
+                <button className="btn-secondary" onClick={() => navigate('/tank')}>Hủy</button>
+            </div>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
     );
 }

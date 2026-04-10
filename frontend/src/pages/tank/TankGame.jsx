@@ -336,18 +336,18 @@ export default function TankGame() {
     const starLabel = ['●', '★', '★★', '★★★'];
 
     return (
-        <div style={{
+        <div className="full-page-mobile-scroll" style={{
             display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
-            width: '100vw', minHeight: '100vh', padding: '1rem',
+            width: '100vw', minHeight: '100vh', padding: '0.5rem',
             background: 'radial-gradient(circle at center, #1a1a2e 0%, #05050a 100%)',
             overflowY: 'auto', boxSizing: 'border-box'
         }}>
-            <div className="game-container" style={{
+            <div style={{
                 position: 'relative', display: 'flex', flexWrap: 'wrap',
-                padding: '1.5rem', gap: '1.5rem', alignItems: 'flex-start', justifyContent: 'center',
-                width: '100%', maxWidth: '1300px', borderRadius: '30px',
-                background: 'rgba(23, 23, 33, 0.8)', backdropFilter: 'blur(30px)',
-                border: '1px solid rgba(255, 255, 255, 0.1)', boxShadow: '0 40px 100px rgba(0,0,0,0.8)'
+                padding: '1.2rem', gap: '1.5rem', alignItems: 'stretch', justifyContent: 'center',
+                height: 'fit-content', maxHeight: '96vh', width: 'max-content', maxWidth: '98%',
+                borderRadius: '20px', background: 'rgba(23, 23, 33, 0.85)', backdropFilter: 'blur(25px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
             }}>
                 {/* LEFT: Info/Controls */}
                 <div style={{ flex: '1 1 240px', maxWidth: '300px', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
@@ -356,9 +356,8 @@ export default function TankGame() {
                         <div style={{ color: '#ffd700', fontSize: '0.7rem', fontWeight: 800 }}>BATTLE CITY CLONE</div>
                     </div>
                     
-                    <button onClick={() => navigate('/tank')} style={{
-                        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                        padding: '10px', borderRadius: '12px', color: '#fff', cursor: 'pointer',
+                    <button className="btn-secondary" onClick={() => navigate('/tank')} style={{
+                        padding: '10px', borderRadius: '12px',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                     }}>
                         <ArrowLeft size={18} /> THOÁT
