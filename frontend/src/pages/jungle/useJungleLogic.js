@@ -2,18 +2,25 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { socket } from '../../utils/socket';
 import { EVENTS } from '../../utils/constants';
 
-export function useJungleLogic(roomId, mode = 'multiplayer', difficulty = 'medium', onHintReceived) {
+export function useJungleLogic(roomId, mode = 'multiplayer', difficulty = 'medium', onHintReceived, onMoveMade, onPieceCaptured, onGameOver) {
     const [pieces, setPieces] = useState([]);
     const [turn, setTurn] = useState(null);
     const [selectedPiece, setSelectedPiece] = useState(null);
     const [validMoves, setValidMoves] = useState([]);
     const [gameOver, setGameOver] = useState(null);
     const [myId, setMyId] = useState(socket.id);
+    const myIdRef = useRef(socket.id);
+    const prevPiecesRef = useRef([]);
+
+    useEffect(() => {
+        myIdRef.current = myId;
+    }, [myId]);
 
     const initGame = useCallback((data) => {
         setPieces(data.pieces);
         setTurn(data.turn);
         setGameOver(null);
+        prevPiecesRef.current = data.pieces;
     }, []);
 
     useEffect(() => {
@@ -33,17 +40,33 @@ export function useJungleLogic(roomId, mode = 'multiplayer', difficulty = 'mediu
 
         socket.on(EVENTS.JUNGLE_GAME_STARTED, initGame);
         socket.on(EVENTS.JUNGLE_GAME_STATE, (data) => {
-            setPieces(data.pieces);
+            const prevPieces = prevPiecesRef.current;
+            const newPieces = data.pieces;
+            
+            if (prevPieces.length > 0) {
+                const capturedPiece = prevPieces.find(p => 
+                    !newPieces.find(np => np.x === p.x && np.y === p.y)
+                );
+                if (capturedPiece) {
+                    if (onPieceCaptured) onPieceCaptured(capturedPiece);
+                } else {
+                    if (onMoveMade) onMoveMade(false);
+                }
+            }
+            
+            prevPiecesRef.current = newPieces;
+            setPieces(newPieces);
             setTurn(data.turn);
         });
         socket.on(EVENTS.JUNGLE_PIECE_CAPTURED, (data) => {
-            // Animation trigger could be here
+            if (onPieceCaptured) onPieceCaptured(data.piece);
         });
         socket.on(EVENTS.JUNGLE_HINT_RECEIVED, (move) => {
             if (onHintReceived) onHintReceived(move);
         });
         socket.on(EVENTS.JUNGLE_GAME_OVER, (data) => {
             setGameOver(data.winner);
+            if (onGameOver) onGameOver(data.winner);
         });
 
         return () => {
@@ -54,7 +77,7 @@ export function useJungleLogic(roomId, mode = 'multiplayer', difficulty = 'mediu
             socket.off(EVENTS.JUNGLE_GAME_OVER);
             socket.off(EVENTS.JUNGLE_HINT_RECEIVED);
         };
-    }, [roomId, mode, difficulty, initGame, onHintReceived]);
+    }, [roomId, mode, difficulty, initGame, onHintReceived, onMoveMade, onPieceCaptured, onGameOver]);
 
     const isRiver = (x, y) => {
         const rivers = [
@@ -104,7 +127,7 @@ export function useJungleLogic(roomId, mode = 'multiplayer', difficulty = 'mediu
             // 4. Capture rules
             const target = pieces.find(p => p.x === nx && p.y === ny);
             if (target) {
-                if (target.ownerId === myId) return; // Own piece
+                if (target.ownerId === myIdRef.current) return; // Own piece
                 
                 // Rat in water cannot capture piece on land
                 if (isRiver(piece.x, piece.y) && !isRiver(nx, ny)) return;
@@ -132,14 +155,15 @@ export function useJungleLogic(roomId, mode = 'multiplayer', difficulty = 'mediu
         return moves;
     };
 
-    const handleSelect = (x, y) => {
-        if (turn !== myId || gameOver) return;
+    const handleSelect = (x, y, playSelectSound) => {
+        if (turn !== myIdRef.current || gameOver) return;
 
         const piece = pieces.find(p => p.x === x && p.y === y);
         
-        if (piece && piece.ownerId === myId) {
+        if (piece && piece.ownerId === myIdRef.current) {
             setSelectedPiece(piece);
             setValidMoves(getValidMoves(piece));
+            if (playSelectSound) playSelectSound();
         } else if (selectedPiece) {
             const isMoveValid = validMoves.some(m => m.x === x && m.y === y);
             if (isMoveValid) {

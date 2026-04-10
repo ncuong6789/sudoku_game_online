@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useJungleLogic } from './useJungleLogic';
+import { useJungleSounds } from './useJungleSounds';
 import { Swords, Trophy, Activity, ArrowLeft, RotateCcw, RefreshCw, HelpCircle } from 'lucide-react';
 import { socket } from '../../utils/socket';
 import { EVENTS } from '../../utils/constants';
@@ -31,6 +32,14 @@ const DENS = [
     { x: 3, y: 8, owner: 1 }
 ];
 
+const ANIMAL_ICONS = {
+    1: '🐀', 2: '🐱', 3: '🐕', 4: '🐺', 5: '🐆', 6: '🐅', 7: '🦁', 8: '🐘'
+};
+
+const ANIMAL_COLORS = {
+    1: '#9ca3af', 2: '#f97316', 3: '#a855f7', 4: '#ef4444', 5: '#eab308', 6: '#f59e0b', 7: '#eab308', 8: '#64748b'
+};
+
 export default function JungleGame() {
     const location = useLocation();
     const navigate = useNavigate();
@@ -39,10 +48,19 @@ export default function JungleGame() {
     const canvasRef = useRef(null);
     const [activeHint, setActiveHint] = useState(null);
     
+    const { playSelect, playMove, playCapture, playWin, playLose } = useJungleSounds();
+
     const { pieces, turn, selectedPiece, validMoves, gameOver, handleSelect, myId } = useJungleLogic(
-        roomId, mode, difficulty, (move) => {
+        roomId, mode, difficulty, 
+        (move) => {
             setActiveHint(move);
-            setTimeout(() => setActiveHint(null), 3000); // Auto clear hint
+            setTimeout(() => setActiveHint(null), 3000);
+        },
+        (isJump) => playMove(isJump),
+        () => playCapture(),
+        (winner) => {
+            if (winner === myId) playWin();
+            else playLose();
         }
     );
 
@@ -67,8 +85,12 @@ export default function JungleGame() {
         let frameId;
 
         const render = (ts) => {
-            // 1. Clear & Background
-            ctx.fillStyle = '#0f172a';
+            // 1. Clear & Background with gradient
+            const bgGrad = ctx.createLinearGradient(0, 0, MAP_SIZE_W, MAP_SIZE_H);
+            bgGrad.addColorStop(0, '#0f172a');
+            bgGrad.addColorStop(0.5, '#1e293b');
+            bgGrad.addColorStop(1, '#0f172a');
+            ctx.fillStyle = bgGrad;
             ctx.fillRect(0, 0, MAP_SIZE_W, MAP_SIZE_H);
 
             // 2. Draw Grid & Special Tiles
@@ -77,35 +99,82 @@ export default function JungleGame() {
                     const tx = getRenderX(x) * TILE_SIZE;
                     const ty = getRenderY(y) * TILE_SIZE;
 
-                    // Base Tile
-                    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+                    // Base Tile - subtle grid
+                    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
                     ctx.lineWidth = 1;
                     ctx.strokeRect(tx, ty, TILE_SIZE, TILE_SIZE);
 
-                    // Rivers
-                    if (RIVERS.some(r => r.x === x && r.y === y)) {
-                        const pulse = 0.2 + 0.1 * Math.sin(ts / 500);
-                        ctx.fillStyle = `rgba(59, 130, 246, ${pulse})`;
-                        ctx.fillRect(tx + 2, ty + 2, TILE_SIZE - 4, TILE_SIZE - 4);
-                        ctx.strokeStyle = 'rgba(96, 165, 250, 0.3)';
-                        ctx.strokeRect(tx + 4, ty + 4, TILE_SIZE - 8, TILE_SIZE - 8);
+                    // Grass pattern for land tiles
+                    if (!RIVERS.some(r => r.x === x && r.y === y)) {
+                        ctx.fillStyle = 'rgba(34, 197, 94, 0.03)';
+                        ctx.fillRect(tx + 1, ty + 1, TILE_SIZE - 2, TILE_SIZE - 2);
                     }
 
-                    // Traps
+                    // Rivers - enhanced water effect
+                    if (RIVERS.some(r => r.x === x && r.y === y)) {
+                        const waveOffset = Math.sin(ts / 400 + x * 0.5 + y * 0.3) * 0.15;
+                        const waterGrad = ctx.createLinearGradient(tx, ty, tx + TILE_SIZE, ty + TILE_SIZE);
+                        waterGrad.addColorStop(0, `rgba(59, 130, 246, ${0.4 + waveOffset})`);
+                        waterGrad.addColorStop(0.5, `rgba(37, 99, 235, ${0.5 + waveOffset})`);
+                        waterGrad.addColorStop(1, `rgba(59, 130, 246, ${0.4 + waveOffset})`);
+                        ctx.fillStyle = waterGrad;
+                        ctx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
+                        
+                        // Water wave lines
+                        ctx.strokeStyle = 'rgba(147, 197, 253, 0.3)';
+                        ctx.lineWidth = 1;
+                        for (let w = 0; w < 3; w++) {
+                            const wy = ty + 15 + w * 20 + Math.sin(ts / 300 + w) * 3;
+                            ctx.beginPath();
+                            ctx.moveTo(tx + 5, wy);
+                            ctx.lineTo(tx + TILE_SIZE - 5, wy);
+                            ctx.stroke();
+                        }
+                    }
+
+                    // Traps - enhanced trap visualization
                     if (TRAPS.some(t => t.x === x && t.y === y)) {
-                        ctx.fillStyle = 'rgba(248, 113, 113, 0.1)';
-                        ctx.fillRect(tx + 5, ty + 5, TILE_SIZE - 10, TILE_SIZE - 10);
-                        ctx.strokeStyle = 'rgba(248, 113, 113, 0.4)';
-                        ctx.setLineDash([5, 5]);
-                        ctx.strokeRect(tx + 8, ty + 8, TILE_SIZE - 16, TILE_SIZE - 16);
+                        ctx.fillStyle = 'rgba(220, 38, 38, 0.15)';
+                        ctx.fillRect(tx + 2, ty + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                        
+                        ctx.font = '20px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillStyle = 'rgba(248, 113, 113, 0.6)';
+                        ctx.fillText('💀', tx + TILE_SIZE/2, ty + TILE_SIZE/2);
+                        
+                        const trapPulse = 0.4 + 0.2 * Math.sin(ts / 300);
+                        ctx.strokeStyle = `rgba(248, 113, 113, ${trapPulse})`;
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([4, 4]);
+                        ctx.strokeRect(tx + 6, ty + 6, TILE_SIZE - 12, TILE_SIZE - 12);
                         ctx.setLineDash([]);
                     }
 
-                    // Dens
+                    // Dens - enhanced den visualization
                     if (DENS.some(d => d.x === x && d.y === y)) {
-                        const isWinDen = DENS.find(d => d.x === x && d.y === y).owner !== 0;
-                        ctx.fillStyle = isWinDen ? 'rgba(74, 222, 128, 0.15)' : 'rgba(255, 255, 255, 0.05)';
+                        const den = DENS.find(d => d.x === x && d.y === y);
+                        const isWinDen = den.owner !== 0;
+                        const denGrad = ctx.createRadialGradient(
+                            tx + TILE_SIZE/2, ty + TILE_SIZE/2, 0,
+                            tx + TILE_SIZE/2, ty + TILE_SIZE/2, TILE_SIZE/2
+                        );
+                        if (isWinDen) {
+                            denGrad.addColorStop(0, 'rgba(74, 222, 128, 0.3)');
+                            denGrad.addColorStop(1, 'rgba(74, 222, 128, 0.1)');
+                        } else {
+                            denGrad.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
+                            denGrad.addColorStop(1, 'rgba(255, 255, 255, 0.05)');
+                        }
+                        ctx.fillStyle = denGrad;
                         ctx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
+                        
+                        ctx.font = '24px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillStyle = isWinDen ? '#4ade80' : '#94a3b8';
+                        ctx.fillText('🏠', tx + TILE_SIZE/2, ty + TILE_SIZE/2);
+                        
                         ctx.strokeStyle = isWinDen ? '#4ade80' : '#fff';
                         ctx.lineWidth = 2;
                         ctx.beginPath();
@@ -115,79 +184,99 @@ export default function JungleGame() {
                 }
             }
 
-            // 3. Draw Valid Move Indicators
+            // 3. Draw Valid Move Indicators - enhanced
             validMoves.forEach(m => {
                 const tx = getRenderX(m.x) * TILE_SIZE;
                 const ty = getRenderY(m.y) * TILE_SIZE;
-                ctx.fillStyle = 'rgba(74, 222, 128, 0.3)';
+                
+                // Pulsing dot
+                const pulse = 0.3 + 0.15 * Math.sin(ts / 200);
+                ctx.fillStyle = `rgba(74, 222, 128, ${pulse})`;
                 ctx.beginPath();
-                ctx.arc(tx + TILE_SIZE/2, ty + TILE_SIZE/2, 8, 0, Math.PI * 2);
+                ctx.arc(tx + TILE_SIZE/2, ty + TILE_SIZE/2, 10, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Inner dot
+                ctx.fillStyle = 'rgba(74, 222, 128, 0.8)';
+                ctx.beginPath();
+                ctx.arc(tx + TILE_SIZE/2, ty + TILE_SIZE/2, 5, 0, Math.PI * 2);
                 ctx.fill();
             });
 
-            // 4. Draw Pieces
+            // 4. Draw Pieces with enhanced visuals
             pieces.forEach(p => {
                 const tx = getRenderX(p.x) * TILE_SIZE;
                 const ty = getRenderY(p.y) * TILE_SIZE;
                 const isSelected = selectedPiece && selectedPiece.x === p.x && selectedPiece.y === p.y;
-                const isMyTurn = turn === myId;
                 const isMyPiece = p.ownerId === myId;
 
                 ctx.save();
                 ctx.translate(tx + TILE_SIZE/2, ty + TILE_SIZE/2);
 
-                // Glow effect for selected or playable piece
+                // Animated selection ring
                 if (isSelected) {
-                    ctx.shadowBlur = 20;
-                    ctx.shadowColor = p.ownerId === myId ? '#4ade80' : '#60a5fa';
-                } else {
-                    ctx.shadowBlur = 5;
-                    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                    const ringPulse = 1 + Math.sin(ts / 150) * 0.15;
+                    ctx.shadowBlur = 25;
+                    ctx.shadowColor = isMyPiece ? '#4ade80' : '#60a5fa';
+                    
+                    ctx.strokeStyle = isMyPiece ? 'rgba(74, 222, 128, 0.5)' : 'rgba(96, 165, 250, 0.5)';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, (TILE_SIZE/2 - 2) * ringPulse, 0, Math.PI * 2);
+                    ctx.stroke();
                 }
 
-                // Piece Base (3D Coin Style)
-                const gradOuter = ctx.createLinearGradient(-30, -30, 30, 30);
-                gradOuter.addColorStop(0, p.ownerId === myId ? '#166534' : '#1e3a8a');
-                gradOuter.addColorStop(1, p.ownerId === myId ? '#052e16' : '#172554');
+                // Piece base with 3D gradient
+                const pieceGrad = ctx.createRadialGradient(-5, -5, 0, 0, 0, TILE_SIZE/2 - 4);
+                if (isMyPiece) {
+                    pieceGrad.addColorStop(0, '#22c55e');
+                    pieceGrad.addColorStop(0.7, '#166534');
+                    pieceGrad.addColorStop(1, '#052e16');
+                } else {
+                    pieceGrad.addColorStop(0, '#3b82f6');
+                    pieceGrad.addColorStop(0.7, '#1e3a8a');
+                    pieceGrad.addColorStop(1, '#172554');
+                }
                 
-                ctx.fillStyle = gradOuter;
+                ctx.fillStyle = pieceGrad;
                 ctx.beginPath();
-                ctx.arc(0, 0, TILE_SIZE/2 - 6, 0, Math.PI * 2);
+                ctx.arc(0, 0, TILE_SIZE/2 - 4, 0, Math.PI * 2);
                 ctx.fill();
                 
-                ctx.strokeStyle = isSelected ? '#fff' : (p.ownerId === myId ? '#4ade80' : '#60a5fa');
+                // Border
+                ctx.strokeStyle = isSelected ? '#fff' : (isMyPiece ? '#4ade80' : '#60a5fa');
                 ctx.lineWidth = isSelected ? 3 : 2;
                 ctx.stroke();
 
-                // Inner Ring (Gold/Silver Trim)
-                ctx.strokeStyle = p.ownerId === myId ? 'rgba(74, 222, 128, 0.4)' : 'rgba(96, 165, 250, 0.4)';
+                // Inner glow ring
+                ctx.strokeStyle = isMyPiece ? 'rgba(74, 222, 128, 0.3)' : 'rgba(96, 165, 250, 0.3)';
+                ctx.lineWidth = 1;
                 ctx.beginPath();
-                ctx.arc(0, 0, TILE_SIZE/2 - 12, 0, Math.PI * 2);
+                ctx.arc(0, 0, TILE_SIZE/2 - 10, 0, Math.PI * 2);
                 ctx.stroke();
 
-                // Animal Icon (Emoji/SVG)
-                const icons = { 1: '🐀', 2: '🐱', 3: '🐕', 4: '🐺', 5: '🐆', 6: '🐅', 7: '🦁', 8: '🐘' };
-                ctx.shadowBlur = 4;
+                // Animal icon with color tint
+                ctx.shadowBlur = 8;
                 ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                ctx.font = `${TILE_SIZE/2.2}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+                ctx.font = `${TILE_SIZE/2.5}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                // Adjusting Y-offset to make it look centered in the coin
-                ctx.fillText(icons[p.type], 0, 3);
+                ctx.fillText(ANIMAL_ICONS[p.type], 0, 2);
 
-                // Rank Badge
-                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                // Rank badge with animation
+                const badgePulse = isSelected ? 1 + Math.sin(ts / 200) * 0.1 : 1;
+                ctx.fillStyle = 'rgba(0,0,0,0.7)';
                 ctx.beginPath();
-                ctx.arc(TILE_SIZE/4, -TILE_SIZE/4, 8, 0, Math.PI * 2);
+                ctx.arc(TILE_SIZE/4 * badgePulse, -TILE_SIZE/4 * badgePulse, 10, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.fillStyle = '#fff';
-                ctx.font = 'bold 10px Inter';
+                ctx.font = 'bold 11px Inter, sans-serif';
                 ctx.fillText(p.type, TILE_SIZE/4, -TILE_SIZE/4 + 1);
 
                 ctx.restore();
             });
 
-            // 5. Draw Hint (if any)
+            // 5. Draw Hint with animation
             if (activeHint) {
                 const { from, to } = activeHint;
                 const fx = getRenderX(from.x) * TILE_SIZE + TILE_SIZE/2;
@@ -195,14 +284,27 @@ export default function JungleGame() {
                 const tx = getRenderX(to.x) * TILE_SIZE + TILE_SIZE/2;
                 const ty = getRenderY(to.y) * TILE_SIZE + TILE_SIZE/2;
 
+                // Animated dashed line
+                const dashOffset = (ts / 50) % 20;
                 ctx.strokeStyle = '#fbbf24';
                 ctx.lineWidth = 4;
                 ctx.setLineDash([10, 5]);
+                ctx.lineDashOffset = -dashOffset;
                 ctx.beginPath();
                 ctx.moveTo(fx, fy);
                 ctx.lineTo(tx, ty);
                 ctx.stroke();
                 ctx.setLineDash([]);
+                
+                // Arrow head
+                const angle = Math.atan2(ty - fy, tx - fx);
+                ctx.fillStyle = '#fbbf24';
+                ctx.beginPath();
+                ctx.moveTo(tx, ty);
+                ctx.lineTo(tx - 15 * Math.cos(angle - Math.PI/6), ty - 15 * Math.sin(angle - Math.PI/6));
+                ctx.lineTo(tx - 15 * Math.cos(angle + Math.PI/6), ty - 15 * Math.sin(angle + Math.PI/6));
+                ctx.closePath();
+                ctx.fill();
             }
 
             frameId = requestAnimationFrame(render);
@@ -220,7 +322,13 @@ export default function JungleGame() {
         const rawY = Math.floor(((e.clientY - rect.top) * scaleY) / TILE_SIZE);
         const x = myId === 1 ? 6 - rawX : rawX;
         const y = myId === 1 ? rawY : 8 - rawY;
-        handleSelect(x, y);
+        
+        const piece = pieces.find(p => p.x === x && p.y === y);
+        if (piece && piece.ownerId === myId) {
+            handleSelect(x, y, playSelect);
+        } else {
+            handleSelect(x, y);
+        }
     };
 
     const isMyTurn = turn === myId;
