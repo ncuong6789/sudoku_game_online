@@ -98,12 +98,13 @@ export default function TetrisGame() {
     const { 
         stage, nextPieces, score, rows, level, gameOver,
         startGame, movePlayer, dropPlayer, playerRotate, hardDrop, resumeDrop,
-        setGameOver
+        setGameOver, setDropTime, getBaseDropTime
     } = useTetris(pieceSequence, difficulty, playClearLineSound);
     
     // Pause state
     const [isPaused, setIsPaused] = useState(false);
     const [showPauseMenu, setShowPauseMenu] = useState(false);
+    const [isStarted, setIsStarted] = useState(false);
     
     const togglePause = useCallback(() => {
         if (gameOver || !isStarted) return;
@@ -124,8 +125,6 @@ export default function TetrisGame() {
     const [opponentStage, setOpponentStage] = useState(Array.from(Array(STAGE_HEIGHT), () => Array(STAGE_WIDTH).fill([0, 'clear'])));
     const [opponentScore, setOpponentScore] = useState(0);
     const [gameResult, setGameResult] = useState(''); // 'Win', 'Lose', 'Draw'
-    
-    const [isStarted, setIsStarted] = useState(false);
 
     // Keyboard handlers
     const move = useCallback((e) => {

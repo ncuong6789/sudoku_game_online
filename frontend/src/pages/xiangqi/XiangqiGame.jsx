@@ -36,7 +36,8 @@ export default function XiangqiGame() {
         inCheckColor,
         selectPiece,
         movePiece,
-        makeAIMove
+        makeAIMove,
+        validMoves
     } = useXiangqiLogic('r', {
         onClick: playXiangqiClickSound,
         onMove: playXiangqiMoveSound,
@@ -54,7 +55,8 @@ export default function XiangqiGame() {
             }, 100);
             return () => clearTimeout(timer);
         }
-    }, [turn, mode, isGameOver, myColor, makeAIMove]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [turn, mode, isGameOver, myColor]);
 
     // Game Over Sound
     useEffect(() => {
@@ -130,10 +132,11 @@ export default function XiangqiGame() {
                 <div style={{ flex: '1 1 auto', display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: 0, minHeight: 0 }}>
                     <div style={{
                         position: 'relative',
-                        width: '100%',
-                        height: '100%',
-                        maxHeight: '100%',
-                        aspectRatio: '9/10', // Xiangqi ratio
+                        width: '100vw',
+                        maxWidth: 'calc(100% - 20px)',
+                        maxHeight: 'calc(100% - 20px)',
+                        aspectRatio: '9/10', // True Xiangqi ratio securely enforced on content
+                        boxSizing: 'content-box',
                         backgroundColor: '#e6c28f', // Wooden board color
                         border: '10px solid #8b5a2b', // Darker wood frame
                         borderRadius: '4px',

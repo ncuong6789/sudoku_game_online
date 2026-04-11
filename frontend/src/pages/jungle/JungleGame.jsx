@@ -52,14 +52,14 @@ const ANIMAL_COLORS = {
 };
 
 const ANIMAL_SYMBOLS = {
-    1: { char: 'R', name: 'Rat', sound: 'squeak' },
-    2: { char: 'C', name: 'Cat', sound: 'meow' },
-    3: { char: 'D', name: 'Dog', sound: 'bark' },
-    4: { char: 'W', name: 'Wolf', sound: 'howl' },
-    5: { char: 'L', name: 'Leopard', sound: 'growl' },
-    6: { char: 'T', name: 'Tiger', sound: 'roar' },
-    7: { char: 'S', name: 'Lion', sound: 'roar' },
-    8: { char: 'E', name: 'Elephant', sound: 'trumpet' }
+    1: { char: '🐭', name: 'Rat', sound: 'squeak' },
+    2: { char: '🐱', name: 'Cat', sound: 'meow' },
+    3: { char: '🐶', name: 'Dog', sound: 'bark' },
+    4: { char: '🐺', name: 'Wolf', sound: 'howl' },
+    5: { char: '🐆', name: 'Leopard', sound: 'growl' },
+    6: { char: '🐯', name: 'Tiger', sound: 'roar' },
+    7: { char: '🦁', name: 'Lion', sound: 'roar' },
+    8: { char: '🐘', name: 'Elephant', sound: 'trumpet' }
 };
 
 export default function JungleGame() {
@@ -283,17 +283,16 @@ export default function JungleGame() {
                 ctx.arc(0, 0, TILE_SIZE/2 - 10, 0, Math.PI * 2);
                 ctx.stroke();
 
-                // Animal symbol with modern badge style
-                ctx.shadowBlur = 4;
-                ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                ctx.font = `bold ${TILE_SIZE/2.2}px "Inter", "Segoe UI", sans-serif`;
+                // Animal symbol with modern emoji style
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                ctx.font = `normal ${TILE_SIZE/1.8}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 
-                // Draw letter in badge
+                // Draw emoji in badge
                 const symbol = ANIMAL_SYMBOLS[p.type];
-                ctx.fillStyle = ANIMAL_COLORS[p.type];
-                ctx.fillText(symbol?.char || p.type, 0, 2);
+                ctx.fillText(symbol?.char || p.type, 0, 3);
 
                 // Rank badge with animation
                 const badgePulse = isSelected ? 1 + Math.sin(ts / 200) * 0.1 : 1;
@@ -416,17 +415,17 @@ export default function JungleGame() {
                                 padding: '6px', borderRadius: '6px'
                             }}>
                                 <div style={{ 
-                                    width: '24px', height: '24px', borderRadius: '4px', 
-                                    background: ANIMAL_COLORS[v], display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    fontWeight: 700, fontSize: '0.75rem', color: '#fff'
+                                    width: '28px', height: '28px', borderRadius: '6px', 
+                                    background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    fontSize: '1.2rem', boxShadow: 'inset 0 0 5px rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)'
                                 }}>
                                     {ANIMAL_SYMBOLS[v]?.char || v}
                                 </div>
                                 <div style={{ flex: 1 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span style={{ color: '#fff', fontWeight: 600, fontSize: '0.8rem' }}>{PIECE_NAMES[v]}</span>
-                                        {v === 8 && <span style={{ fontSize: '0.6rem', color: '#ef4444', background: 'rgba(239,68,68,0.2)', padding: '1px 4px', borderRadius: '3px' }}>Yếu</span>}
-                                        {v === 1 && <span style={{ fontSize: '0.6rem', color: '#4ade80', background: 'rgba(74,222,128,0.2)', padding: '1px 4px', borderRadius: '3px' }}>Mạnh</span>}
+                                        <span style={{ color: '#fff', fontWeight: 600, fontSize: '0.85rem' }}>{PIECE_NAMES[v]}</span>
+                                        {v === 8 && <span style={{ fontSize: '0.65rem', color: '#ef4444', background: 'rgba(239,68,68,0.2)', padding: '2px 6px', borderRadius: '4px' }}>Yếu với 🐭</span>}
+                                        {v === 1 && <span style={{ fontSize: '0.65rem', color: '#4ade80', background: 'rgba(74,222,128,0.2)', padding: '2px 6px', borderRadius: '4px' }}>Ăn được 🐘</span>}
                                     </div>
                                 </div>
                             </div>

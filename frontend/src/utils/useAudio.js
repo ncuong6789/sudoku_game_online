@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 
 // Tạo 1 AudioContext chung cho cả app để tiết kiệm bộ nhớ
 let audioCtx;
@@ -21,6 +21,29 @@ const playTone = (ctx, osc, gainParams, volume, duration) => {
 };
 
 export const useAudio = () => {
+    const activeAudios = useRef(new Set());
+    
+    useEffect(() => {
+        const audios = activeAudios.current;
+        return () => {
+            audios.forEach(audio => { 
+                try { audio.pause(); audio.src = ''; } catch(e){} 
+            });
+            audios.clear();
+        };
+    }, []);
+
+    const playHTMLAudio = useCallback((path, vol = 1) => {
+        try {
+            const audio = new window.Audio(path);
+            audio.volume = vol;
+            activeAudios.current.add(audio);
+            audio.play().catch(()=>{});
+            audio.onended = () => activeAudios.current.delete(audio);
+            return audio;
+        } catch(e) { return null; }
+    }, []);
+
     const playWinSound = useCallback(() => {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -46,12 +69,8 @@ export const useAudio = () => {
     }, []);
 
     const playLoseSound = useCallback(() => {
-        try {
-            const audio = new Audio('/lose.mp3');
-            audio.currentTime = 0;
-            audio.play().catch(() => {});
-        } catch(e) {}
-    }, []);
+        playHTMLAudio('/lose.mp3');
+    }, [playHTMLAudio]);
 
     const playClearLineSound = useCallback(() => {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -183,9 +202,7 @@ export const useAudio = () => {
         osc.stop(now + 0.1);
     }, []);
 
-    const playPacmanStartSound = useCallback(() => {
-        try { new window.Audio('/pacman_audio/gs_start.mp3').play().catch(()=>{}); } catch(e){}
-    }, []);
+    const playPacmanStartSound = useCallback(() => playHTMLAudio('/pacman_audio/gs_start.mp3'), [playHTMLAudio]);
 
     const playPacmanWakaSound = useCallback(() => {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -241,9 +258,7 @@ export const useAudio = () => {
         osc.stop(now + 0.2);
     }, []);
 
-    const playPacmanDieSound = useCallback(() => {
-        try { new window.Audio('/pacman_audio/gs_pacmandies.mp3').play().catch(()=>{}); } catch(e){}
-    }, []);
+    const playPacmanDieSound = useCallback(() => playHTMLAudio('/pacman_audio/gs_pacmandies.mp3'), [playHTMLAudio]);
 
     const playJungleMoveSound = useCallback(() => {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -379,13 +394,13 @@ export const useAudio = () => {
         });
     }, []);
 
-    const playXiangqiClickSound = useCallback(() => { try { const a = new window.Audio('/xiangqi_audio/click.wav'); a.volume = 0.6; a.play().catch(()=>{}); } catch(e){} }, []);
-    const playXiangqiMoveSound = useCallback(() => { try { const a = new window.Audio('/xiangqi_audio/move.wav'); a.volume = 0.8; a.play().catch(()=>{}); } catch(e){} }, []);
-    const playXiangqiCaptureSound = useCallback(() => { try { const a = new window.Audio('/xiangqi_audio/capture.wav'); a.volume = 0.9; a.play().catch(()=>{}); } catch(e){} }, []);
-    const playXiangqiCheckSound = useCallback(() => { try { const a = new window.Audio('/xiangqi_audio/check.wav'); a.volume = 0.9; a.play().catch(()=>{}); } catch(e){} }, []);
-    const playXiangqiIllegalSound = useCallback(() => { try { const a = new window.Audio('/xiangqi_audio/illegal.wav'); a.volume = 0.7; a.play().catch(()=>{}); } catch(e){} }, []);
-    const playXiangqiWinSound = useCallback(() => { try { const a = new window.Audio('/xiangqi_audio/win.wav'); a.volume = 0.8; a.play().catch(()=>{}); } catch(e){} }, []);
-    const playXiangqiLossSound = useCallback(() => { try { const a = new window.Audio('/xiangqi_audio/loss.wav'); a.volume = 0.8; a.play().catch(()=>{}); } catch(e){} }, []);
+    const playXiangqiClickSound = useCallback(() => playHTMLAudio('/xiangqi_audio/click.wav', 0.6), [playHTMLAudio]);
+    const playXiangqiMoveSound = useCallback(() => playHTMLAudio('/xiangqi_audio/move.wav', 0.8), [playHTMLAudio]);
+    const playXiangqiCaptureSound = useCallback(() => playHTMLAudio('/xiangqi_audio/capture.wav', 0.9), [playHTMLAudio]);
+    const playXiangqiCheckSound = useCallback(() => playHTMLAudio('/xiangqi_audio/check.wav', 0.9), [playHTMLAudio]);
+    const playXiangqiIllegalSound = useCallback(() => playHTMLAudio('/xiangqi_audio/illegal.wav', 0.7), [playHTMLAudio]);
+    const playXiangqiWinSound = useCallback(() => playHTMLAudio('/xiangqi_audio/win.wav', 0.8), [playHTMLAudio]);
+    const playXiangqiLossSound = useCallback(() => playHTMLAudio('/xiangqi_audio/loss.wav', 0.8), [playHTMLAudio]);
 
     return { 
         playWinSound, playLoseSound, playClearLineSound, 

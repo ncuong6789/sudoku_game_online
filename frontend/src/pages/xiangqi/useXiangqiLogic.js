@@ -276,7 +276,7 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}) => {
 
     const makeAIMove = (color) => {
         if (isGameOver) return;
-        getBestMoveAsync(board, color, getLegalMoves, cloneBoard, isCheck, isKingsFacing, 3).then(chosenMove => {
+        getBestMoveAsync(board, color, getLegalMoves, cloneBoard, isCheck, isKingsFacing, 2).then(chosenMove => {
             if (!chosenMove) {
                 return; // Let checkWinCondition handle game over via hasAnyLegalMove
             }

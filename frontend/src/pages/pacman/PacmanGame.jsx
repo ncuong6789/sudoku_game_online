@@ -134,8 +134,8 @@ export default function PacmanGame() {
         <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100vw', height: '100vh', padding: '1rem', boxSizing: 'border-box' }}>
             <div className="glass-panel" style={{ 
                 position: 'relative', 
-                width: 'max-content',
-                maxWidth: '98%',
+                width: '100%',
+                maxWidth: '900px',
                 height: 'fit-content',
                 maxHeight: '96vh',
                 display: 'flex', 
@@ -148,85 +148,16 @@ export default function PacmanGame() {
                 overflow: 'hidden',
                 boxSizing: 'border-box'
             }}>
-            
-            {/* ── TRÁI: INFO ── */}
-            <div style={{
-                flex: '0 0 220px',
-                width: '220px',
-                display: 'flex',
-                flexDirection: 'column',
-                maxHeight: '100%',
-                overflow: 'hidden',
-                background: 'rgba(255,255,255,0.03)',
-                borderRadius: '16px',
-                border: '1px solid rgba(255,255,255,0.08)',
-                padding: '1rem',
-                boxSizing: 'border-box'
-            }}>
-                <h3 style={{ margin: '0 0 12px 0', fontSize: '0.95rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>🎮</span> Thông tin
-                </h3>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, overflowY: 'auto' }}>
-                    <div style={{ padding: '12px', background: 'rgba(251,191,36,0.1)', borderRadius: '10px', border: '1px solid rgba(251,191,36,0.2)', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Score</div>
-                        <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#fbbf24' }}>{score}</div>
-                    </div>
-                    
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                        <Heart size={20} color={lives > 0 ? '#ef4444' : '#374151'} fill={lives > 0 ? '#ef4444' : 'none'} />
-                        <Heart size={20} color={lives > 1 ? '#ef4444' : '#374151'} fill={lives > 1 ? '#ef4444' : 'none'} />
-                        <Heart size={20} color={lives > 2 ? '#ef4444' : '#374151'} fill={lives > 2 ? '#ef4444' : 'none'} />
-                    </div>
-
-                    <div style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '4px' }}>
-                            <span style={{ color: 'var(--text-secondary)' }}>Map</span>
-                            <span style={{ color: '#fff', fontWeight: 600 }}>{mapType}</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '4px' }}>
-                            <span style={{ color: 'var(--text-secondary)' }}>Độ khó</span>
-                            <span style={{ fontWeight: 700, color: difficulty === 'hard' ? '#ef4444' : '#f59e0b' }}>
-                                {difficulty === 'hard' ? '🔥 Khó' : '⚡ TB'}
-                            </span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
-                            <span style={{ color: 'var(--text-secondary)' }}>Chấm</span>
-                            <span style={{ color: '#fbbf24', fontWeight: 600 }}>{dots.size}</span>
-                        </div>
-                    </div>
-
-                    <div style={{ padding: '8px', background: 'rgba(96,165,250,0.1)', borderRadius: '8px', border: '1px solid rgba(96,165,250,0.2)' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#60b5ff', fontWeight: 600, marginBottom: '4px' }}>👻 Ghosts</div>
-                        {ghosts.map(g => (
-                            <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem', marginBottom: '3px' }}>
-                                <GhostArt color={g.color} dir={g.dir} state={g.state} frightenedFlash={false} size='16px' />
-                                <span style={{ color: 'var(--text-secondary)', flex: 1 }}>{g.id}</span>
-                                <span style={{ fontSize: '0.6rem' }}>
-                                    {g.state === 'frightened' ? '😱' : g.state === 'dead' ? '💀' : '🎯'}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                    
-                    {frightenedTimer > 0 && (
-                        <div style={{ padding: '8px', textAlign: 'center', borderRadius: '8px', border: '1px solid rgba(29,78,216,0.5)', background: 'rgba(29,78,216,0.1)' }}>
-                            <div style={{ fontSize: '0.65rem', color: '#93c5fd' }}>⚡ POWER</div>
-                            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#60b5fa' }}>{frightenedTimer}</div>
-                        </div>
-                    )}
-                </div>
-            </div>
-
             {/* ── GIỮA: BOARD ── */}
             <div style={{
                 flex: '1 1 auto',
-                minWidth: '320px',
+                minWidth: 0,
+                minHeight: 0,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                maxHeight: '100%'
+                padding: '0'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '10px', padding: '8px 16px', background: 'rgba(0,0,0,0.3)', borderRadius: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -242,8 +173,11 @@ export default function PacmanGame() {
                 <div style={{
                     position: 'relative',
                     width: '100%',
+                    maxWidth: `calc((85vh - 60px) * ${cols} / ${rows})`,
+                    maxHeight: 'calc(85vh - 60px)',
                     aspectRatio: `${cols}/${rows}`,
-                    maxHeight: 'calc(100vh - 140px)',
+                    margin: '0 auto',
+                    boxSizing: 'border-box',
                     border: '4px solid rgba(255,255,255,0.1)',
                     borderRadius: '12px',
                     overflow: 'hidden',
@@ -398,30 +332,69 @@ export default function PacmanGame() {
                 </div>
             </div>
 
-            {/* ── PHẢI: CONTROLS ── */}
+            {/* ── PHẢI: INFO & CONTROLS ── */}
             <div style={{ 
-                flex: '0 0 200px', 
-                width: '200px', 
+                flex: '0 0 240px', 
+                width: '240px', 
                 display: 'flex', 
                 flexDirection: 'column', 
-                gap: '0.75rem', 
+                justifyContent: 'space-between',
+                gap: '1rem', 
                 maxHeight: '100%',
                 overflow: 'hidden'
             }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1rem', color: '#fff' }}>🍡 PAC-MAN</div>
+                {/* INFO (Điểm & Máu) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', padding: '1rem', boxSizing: 'border-box' }}>
+                    <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.1rem', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '8px' }}>
+                        <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#fbbf24', boxShadow: '0 0 10px #fbbf24' }} />
+                        PAC-MAN
+                    </div>
                     
+                    <div style={{ padding: '12px', background: 'rgba(251,191,36,0.1)', borderRadius: '10px', border: '1px solid rgba(251,191,36,0.2)', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Score</div>
+                        <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#fbbf24' }}>{score}</div>
+                    </div>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', margin: '8px 0' }}>
+                        <Heart size={24} color={lives > 0 ? '#ef4444' : '#374151'} fill={lives > 0 ? '#ef4444' : 'none'} />
+                        <Heart size={24} color={lives > 1 ? '#ef4444' : '#374151'} fill={lives > 1 ? '#ef4444' : 'none'} />
+                        <Heart size={24} color={lives > 2 ? '#ef4444' : '#374151'} fill={lives > 2 ? '#ef4444' : 'none'} />
+                    </div>
+
+                    <div style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
+                            <span style={{ color: 'var(--text-secondary)' }}>Map</span>
+                            <span style={{ color: '#fff', fontWeight: 600 }}>{mapType}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                            <span style={{ color: 'var(--text-secondary)' }}>Độ khó</span>
+                            <span style={{ fontWeight: 700, color: difficulty === 'hard' ? '#ef4444' : '#f59e0b' }}>
+                                {difficulty === 'hard' ? '🔥 Khó' : '⚡ TB'}
+                            </span>
+                        </div>
+                    </div>
+
+                    {frightenedTimer > 0 && (
+                        <div style={{ padding: '8px', textAlign: 'center', borderRadius: '8px', border: '1px solid rgba(29,78,216,0.5)', background: 'rgba(29,78,216,0.1)' }}>
+                            <div style={{ fontSize: '0.65rem', color: '#93c5fd' }}>⚡ POWER</div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#60b5fa' }}>{frightenedTimer}</div>
+                        </div>
+                    )}
+                </div>
+
+                {/* CONTROLS */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <button onClick={togglePause} disabled={phase === 'gameover' || phase === 'won'} style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', width: '100%', fontSize: '0.8rem', background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: isPaused ? '#38bdf8' : '#fff', cursor: (phase === 'gameover' || phase === 'won') ? 'default' : 'pointer', opacity: (phase === 'gameover' || phase === 'won') ? 0.5 : 1 }}>
+                        <button onClick={togglePause} disabled={phase === 'gameover' || phase === 'won'} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%', fontSize: '0.9rem', background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: isPaused ? '#38bdf8' : '#fff', cursor: (phase === 'gameover' || phase === 'won') ? 'default' : 'pointer', opacity: (phase === 'gameover' || phase === 'won') ? 0.5 : 1 }}>
                             {isPaused ? '▶ Tiếp tục' : '⏸ Tạm dừng'}
                         </button>
                         
-                        <button className="btn-primary" onClick={handleRestart} style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}>
-                            <RotateCcw size={16} /> Chơi lại
+                        <button className="btn-primary" onClick={handleRestart} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
+                            <RotateCcw size={18} /> Chơi lại
                         </button>
                         
-                        <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}>
-                            <ArrowLeft size={16} /> Thoát
+                        <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
+                            <ArrowLeft size={18} /> Thoát
                         </button>
                     </div>
                 </div>
