@@ -21,8 +21,8 @@ export default function PikachuGame() {
 
     // Mảng lưới board sẽ có size (ROWS+2) x (COLS+2) (Padding)
     // Map tile ID sang icon (sg11 used 0-35, but we use 1-36 internally to reserve 0 for empty space)
-    const getIconSrc = (id) => `/pikachu_sprites_hd_from_sheet/${id - 1}.png`;
-    
+    const getIconSrc = (id) => `/pikachu_sprites_hd/${id - 1}.png`;
+
     // Optimized sprite loading with proper sizing
     const SPRITE_SIZE = 64; // Base size for sprites
     const getSpriteStyle = (id) => ({
@@ -204,7 +204,7 @@ export default function PikachuGame() {
                                             }}
                                         >
                                             <div style={{
-                                                width: '98%', 
+                                                width: '98%',
                                                 height: '98%',
                                                 display: 'flex',
                                                 alignItems: 'center',
