@@ -46,6 +46,14 @@ img {
   -moz-osx-font-smoothing: grayscale;
 }
 
+* {
+  box-sizing: border-box;
+}
+
+div {
+  box-sizing: border-box;
+}
+
 input,
 textarea,
 .selectable-text {

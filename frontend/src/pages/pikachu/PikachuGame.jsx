@@ -21,7 +21,7 @@ export default function PikachuGame() {
 
     // Mảng lưới board sẽ có size (ROWS+2) x (COLS+2) (Padding)
     // Map tile ID sang icon (sg11 used 0-35, but we use 1-36 internally to reserve 0 for empty space)
-    const getIconSrc = (id) => `/pikachu_sprites_hd/${id - 1}.png`;
+    const getIconSrc = (id) => `/pikachu_sprites/${id - 1}.png`;
 
     const boardRef = React.useRef(null);
     const cellRefs = React.useRef({});
@@ -162,18 +162,14 @@ export default function PikachuGame() {
                                     height: 'auto',
                                     maxWidth: '100%',
                                     maxHeight: '100%',
-                                    aspectRatio: `${(COLS + 2)} / ${(activeRows + 2)}`,
+                                    aspectRatio: `${(COLS + 2) * 40} / ${(ROWS + 2) * 45}`,
                                     margin: 'auto',
                                     display: 'grid',
                                     gridTemplateColumns: `repeat(${COLS + 2}, 1fr)`,
-                                    gridTemplateRows: `repeat(${activeRows + 2}, 1fr)`,
-                                    background: 'rgba(255,255,255,0.02)',
-                                    borderRadius: '8px',
-                                    gap: 0,
-                                    boxShadow: '0 0 0 1px rgba(255,255,255,0.1)'
+                                    gridTemplateRows: `repeat(${ROWS + 2}, 1fr)`,
                                 }}
                             >
-                                {board.slice(0, activeRows + 2).map((row, r) =>
+                                {board.map((row, r) =>
                                     row.map((id, c) => (
                                         <div
                                             key={`cell-${r}-${c}`}
@@ -184,41 +180,28 @@ export default function PikachuGame() {
                                             style={{
                                                 width: '100%',
                                                 height: '100%',
+                                                margin: 0,
+                                                padding: 0,
                                                 cursor: id !== 0 ? 'pointer' : 'default',
-                                                boxSizing: 'border-box',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                position: 'relative',
-                                                willChange: 'transform',
                                             }}
                                         >
-                                            <div style={{
-                                                width: '100%',
-                                                height: '100%',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                ...getTileStyle(r, c, id)
-                                            }}>
-                                                {id !== 0 && (
-                                                    <img
-                                                        src={getIconSrc(id)}
-                                                        alt={`Tile ${id}`}
-                                                        style={{
-                                                            width: '100%',
-                                                            height: '100%',
-                                                            objectFit: 'fill',
-                                                            display: 'block',
-                                                            imageRendering: 'high-quality',
-                                                            WebkitImageSmoothing: 'high',
-                                                            MozOsxFontSmoothing: 'grayscale',
-                                                        }}
-                                                        draggable="false"
-                                                        loading="eager"
-                                                    />
-                                                )}
-                                            </div>
+                                            {id !== 0 && (
+                                                <img
+                                                    src={getIconSrc(id)}
+                                                    alt={`Tile ${id}`}
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        objectFit: 'fill',
+                                                        display: 'block',
+                                                        margin: 0,
+                                                        padding: 0,
+                                                        ...getTileStyle(r, c, id),
+                                                    }}
+                                                    draggable="false"
+                                                    loading="eager"
+                                                />
+                                            )}
                                         </div>
                                     ))
                                 )}
