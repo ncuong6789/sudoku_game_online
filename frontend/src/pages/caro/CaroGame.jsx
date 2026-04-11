@@ -165,15 +165,20 @@ export default function CaroGame() {
                 </div>
 
                 {isGameOver && (
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13, 17, 23, 0.95)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100, gap: '20px' }}>
-                        <div style={{ fontSize: '5rem', animation: 'float 3s ease-in-out infinite' }}>{winner === -1 ? '🤝' : winner === humanNum ? '🏆' : '💀'}</div>
-                        <h2 style={{ margin: 0, fontSize: '3rem', color: winner === -1 ? '#fbbf24' : winner === humanNum ? 'var(--primary-color)' : '#ff4757', textAlign: 'center', textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>{winner === -1 ? 'Hòa!' : winner === humanNum ? 'Bạn Thắng!' : 'Bạn Thua!'}</h2>
-                        <div style={{ display: 'flex', gap: '20px', marginTop: '15px' }}>
-                            <button className="btn-primary" style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }} onClick={resetGame}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><RotateCcw size={24} /> {mode === 'solo' ? `Chơi ván ${soloGameCount + 2}` : 'Chơi lại'}</div>
-                                {mode === 'solo' && <span style={{ fontSize: '0.7rem', opacity: 0.8, fontWeight: 'normal' }}>(Phím Space)</span>}
-                            </button>
-                            <button className="btn-secondary" style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }} onClick={handleExit}><ArrowLeft size={24} /> Thoát</button>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13, 17, 23, 0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+                        <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: `1px solid ${winner === -1 ? 'rgba(251,191,36,0.4)' : winner === humanNum ? 'rgba(74,222,128,0.4)' : 'rgba(239,68,68,0.4)'}`, boxShadow: `0 0 40px ${winner === -1 ? 'rgba(251,191,36,0.3)' : winner === humanNum ? 'rgba(74,222,128,0.3)' : 'rgba(239,68,68,0.3)'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                            <div style={{ fontSize: '3.5rem' }}>{winner === -1 ? '🤝' : winner === humanNum ? '🏆' : '💀'}</div>
+                            <h2 style={{ margin: 0, fontSize: '1.8rem', color: winner === -1 ? '#fbbf24' : winner === humanNum ? '#4ade80' : '#ef4444', fontWeight: 900 }}>
+                                {winner === -1 ? 'HÒA' : winner === humanNum ? 'THẮNG' : 'THUA'}
+                            </h2>
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                                <button onClick={resetGame} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: '#4ade80', color: '#000', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>
+                                    CHƠI LẠI
+                                </button>
+                                <button onClick={handleExit} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', cursor: 'pointer' }}>
+                                    THOÁT
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}

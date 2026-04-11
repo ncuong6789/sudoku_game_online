@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Target, ArrowLeft, Gamepad, Users, Shield, Zap, Swords } from 'lucide-react';
+import { Target, ArrowLeft, Gamepad, Users, Shield, Zap, Swords, Info } from 'lucide-react';
+
+const PIECE_NAMES = { 1: 'Chuột', 2: 'Mèo', 3: 'Chó', 4: 'Sói', 5: 'Báo', 6: 'Hổ', 7: 'Sư tử', 8: 'Voi' };
+const PIECE_ICONS = { 1: '🐀', 2: '🐱', 3: '🐕', 4: '🐺', 5: '🐆', 6: '🐅', 7: '🦁', 8: '🐘' };
 
 const DIFF_INFO = {
     easy: {
@@ -29,6 +32,7 @@ const DIFF_INFO = {
 export default function JungleHome() {
     const navigate = useNavigate();
     const [difficulty, setDifficulty] = useState('medium');
+    const [showRules, setShowRules] = useState(false);
 
     const selectedDiff = DIFF_INFO[difficulty];
 
@@ -40,7 +44,7 @@ export default function JungleHome() {
                     <div style={{ width: '60px', height: '60px', background: '#22c55e', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 30px rgba(34, 197, 94, 0.3)' }}>
                         <Target size={36} color="#fff" />
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ flex: 1 }}>
                         <h1 style={{ fontSize: '2.5rem', margin: 0, background: 'linear-gradient(135deg, #4ade80, #22c55e)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', whiteSpace: 'nowrap', userSelect: 'none', lineHeight: 1 }}>
                             CỜ THÚ
                         </h1>
@@ -48,6 +52,9 @@ export default function JungleHome() {
                             JUNGLE CHESS
                         </span>
                     </div>
+                    <button onClick={() => setShowRules(true)} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', padding: '10px', cursor: 'pointer', color: '#4ade80' }}>
+                        <Info size={24} />
+                    </button>
                 </div>
 
                 {/* Difficulty Selection */}
@@ -102,6 +109,29 @@ export default function JungleHome() {
                         <ArrowLeft size={18} /> Quay lại Hub
                     </button>
                 </div>
+
+                {showRules && (
+                    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowRules(false)}>
+                        <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '16px', padding: '24px', maxWidth: '500px', maxHeight: '80vh', overflow: 'auto', border: '1px solid rgba(255,255,255,0.1)' }} onClick={e => e.stopPropagation()}>
+                            <h2 style={{ color: '#4ade80', marginTop: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>📜 Luật Chơi Cờ Thú</h2>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                {[8,7,6,5,4,3,2,1].map(v => (
+                                    <div key={v} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+                                        <span style={{ fontSize: '1.5rem' }}>{PIECE_ICONS[v]}</span>
+                                        <div>
+                                            <div style={{ color: '#fff', fontWeight: 600 }}>{v}. {PIECE_NAMES[v]}</div>
+                                            <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{v===1?'Bơi trong sông, ăn Voi':v===6||v===7?'Nhảy qua sông 2 ô':v===8?'Bị Chuột ăn, k vào sông':'Bình thường'}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div style={{ marginTop: '16px', padding: '12px', background: 'rgba(251,191,36,0.1)', borderRadius: '8px', fontSize: '0.85rem', color: '#fbbf24' }}>
+                                <strong>Quy tắc:</strong> Quân lớn ăn quân nhỏ (8 vs 1 là ngoại lệ). Vào Hang đối phương = THẮNG.
+                            </div>
+                            <button className="btn-primary" style={{ marginTop: '16px', width: '100%' }} onClick={() => setShowRules(false)}>Đã hiểu</button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

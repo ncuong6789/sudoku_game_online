@@ -7,8 +7,9 @@ import { useAudio } from '../../utils/useAudio';
 
 // A Cell component
 const Cell = ({ type, cellState }) => {
-    let color = 'rgba(255, 255, 255, 0.05)';
-    if (type !== 0 && TETROMINOES[type]) {
+    let color = 'rgba(10, 15, 25, 0.75)'; // Nền tối cho ô trống
+    let hasBorder = type !== 0;
+    if (hasBorder && TETROMINOES[type]) {
         color = TETROMINOES[type].color;
     }
     return (
@@ -16,9 +17,9 @@ const Cell = ({ type, cellState }) => {
             width: '100%',
             height: '100%',
             backgroundColor: color,
-            border: `1px solid ${type === 0 ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0,0,0,0.5)'}`,
-            borderRadius: '2px',
-            boxShadow: type === 0 ? 'none' : `inset 2px 2px 4px rgba(255,255,255,0.3), inset -2px -2px 4px rgba(0,0,0,0.5)`
+            border: hasBorder ? '1px solid rgba(0,0,0,0.5)' : 'none',
+            borderRadius: hasBorder ? '2px' : '0',
+            boxShadow: hasBorder ? `inset 2px 2px 4px rgba(255,255,255,0.3), inset -2px -2px 4px rgba(0,0,0,0.5)` : 'none'
         }} />
     );
 };
@@ -31,8 +32,8 @@ const Stage = ({ stage, isOpponent }) => (
         gridTemplateColumns: `repeat(${STAGE_WIDTH}, min(calc((100vh - 32px) / ${STAGE_HEIGHT}), 28px))`,
         gridGap: '1px',
         border: '2px solid rgba(255, 255, 255, 0.1)',
-        background: 'rgba(0, 0, 0, 0.6)',
-        padding: '2px',
+        background: 'rgba(255, 255, 255, 0.04)', // Màu nét đứt caro (lưới)
+        padding: '1px',
         borderRadius: '4px',
         opacity: isOpponent ? 0.7 : 1
     }}>
@@ -312,57 +313,41 @@ export default function TetrisGame() {
 
                 {/* GAME OVER BANNER OVERLAY FULL PANEL */}
                 {gameOver && gameResult && (
-                    <div style={{
-                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                        background: 'rgba(13, 17, 23, 0.95)', backdropFilter: 'blur(8px)',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                        zIndex: 100, gap: '20px'
-                    }}>
-                        <div style={{ fontSize: '5rem', animation: 'float 3s ease-in-out infinite' }}>
-                            {gameResult === 'Win' ? '🏆' : gameResult === 'Draw' ? '🤝' : '💀'}
-                        </div>
-                        <h2 style={{ margin: 0, fontSize: '3rem', textAlign: 'center', color: gameResult === 'Win' ? '#4ade80' : '#f87171', textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
-                            {gameResult === 'Win' ? 'CHIẾN THẮNG!' : gameResult === 'Draw' ? 'HÒA' : 'THẤT BẠI'}
-                        </h2>
-                        <p style={{ fontSize: '1.4rem', marginBottom: '10px' }}>Điểm của bạn: <strong style={{color: '#4ade80'}}>{score}</strong></p>
-                        
-                        <div style={{ display: 'flex', gap: '20px' }}>
-                            {mode === 'solo' && (
-                                <button className="btn-primary" style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }} onClick={startGame}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <RefreshCw size={24} /> Chơi lại ngay
-                                    </div>
-                                    <span style={{ fontSize: '0.7rem', opacity: 0.8, fontWeight: 'normal' }}>(Phím Space)</span>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13, 17, 23, 0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+                        <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: `1px solid ${gameResult === 'Win' ? 'rgba(74,222,128,0.4)' : gameResult === 'Draw' ? 'rgba(251,191,36,0.4)' : 'rgba(239,68,68,0.4)'}`, boxShadow: `0 0 40px ${gameResult === 'Win' ? 'rgba(74,222,128,0.3)' : gameResult === 'Draw' ? 'rgba(251,191,36,0.3)' : 'rgba(239,68,68,0.3)'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                            <div style={{ fontSize: '3.5rem' }}>{gameResult === 'Win' ? '🏆' : gameResult === 'Draw' ? '🤝' : '💀'}</div>
+                            <h2 style={{ margin: 0, fontSize: '1.8rem', color: gameResult === 'Win' ? '#4ade80' : gameResult === 'Draw' ? '#fbbf24' : '#ef4444', fontWeight: 900 }}>
+                                {gameResult === 'Win' ? 'THẮNG' : gameResult === 'Draw' ? 'HÒA' : 'THUA'}
+                            </h2>
+                            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem', marginTop: '4px' }}>Điểm: <span style={{ color: '#4ade80', fontWeight: 700 }}>{score}</span></div>
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                                {mode === 'solo' && (
+                                    <button onClick={startGame} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: '#4ade80', color: '#000', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>
+                                        CHƠI LẠI
+                                    </button>
+                                )}
+                                <button onClick={() => navigate('/tetris')} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', cursor: 'pointer' }}>
+                                    THOÁT
                                 </button>
-                            )}
-                            <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/tetris/multiplayer' : '/tetris')} style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.1)' }}>
-                                <ArrowLeft size={24} /> Thoát ra
-                            </button>
+                            </div>
                         </div>
                     </div>
                 )}
-                
-                {/* Dành cho Solo khi GameOver */}
+
                 {gameOver && !gameResult && mode === 'solo' && (
-                    <div style={{
-                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                        background: 'rgba(13, 17, 23, 0.95)', backdropFilter: 'blur(8px)',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                        zIndex: 100, gap: '20px'
-                    }}>
-                        <div style={{ fontSize: '5rem', animation: 'float 3s ease-in-out infinite' }}>💀</div>
-                        <h2 style={{ margin: 0, fontSize: '3rem', textAlign: 'center', color: '#f87171', textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
-                            GAME OVER
-                        </h2>
-                        <p style={{ fontSize: '1.4rem', marginBottom: '10px' }}>Điểm của bạn: <strong style={{color: '#4ade80'}}>{score}</strong></p>
-                        
-                        <div style={{ display: 'flex', gap: '20px' }}>
-                            <button className="btn-primary" onClick={() => startGame()} style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <RefreshCw size={24} /> Chơi lại ngay
-                            </button>
-                            <button className="btn-secondary" onClick={() => navigate('/tetris')} style={{ padding: '16px 36px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.1)' }}>
-                                <ArrowLeft size={24} /> Thoát ra
-                            </button>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13, 17, 23, 0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+                        <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: '1px solid rgba(239,68,68,0.4)', boxShadow: '0 0 40px rgba(239,68,68,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                            <div style={{ fontSize: '3.5rem' }}>💀</div>
+                            <h2 style={{ margin: 0, fontSize: '1.8rem', color: '#ef4444', fontWeight: 900 }}>THUA</h2>
+                            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem', marginTop: '4px' }}>Điểm: <span style={{ color: '#4ade80', fontWeight: 700 }}>{score}</span></div>
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                                <button onClick={() => startGame()} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: '#ef4444', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>
+                                    CHƠI LẠI
+                                </button>
+                                <button onClick={() => navigate('/tetris')} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', cursor: 'pointer' }}>
+                                    THOÁT
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}

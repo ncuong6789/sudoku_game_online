@@ -3,18 +3,17 @@ import { X, Heart, Copy, Check, ExternalLink } from 'lucide-react';
 
 // CẤU HÌNH TÀI KHOẢN CỦA BẠN TẠI ĐÂY
 const DONATE_CONFIG = {
-    bankId: 'TCB', // Techcombank
-    accountNo: '19038495256012', // Số tài khoản mới
-    accountName: 'NGUYEN LE HUNG CUONG',
-    description: 'Ung ho GameOnl',
+    bankId: 'Ngân hàng Techcombank', // Bank name
+    accountNo: '19038495256012', 
+    accountName: 'NGUYỆN LÊ HÙNG CƯỜNG',
+    qrImage: '/qr-donate.png', // Hãy thay file ảnh bằng mã QR cố định của bạn (lưu trong folder public/)
+    bankLogo: '/techcombank-logo.png' // Logo ngân hàng (lưu trong public/)
 };
 
 export default function DonateModal({ isOpen, onClose }) {
     const [copied, setCopied] = useState(false);
 
     if (!isOpen) return null;
-
-    const qrUrl = `https://img.vietqr.io/image/${DONATE_CONFIG.bankId}-${DONATE_CONFIG.accountNo}-compact2.png?amount=50000&addInfo=${encodeURIComponent(DONATE_CONFIG.description)}&accountName=${encodeURIComponent(DONATE_CONFIG.accountName)}`;
 
     const handleCopy = () => {
         navigator.clipboard.writeText(DONATE_CONFIG.accountNo);
@@ -77,20 +76,13 @@ export default function DonateModal({ isOpen, onClose }) {
                     <X size={18} />
                 </button>
 
-                <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                    <div className="heart-pulse" style={{
-                        width: '50px', height: '50px',
-                        background: 'rgba(239, 68, 68, 0.15)',
-                        borderRadius: '50%',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        margin: '0 auto 0.8rem auto',
-                        boxShadow: '0 0 20px rgba(239, 68, 68, 0.2)'
-                    }}>
-                        <Heart size={28} fill="#ef4444" color="#ef4444" />
-                    </div>
-                    <h2 style={{ margin: '0 0 0.3rem 0', fontSize: '1.5rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>Ủng hộ dự án</h2>
-                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.4 }}>
-                        Giúp mình duy trì server và phát triển game nhé. ❤️
+                <div style={{ textAlign: 'center', marginBottom: '1.2rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '0 0 0.4rem 0', fontSize: '1.6rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>
+                        Ủng hộ dự án 
+                        <Heart className="heart-pulse" size={26} fill="#ef4444" color="#ef4444" />
+                    </h2>
+                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.4 }}>
+                        Giúp mình duy trì server và phát triển game nhé.
                     </p>
                 </div>
 
@@ -105,7 +97,7 @@ export default function DonateModal({ isOpen, onClose }) {
                 }}>
                     <div style={{
                         background: '#fff',
-                        padding: '10px',
+                        padding: '6px',
                         borderRadius: '16px',
                         width: '280px', height: '280px',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -114,37 +106,53 @@ export default function DonateModal({ isOpen, onClose }) {
                         overflow: 'hidden'
                     }}>
                         <img
-                            src={qrUrl}
-                            alt="VietQR"
-                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                            src={DONATE_CONFIG.qrImage}
+                            alt="Mã QR Donate"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }}
                             onError={(e) => {
-                                e.target.src = 'https://via.placeholder.com/280?text=QR+Error';
+                                e.target.src = 'https://via.placeholder.com/280?text=QR+Image+Missing';
                             }}
                         />
                     </div>
 
                     <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '10px 14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>Số tài khoản ({DONATE_CONFIG.bankId})</span>
-                                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#4ade80', fontFamily: 'monospace' }}>{DONATE_CONFIG.accountNo}</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'rgba(255,255,255,0.03)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            {/* Bank Name & Logo */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px' }}>
+                                <img src={DONATE_CONFIG.bankLogo} alt="Logo" style={{ width: '28px', height: '28px', objectFit: 'contain', borderRadius: '4px' }} onError={(e) => { e.target.style.display = 'none'; }} />
+                                <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f3f4f6', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{DONATE_CONFIG.bankId}</span>
                             </div>
-                            <button
-                                onClick={handleCopy}
-                                style={{
-                                    background: copied ? '#4ade8022' : 'rgba(255,255,255,0.05)',
-                                    border: 'none',
-                                    color: copied ? '#4ade80' : '#fff',
-                                    padding: '8px',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', gap: '4px',
-                                    transition: 'all 0.2s'
-                                }}
-                            >
-                                {copied ? <Check size={14} /> : <Copy size={14} />}
-                                <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>{copied ? 'Xong' : 'Copy'}</span>
-                            </button>
+                            
+                            {/* Account No & Copy */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', marginBottom: '2px' }}>Số tài khoản</span>
+                                    <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#4ade80', fontFamily: 'monospace', letterSpacing: '1px' }}>{DONATE_CONFIG.accountNo}</span>
+                                </div>
+                                <button
+                                    onClick={handleCopy}
+                                    style={{
+                                        background: copied ? '#4ade8022' : 'rgba(255,255,255,0.05)',
+                                        border: '1px solid rgba(255,255,255,0.05)',
+                                        color: copied ? '#4ade80' : '#fff',
+                                        padding: '8px 12px',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', gap: '6px',
+                                        transition: 'all 0.2s',
+                                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                    }}
+                                >
+                                    {copied ? <Check size={16} /> : <Copy size={16} />}
+                                    <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{copied ? 'Xong' : 'Copy'}</span>
+                                </button>
+                            </div>
+
+                            {/* Account Name */}
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', marginBottom: '2px' }}>Chủ tài khoản</span>
+                                <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff', textTransform: 'uppercase' }}>{DONATE_CONFIG.accountName}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -173,11 +181,14 @@ export default function DonateModal({ isOpen, onClose }) {
 
             <style>{`
                 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-                .heart-pulse { animation: pulse 2s infinite; }
+                .heart-pulse { animation: pulse 1.5s infinite ease-in-out; }
                 @keyframes pulse {
-                    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-                    70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
-                    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+                    0% { transform: scale(1); }
+                    15% { transform: scale(1.25); }
+                    30% { transform: scale(1); }
+                    45% { transform: scale(1.25); }
+                    60% { transform: scale(1); }
+                    100% { transform: scale(1); }
                 }
             `}</style>
         </div>

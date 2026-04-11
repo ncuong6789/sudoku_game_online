@@ -396,15 +396,19 @@ export default function TankGame() {
                             </div>
                         )}
                         {(gameState === 'finished' || gameState === 'win') && (
-                            <div style={{ position: 'absolute', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                                <h1 style={{ color: gameState === 'win' ? '#ffd700' : '#ff4444', fontSize: '3rem', margin: 0 }}>{gameState === 'win' ? 'VICTORY' : 'GAME OVER'}</h1>
-                                {gameState === 'win' && currentLevel >= maxLevel && (
-                                    <p style={{ color: '#fbbf24', fontSize: '1.2rem', marginTop: '10px' }}>🎉 Bạn đã vượt qua tất cả {maxLevel} màn!</p>
-                                )}
-                                {gameState === 'win' && currentLevel < maxLevel && (
-                                    <p style={{ color: '#60a5fa', fontSize: '1.2rem', marginTop: '10px' }}>Đã hoàn thành màn {currentLevel}!</p>
-                                )}
-                                <button className="btn-primary" onClick={() => navigate('/tank')} style={{ marginTop: '20px' }}>EXIT</button>
+                            <div style={{ position: 'absolute', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: `1px solid ${gameState === 'win' ? 'rgba(255,215,0,0.4)' : 'rgba(239,68,68,0.4)'}`, boxShadow: gameState === 'win' ? '0 0 40px rgba(255,215,0,0.3)' : '0 0 40px rgba(239,68,68,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                                    <h1 style={{ color: gameState === 'win' ? '#ffd700' : '#ff4444', fontSize: '2rem', margin: 0, fontWeight: 900 }}>{gameState === 'win' ? 'CHIẾN THẮNG!' : 'THUA'}</h1>
+                                    {gameState === 'win' && currentLevel >= maxLevel && (
+                                        <p style={{ color: '#fbbf24', fontSize: '1rem', marginTop: '4px' }}>Tất cả {maxLevel} màn!</p>
+                                    )}
+                                    {gameState === 'win' && currentLevel < maxLevel && (
+                                        <p style={{ color: '#60a5fa', fontSize: '1rem', marginTop: '4px' }}>Màn {currentLevel}</p>
+                                    )}
+                                    <button onClick={() => navigate('/tank')} style={{ marginTop: '8px', padding: '12px 32px', fontSize: '1rem', fontWeight: 700, background: gameState === 'win' ? '#ffd700' : '#ef4444', color: '#000', border: 'none', borderRadius: '12px', cursor: 'pointer' }}>
+                                        THOÁT
+                                    </button>
+                                </div>
                             </div>
                         )}
                         <canvas ref={canvasRef} width={CANVAS_W} height={CANVAS_H} style={{ width: '100%', height: '100%', imageRendering: 'pixelated', objectFit: 'contain' }} />

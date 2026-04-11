@@ -128,7 +128,7 @@ export default function ChessGame() {
                 setIsEngineReady(true);
             } else if (line.startsWith('bestmove')) {
                 const moveMatch = line.match(/bestmove\s([a-h][1-8][a-h][1-8])(n|b|r|q)?/);
-                if (moveMatch && !isThinkingHint) { // Chỉ tự động đi trong Solo mode
+                if (moveMatch && mode === 'solo' && !isThinkingHint) {
                     const moveStr = moveMatch[1];
                     const promotion = moveMatch[2];
                     const from = moveStr.substring(0, 2);
@@ -155,7 +155,7 @@ export default function ChessGame() {
         return () => {
             stockfishWorker.terminate();
         };
-    }, [difficulty, isThinkingHint]);
+    }, [difficulty]);
 
     const makeAIMove = useCallback(() => {
         if (engine.current && isEngineReady && !game.isGameOver()) {
@@ -165,7 +165,7 @@ export default function ChessGame() {
         }
     }, [game, isEngineReady, difficulty]);
 
-    const getAIHint = () => {
+    const getAIHint = useCallback(() => {
         if (engine.current && isEngineReady && !game.isGameOver() && game.turn() === myColor) {
             setIsThinkingHint(true);
             setHintMove(null);
@@ -187,7 +187,7 @@ export default function ChessGame() {
             engine.current.postMessage(`position fen ${game.fen()}`);
             engine.current.postMessage(`go depth 12`);
         }
-    };
+    }, [game, isEngineReady, myColor]);
 
     useEffect(() => {
         if (mode === 'solo' && !gameOver && isEngineReady && game.turn() !== myColor) {
@@ -488,9 +488,18 @@ export default function ChessGame() {
 
                 {/* GAME OVER PANEL */}
                 {gameOver && (
-                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(13, 17, 23, 0.95)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100, gap: '20px' }}>
-                        <h2 style={{ fontSize: '3rem', color: '#4ade80' }}>Kết thúc!</h2>
-                        <button className="btn-primary" onClick={handleReset}>Chơi lại</button>
+                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(13, 17, 23, 0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+                        <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: '1px solid rgba(74,222,128,0.4)', boxShadow: '0 0 40px rgba(74,222,128,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                            <h2 style={{ fontSize: '1.8rem', color: '#4ade80', margin: 0, fontWeight: 900 }}>KẾT THÚC</h2>
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                                <button onClick={handleReset} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: '#4ade80', color: '#000', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>
+                                    CHƠI LẠI
+                                </button>
+                                <button onClick={() => navigate(mode === 'multiplayer' ? '/chess/multiplayer' : '/chess')} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', cursor: 'pointer' }}>
+                                    THOÁT
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

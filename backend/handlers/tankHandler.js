@@ -82,7 +82,10 @@ class TankServer {
         
         const sp = this.enemySpawnPoints[this.enemySpawnQueue % 3];
         // Check if spawn point is occupied
-        // Simplified check:
+        if (this.checkTankCollisions(sp.x, sp.y, TANK_SIZE, TANK_SIZE, 'dummy')) {
+            return; // point occupied, try again next tick
+        }
+        
         let randType = Math.random();
         let eType = 'basic';
         let hp = 1, spd = TANK_SPEED_BASIC;
@@ -222,7 +225,7 @@ class TankServer {
             else if (e.dir === 'left') nx -= e.speed;
             else if (e.dir === 'right') nx += e.speed;
 
-            const moved = this.moveTank(e, nx, ny, true);
+            const moved = this.moveTank(e, nx, ny, false);
 
             // Change direction if stuck OR randomly (more frequent for fast tanks)
             const turnFreq = e.type === 'fast' ? 0.08 : 0.03;

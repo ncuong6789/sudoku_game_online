@@ -38,7 +38,7 @@ export function useTankLogic(roomId, mode = 'multiplayer', startLevel = 1) {
     });
 
     // Client-side collision check
-    const checkWallCollision = useCallback((x, y, w, h, gameMap) => {
+    const checkWallCollision = useCallback((x, y, w, h, gameMap, currentBase) => {
         if (!gameMap || gameMap.length === 0) return false;
         
         // Bounds check
@@ -52,10 +52,19 @@ export function useTankLogic(roomId, mode = 'multiplayer', startLevel = 1) {
             for (let c = sc; c <= ec; c++) {
                 if (r >= 0 && r < MAP_ROWS && c >= 0 && c < MAP_COLS) {
                     const t = gameMap[r]?.[c];
-                    if (t === 1 || t === 2) return true; // Brick or Steel blocks
+                    if (t === 1 || t === 2 || t === 3) return true; // Brick, Steel or Water blocks
                 }
             }
         }
+
+        // Base collision
+        if (currentBase && !currentBase.destroyed) {
+            if (x < currentBase.x + currentBase.w && x + w > currentBase.x &&
+                y < currentBase.y + currentBase.h && y + h > currentBase.y) {
+                return true;
+            }
+        }
+
         return false;
     }, []);
 
@@ -63,7 +72,9 @@ export function useTankLogic(roomId, mode = 'multiplayer', startLevel = 1) {
         const allTanks = [...Object.values(allPlayers || {}), ...Object.values(allEnemies || {})];
         for (const t of allTanks) {
             if (t.id === ignoreId || t.hp <= 0) continue;
-            if (x < t.x + t.w && x + w > t.x && y < t.y + t.h && y + h > t.y) return true;
+            const x1 = x + 0.1, y1 = y + 0.1, w1 = w - 0.2, h1 = h - 0.2;
+            const x2 = t.x + 0.1, y2 = t.y + 0.1, w2 = t.w - 0.2, h2 = t.h - 0.2;
+            if (x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2) return true;
         }
         return false;
     }, []);
@@ -201,7 +212,7 @@ export function useTankLogic(roomId, mode = 'multiplayer', startLevel = 1) {
 
         // Client-side collision detection
         if (moved) {
-            let canMove = !checkWallCollision(newX, newY, TANK_SIZE, TANK_SIZE, map) &&
+            let canMove = !checkWallCollision(newX, newY, TANK_SIZE, TANK_SIZE, map, base) &&
                            !checkTankCollision(newX, newY, TANK_SIZE, TANK_SIZE, myId, players, enemies);
             
             // Auto corner-slip assist
@@ -209,20 +220,20 @@ export function useTankLogic(roomId, mode = 'multiplayer', startLevel = 1) {
                 const trySlides = [0.05, 0.1, 0.15, 0.2, 0.25];
                 if (newDir === 'up' || newDir === 'down') {
                     for (let s of trySlides) {
-                        if (!checkWallCollision(newX - s, newY, TANK_SIZE, TANK_SIZE, map) && !checkTankCollision(newX - s, newY, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
+                        if (!checkWallCollision(newX - s, newY, TANK_SIZE, TANK_SIZE, map, base) && !checkTankCollision(newX - s, newY, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
                             newX -= speed; // Slide left slowly
                             canMove = true; break;
-                        } else if (!checkWallCollision(newX + s, newY, TANK_SIZE, TANK_SIZE, map) && !checkTankCollision(newX + s, newY, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
+                        } else if (!checkWallCollision(newX + s, newY, TANK_SIZE, TANK_SIZE, map, base) && !checkTankCollision(newX + s, newY, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
                             newX += speed; // Slide right slowly
                             canMove = true; break;
                         }
                     }
                 } else if (newDir === 'left' || newDir === 'right') {
                     for (let s of trySlides) {
-                        if (!checkWallCollision(newX, newY - s, TANK_SIZE, TANK_SIZE, map) && !checkTankCollision(newX, newY - s, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
+                        if (!checkWallCollision(newX, newY - s, TANK_SIZE, TANK_SIZE, map, base) && !checkTankCollision(newX, newY - s, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
                             newY -= speed; // Slide up slowly
                             canMove = true; break;
-                        } else if (!checkWallCollision(newX, newY + s, TANK_SIZE, TANK_SIZE, map) && !checkTankCollision(newX, newY + s, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
+                        } else if (!checkWallCollision(newX, newY + s, TANK_SIZE, TANK_SIZE, map, base) && !checkTankCollision(newX, newY + s, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
                             newY += speed; // Slide down slowly
                             canMove = true; break;
                         }
@@ -273,7 +284,7 @@ export function useTankLogic(roomId, mode = 'multiplayer', startLevel = 1) {
         }
 
         requestRef.current = requestAnimationFrame(update);
-    }, [gameState, roomId, players, enemies, map, myId, checkWallCollision, checkTankCollision]);
+    }, [gameState, roomId, players, enemies, map, base, myId, checkWallCollision, checkTankCollision]);
 
     useEffect(() => {
         requestRef.current = requestAnimationFrame(update);

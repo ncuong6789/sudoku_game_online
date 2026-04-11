@@ -225,6 +225,7 @@ export function applyLevelMovement(board, p1, p2, level) {
 
 export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true) {
     const [board, setBoard] = useState([]);
+    const [activeRows, setActiveRows] = useState(ROWS);
     const [level, setLevel] = useState(1);
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(100);
@@ -295,6 +296,7 @@ export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true) {
         let b = generateInitialBoard();
         let fixState = checkAndFixDeadlock(b);
         setBoard(fixState.board);
+        setActiveRows(ROWS);
         setTimeLeft(100);
         setStatus('playing');
         setIsPaused(false);
@@ -327,7 +329,7 @@ export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true) {
         return () => clearInterval(timerRef.current);
     }, [status, timeLimitEnabled, isPaused]);
 
-    const handleTileClick = (r, c) => {
+    const handleTileClick = useCallback((r, c) => {
         if (status !== 'playing' || isPaused || board[r][c] === 0 || connectedPath) return;
 
         playSound(tapSound);
@@ -356,19 +358,36 @@ export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true) {
                         playSound(bgWinsound);
                     }
                     
+                    // Calculate active rows - shrink only when 2 adjacent rows are empty
+                    setActiveRows(prevRows => {
+                        let emptyRows = [];
+                        for (let r = 1; r <= prevRows; r++) {
+                            const hasTile = newBoard[r].slice(1, COLS + 1).some(v => v !== 0);
+                            if (!hasTile) emptyRows.push(r);
+                        }
+                        
+                        let newActiveRows = prevRows;
+                        for (let i = 0; i < emptyRows.length - 1; i++) {
+                            if (emptyRows[i + 1] === emptyRows[i] + 1) {
+                                newActiveRows = Math.max(3, prevRows - 1);
+                                break;
+                            }
+                        }
+                        return newActiveRows;
+                    });
+                    
                     setBoard(newBoard);
                     setScore(s => s + 10);
                     if (timeLimitEnabled) setTimeLeft(prev => Math.min(100, prev + 2));
                     setSelected(null);
                     setConnectedPath(null);
-                }, 400); // 400ms for path animation
+                }, 400);
             } else {
-                // Wrong move — no valid path between the two tiles
                 triggerPenalty(10);
-                setSelected(null); // Switch selection to null (Clear)
+                setSelected(null);
             }
         }
-    };
+    }, [status, isPaused, board, selected, connectedPath, level, checkAndFixDeadlock]);
 
     const useHint = () => {
         if (hints > 0 && status === 'playing' && !isPaused && !hintPair) {
@@ -381,21 +400,21 @@ export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true) {
         }
     };
 
-    const handleShuffle = () => {
+    const handleShuffle = useCallback(() => {
         if (shuffles > 0 && status === 'playing' && !isPaused) {
             setBoard(shuffleBoard(board));
             setShuffles(s => s - 1);
             setHintPair(null);
             setSelected(null);
         }
-    };
+    }, [shuffles, status, isPaused, board]);
 
     const togglePause = () => {
         if (status === 'playing') setIsPaused(!isPaused);
     };
     
     return {
-        board, ROWS, COLS, level, score, timeLeft, status, selected, connectedPath,
+        board, ROWS, COLS, activeRows, level, score, timeLeft, status, selected, connectedPath,
         hints, shuffles, hintPair, penaltyFlash, isPaused, togglePause,
         handleTileClick, useHint, handleShuffle, initGame, checkAndFixDeadlock
     };

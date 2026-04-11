@@ -16,6 +16,17 @@ const PIECE_NAMES = {
     1: 'Chuột', 2: 'Mèo', 3: 'Chó', 4: 'Sói', 5: 'Báo', 6: 'Hổ', 7: 'Sư tử', 8: 'Voi'
 };
 
+const PIECE_DESCRIPTIONS = {
+    1: 'Bơi được trong sông, ăn được Voi',
+    2: 'Di chuyển bình thường',
+    3: 'Di chuyển bình thường',
+    4: 'Di chuyển bình thường',
+    5: 'Di chuyển bình thường',
+    6: 'Nhảy qua sông, bị Chuột ăn trong sông',
+    7: 'Nhảy qua sông, bị Chuột ăn trong sông',
+    8: 'Bị Chuột ăn, không vào được sông'
+};
+
 const RIVERS = [
     { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 4, y: 3 }, { x: 5, y: 3 },
     { x: 1, y: 4 }, { x: 2, y: 4 }, { x: 4, y: 4 }, { x: 5, y: 4 },
@@ -50,7 +61,7 @@ export default function JungleGame() {
     
     const { playSelect, playMove, playCapture, playWin, playLose } = useJungleSounds();
 
-    const { pieces, turn, selectedPiece, validMoves, gameOver, handleSelect, myId } = useJungleLogic(
+    const { pieces, turn, selectedPiece, validMoves, gameOver, isLoading, handleSelect, myId } = useJungleLogic(
         roomId, mode, difficulty, 
         (move) => {
             setActiveHint(move);
@@ -355,9 +366,9 @@ export default function JungleGame() {
                 
                 {/* LEFT: INFO & RULES */}
                 <div style={{
-                    flex: '0 1 260px',
-                    width: '260px',
-                    minWidth: '220px',
+                    flex: '0 1 280px',
+                    width: '280px',
+                    minWidth: '240px',
                     display: 'flex',
                     flexDirection: 'column',
                     maxHeight: '100%',
@@ -369,27 +380,58 @@ export default function JungleGame() {
                     boxSizing: 'border-box'
                 }}>
                     <h3 style={{ margin: '0 0 15px 0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)' }}>
-                        <span style={{ fontSize: '1.2rem' }}>📊</span> Cấp bậc & Quyền
+                        <span style={{ fontSize: '1.2rem' }}>📊</span> Cấp bậc & Kỹ năng
                     </h3>
 
                     <div style={{
                         flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)',
                         borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.05)',
                         scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.1) transparent',
-                        display: 'flex', flexDirection: 'column', gap: '10px'
+                        display: 'flex', flexDirection: 'column', gap: '8px'
                     }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.9rem' }}>
-                            {[8,7,6,5,4,3,2,1].map(v => (
-                                <div key={v} style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: '4px' }}>
-                                    <span style={{ color: '#94a3b8' }}>{v}. {PIECE_NAMES[v]}</span>
-                                    {v === 8 && <span style={{ fontSize: '0.75rem', color: '#ef4444' }}>(&gt;1)</span>}
-                                    {v === 1 && <span style={{ fontSize: '0.75rem', color: '#4ade80' }}>(&gt;8)</span>}
+                        {[8,7,6,5,4,3,2,1].map(v => (
+                            <div key={v} style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '10px',
+                                background: v <= 2 ? 'rgba(251,191,36,0.08)' : (v >= 7 ? 'rgba(239,68,68,0.08)' : 'transparent'),
+                                padding: '8px',
+                                borderRadius: '8px',
+                                border: '1px solid rgba(255,255,255,0.03)'
+                            }}>
+                                <span style={{ fontSize: '1.3rem', width: '28px', textAlign: 'center' }}>{ANIMAL_ICONS[v]}</span>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ color: '#fff', fontWeight: 600, fontSize: '0.9rem' }}>{v}. {PIECE_NAMES[v]}</span>
+                                        {v === 8 && <span style={{ fontSize: '0.7rem', color: '#ef4444', background: 'rgba(239,68,68,0.2)', padding: '2px 6px', borderRadius: '4px' }}>Yếu nhất</span>}
+                                        {v === 1 && <span style={{ fontSize: '0.7rem', color: '#4ade80', background: 'rgba(74,222,128,0.2)', padding: '2px 6px', borderRadius: '4px' }}>Mạnh nhất</span>}
+                                    </div>
+                                    <div style={{ fontSize: '0.75rem', color: ANIMAL_COLORS[v], marginTop: '2px' }}>
+                                        {PIECE_DESCRIPTIONS[v]}
+                                    </div>
                                 </div>
-                            ))}
+                            </div>
+                        ))}
+                        
+                        <div style={{ marginTop: '12px', padding: '12px', background: 'rgba(251,191,36,0.1)', borderRadius: '8px', border: '1px solid rgba(251,191,36,0.2)' }}>
+                            <div style={{ fontSize: '0.8rem', color: '#fbbf24', fontWeight: 700, marginBottom: '8px' }}>🎯 LUẬT CHƠI</div>
+                            <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', lineHeight: '1.6' }}>
+                                <li>Quân lớn hơn ăn quân nhỏ hơn (8 vs 1 là ngoại lệ)</li>
+                                <li>Hổ & Sư tử <strong style={{color:'#4ade80'}}>nhảy qua sông</strong> 2 ô</li>
+                                <li>Chuột <strong style={{color:'#4ade80'}}>bơi trong sông</strong> & ăn Voi</li>
+                                <li>Voi không vào sông, bị Chuột ăn</li>
+                                <li>Vào Hang đối phương = <strong style={{color:'#ffd700'}}>THẮNG</strong></li>
+                                <li>Bị ăn hết quân = <strong style={{color:'#ef4444'}}>THUA</strong></li>
+                            </ul>
                         </div>
-
-                        <div style={{ marginTop: '10px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', lineHeight: '1.5' }}>
-                            <strong style={{ color: '#fbbf24' }}>Gợi ý:</strong> Nhảy qua sông bằng Hổ/Sư tử. Chuột có thể bơi dưới sông. Đưa quân vào Hang đối phương để thắng!
+                        
+                        <div style={{ padding: '10px', background: 'rgba(96,165,250,0.1)', borderRadius: '8px', border: '1px solid rgba(96,165,250,0.2)' }}>
+                            <div style={{ fontSize: '0.75rem', color: '#60b5ff', fontWeight: 600, marginBottom: '4px' }}>🏞 Địa hình</div>
+                            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)' }}>
+                                🌊 <strong>Sông</strong>: Hổ/Sư tử nhảy qua, Chuột bơi<br/>
+                                ⬜ <strong>Bẫy</strong>: Quân yếu bị giảm sức<br/>
+                                🏠 <strong>Hang</strong>: Vào được = thắng
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -435,7 +477,7 @@ export default function JungleGame() {
                         aspectRatio: '7 / 9',
                         flex: '1 1 auto'
                     }}>
-                        {pieces.length === 0 && !gameOver && (
+                        {isLoading && (
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 10, background: 'rgba(15, 23, 42, 0.9)' }}>
                                 <RefreshCw className="animate-spin" size={48} color="#4ade80" style={{ marginBottom: '15px' }} />
                                 <span style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>ĐANG KẾT NỐI...</span>
@@ -484,13 +526,21 @@ export default function JungleGame() {
 
                 {/* GAME OVER SYNC OVERLAY */}
                 {gameOver !== null && (
-                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(13, 17, 23, 0.95)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100, gap: '20px' }}>
-                        <Trophy size={80} color={gameOver === myId ? '#fbbf24' : '#94a3b8'} style={{ marginBottom: '-10px' }} />
-                        <h2 style={{ fontSize: '3rem', fontWeight: 900, color: gameOver === myId ? '#fbbf24' : '#fff', margin: 0 }}>
-                            {gameOver === myId ? 'BẠN ĐÃ THẮNG!' : 'BẠN ĐÃ THUA...'}
-                        </h2>
-                        <button className="btn-primary" onClick={handleReset}>Chơi lại</button>
-                        <button className="btn-secondary" onClick={() => navigate('/jungle')}>Trở về sảnh</button>
+                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(13, 17, 23, 0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+                        <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: `1px solid ${gameOver === myId ? 'rgba(251,191,36,0.4)' : 'rgba(255,255,255,0.1)'}`, boxShadow: gameOver === myId ? '0 0 40px rgba(251,191,36,0.3)' : 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                            <Trophy size={60} color={gameOver === myId ? '#fbbf24' : '#94a3b8'} />
+                            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: gameOver === myId ? '#fbbf24' : '#fff', margin: 0 }}>
+                                {gameOver === myId ? 'THẮNG!' : 'THUA'}
+                            </h2>
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                                <button onClick={handleReset} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: gameOver === myId ? '#fbbf24' : '#ef4444', color: '#000', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>
+                                    CHƠI LẠI
+                                </button>
+                                <button onClick={() => navigate('/jungle')} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', cursor: 'pointer' }}>
+                                    THOÁT
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

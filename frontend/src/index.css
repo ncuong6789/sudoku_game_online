@@ -35,6 +35,15 @@ body {
   user-select: none;
   -webkit-user-select: none;
   cursor: default;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  image-rendering: -webkit-optimize-quality;
+  image-rendering: high-quality;
+}
+
+img {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 input,

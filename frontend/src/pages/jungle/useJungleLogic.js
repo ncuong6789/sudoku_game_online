@@ -2,12 +2,32 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { socket } from '../../utils/socket';
 import { EVENTS } from '../../utils/constants';
 
+const INITIAL_PIECES = [
+    { type: 7, x: 0, y: 0, owner: 0, ownerId: '' },
+    { type: 6, x: 6, y: 0, owner: 0, ownerId: '' },
+    { type: 3, x: 1, y: 1, owner: 0, ownerId: '' },
+    { type: 2, x: 5, y: 1, owner: 0, ownerId: '' },
+    { type: 1, x: 0, y: 2, owner: 0, ownerId: '' },
+    { type: 5, x: 2, y: 2, owner: 0, ownerId: '' },
+    { type: 4, x: 4, y: 2, owner: 0, ownerId: '' },
+    { type: 8, x: 6, y: 2, owner: 0, ownerId: '' },
+    { type: 6, x: 0, y: 8, owner: 1, ownerId: '' },
+    { type: 7, x: 6, y: 8, owner: 1, ownerId: '' },
+    { type: 2, x: 1, y: 7, owner: 1, ownerId: '' },
+    { type: 3, x: 5, y: 7, owner: 1, ownerId: '' },
+    { type: 8, x: 0, y: 6, owner: 1, ownerId: '' },
+    { type: 4, x: 2, y: 6, owner: 1, ownerId: '' },
+    { type: 5, x: 4, y: 6, owner: 1, ownerId: '' },
+    { type: 1, x: 6, y: 6, owner: 1, ownerId: '' },
+];
+
 export function useJungleLogic(roomId, mode = 'multiplayer', difficulty = 'medium', onHintReceived, onMoveMade, onPieceCaptured, onGameOver) {
-    const [pieces, setPieces] = useState([]);
-    const [turn, setTurn] = useState(null);
+    const [pieces, setPieces] = useState(INITIAL_PIECES);
+    const [turn, setTurn] = useState(0);
     const [selectedPiece, setSelectedPiece] = useState(null);
     const [validMoves, setValidMoves] = useState([]);
     const [gameOver, setGameOver] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
     const [myId, setMyId] = useState(socket.id);
     const myIdRef = useRef(socket.id);
     const prevPiecesRef = useRef([]);
@@ -17,10 +37,13 @@ export function useJungleLogic(roomId, mode = 'multiplayer', difficulty = 'mediu
     }, [myId]);
 
     const initGame = useCallback((data) => {
-        setPieces(data.pieces);
-        setTurn(data.turn);
+        if (data.pieces && data.pieces.length > 0) {
+            setPieces(data.pieces);
+            prevPiecesRef.current = data.pieces;
+        }
+        if (data.turn) setTurn(data.turn);
         setGameOver(null);
-        prevPiecesRef.current = data.pieces;
+        setIsLoading(false);
     }, []);
 
     useEffect(() => {
@@ -187,6 +210,7 @@ export function useJungleLogic(roomId, mode = 'multiplayer', difficulty = 'mediu
         selectedPiece,
         validMoves,
         gameOver,
+        isLoading,
         handleSelect,
         myId
     };
