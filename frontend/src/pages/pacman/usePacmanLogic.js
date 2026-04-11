@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAudio } from '../../utils/useAudio';
 import { ALL_MAPS, CLASSIC, DIRS, GHOST_STARTS, chooseDirectionClassic, getGlobalMode, getRandomDir, manhattan, parseMap } from './pacmanAI';
 
-export function usePacmanLogic(mapType, difficulty) {
+export function usePacmanLogic(mapType, difficulty, isPaused) {
     const { playWinSound, playLoseSound, playPacmanStartSound, playPacmanWakaSound, playPacmanPowerPillSound, playPacmanEatGhostSound, playPacmanDieSound } = useAudio();
 
     const [mapGrid, setMapGrid] = useState([]);
@@ -19,7 +19,7 @@ export function usePacmanLogic(mapType, difficulty) {
 
     const ref = useRef({});
     useEffect(() => {
-        ref.current = { pacman, ghosts, dots, pills, score, lives, phase, frightenedTimer, protectedTimer, mapGrid, tickCount };
+        ref.current = { pacman, ghosts, dots, pills, score, lives, phase, frightenedTimer, protectedTimer, mapGrid, tickCount, isPaused };
     });
 
     const snd = useRef({});
@@ -94,7 +94,7 @@ export function usePacmanLogic(mapType, difficulty) {
         if (phase !== 'playing') return;
         const id = setInterval(() => {
             const s = ref.current;
-            if (s.phase !== 'playing' || !s.pacman || !s.mapGrid.length) return;
+            if (s.phase !== 'playing' || s.isPaused || !s.pacman || !s.mapGrid.length) return;
             const grid = s.mapGrid, cols = grid[0].length, rows = grid.length;
             const tc = s.tickCount + 1;
             setTickCount(tc);

@@ -48,16 +48,16 @@ export default function PacmanGame() {
     const navigate = useNavigate();
     const { mapType = 'Classic', difficulty = 'medium' } = state;
 
+    // Pause state (hoisted so we can pass to logic)
+    const [isPaused, setIsPaused] = React.useState(false);
+    const [showPauseMenu, setShowPauseMenu] = React.useState(false);
+
     const {
         mapGrid, pacman, ghosts, dots, pills, score, lives, phase,
         frightenedTimer, protectedTimer, totalDotsRef, handleRestart
-    } = usePacmanLogic(mapType, difficulty);
+    } = usePacmanLogic(mapType, difficulty, isPaused);
 
     const isPlaying = phase === 'playing' || phase === 'ready';
-    
-    // Pause state
-    const [isPaused, setIsPaused] = React.useState(false);
-    const [showPauseMenu, setShowPauseMenu] = React.useState(false);
     
     const togglePause = React.useCallback(() => {
         if (phase === 'gameover' || phase === 'won') return;

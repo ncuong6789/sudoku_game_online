@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { getBestMoveAsync } from './xiangqiAI';
 
 const INITIAL_BOARD = [
     ['b_r', 'b_n', 'b_b', 'b_a', 'b_k', 'b_a', 'b_b', 'b_n', 'b_r'],
@@ -211,13 +212,18 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}) => {
     const [validMoves, setValidMoves] = useState([]);
     const [isGameOver, setIsGameOver] = useState(false);
     const [winner, setWinner] = useState(null);
+    const [inCheckColor, setInCheckColor] = useState(null);
 
     const checkWinCondition = useCallback((customBoard, currentTurn) => {
         if (!hasAnyLegalMove(customBoard, currentTurn)) {
             setIsGameOver(true);
             setWinner(currentTurn === 'r' ? 'b' : 'r');
+            setInCheckColor(null);
         } else if (isCheck(customBoard, currentTurn)) {
+            setInCheckColor(currentTurn);
             if (callbacks.onCheck) callbacks.onCheck();
+        } else {
+            setInCheckColor(null);
         }
     }, [callbacks]);
 
@@ -268,23 +274,12 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}) => {
         return true;
     };
 
-    const makeRandomAIMove = (color) => {
+    const makeAIMove = (color) => {
         if (isGameOver) return;
-        const allMoves = [];
-        for (let r = 0; r <= 9; r++) {
-            for (let c = 0; c <= 8; c++) {
-                if (board[r][c] && board[r][c][0] === color) {
-                    const moves = getLegalMoves(board, r, c);
-                    moves.forEach(m => allMoves.push({ from: {r, c}, to: m }));
-                }
+        getBestMoveAsync(board, color, getLegalMoves, cloneBoard, isCheck, isKingsFacing, 3).then(chosenMove => {
+            if (!chosenMove) {
+                return; // Let checkWinCondition handle game over via hasAnyLegalMove
             }
-        }
-        if (allMoves.length > 0) {
-            // Simple logic: prefer captures
-            let bestMoves = allMoves.filter(m => board[m.to.r][m.to.c] !== null);
-            if (bestMoves.length === 0) bestMoves = allMoves;
-            
-            const chosenMove = bestMoves[Math.floor(Math.random() * bestMoves.length)];
             
             const target = board[chosenMove.to.r][chosenMove.to.c];
             if (target && callbacks.onCapture) callbacks.onCapture();
@@ -301,7 +296,7 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}) => {
                 checkWinCondition(newBoard, nextTurn);
                 return newBoard;
             });
-        }
+        });
     };
 
     return {
@@ -311,8 +306,9 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}) => {
         validMoves,
         isGameOver,
         winner,
+        inCheckColor,
         selectPiece,
         movePiece,
-        makeRandomAIMove
+        makeAIMove
     };
 };

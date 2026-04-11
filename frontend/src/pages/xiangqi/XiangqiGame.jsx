@@ -31,12 +31,12 @@ export default function XiangqiGame() {
         board,
         turn,
         selectedPos,
-        validMoves,
         isGameOver,
         winner,
+        inCheckColor,
         selectPiece,
         movePiece,
-        makeRandomAIMove
+        makeAIMove
     } = useXiangqiLogic('r', {
         onClick: playXiangqiClickSound,
         onMove: playXiangqiMoveSound,
@@ -48,12 +48,13 @@ export default function XiangqiGame() {
     // AI Move
     useEffect(() => {
         if (mode === 'solo' && !isGameOver && turn !== myColor) {
+            // Minimal layout delay since AI is async
             const timer = setTimeout(() => {
-                makeRandomAIMove(turn);
-            }, 800);
+                makeAIMove(turn);
+            }, 100);
             return () => clearTimeout(timer);
         }
-    }, [turn, mode, isGameOver, myColor, makeRandomAIMove]);
+    }, [turn, mode, isGameOver, myColor, makeAIMove]);
 
     // Game Over Sound
     useEffect(() => {
@@ -140,48 +141,48 @@ export default function XiangqiGame() {
                         overflow: 'hidden'
                     }}>
                         {/* THE SVG BOARD LINES */}
-                        <svg width="100%" height="100%" viewBox="0 0 800 900" style={{ position: 'absolute', inset: 0, padding: '40px', boxSizing: 'border-box', overflow: 'visible' }}>
+                        <svg width="100%" height="100%" viewBox="0 0 900 1000" preserveAspectRatio="xMidYMid meet" style={{ position: 'absolute', inset: 0 }}>
                             <g stroke="#3e2723" strokeWidth="3">
                                 {/* 10 Horizontal lines */}
-                                {[0, 100, 200, 300, 400, 500, 600, 700, 800, 900].map((y, i) => (
-                                    <line key={`h${i}`} x1="0" y1={y} x2="800" y2={y} />
+                                {[50, 150, 250, 350, 450, 550, 650, 750, 850, 950].map((y, i) => (
+                                    <line key={`h${i}`} x1="50" y1={y} x2="850" y2={y} />
                                 ))}
                                 {/* Vertical lines logic */}
-                                {[0, 100, 200, 300, 400, 500, 600, 700, 800].map((x, i) => {
-                                    if (x === 0 || x === 800) {
-                                        return <line key={`v${i}`} x1={x} y1="0" x2={x} y2="900" />;
+                                {[50, 150, 250, 350, 450, 550, 650, 750, 850].map((x, i) => {
+                                    if (i === 0 || i === 8) {
+                                        return <line key={`v${i}`} x1={x} y1="50" x2={x} y2="950" />;
                                     }
                                     return (
                                         <g key={`v${i}`}>
-                                            <line x1={x} y1="0" x2={x} y2="400" />
-                                            <line x1={x} y1="500" x2={x} y2="900" />
+                                            <line x1={x} y1="50" x2={x} y2="450" />
+                                            <line x1={x} y1="550" x2={x} y2="950" />
                                         </g>
                                     );
                                 })}
                                 {/* Palaces (X cross lines) */}
                                 {/* Top Palace (Black) */}
-                                <line x1="300" y1="0" x2="500" y2="200" />
-                                <line x1="500" y1="0" x2="300" y2="200" />
+                                <line x1="350" y1="50" x2="550" y2="250" />
+                                <line x1="550" y1="50" x2="350" y2="250" />
                                 {/* Bottom Palace (Red) */}
-                                <line x1="300" y1="700" x2="500" y2="900" />
-                                <line x1="500" y1="700" x2="300" y2="900" />
+                                <line x1="350" y1="750" x2="550" y2="950" />
+                                <line x1="550" y1="750" x2="350" y2="950" />
                                 
                                 {/* River text */}
-                                <text x="150" y="475" fill="#3e2723" fontSize="48" fontWeight="bold" fontFamily="serif" opacity="0.3" transform="scale(1, 1.2)">楚  河</text>
-                                <text x="500" y="475" fill="#3e2723" fontSize="48" fontWeight="bold" fontFamily="serif" opacity="0.3" transform="scale(1, 1.2)">漢  界</text>
+                                <text x="250" y="500" textAnchor="middle" dominantBaseline="central" fill="#3e2723" fontSize="48" fontWeight="bold" fontFamily="serif" opacity="0.4" transform="matrix(1, 0, 0, 1.2, 0, -100)">楚  河</text>
+                                <text x="650" y="500" textAnchor="middle" dominantBaseline="central" fill="#3e2723" fontSize="48" fontWeight="bold" fontFamily="serif" opacity="0.4" transform="matrix(1, 0, 0, 1.2, 0, -100)">漢  界</text>
                             </g>
                         </svg>
 
                         {/* PIECES AND HIGHLIGHTS RENDERED ON TOP */}
-                        <div style={{ position: 'absolute', inset: '40px', pointerEvents: 'none' }}>
+                        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
                             {board.map((rowArr, rowIndex) => 
                                 rowArr.map((piece, colIndex) => {
                                     // Visual Rotation for Black Player
                                     const displayRow = myColor === 'b' ? 9 - rowIndex : rowIndex;
                                     const displayCol = myColor === 'b' ? 8 - colIndex : colIndex;
                                     
-                                    const leftPct = (displayCol / 8) * 100;
-                                    const topPct = (displayRow / 9) * 100;
+                                    const leftPct = ((50 + displayCol * 100) / 900) * 100;
+                                    const topPct = ((50 + displayRow * 100) / 1000) * 100;
                                     
                                     const isSelected = selectedPos?.r === rowIndex && selectedPos?.c === colIndex;
                                     const isValidMove = validMoves.some(m => m.r === rowIndex && m.c === colIndex);
@@ -215,13 +216,13 @@ export default function XiangqiGame() {
                                                         position: 'absolute',
                                                         left: `${leftPct}%`,
                                                         top: `${topPct}%`,
-                                                        width: 'min(50px, 5.5vw)',
-                                                        height: 'min(50px, 5.5vw)',
+                                                        width: 'min(65px, 7.5vw)',
+                                                        height: 'min(65px, 7.5vw)',
                                                         transform: 'translate(-50%, -50%)',
-                                                        border: '4px solid rgba(239, 68, 68, 0.8)',
+                                                        border: '4px solid rgba(239, 68, 68, 0.9)',
                                                         borderRadius: '50%',
                                                         pointerEvents: 'none',
-                                                        zIndex: 20
+                                                        zIndex: 40, // Ensure it draws ABOVE the piece
                                                     }}
                                                 />
                                             )}
@@ -244,7 +245,9 @@ export default function XiangqiGame() {
                                             )}
 
                                             {/* PIECE VISUAL */}
-                                            {piece && (
+                                            {piece && (() => {
+                                                const isKingInCheck = inCheckColor && piece === `${inCheckColor}_k`;
+                                                return (
                                                 <div 
                                                     style={{
                                                         position: 'absolute',
@@ -255,10 +258,12 @@ export default function XiangqiGame() {
                                                         transform: 'translate(-50%, -50%)',
                                                         backgroundColor: '#e6c28f', // Wood base
                                                         borderRadius: '50%',
-                                                        border: `2px solid ${isSelected ? '#fbbf24' : '#8b5a2b'}`,
+                                                        border: `2px solid ${isSelected ? '#fbbf24' : isKingInCheck ? '#ef4444' : '#8b5a2b'}`,
                                                         boxShadow: isSelected 
                                                             ? '0 0 20px #fbbf24, inset 0 0 10px rgba(0,0,0,0.5)'
-                                                            : '0 4px 10px rgba(0,0,0,0.6), inset 0 0 10px rgba(139,90,43,0.8)',
+                                                            : isKingInCheck
+                                                                ? '0 0 20px rgba(239,68,68,0.9), inset 0 0 15px rgba(239,68,68,0.6)'
+                                                                : '0 4px 10px rgba(0,0,0,0.6), inset 0 0 10px rgba(139,90,43,0.8)',
                                                         display: 'flex',
                                                         alignItems: 'center',
                                                         justifyContent: 'center',
@@ -280,7 +285,8 @@ export default function XiangqiGame() {
                                                     }}></div>
                                                     {PIECE_TEXT[piece]}
                                                 </div>
-                                            )}
+                                                );
+                                            })()}
                                         </React.Fragment>
                                     );
                                 })

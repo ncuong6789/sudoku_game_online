@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "grapuco": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://api.grapuco.com/mcp",
+        "--header",
+        "Authorization: Bearer Ygyc_sk_291d2a34d58673f8d933e98bd88bda218ec59b0dbe9fcbff2d9099a8507c75ac"
+      ]
+    }
+  }
+}

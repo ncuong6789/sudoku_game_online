@@ -159,10 +159,10 @@ export default function PikachuGame() {
                                 style={{
                                     position: 'relative',
                                     width: '100%',
-                                    height: '100%',
+                                    height: 'auto',
                                     maxWidth: '100%',
                                     maxHeight: '100%',
-                                    aspectRatio: `${(COLS + 2) * 4.5} / ${(activeRows + 2) * 5.5}`, // Typical Pikachu tile ratio 45x55
+                                    aspectRatio: `${(COLS + 2)} / ${(activeRows + 2)}`,
                                     margin: 'auto',
                                     display: 'grid',
                                     gridTemplateColumns: `repeat(${COLS + 2}, 1fr)`,
