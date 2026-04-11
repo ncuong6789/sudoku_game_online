@@ -4,10 +4,10 @@ import { X, Heart, Copy, Check, ExternalLink } from 'lucide-react';
 // CẤU HÌNH TÀI KHOẢN CỦA BẠN TẠI ĐÂY
 const DONATE_CONFIG = {
     bankId: 'Ngân hàng Techcombank', // Bank name
-    accountNo: '19038495256012', 
-    accountName: 'NGUYỆN LÊ HÙNG CƯỜNG',
-    qrImage: '/qr-donate.png', // Hãy thay file ảnh bằng mã QR cố định của bạn (lưu trong folder public/)
-    bankLogo: '/techcombank-logo.png' // Logo ngân hàng (lưu trong public/)
+    accountNo: '19038495256012',
+    accountName: 'NGUYỄN LÊ HÙNG CƯỜNG',
+    qrImage: '/qr_code.png', // Sử dụng ảnh QR xịn mà bạn đã có sẵn
+    bankLogo: 'https://api.vietqr.io/img/TCB.png' // Logo ngân hàng chuẩn từ hệ thống VietQR
 };
 
 export default function DonateModal({ isOpen, onClose }) {
@@ -78,7 +78,7 @@ export default function DonateModal({ isOpen, onClose }) {
 
                 <div style={{ textAlign: 'center', marginBottom: '1.2rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '0 0 0.4rem 0', fontSize: '1.6rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>
-                        Ủng hộ dự án 
+                        Ủng hộ dự án
                         <Heart className="heart-pulse" size={26} fill="#ef4444" color="#ef4444" />
                     </h2>
                     <p style={{ margin: 0, fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.4 }}>
@@ -108,9 +108,9 @@ export default function DonateModal({ isOpen, onClose }) {
                         <img
                             src={DONATE_CONFIG.qrImage}
                             alt="Mã QR Donate"
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }}
+                            style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '12px' }}
                             onError={(e) => {
-                                e.target.src = 'https://via.placeholder.com/280?text=QR+Image+Missing';
+                                e.target.src = '/donate_qr.png';
                             }}
                         />
                     </div>
@@ -122,7 +122,7 @@ export default function DonateModal({ isOpen, onClose }) {
                                 <img src={DONATE_CONFIG.bankLogo} alt="Logo" style={{ width: '28px', height: '28px', objectFit: 'contain', borderRadius: '4px' }} onError={(e) => { e.target.style.display = 'none'; }} />
                                 <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f3f4f6', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{DONATE_CONFIG.bankId}</span>
                             </div>
-                            
+
                             {/* Account No & Copy */}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>

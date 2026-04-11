@@ -44,11 +44,22 @@ const DENS = [
 ];
 
 const ANIMAL_ICONS = {
-    1: '🐀', 2: '🐱', 3: '🐕', 4: '🐺', 5: '🐆', 6: '🐅', 7: '🦁', 8: '🐘'
+    1: '⚀', 2: '⚂', 3: '⚃', 4: '⚄', 5: '⚅', 6: '⚌', 7: '⚘', 8: '▣'
 };
 
 const ANIMAL_COLORS = {
     1: '#9ca3af', 2: '#f97316', 3: '#a855f7', 4: '#ef4444', 5: '#eab308', 6: '#f59e0b', 7: '#eab308', 8: '#64748b'
+};
+
+const ANIMAL_SYMBOLS = {
+    1: { char: 'R', name: 'Rat', sound: 'squeak' },
+    2: { char: 'C', name: 'Cat', sound: 'meow' },
+    3: { char: 'D', name: 'Dog', sound: 'bark' },
+    4: { char: 'W', name: 'Wolf', sound: 'howl' },
+    5: { char: 'L', name: 'Leopard', sound: 'growl' },
+    6: { char: 'T', name: 'Tiger', sound: 'roar' },
+    7: { char: 'S', name: 'Lion', sound: 'roar' },
+    8: { char: 'E', name: 'Elephant', sound: 'trumpet' }
 };
 
 export default function JungleGame() {
@@ -57,18 +68,15 @@ export default function JungleGame() {
     const { roomId, mode, difficulty } = location.state || { roomId: 'local', mode: 'solo', difficulty: 'medium' };
     
     const canvasRef = useRef(null);
-    const [activeHint, setActiveHint] = useState(null);
+    const [hintMoves, setHintMoves] = useState(null);
     
     const { playSelect, playMove, playCapture, playWin, playLose } = useJungleSounds();
 
     const { pieces, turn, selectedPiece, validMoves, gameOver, isLoading, handleSelect, myId } = useJungleLogic(
         roomId, mode, difficulty, 
-        (move) => {
-            setActiveHint(move);
-            setTimeout(() => setActiveHint(null), 3000);
-        },
+        () => {}, // No auto-hint on move
         (isJump) => playMove(isJump),
-        () => playCapture(),
+        (capturedPiece, attackerPiece) => playCapture(capturedPiece?.type, attackerPiece?.type),
         (winner) => {
             if (winner === myId) playWin();
             else playLose();
@@ -78,6 +86,15 @@ export default function JungleGame() {
     const getHint = () => {
         socket.emit(EVENTS.JUNGLE_GET_HINT, { roomId });
     };
+
+    // Listen for hint response
+    useEffect(() => {
+        const handleHintResponse = (suggestions) => {
+            setHintMoves(suggestions);
+        };
+        socket.on('jungleHintReceived', handleHintResponse);
+        return () => socket.off('jungleHintReceived', handleHintResponse);
+    }, []);
 
     const handleReset = () => {
         const resetRoomId = roomId === 'local' ? `local_${socket.id}` : roomId;
@@ -266,13 +283,17 @@ export default function JungleGame() {
                 ctx.arc(0, 0, TILE_SIZE/2 - 10, 0, Math.PI * 2);
                 ctx.stroke();
 
-                // Animal icon with color tint
-                ctx.shadowBlur = 8;
-                ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                ctx.font = `${TILE_SIZE/2.5}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
+                // Animal symbol with modern badge style
+                ctx.shadowBlur = 4;
+                ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                ctx.font = `bold ${TILE_SIZE/2.2}px "Inter", "Segoe UI", sans-serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(ANIMAL_ICONS[p.type], 0, 2);
+                
+                // Draw letter in badge
+                const symbol = ANIMAL_SYMBOLS[p.type];
+                ctx.fillStyle = ANIMAL_COLORS[p.type];
+                ctx.fillText(symbol?.char || p.type, 0, 2);
 
                 // Rank badge with animation
                 const badgePulse = isSelected ? 1 + Math.sin(ts / 200) * 0.1 : 1;
@@ -287,9 +308,10 @@ export default function JungleGame() {
                 ctx.restore();
             });
 
-            // 5. Draw Hint with animation
-            if (activeHint) {
-                const { from, to } = activeHint;
+            // 5. Draw Hints with animation (show best move)
+            if (hintMoves && hintMoves.length > 0) {
+                const bestMove = hintMoves[0];
+                const { from, to } = bestMove;
                 const fx = getRenderX(from.x) * TILE_SIZE + TILE_SIZE/2;
                 const fy = getRenderY(from.y) * TILE_SIZE + TILE_SIZE/2;
                 const tx = getRenderX(to.x) * TILE_SIZE + TILE_SIZE/2;
@@ -323,7 +345,7 @@ export default function JungleGame() {
 
         render(0);
         return () => cancelAnimationFrame(frameId);
-    }, [pieces, selectedPiece, validMoves, turn, myId, activeHint]);
+    }, [pieces, selectedPiece, validMoves, turn, myId, hintMoves]);
 
     const handleCanvasClick = (e) => {
         const rect = canvasRef.current.getBoundingClientRect();
@@ -361,121 +383,25 @@ export default function JungleGame() {
                 background: 'rgba(23, 23, 33, 0.85)',
                 backdropFilter: 'blur(25px)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)',
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'flex-start'
             }}>
                 
-                {/* LEFT: INFO & RULES */}
+                {/* TRÁI: BÀN CỜ */}
                 <div style={{
-                    flex: '0 1 280px',
-                    width: '280px',
-                    minWidth: '240px',
+                    flex: '0 0 auto',
                     display: 'flex',
                     flexDirection: 'column',
-                    maxHeight: '100%',
-                    overflow: 'hidden',
-                    background: 'rgba(255,255,255,0.03)',
-                    borderRadius: '16px',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    padding: '1.2rem',
-                    boxSizing: 'border-box'
+                    alignItems: 'center',
+                    gap: '0.5rem'
                 }}>
-                    <h3 style={{ margin: '0 0 15px 0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)' }}>
-                        <span style={{ fontSize: '1.2rem' }}>📊</span> Cấp bậc & Kỹ năng
-                    </h3>
-
                     <div style={{
-                        flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)',
-                        borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.05)',
-                        scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.1) transparent',
-                        display: 'flex', flexDirection: 'column', gap: '8px'
-                    }}>
-                        {[8,7,6,5,4,3,2,1].map(v => (
-                            <div key={v} style={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                gap: '10px',
-                                background: v <= 2 ? 'rgba(251,191,36,0.08)' : (v >= 7 ? 'rgba(239,68,68,0.08)' : 'transparent'),
-                                padding: '8px',
-                                borderRadius: '8px',
-                                border: '1px solid rgba(255,255,255,0.03)'
-                            }}>
-                                <span style={{ fontSize: '1.3rem', width: '28px', textAlign: 'center' }}>{ANIMAL_ICONS[v]}</span>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span style={{ color: '#fff', fontWeight: 600, fontSize: '0.9rem' }}>{v}. {PIECE_NAMES[v]}</span>
-                                        {v === 8 && <span style={{ fontSize: '0.7rem', color: '#ef4444', background: 'rgba(239,68,68,0.2)', padding: '2px 6px', borderRadius: '4px' }}>Yếu nhất</span>}
-                                        {v === 1 && <span style={{ fontSize: '0.7rem', color: '#4ade80', background: 'rgba(74,222,128,0.2)', padding: '2px 6px', borderRadius: '4px' }}>Mạnh nhất</span>}
-                                    </div>
-                                    <div style={{ fontSize: '0.75rem', color: ANIMAL_COLORS[v], marginTop: '2px' }}>
-                                        {PIECE_DESCRIPTIONS[v]}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                        
-                        <div style={{ marginTop: '12px', padding: '12px', background: 'rgba(251,191,36,0.1)', borderRadius: '8px', border: '1px solid rgba(251,191,36,0.2)' }}>
-                            <div style={{ fontSize: '0.8rem', color: '#fbbf24', fontWeight: 700, marginBottom: '8px' }}>🎯 LUẬT CHƠI</div>
-                            <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', lineHeight: '1.6' }}>
-                                <li>Quân lớn hơn ăn quân nhỏ hơn (8 vs 1 là ngoại lệ)</li>
-                                <li>Hổ & Sư tử <strong style={{color:'#4ade80'}}>nhảy qua sông</strong> 2 ô</li>
-                                <li>Chuột <strong style={{color:'#4ade80'}}>bơi trong sông</strong> & ăn Voi</li>
-                                <li>Voi không vào sông, bị Chuột ăn</li>
-                                <li>Vào Hang đối phương = <strong style={{color:'#ffd700'}}>THẮNG</strong></li>
-                                <li>Bị ăn hết quân = <strong style={{color:'#ef4444'}}>THUA</strong></li>
-                            </ul>
-                        </div>
-                        
-                        <div style={{ padding: '10px', background: 'rgba(96,165,250,0.1)', borderRadius: '8px', border: '1px solid rgba(96,165,250,0.2)' }}>
-                            <div style={{ fontSize: '0.75rem', color: '#60b5ff', fontWeight: 600, marginBottom: '4px' }}>🏞 Địa hình</div>
-                            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)' }}>
-                                🌊 <strong>Sông</strong>: Hổ/Sư tử nhảy qua, Chuột bơi<br/>
-                                ⬜ <strong>Bẫy</strong>: Quân yếu bị giảm sức<br/>
-                                🏠 <strong>Hang</strong>: Vào được = thắng
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* MIDDLE: BOARD */}
-                <div style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '320px', padding: 0, margin: 0, maxHeight: '100%' }}>
-                    {/* Status Header */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', width: '100%', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '10px 18px', marginBottom: '10px', flexShrink: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <Activity size={18} color="#4ade80" />
-                            <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#fff' }}>Cờ Thú</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', justifyContent: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: turn === myId ? 1 : 0.5 }}>
-                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 10px #4ade80' }} />
-                                <span style={{ fontWeight: 800, fontSize: '0.9rem', color: turn === myId ? '#4ade80' : '#fff' }}>BẠN {turn === myId ? '(Đang đi)' : ''}</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: turn !== myId ? 1 : 0.5 }}>
-                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#60a5fa', boxShadow: '0 0 10px #60a5fa' }} />
-                                <span style={{ fontWeight: 800, fontSize: '0.9rem', color: turn !== myId ? '#60a5fa' : '#fff' }}>ĐỐI THỦ {turn !== myId && turn !== null ? '(Đang đi)' : ''}</span>
-                            </div>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fbbf24', background: 'rgba(251,191,36,0.1)', padding: '4px 12px', borderRadius: '20px', border: '1px solid #fbbf2433' }}>
-                                {difficulty.toUpperCase()}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="game-play-board jungle-board" style={{
                         position: 'relative',
-                        border: '6px solid rgba(15, 15, 25, 0.95)',
-                        borderRadius: '12px',
-                        boxShadow: '0 30px 60px rgba(0, 0, 0, 0.6)',
-                        overflow: 'hidden',
-                        background: '#0f172a',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        /* Add responsive logic */
                         width: '100%',
-                        maxHeight: 'calc(100vh - 120px)',
-                        aspectRatio: '7 / 9',
-                        flex: '1 1 auto'
+                        maxWidth: `${MAP_SIZE_W}px`,
+                        aspectRatio: '7 / 9'
                     }}>
                         {isLoading && (
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 10, background: 'rgba(15, 23, 42, 0.9)' }}>
@@ -500,27 +426,109 @@ export default function JungleGame() {
                     </div>
                 </div>
 
-                {/* RIGHT: CONTROLS */}
-                <div style={{ flex: '0 1 260px', width: '260px', minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '0.8rem', maxHeight: '100%', overflow: 'hidden' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.2rem', color: '#fff' }}>CỜ THÚ</div>
-                        
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <button className="btn-primary" onClick={handleReset}><RotateCcw size={18} /> Chơi ván mới</button>
-                            
-                            <button className="btn-secondary" onClick={getHint} disabled={turn !== myId} style={{ borderColor: '#fbbf24', color: '#fbbf24' }}>
-                                <HelpCircle size={18} /> Gợi ý nước đi (AI)
-                            </button>
-                            
-                            <button className="btn-secondary" onClick={() => navigate('/jungle')}><ArrowLeft size={18} /> Thoát</button>
+                {/* PHẢI: CONTROLS + INFO 2 CỘT */}
+                <div style={{ flex: '0 0 280px', width: '280px', display: 'flex', flexDirection: 'column', gap: '0.75rem', marginLeft: '1rem', minHeight: 0 }}>
+                    
+                    {/* CỘT TRÊN: Header + Score/Level */}
+                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        {/* Cột trái: Header + Turn */}
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            <div className="nav-item active" style={{ padding: '8px', display: 'flex', alignSelf: 'center', alignItems: 'center', gap: '6px', fontSize: '1rem', fontWeight: 'bold' }}>
+                                <span style={{fontSize: '1.1rem'}}>♟</span> Cờ Thú
+                            </div>
+                            <div style={{ textAlign: 'center', fontSize: '0.85rem', color: isMyTurn ? '#4ade80' : '#94a3b8' }}>
+                                {isMyTurn ? '🎯 Lượt của bạn' : '⏳ Đợi đối thủ...'}
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#4ade80' }}></span>
+                                    Bạn
+                                </span>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#60b5fa' }}></span>
+                                    Đối
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Cột phải: Animals list */}
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '0.75rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', maxHeight: '180px', overflowY: 'auto' }}>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>Cấp bậc</div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px' }}>
+                                {[8,7,6,5,4,3,2,1].map(v => (
+                                    <div key={v} style={{ 
+                                        display: 'flex', 
+                                        flexDirection: 'column',
+                                        alignItems: 'center', 
+                                        padding: '4px',
+                                        background: v <= 2 ? 'rgba(251,191,36,0.08)' : (v >= 7 ? 'rgba(239,68,68,0.08)' : 'transparent'),
+                                        borderRadius: '4px'
+                                    }}>
+                                        <div style={{ 
+                                            width: '20px', height: '20px', 
+                                            borderRadius: '4px', 
+                                            background: ANIMAL_COLORS[v],
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            fontWeight: 700, fontSize: '0.65rem', color: '#fff'
+                                        }}>
+                                            {ANIMAL_SYMBOLS[v]?.char || v}
+                                        </div>
+                                        <span style={{ fontSize: '0.55rem', color: 'var(--text-secondary)', marginTop: '2px' }}>{PIECE_NAMES[v]}</span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
 
-                    <div style={{ borderRadius: '12px', padding: '15px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', flex: 1 }}>
-                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', marginBottom: '12px' }}>🛡 Phòng Thủ</div>
-                        <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', lineHeight: '1.6' }}>
-                            Hãy cẩn thận với <b>Bẫy (Traps)</b> xung quanh Hang. Bất kỳ quân nào sa vào bẫy đều sẽ bị giảm sức mạnh và ai cũng ăn được!
-                        </p>
+                    {/* Controls */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <button className="btn-primary" onClick={handleReset} style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+                            <RotateCcw size={16} /> Chơi ván mới
+                        </button>
+                        
+                        <button className="btn-secondary" onClick={getHint} disabled={turn !== myId || isLoading} style={{ borderColor: '#fbbf24', color: '#fbbf24', padding: '10px', fontSize: '0.85rem' }}>
+                            <HelpCircle size={16} /> Gợi ý (AI)
+                        </button>
+
+                        {hintMoves && hintMoves.length > 0 && (
+                            <div style={{ 
+                                padding: '10px', 
+                                background: 'rgba(251,191,36,0.1)', 
+                                borderRadius: '8px', 
+                                border: '1px solid rgba(251,191,36,0.3)'
+                            }}>
+                                <div style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 600, marginBottom: '6px' }}>💡 Gợi ý</div>
+                                {hintMoves.slice(0, 2).map((move, idx) => (
+                                    <div key={idx} style={{ 
+                                        display: 'flex', alignItems: 'center', gap: '6px',
+                                        padding: '6px',
+                                        background: idx === 0 ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.05)',
+                                        borderRadius: '6px', marginBottom: '4px',
+                                        fontSize: '0.75rem'
+                                    }}>
+                                        <span style={{ 
+                                            width: '16px', height: '16px', 
+                                            borderRadius: '50%', 
+                                            background: idx === 0 ? '#4ade80' : '#60b5fa',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            fontSize: '0.6rem', fontWeight: 700, color: '#000'
+                                        }}>{idx+1}</span>
+                                        <span style={{ color: '#fff' }}>
+                                            {ANIMAL_SYMBOLS[pieces.find(p => p.x === move.from.x && p.y === move.from.y)?.type]?.char || '?'}
+                                            {String.fromCharCode(65 + move.from.x)}{9 - move.from.y}→{String.fromCharCode(65 + move.to.x)}{9 - move.to.y}
+                                        </span>
+                                    </div>
+                                ))}
+                                <button 
+                                    onClick={() => setHintMoves(null)} 
+                                    style={{ width: '100%', padding: '4px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem' }}
+                                >✕ Ẩn</button>
+                            </div>
+                        )}
+                        
+                        <button className="btn-secondary" onClick={() => navigate('/jungle')} style={{ padding: '10px', fontSize: '0.85rem' }}>
+                            <ArrowLeft size={16} /> Thoát
+                        </button>
                     </div>
                 </div>
 

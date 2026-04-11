@@ -44,6 +44,10 @@ import JungleHome from './pages/jungle/JungleHome';
 import JungleLobby from './pages/jungle/JungleLobby';
 import JungleGame from './pages/jungle/JungleGame';
 
+// Xiangqi Components
+import XiangqiHome from './pages/xiangqi/XiangqiHome';
+import XiangqiGame from './pages/xiangqi/XiangqiGame';
+
 // Test Dashboard
 import GameTestDashboard from './pages/test/GameTestDashboard';
 
@@ -97,6 +101,10 @@ function App() {
         <Route path="/jungle" element={<JungleHome />} />
         <Route path="/jungle/multiplayer" element={<JungleLobby />} />
         <Route path="/jungle/game" element={<JungleGame />} />
+
+        {/* Xiangqi Module */}
+        <Route path="/xiangqi" element={<XiangqiHome />} />
+        <Route path="/xiangqi/game" element={<XiangqiGame />} />
 
         {/* Test Dashboard */}
         <Route path="/test" element={<GameTestDashboard />} />

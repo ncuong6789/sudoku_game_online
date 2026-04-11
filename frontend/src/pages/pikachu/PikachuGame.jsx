@@ -23,18 +23,6 @@ export default function PikachuGame() {
     // Map tile ID sang icon (sg11 used 0-35, but we use 1-36 internally to reserve 0 for empty space)
     const getIconSrc = (id) => `/pikachu_sprites_hd/${id - 1}.png`;
 
-    // Optimized sprite loading with proper sizing
-    const SPRITE_SIZE = 64; // Base size for sprites
-    const getSpriteStyle = (id) => ({
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-        objectPosition: 'center',
-        imageRendering: 'auto',
-        WebkitImageSmoothing: 'high',
-        MozOsxFontSmoothing: 'grayscale',
-    });
-
     const boardRef = React.useRef(null);
     const cellRefs = React.useRef({});
     const [linePoints, setLinePoints] = React.useState('');
@@ -204,8 +192,8 @@ export default function PikachuGame() {
                                             }}
                                         >
                                             <div style={{
-                                                width: '98%',
-                                                height: '98%',
+                                                width: '100%',
+                                                height: '100%',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
@@ -215,7 +203,15 @@ export default function PikachuGame() {
                                                     <img
                                                         src={getIconSrc(id)}
                                                         alt={`Tile ${id}`}
-                                                        style={getSpriteStyle(id)}
+                                                        style={{
+                                                            width: '100%',
+                                                            height: '100%',
+                                                            objectFit: 'contain',
+                                                            display: 'block',
+                                                            imageRendering: 'high-quality',
+                                                            WebkitImageSmoothing: 'high',
+                                                            MozOsxFontSmoothing: 'grayscale',
+                                                        }}
                                                         draggable="false"
                                                         loading="eager"
                                                     />

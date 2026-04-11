@@ -54,12 +54,19 @@ export function useJungleLogic(roomId, mode = 'multiplayer', difficulty = 'mediu
             socket.emit(EVENTS.START_JUNGLE_GAME, { roomId: getEffectiveRoom(), mode, difficulty });
         };
 
-        if (socket.connected) {
-            setMyId(socket.id);
-            socket.emit(EVENTS.START_JUNGLE_GAME, { roomId: getEffectiveRoom(), mode, difficulty });
-        } else {
-            socket.on('connect', onConnect);
-        }
+        const tryStartGame = () => {
+            if (socket.connected) {
+                setMyId(socket.id);
+                socket.emit(EVENTS.START_JUNGLE_GAME, { roomId: getEffectiveRoom(), mode, difficulty });
+            }
+        };
+
+        tryStartGame();
+        socket.on('connect', onConnect);
+        
+        const connectionTimeout = setTimeout(() => {
+            setIsLoading(false);
+        }, 5000);
 
         socket.on(EVENTS.JUNGLE_GAME_STARTED, initGame);
         socket.on(EVENTS.JUNGLE_GAME_STATE, (data) => {
@@ -70,8 +77,12 @@ export function useJungleLogic(roomId, mode = 'multiplayer', difficulty = 'mediu
                 const capturedPiece = prevPieces.find(p => 
                     !newPieces.find(np => np.x === p.x && np.y === p.y)
                 );
+                // Find attacker (the piece that moved to captured position)
+                const attackerPiece = newPieces.find(np => 
+                    prevPieces.find(pp => pp.id === np.id && (pp.x !== np.x || pp.y !== np.y))
+                );
                 if (capturedPiece) {
-                    if (onPieceCaptured) onPieceCaptured(capturedPiece);
+                    if (onPieceCaptured) onPieceCaptured(capturedPiece, attackerPiece);
                 } else {
                     if (onMoveMade) onMoveMade(false);
                 }
@@ -82,7 +93,7 @@ export function useJungleLogic(roomId, mode = 'multiplayer', difficulty = 'mediu
             setTurn(data.turn);
         });
         socket.on(EVENTS.JUNGLE_PIECE_CAPTURED, (data) => {
-            if (onPieceCaptured) onPieceCaptured(data.piece);
+            if (onPieceCaptured) onPieceCaptured(data.piece, data.attacker);
         });
         socket.on(EVENTS.JUNGLE_HINT_RECEIVED, (move) => {
             if (onHintReceived) onHintReceived(move);

@@ -54,6 +54,28 @@ export default function PacmanGame() {
     } = usePacmanLogic(mapType, difficulty);
 
     const isPlaying = phase === 'playing' || phase === 'ready';
+    
+    // Pause state
+    const [isPaused, setIsPaused] = React.useState(false);
+    const [showPauseMenu, setShowPauseMenu] = React.useState(false);
+    
+    const togglePause = React.useCallback(() => {
+        if (phase === 'gameover' || phase === 'won') return;
+        setIsPaused(prev => !prev);
+        setShowPauseMenu(prev => !prev);
+    }, [phase]);
+
+    // Keyboard handler for pause
+    React.useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.code === 'Space' && (phase === 'playing' || phase === 'ready')) {
+                e.preventDefault();
+                togglePause();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [phase, togglePause]);
 
     // Global Mute Toggle (used by the UI buttons, but background piano is removed)
     const [muted, setMuted] = React.useState(false);
@@ -282,31 +304,36 @@ export default function PacmanGame() {
                 </div>
             </div>
 
-            {/* ── SIDEBAR ── */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', width: '240px', flexShrink: 0, height: '100%', overflowY: 'auto' }}>
-                <div style={{ padding: 'clamp(0.8rem,1.5vw,1.2rem)', display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ textAlign: 'center', width: '100%' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '2px' }}>Score</div>
-                        <div style={{ fontSize: 'clamp(1.4rem,2.5vw,1.8rem)', fontWeight: 800, color: '#fbbf24', lineHeight: 1 }}>{score}</div>
-                    </div>
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.8rem', width: '100%', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>Lives</div>
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '6px' }}>
-                            {[...Array(3)].map((_, i) => <Heart key={i} size={22} color={i < lives ? '#ef4444' : '#374151'} fill={i < lives ? '#ef4444' : 'none'} />)}
+            {/* ── SIDEBAR 2 CỘT ── */}
+            <div style={{ display: 'flex', gap: '0.75rem', width: '260px', flexShrink: 0, height: '100%', overflow: 'hidden' }}>
+                {/* CỘT TRÁI: Score + Lives + Info */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem', minHeight: 0, overflow: 'hidden' }}>
+                    <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem', alignItems: 'center', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ textAlign: 'center', width: '100%' }}>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '2px' }}>Score</div>
+                            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#fbbf24', lineHeight: 1 }}>{score}</div>
+                        </div>
+                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.6rem', width: '100%', textAlign: 'center' }}>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '6px' }}>Lives</div>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '4px' }}>
+                                {[...Array(3)].map((_, i) => <Heart key={i} size={20} color={i < lives ? '#ef4444' : '#374151'} fill={i < lives ? '#ef4444' : 'none'} />)}
+                            </div>
                         </div>
                     </div>
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.8rem', width: '100%', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}><span style={{ color: 'var(--text-secondary)' }}>Map</span><span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{mapType}</span></div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}><span style={{ color: 'var(--text-secondary)' }}>Độ khó</span><span style={{ fontWeight: 700, fontSize: '0.72rem', color: difficulty === 'hard' ? '#ef4444' : '#f59e0b' }}>{difficulty === 'hard' ? '🔥 Khó' : '⚡ TB'}</span></div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}><span style={{ color: 'var(--text-secondary)' }}>Chấm còn</span><span style={{ color: '#fbbf24', fontWeight: 600 }}>{dots.size}</span></div>
+
+                    <div style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '4px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', flex: 1, overflow: 'auto' }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '2px' }}>Thông tin</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}><span style={{ color: 'var(--text-secondary)' }}>Map</span><span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{mapType}</span></div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}><span style={{ color: 'var(--text-secondary)' }}>Độ khó</span><span style={{ fontWeight: 700, fontSize: '0.7rem', color: difficulty === 'hard' ? '#ef4444' : '#f59e0b' }}>{difficulty === 'hard' ? '🔥 Khó' : '⚡ TB'}</span></div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}><span style={{ color: 'var(--text-secondary)' }}>Chấm còn</span><span style={{ color: '#fbbf24', fontWeight: 600 }}>{dots.size}</span></div>
                         {totalDotsRef.current > 0 && (() => {
                             const eaten = totalDotsRef.current - dots.size;
                             const pct = Math.round((eaten / totalDotsRef.current) * 100);
                             return (
                                 <div style={{ marginTop: '4px' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--text-secondary)', marginBottom: '3px' }}><span>Ăn được</span><span>{pct}%</span></div>
-                                    <div style={{ height: '5px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden' }}>
-                                        <div style={{ height: '100%', borderRadius: '3px', width: `${pct}%`, background: pct >= 60 ? '#ef4444' : pct >= 40 ? '#f59e0b' : '#4ade80', transition: 'width 0.3s ease' }} />
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--text-secondary)', marginBottom: '2px' }}><span>Ăn được</span><span>{pct}%</span></div>
+                                    <div style={{ height: '4px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
+                                        <div style={{ height: '100%', borderRadius: '2px', width: `${pct}%`, background: pct >= 60 ? '#ef4444' : pct >= 40 ? '#f59e0b' : '#4ade80', transition: 'width 0.3s ease' }} />
                                     </div>
                                 </div>
                             );
@@ -314,42 +341,57 @@ export default function PacmanGame() {
                     </div>
                 </div>
 
-                <div style={{ padding: '0.8rem', display: 'flex', flexDirection: 'column', gap: '6px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '2px' }}>Ghosts</div>
-                    {ghosts.map(g => (
-                        <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem' }}>
-                            <div style={{ width: 18, height: 18, flexShrink: 0 }}>
-                                <GhostArt color={g.color} dir={g.dir} state={g.state} size='100%' frightenedFlash={false} />
+                {/* CỘT PHẢI: Ghosts + Status + Controls */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem', minHeight: 0, overflow: 'hidden' }}>
+                    <div style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '4px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', flex: 1, overflow: 'auto' }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '2px' }}>Ghosts</div>
+                        {ghosts.map(g => (
+                            <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem' }}>
+                                <div style={{ width: 16, height: 16, flexShrink: 0 }}>
+                                    <GhostArt color={g.color} dir={g.dir} state={g.state} size='100%' frightenedFlash={false} />
+                                </div>
+                                <span style={{ color: 'var(--text-secondary)', flex: 1 }}>{g.id[0] + g.id.slice(1).toLowerCase()}</span>
+                                <span style={{ fontSize: '0.65rem' }}>{g.state === 'frightened' ? '😱' : g.state === 'dead' ? '💀' : g.state === 'house' ? '🏠' : g.state === 'exiting' ? '🚪' : '🎯'}</span>
                             </div>
-                            <span style={{ color: 'var(--text-secondary)', flex: 1 }}>{g.id[0] + g.id.slice(1).toLowerCase()}</span>
-                            <span style={{ fontSize: '0.65rem' }}>{g.state === 'frightened' ? '😱' : g.state === 'dead' ? '💀' : g.state === 'house' ? '🏠' : g.state === 'exiting' ? '🚪' : '🎯'}</span>
-                        </div>
-                    ))}
-                </div>
-
-                {frightenedTimer > 0 && (
-                    <div style={{ padding: '0.8rem', textAlign: 'center', borderRadius: '12px', border: '1px solid rgba(29,78,216,0.5)', background: 'rgba(29,78,216,0.1)' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#93c5fd', marginBottom: '2px' }}>⚡ POWER</div><div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#60a5fa' }}>{frightenedTimer}</div>
+                        ))}
                     </div>
-                )}
-                {isProtected && phase === 'playing' && (
-                    <div style={{ padding: '0.8rem', textAlign: 'center', borderRadius: '12px', border: '1px solid rgba(251,191,36,0.5)', background: 'rgba(251,191,36,0.1)' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#fbbf24', animation: 'pacFlash 0.5s infinite' }}>🛡️ Bất Tử</div>
-                    </div>
-                )}
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: 'auto' }}>
-                    <button className="btn-primary" onClick={handleRestart} style={{ padding: '9px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', width: '100%', fontSize: '0.9rem' }}>
-                        <RotateCcw size={15} /> Chơi Lại
-                    </button>
-                    <button onClick={toggleMute} style={{ width: '100%', padding: '9px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontSize: '0.9rem', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: muted ? '#ef4444' : '#4ade80', cursor: 'pointer' }}>
-                        {muted ? <VolumeX size={15} /> : <Volume2 size={15} />} {muted ? 'Bật nhạc' : 'Tắt nhạc'}
-                    </button>
-                    <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '9px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', width: '100%', fontSize: '0.9rem' }}>
-                        <ArrowLeft size={15} /> Về Sảnh
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        {frightenedTimer > 0 && (
+                            <div style={{ flex: 1, padding: '0.6rem', textAlign: 'center', borderRadius: '10px', border: '1px solid rgba(29,78,216,0.5)', background: 'rgba(29,78,216,0.1)' }}>
+                                <div style={{ fontSize: '0.6rem', color: '#93c5fd' }}>⚡ POWER</div><div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#60a5fa' }}>{frightenedTimer}</div>
+                            </div>
+                        )}
+                        {isProtected && phase === 'playing' && (
+                            <div style={{ flex: 1, padding: '0.6rem', textAlign: 'center', borderRadius: '10px', border: '1px solid rgba(251,191,36,0.5)', background: 'rgba(251,191,36,0.1)' }}>
+                                <div style={{ fontSize: '0.65rem', color: '#fbbf24', animation: 'pacFlash 0.5s infinite' }}>🛡️ Bất Tử</div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <button onClick={togglePause} disabled={phase === 'gameover' || phase === 'won'} style={{ padding: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px', width: '100%', fontSize: '0.8rem', background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.04)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: isPaused ? '#38bdf8' : '#fff', cursor: (phase === 'gameover' || phase === 'won') ? 'default' : 'pointer', opacity: (phase === 'gameover' || phase === 'won') ? 0.5 : 1 }}>
+                            {isPaused ? '▶ Tiếp tục' : '⏸ Tạm dừng'}
+                        </button>
+                        <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}>
+                            <ArrowLeft size={14} /> Về Sảnh
+                        </button>
+                    </div>
                 </div>
             </div>
+
+            {/* Pause Overlay */}
+            {showPauseMenu && (
+                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+                    <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: '1px solid rgba(56,189,248,0.4)', boxShadow: '0 0 40px rgba(56,189,248,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                        <div style={{ fontSize: '3rem' }}>⏸️</div>
+                        <h2 style={{ margin: 0, fontSize: '1.8rem', color: '#38bdf8', fontWeight: 900 }}>TẠM DỪNG</h2>
+                        <button onClick={togglePause} style={{ padding: '12px 32px', fontSize: '1rem', fontWeight: 700, background: '#38bdf8', color: '#000', border: 'none', borderRadius: '12px', cursor: 'pointer' }}>
+                            TIẾP TỤC (Space)
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <style>{`
                 @keyframes pacDie { 0% { transform:scale(1) rotate(0deg); opacity:1; } 60% { transform:scale(1.3) rotate(180deg); opacity:0.7; } 100%{ transform:scale(0) rotate(360deg); opacity:0; } }

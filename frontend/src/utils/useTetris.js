@@ -325,6 +325,6 @@ export const useTetris = (initialPieceSequence = [], difficulty = 'Medium', play
     return { 
         stage, nextPieces, score, rows, level, gameOver, 
         startGame, movePlayer, dropPlayer, playerRotate, hardDrop, resumeDrop, 
-        setGameOver // Expose for forcing game over
+        setGameOver, setDropTime
     };
 };

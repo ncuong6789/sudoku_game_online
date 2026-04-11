@@ -23,8 +23,8 @@ export const useJungleSounds = () => {
         }
     }, [playJungleMoveSound, playJungleJumpSound]);
 
-    const playCapture = useCallback(() => {
-        playJungleCaptureSound();
+    const playCapture = useCallback((capturedPieceType, attackerType) => {
+        playJungleCaptureSound(capturedPieceType, attackerType);
     }, [playJungleCaptureSound]);
 
     const playWin = useCallback(() => {

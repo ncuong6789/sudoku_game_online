@@ -262,21 +262,49 @@ export const useAudio = () => {
         osc.stop(now + 0.08);
     }, []);
 
-    const playJungleCaptureSound = useCallback(() => {
+    const playJungleCaptureSound = useCallback((capturedType = 1, attackerType = 1) => {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
+        
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        osc.type = 'sawtooth';
+        
         const now = audioCtx.currentTime;
-        osc.frequency.setValueAtTime(300, now);
-        osc.frequency.exponentialRampToValueAtTime(100, now + 0.2);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.2);
+        
+        // Different sounds based on animal type
+        const getSoundParams = (type) => {
+            switch(type) {
+                case 8: // Elephant - deep trumpet
+                    return { freqStart: 80, freqEnd: 40, duration: 0.4, wave: 'sawtooth', vol: 0.2 };
+                case 7: // Lion - loud roar
+                    return { freqStart: 200, freqEnd: 100, duration: 0.3, wave: 'sawtooth', vol: 0.18 };
+                case 6: // Tiger - fierce roar
+                    return { freqStart: 250, freqEnd: 120, duration: 0.25, wave: 'sawtooth', vol: 0.18 };
+                case 5: // Leopard - growl
+                    return { freqStart: 300, freqEnd: 150, duration: 0.2, wave: 'square', vol: 0.15 };
+                case 4: // Wolf - howl
+                    return { freqStart: 400, freqEnd: 200, duration: 0.25, wave: 'sine', vol: 0.12 };
+                case 3: // Dog - bark
+                    return { freqStart: 500, freqEnd: 300, duration: 0.15, wave: 'square', vol: 0.12 };
+                case 2: // Cat - meow (higher pitch)
+                    return { freqStart: 600, freqEnd: 400, duration: 0.15, wave: 'sine', vol: 0.1 };
+                case 1: // Rat - squeak
+                default:
+                    return { freqStart: 800, freqEnd: 600, duration: 0.1, wave: 'sine', vol: 0.1 };
+            }
+        };
+        
+        const params = getSoundParams(capturedType);
+        osc.type = params.wave;
+        osc.frequency.setValueAtTime(params.freqStart, now);
+        osc.frequency.exponentialRampToValueAtTime(params.freqEnd, now + params.duration);
+        gain.gain.setValueAtTime(params.vol, now);
+        gain.gain.linearRampToValueAtTime(0, now + params.duration);
+        
         osc.start(now);
-        osc.stop(now + 0.2);
+        osc.stop(now + params.duration);
     }, []);
 
     const playJungleJumpSound = useCallback(() => {

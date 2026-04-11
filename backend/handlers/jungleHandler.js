@@ -1,5 +1,5 @@
 const { EVENTS } = require('../utils/constants');
-const jungleAI = require('./jungleAI');
+const { getBestMove, getMoveSuggestions } = require('./jungleAI');
 
 /**
  * Jungle Chess (Cờ Thú) Handler
@@ -186,7 +186,12 @@ const jungleHandler = (io, socket, roomManager) => {
             }
             if (!canCapture) return;
             state.pieces = state.pieces.filter(p => p !== targetPiece);
-            io.to(roomId).emit(EVENTS.JUNGLE_PIECE_CAPTURED, { x: to.x, y: to.y, piece: targetPiece });
+            io.to(roomId).emit(EVENTS.JUNGLE_PIECE_CAPTURED, { 
+                x: to.x, 
+                y: to.y, 
+                piece: targetPiece,
+                attacker: piece
+            });
         }
 
         piece.x = to.x;
@@ -214,16 +219,15 @@ const jungleHandler = (io, socket, roomManager) => {
         if (!room || !room.jungleState || room.jungleState.status !== 'playing') return;
         const state = room.jungleState;
         
-        const bestMove = jungleAI.getBestMove(
+        const playerType = socket.id === room.players[0] ? 0 : 1;
+        const suggestions = getMoveSuggestions(
             state.pieces,
             socket.id,
-            room.players.find(id => id !== socket.id),
-            socket.id === room.players[0] ? 0 : 1, // Current player type
-            socket.id === room.players[0] ? 1 : 0, // Opponent type
-            'hard' // Hints are always the best possible move
+            playerType,
+            'hard'
         );
         
-        socket.emit(EVENTS.JUNGLE_HINT_RECEIVED, bestMove);
+        socket.emit(EVENTS.JUNGLE_HINT_RECEIVED, suggestions);
     });
 };
 

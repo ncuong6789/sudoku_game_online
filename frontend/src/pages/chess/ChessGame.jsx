@@ -113,6 +113,7 @@ export default function ChessGame() {
     const [isEngineReady, setIsEngineReady] = useState(false);
     const [hintMove, setHintMove] = useState(null);
     const [isThinkingHint, setIsThinkingHint] = useState(false);
+    const [hintSuggestions, setHintSuggestions] = useState(null); // Store multiple suggestions
 
     useEffect(() => {
         // Khởi tạo Engine cho cả Solo và Multiplayer (để dùng Hint)
@@ -169,14 +170,64 @@ export default function ChessGame() {
         if (engine.current && isEngineReady && !game.isGameOver() && game.turn() === myColor) {
             setIsThinkingHint(true);
             setHintMove(null);
+            setHintSuggestions(null);
+            
+            const suggestions = [];
             
             const onHintMessage = (e) => {
                 const line = e.data;
+                
+                // Parse evaluation score (centipawns)
+                if (line.startsWith('info depth')) {
+                    const scoreMatch = line.match(/score cp (-?\d+)/);
+                    const pvMatch = line.match(/pv\s+([a-h][1-8][a-h][1-8])/);
+                    
+                    if (scoreMatch && pvMatch && suggestions.length < 5) {
+                        const score = parseInt(scoreMatch[1]);
+                        const moveStr = pvMatch[1];
+                        const move = { from: moveStr.substring(0, 2), to: moveStr.substring(2, 4) };
+                        
+                        // Avoid duplicates
+                        if (!suggestions.find(s => s.from === move.from && s.to === move.to)) {
+                            suggestions.push({ ...move, score });
+                        }
+                    }
+                }
+                
                 if (line.startsWith('bestmove')) {
                     const moveMatch = line.match(/bestmove\s([a-h][1-8][a-h][1-8])(n|b|r|q)?/);
                     if (moveMatch) {
                         const moveStr = moveMatch[1];
-                        setHintMove({ from: moveStr.substring(0, 2), to: moveStr.substring(2, 4) });
+                        const bestMove = { from: moveStr.substring(0, 2), to: moveStr.substring(2, 4) };
+                        setHintMove(bestMove);
+                        
+                        // Build suggestions with labels and percentages
+                        if (suggestions.length > 0) {
+                            // Sort by score (higher is better)
+                            suggestions.sort((a, b) => b.score - a.score);
+                            
+                            const best = suggestions[0].score;
+                            const worst = suggestions[suggestions.length - 1].score;
+                            const range = best - worst || 1;
+                            
+                            const labeled = suggestions.slice(0, 3).map((s, i) => {
+                                const pct = Math.round(((s.score - worst) / range) * 100);
+                                let label, color;
+                                if (pct >= 80) { label = '✅ Tuyệt vời!'; color = '#4ade80'; }
+                                else if (pct >= 50) { label = '✓ Tốt'; color = '#60b5fa'; }
+                                else if (pct >= 20) { label = '⚠️ Bình thường'; color = '#fbbf24'; }
+                                else { label = '❌ Yếu'; color = '#ef4444'; }
+                                
+                                return { 
+                                    ...s, 
+                                    label, 
+                                    color,
+                                    percentage: pct,
+                                    evalDisplay: (s.score > 0 ? '+' : '') + (s.score / 100).toFixed(1)
+                                };
+                            });
+                            setHintSuggestions(labeled);
+                        }
                     }
                     setIsThinkingHint(false);
                     engine.current.removeEventListener('message', onHintMessage);
@@ -185,7 +236,7 @@ export default function ChessGame() {
             
             engine.current.addEventListener('message', onHintMessage);
             engine.current.postMessage(`position fen ${game.fen()}`);
-            engine.current.postMessage(`go depth 12`);
+            engine.current.postMessage(`go depth 15`);
         }
     }, [game, isEngineReady, myColor]);
 
@@ -213,7 +264,8 @@ export default function ChessGame() {
             setGame(gameCopy);
             setMoveFrom(null);
             setOptionSquares({});
-            setHintMove(null); // Clear hint after move
+            setHintMove(null);
+            setHintSuggestions(null); // Clear hint suggestions after move
             if (mode === 'multiplayer') {
                 socket.emit('chessMove', { roomId, move: moveObj, fen: gameCopy.fen() });
             }
@@ -476,6 +528,89 @@ export default function ChessGame() {
                             <button className="btn-secondary" onClick={getAIHint} disabled={isThinkingHint || game.turn() !== myColor} style={{ borderColor: '#fbbf24', color: '#fbbf24' }}>
                                 <HelpCircle size={18} /> {isThinkingHint ? 'Đang tính...' : 'Gợi ý nước đi (AI)'}
                             </button>
+
+                            {/* Hint Suggestions Popup */}
+                            {hintSuggestions && hintSuggestions.length > 0 && (
+                                <div style={{ 
+                                    marginTop: '10px', 
+                                    padding: '12px', 
+                                    background: 'rgba(251,191,36,0.1)', 
+                                    borderRadius: '10px', 
+                                    border: '1px solid rgba(251,191,36,0.3)',
+                                    animation: 'fadeIn 0.3s ease'
+                                }}>
+                                    <div style={{ fontSize: '0.75rem', color: '#fbbf24', fontWeight: 700, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <span>💡</span> Gợi ý nước đi tốt nhất
+                                    </div>
+                                    {hintSuggestions.map((move, idx) => (
+                                        <div key={idx} style={{ 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            justifyContent: 'space-between',
+                                            padding: '8px 10px',
+                                            marginBottom: '6px',
+                                            background: idx === 0 ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.05)',
+                                            borderRadius: '8px',
+                                            border: `1px solid ${move.color || 'rgba(255,255,255,0.05)'}`,
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s',
+                                            fontSize: '0.8rem'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = idx === 0 ? 'rgba(74,222,128,0.25)' : 'rgba(255,255,255,0.1)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = idx === 0 ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.05)';
+                                        }}
+                                        onClick={() => {
+                                            setHintMove(move);
+                                        }}
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <span style={{ 
+                                                    width: '20px', height: '20px', 
+                                                    borderRadius: '50%', 
+                                                    background: move.color || (idx === 0 ? '#4ade80' : (idx === 1 ? '#60b5fa' : '#94a3b8')),
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    fontSize: '0.7rem', fontWeight: 700, color: idx < 2 ? '#000' : '#fff'
+                                                }}>
+                                                    {idx + 1}
+                                                </span>
+                                                <span style={{ color: '#fff' }}>
+                                                    {move.from} → {move.to}
+                                                </span>
+                                            </div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+                                                <span style={{ 
+                                                    color: move.color || '#94a3b8',
+                                                    fontWeight: 600,
+                                                    fontSize: '0.75rem'
+                                                }}>
+                                                    {move.label}
+                                                </span>
+                                                <span style={{ fontSize: '0.65rem', color: move.color || 'rgba(255,255,255,0.5)' }}>
+                                                    {move.evalDisplay}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <button 
+                                        onClick={() => setHintSuggestions(null)} 
+                                        style={{ 
+                                            width: '100%', 
+                                            padding: '6px', 
+                                            background: 'transparent', 
+                                            border: '1px solid rgba(255,255,255,0.1)', 
+                                            borderRadius: '6px',
+                                            color: 'rgba(255,255,255,0.6)',
+                                            fontSize: '0.75rem',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        ✕ Ẩn gợi ý
+                                    </button>
+                                </div>
+                            )}
 
                             {mode === 'solo' && !gameOver && moveHistory.length > 0 && (
                                 <button className="btn-secondary" onClick={handleUndo}><Undo2 size={18} /> Đi lại</button>

@@ -217,24 +217,40 @@ export function useTankLogic(roomId, mode = 'multiplayer', startLevel = 1) {
             
             // Auto corner-slip assist
             if (!canMove) {
-                const trySlides = [0.05, 0.1, 0.15, 0.2, 0.25];
+                const trySlides = [0.1, 0.2, 0.3, 0.4, 0.5];
                 if (newDir === 'up' || newDir === 'down') {
                     for (let s of trySlides) {
-                        if (!checkWallCollision(newX - s, newY, TANK_SIZE, TANK_SIZE, map, base) && !checkTankCollision(newX - s, newY, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
-                            newX -= speed; // Slide left slowly
+                        if (!checkWallCollision(tank.x - s, newY, TANK_SIZE, TANK_SIZE, map, base) && 
+                            !checkTankCollision(tank.x - s, newY, TANK_SIZE, TANK_SIZE, myId, players, enemies) &&
+                            !checkWallCollision(tank.x - speed, tank.y, TANK_SIZE, TANK_SIZE, map, base) &&
+                            !checkTankCollision(tank.x - speed, tank.y, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
+                            newX = tank.x - speed; // Slide left slowly
+                            newY = tank.y; // Keep vertical pos
                             canMove = true; break;
-                        } else if (!checkWallCollision(newX + s, newY, TANK_SIZE, TANK_SIZE, map, base) && !checkTankCollision(newX + s, newY, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
-                            newX += speed; // Slide right slowly
+                        } else if (!checkWallCollision(tank.x + s, newY, TANK_SIZE, TANK_SIZE, map, base) && 
+                                   !checkTankCollision(tank.x + s, newY, TANK_SIZE, TANK_SIZE, myId, players, enemies) &&
+                                   !checkWallCollision(tank.x + speed, tank.y, TANK_SIZE, TANK_SIZE, map, base) &&
+                                   !checkTankCollision(tank.x + speed, tank.y, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
+                            newX = tank.x + speed; // Slide right slowly
+                            newY = tank.y; // Keep vertical pos
                             canMove = true; break;
                         }
                     }
                 } else if (newDir === 'left' || newDir === 'right') {
                     for (let s of trySlides) {
-                        if (!checkWallCollision(newX, newY - s, TANK_SIZE, TANK_SIZE, map, base) && !checkTankCollision(newX, newY - s, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
-                            newY -= speed; // Slide up slowly
+                        if (!checkWallCollision(newX, tank.y - s, TANK_SIZE, TANK_SIZE, map, base) && 
+                            !checkTankCollision(newX, tank.y - s, TANK_SIZE, TANK_SIZE, myId, players, enemies) &&
+                            !checkWallCollision(tank.x, tank.y - speed, TANK_SIZE, TANK_SIZE, map, base) &&
+                            !checkTankCollision(tank.x, tank.y - speed, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
+                            newY = tank.y - speed; // Slide up slowly
+                            newX = tank.x; // Keep horizontal pos
                             canMove = true; break;
-                        } else if (!checkWallCollision(newX, newY + s, TANK_SIZE, TANK_SIZE, map, base) && !checkTankCollision(newX, newY + s, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
-                            newY += speed; // Slide down slowly
+                        } else if (!checkWallCollision(newX, tank.y + s, TANK_SIZE, TANK_SIZE, map, base) && 
+                                   !checkTankCollision(newX, tank.y + s, TANK_SIZE, TANK_SIZE, myId, players, enemies) &&
+                                   !checkWallCollision(tank.x, tank.y + speed, TANK_SIZE, TANK_SIZE, map, base) &&
+                                   !checkTankCollision(tank.x, tank.y + speed, TANK_SIZE, TANK_SIZE, myId, players, enemies)) {
+                            newY = tank.y + speed; // Slide down slowly
+                            newX = tank.x; // Keep horizontal pos
                             canMove = true; break;
                         }
                     }

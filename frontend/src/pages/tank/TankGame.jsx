@@ -336,48 +336,49 @@ export default function TankGame() {
     const starLabel = ['●', '★', '★★', '★★★'];
 
     return (
-        <div className="full-page-mobile-scroll" style={{
-            display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
-            width: '100vw', minHeight: '100vh', padding: '0.5rem',
+        <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100, // Forces full screen, ignores any headers pushing it down
+            display: 'flex', justifyContent: 'center', alignItems: 'center',
             background: 'radial-gradient(circle at center, #1a1a2e 0%, #05050a 100%)',
-            overflowY: 'auto', boxSizing: 'border-box'
+            overflow: 'hidden', padding: '1rem', boxSizing: 'border-box'
         }}>
             <div style={{
-                position: 'relative', display: 'flex', flexWrap: 'wrap',
-                padding: '1.2rem', gap: '1.5rem', alignItems: 'stretch', justifyContent: 'center',
-                height: 'fit-content', maxHeight: '96vh', width: 'max-content', maxWidth: '98%',
-                borderRadius: '20px', background: 'rgba(23, 23, 33, 0.85)', backdropFilter: 'blur(25px)',
-                border: '1px solid rgba(255, 255, 255, 0.1)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
+                position: 'relative', display: 'flex', flexDirection: 'row', flexWrap: 'nowrap',
+                padding: '1.5rem', gap: '2rem', alignItems: 'stretch', justifyContent: 'center',
+                height: '100%', maxHeight: '800px', width: '100%', maxWidth: '1200px',
+                borderRadius: '24px', background: 'rgba(23, 23, 33, 0.85)', backdropFilter: 'blur(25px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)',
+                boxSizing: 'border-box'
             }}>
                 {/* LEFT: Info/Controls */}
-                <div style={{ flex: '1 1 240px', maxWidth: '300px', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                <div style={{ flex: '0 0 240px', display: 'flex', flexDirection: 'column', gap: '1.2rem', overflowY: 'auto' }}>
                     <div style={{ textAlign: 'center' }}>
-                        <h1 style={{ margin: 0, fontSize: '1.8rem', fontWeight: 900, color: '#fff', letterSpacing: '2px' }}>TANKS</h1>
-                        <div style={{ color: '#ffd700', fontSize: '0.7rem', fontWeight: 800 }}>BATTLE CITY CLONE</div>
+                        <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 900, color: '#fff', letterSpacing: '2px' }}>TANKS</h1>
+                        <div style={{ color: '#ffd700', fontSize: '0.8rem', fontWeight: 800 }}>BATTLE CITY CLONE</div>
                     </div>
                     
                     <button className="btn-secondary" onClick={() => navigate('/tank')} style={{
-                        padding: '10px', borderRadius: '12px',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                        padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)'
                     }}>
                         <ArrowLeft size={18} /> THOÁT
                     </button>
 
                     <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: '16px', padding: '15px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, marginBottom: '10px' }}>🕹 ĐIỀU KHIỂN</div>
-                        <div style={{ fontSize: '0.8rem', color: '#ddd', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#666' }}>Di chuyển:</span> <span>WASD / Arrow</span></div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#666' }}>Bắn:</span> <span>SPACE</span></div>
+                        <div style={{ fontSize: '0.75rem', color: '#888', fontWeight: 800, marginBottom: '12px', letterSpacing: '1px' }}>🕹 ĐIỀU KHIỂN</div>
+                        <div style={{ fontSize: '0.85rem', color: '#ddd', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span style={{ color: '#888' }}>Di chuyển:</span> <span style={{background: 'rgba(255,255,255,0.1)', padding:'2px 6px', borderRadius:'4px'}}>WASD</span></div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span style={{ color: '#888' }}>Bắn:</span> <span style={{background: 'rgba(255,255,255,0.1)', padding:'2px 6px', borderRadius:'4px'}}>SPACE</span></div>
                         </div>
                     </div>
 
                     <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: '16px', padding: '15px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, marginBottom: '10px' }}>🗺 ĐỊA HÌNH</div>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#888', fontWeight: 800, marginBottom: '12px', letterSpacing: '1px' }}>🗺 ĐỊA HÌNH</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                             {[['#b03a14', 'Gạch'], ['#6080a0', 'Thép'], ['#1060a0', 'Nước'], ['#1a6020', 'Cây']].map(([c, l]) => (
-                                <div key={l} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(255,255,255,0.05)', padding: '5px 8px', borderRadius: '8px' }}>
-                                    <div style={{ width: 10, height: 10, background: c, borderRadius: '2px' }} />
-                                    <span style={{ fontSize: '0.7rem' }}>{l}</span>
+                                <div key={l} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.05)', padding: '6px 10px', borderRadius: '8px' }}>
+                                    <div style={{ width: 12, height: 12, background: c, borderRadius: '2px', boxShadow: '0 2px 4px rgba(0,0,0,0.5)' }} />
+                                    <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>{l}</span>
                                 </div>
                             ))}
                         </div>
@@ -385,61 +386,63 @@ export default function TankGame() {
                 </div>
 
                 {/* CENTER: Canvas */}
-                <div style={{ flex: '2 1 624px', display: 'flex', justifyContent: 'center' }}>
+                <div style={{ flex: '1 1 auto', display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: 0, minHeight: 0 }}>
                     <div style={{
-                        position: 'relative', border: '5px solid rgba(255,215,0,0.1)', borderRadius: '15px',
-                        overflow: 'hidden', boxShadow: '0 0 50px rgba(0,0,0,0.9)', width: '100%', maxWidth: '624px', aspectRatio: '1/1'
+                        position: 'relative', border: '4px solid rgba(255,215,0,0.15)', borderRadius: '12px',
+                        overflow: 'hidden', boxShadow: '0 0 50px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.5)', 
+                        height: '100%', maxHeight: '100%', aspectRatio: '1/1', display: 'flex', justifyContent: 'center'
                     }}>
                         {gameState === 'waiting' && map.length === 0 && (
-                            <div style={{ position: 'absolute', inset: 0, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, color: '#ffd700' }}>
-                                LOADING...
+                            <div style={{ position: 'absolute', inset: 0, background: '#050508', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, color: '#ffd700', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                                ĐANG TẢI BẢN ĐỒ...
                             </div>
                         )}
                         {(gameState === 'finished' || gameState === 'win') && (
-                            <div style={{ position: 'absolute', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: `1px solid ${gameState === 'win' ? 'rgba(255,215,0,0.4)' : 'rgba(239,68,68,0.4)'}`, boxShadow: gameState === 'win' ? '0 0 40px rgba(255,215,0,0.3)' : '0 0 40px rgba(239,68,68,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                                    <h1 style={{ color: gameState === 'win' ? '#ffd700' : '#ff4444', fontSize: '2rem', margin: 0, fontWeight: 900 }}>{gameState === 'win' ? 'CHIẾN THẮNG!' : 'THUA'}</h1>
+                            <div style={{ position: 'absolute', inset: 0, zIndex: 100, background: 'rgba(10,10,15,0.9)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div style={{ background: 'rgba(20,20,30,0.95)', borderRadius: '24px', padding: '40px 50px', border: `1px solid ${gameState === 'win' ? 'rgba(255,215,0,0.4)' : 'rgba(239,68,68,0.4)'}`, boxShadow: gameState === 'win' ? '0 0 60px rgba(255,215,0,0.2)' : '0 0 60px rgba(239,68,68,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                                    <div style={{fontSize: '4rem'}}>{gameState === 'win' ? '🏆' : '💀'}</div>
+                                    <h1 style={{ color: gameState === 'win' ? '#ffd700' : '#ff4444', fontSize: '2.5rem', margin: 0, fontWeight: 900 }}>{gameState === 'win' ? 'CHIẾN THẮNG!' : 'THẤT BẠI'}</h1>
                                     {gameState === 'win' && currentLevel >= maxLevel && (
-                                        <p style={{ color: '#fbbf24', fontSize: '1rem', marginTop: '4px' }}>Tất cả {maxLevel} màn!</p>
+                                        <p style={{ color: '#fbbf24', fontSize: '1.1rem', marginTop: '4px', background: 'rgba(255,215,0,0.1)', padding: '5px 15px', borderRadius: '20px' }}>Tất cả {maxLevel} màn!</p>
                                     )}
                                     {gameState === 'win' && currentLevel < maxLevel && (
-                                        <p style={{ color: '#60a5fa', fontSize: '1rem', marginTop: '4px' }}>Màn {currentLevel}</p>
+                                        <p style={{ color: '#60a5fa', fontSize: '1.1rem', marginTop: '4px', background: 'rgba(96,165,250,0.1)', padding: '5px 15px', borderRadius: '20px' }}>Màn {currentLevel}</p>
                                     )}
-                                    <button onClick={() => navigate('/tank')} style={{ marginTop: '8px', padding: '12px 32px', fontSize: '1rem', fontWeight: 700, background: gameState === 'win' ? '#ffd700' : '#ef4444', color: '#000', border: 'none', borderRadius: '12px', cursor: 'pointer' }}>
-                                        THOÁT
+                                    <button onClick={() => navigate('/tank')} style={{ marginTop: '10px', padding: '14px 40px', fontSize: '1.1rem', fontWeight: 800, background: gameState === 'win' ? '#ffd700' : '#ef4444', color: '#000', border: 'none', borderRadius: '12px', cursor: 'pointer', transition: 'transform 0.2s' }} onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}>
+                                        TRỞ VỀ
                                     </button>
                                 </div>
                             </div>
                         )}
-                        <canvas ref={canvasRef} width={CANVAS_W} height={CANVAS_H} style={{ width: '100%', height: '100%', imageRendering: 'pixelated', objectFit: 'contain' }} />
+                        <canvas ref={canvasRef} width={CANVAS_W} height={CANVAS_H} style={{ height: '100%', aspectRatio: '1/1', imageRendering: 'pixelated', objectFit: 'contain' }} />
                     </div>
                 </div>
 
                 {/* RIGHT: Status */}
-                <div style={{ flex: '1 1 240px', maxWidth: '300px', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                <div style={{ flex: '0 0 240px', display: 'flex', flexDirection: 'column', gap: '1.2rem', overflowY: 'auto' }}>
                     <div style={{ background: 'linear-gradient(180deg, rgba(74,222,128,0.1), transparent)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(74,222,128,0.2)' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#4ade80', fontWeight: 800, marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Target size={16} /> TRẠNG THÁI
+                        <div style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '1px' }}>
+                            <Target size={18} /> TRẠNG THÁI
                         </div>
-                        <div style={{ marginBottom: '12px' }}>
-                            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '5px' }}>Màn:</div>
-                            <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#fbbf24' }}>{currentLevel} / {maxLevel}</div>
+                        <div style={{ marginBottom: '16px', background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '12px' }}>
+                            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }}>Màn hiện tại:</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fbbf24' }}>{currentLevel} <span style={{fontSize: '1rem', color: '#666', fontWeight: 600}}>/ {maxLevel}</span></div>
                         </div>
-                        <div style={{ marginBottom: '12px' }}>
-                            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '5px' }}>Sinh mệnh:</div>
-                            <div>{livesIcons(myPlayer?.lives || 0)}</div>
+                        <div style={{ marginBottom: '16px', background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '12px' }}>
+                            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }}>Sinh mệnh:</div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>{livesIcons(myPlayer?.lives || 0)}</div>
                         </div>
-                         <div style={{ marginBottom: '12px' }}>
-                            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '5px' }}>Địch còn lại:</div>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#ff4444' }}>{enemiesLeft}</div>
+                         <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '12px' }}>
+                            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }}>Địch thủ:</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ff4444' }}>{enemiesLeft}</div>
                         </div>
                     </div>
 
-                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '20px', padding: '15px' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#666', fontWeight: 800, marginBottom: '10px' }}>📡 KẾT NỐI</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 10px #4ade80' }} />
-                            <span style={{ fontSize: '0.8rem', color: '#4ade80' }}>Máy chủ trực tuyến</span>
+                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '20px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#666', fontWeight: 800, letterSpacing: '1px' }}>📡 HỆ THỐNG</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px' }}>
+                            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 10px #4ade80', animation: 'pulse 2s infinite' }} />
+                            <span style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 600 }}>Máy chủ ổn định</span>
                         </div>
                     </div>
                 </div>

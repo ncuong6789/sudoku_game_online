@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutGrid, Grid3X3, Swords, Trophy, Users, X, Activity, Ghost, Crown, Zap, Layers, Hash, Menu, User as UserIcon, LogOut, Info, Heart, Puzzle, TreePine, Target } from 'lucide-react';
+import { LayoutGrid, Grid3X3, Swords, Trophy, Users, X, Activity, Ghost, Crown, Zap, Layers, Hash, Menu, User as UserIcon, LogOut, Info, Heart, Puzzle, TreePine, Target, Hexagon } from 'lucide-react';
 import { socket } from '../utils/socket';
 import AuthModal from '../components/AuthModal';
 import DonateModal from '../components/DonateModal';
@@ -132,8 +132,22 @@ const games = {
             'Mỗi bên có 8 quân thú với cấp bậc từ 1 (Chuột) đến 8 (Voi).',
             'Cấp cao hơn ăn được cấp thấp hơn, ngoại trừ Chuột ăn được Voi.',
             'Hổ và Sư tử có thể nhảy qua sông nếu không có quân nào chắn đường.',
-            'Chuột là quân duy nhất có thể đi vào ô sông (nướ́c).',
+            'Chuột là quân duy nhất có thể đi vào ô sông (nước).',
             'Chiến thắng bằng cách đưa bất kỳ quân nào vào Hang (Den) của đối phương.'
+        ]
+    },
+    xiangqi: {
+        id: 'xiangqi',
+        name: 'Cờ Tướng',
+        description: 'Trò chơi chiến thuật kinh điển Châu Á. Điều khiển quân cờ trên bàn cờ 9x10 vượt qua Sở Hà Hán Giới, tuân thủ luật lệ khắt khe của từng loại binh chủng để sát bạt Tướng đối phương.',
+        path: '/xiangqi',
+        difficulty: 'Rất Khó',
+        instructions: [
+            'Mỗi loại quân cờ có cách di chuyển nghiêm ngặt (Tướng, Sĩ, Tượng, Xe, Pháo, Mã, Tốt).',
+            'Tướng và Sĩ bị giam lỏng trong Cung, Tượng không được qua sông.',
+            'Pháo khi muốn ăn quân phải nhảy trùm qua 1 quân khác làm Ngòi.',
+            'Chú ý luật Cản Mã, Cản Tượng và Lộ Mặt Tướng.',
+            'Chế độ Hiện tại: Luyện tập Solo với AI.'
         ]
     }
 };
@@ -231,6 +245,7 @@ export default function Home() {
                             { id: 'pikachu', label: 'Pikachu', Icon: Puzzle },
                             { id: 'tank', label: 'Tanks', Icon: Target },
                             { id: 'jungle', label: 'Cờ Thú', Icon: TreePine },
+                            { id: 'xiangqi', label: 'Cờ Tướng', Icon: Hexagon },
                         ].map(({ id, label, Icon }) => (
                             <div key={id}
                                 className={`nav-item ${activeGame === id ? 'active' : ''}`}
@@ -308,6 +323,7 @@ export default function Home() {
                             {activeGame === 'pikachu' && <Puzzle size={32} color="var(--accent-color)" />}
                             {activeGame === 'tank' && <Target size={32} color="var(--accent-color)" />}
                             {activeGame === 'jungle' && <TreePine size={32} color="var(--accent-color)" />}
+                            {activeGame === 'xiangqi' && <Hexagon size={32} color="#dc2626" />}
                         </div>
                         <h1 className="game-title" style={{ margin: 0, fontSize: '3rem' }}>{game.name}</h1>
                     </div>

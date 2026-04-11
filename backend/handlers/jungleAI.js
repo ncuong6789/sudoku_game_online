@@ -174,4 +174,31 @@ function getBestMove(pieces, aiId, oppId, aiType, oppType, difficulty) {
     return bestMove || moves[Math.floor(Math.random() * moves.length)];
 }
 
-module.exports = { getBestMove };
+/**
+ * Get multiple move suggestions with evaluations (like chess.com)
+ * Returns top 3 moves with their scores
+ */
+function getMoveSuggestions(pieces, playerId, playerType, difficulty) {
+    const depth = difficulty === 'hard' ? 3 : (difficulty === 'medium' ? 2 : 1);
+    const moves = getPossibleMoves(pieces, playerId, playerType);
+    const oppType = playerType === 0 ? 1 : 0;
+    
+    const movesWithEval = moves.map(move => {
+        const nextState = simulateMove(JSON.parse(JSON.stringify(pieces)), move);
+        const evalResult = minimax(nextState, depth - 1, -Infinity, Infinity, false, playerId, null, playerType, oppType);
+        return { ...move, score: evalResult };
+    });
+
+    // Sort by score (higher is better)
+    movesWithEval.sort((a, b) => b.score - a.score);
+
+    // Return top 3 moves with percentage relative to best
+    const bestScore = movesWithEval[0]?.score || 0;
+    return movesWithEval.slice(0, 3).map((m, i) => ({
+        ...m,
+        label: ['Tuyệt vời!', 'Tốt', 'Khá'][i] || `Rank ${i + 1}`,
+        percentage: bestScore !== 0 ? Math.round((m.score / bestScore) * 100) : 0
+    }));
+}
+
+module.exports = { getBestMove, getMoveSuggestions };
