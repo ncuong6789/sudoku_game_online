@@ -383,24 +383,100 @@ export default function JungleGame() {
                 background: 'rgba(23, 23, 33, 0.85)',
                 backdropFilter: 'blur(25px)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)',
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'flex-start'
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
             }}>
                 
-                {/* TRÁI: BÀN CỜ */}
+                {/* TRÁI: INFO & RULES */}
                 <div style={{
-                    flex: '0 0 auto',
+                    flex: '0 0 260px',
+                    width: '260px',
                     display: 'flex',
                     flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '0.5rem'
+                    maxHeight: '100%',
+                    overflow: 'hidden',
+                    background: 'rgba(255,255,255,0.03)',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    padding: '1rem',
+                    boxSizing: 'border-box'
                 }}>
+                    <h3 style={{ margin: '0 0 12px 0', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
+                        <span>📊</span> Cấp bậc & Kỹ năng
+                    </h3>
+
+                    <div style={{
+                        flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)',
+                        borderRadius: '10px', padding: '10px', border: '1px solid rgba(255,255,255,0.05)',
+                        display: 'flex', flexDirection: 'column', gap: '6px'
+                    }}>
+                        {[8,7,6,5,4,3,2,1].map(v => (
+                            <div key={v} style={{ 
+                                display: 'flex', alignItems: 'center', gap: '8px',
+                                background: v <= 2 ? 'rgba(251,191,36,0.08)' : (v >= 7 ? 'rgba(239,68,68,0.08)' : 'transparent'),
+                                padding: '6px', borderRadius: '6px'
+                            }}>
+                                <div style={{ 
+                                    width: '24px', height: '24px', borderRadius: '4px', 
+                                    background: ANIMAL_COLORS[v], display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    fontWeight: 700, fontSize: '0.75rem', color: '#fff'
+                                }}>
+                                    {ANIMAL_SYMBOLS[v]?.char || v}
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ color: '#fff', fontWeight: 600, fontSize: '0.8rem' }}>{PIECE_NAMES[v]}</span>
+                                        {v === 8 && <span style={{ fontSize: '0.6rem', color: '#ef4444', background: 'rgba(239,68,68,0.2)', padding: '1px 4px', borderRadius: '3px' }}>Yếu</span>}
+                                        {v === 1 && <span style={{ fontSize: '0.6rem', color: '#4ade80', background: 'rgba(74,222,128,0.2)', padding: '1px 4px', borderRadius: '3px' }}>Mạnh</span>}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        
+                        <div style={{ marginTop: '8px', padding: '10px', background: 'rgba(251,191,36,0.1)', borderRadius: '8px', border: '1px solid rgba(251,191,36,0.2)' }}>
+                            <div style={{ fontSize: '0.75rem', color: '#fbbf24', fontWeight: 600, marginBottom: '6px' }}>🎯 LUẬT</div>
+                            <ul style={{ margin: 0, paddingLeft: '14px', fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)', lineHeight: '1.5' }}>
+                                <li>Lớn ăn nhỏ (8 vs 1 ngoại lệ)</li>
+                                <li>Hổ/Sư tử <span style={{color:'#4ade80'}}>nhảy sông</span> 2 ô</li>
+                                <li>Chuột <span style={{color:'#4ade80'}}>bơi</span> & ăn Voi</li>
+                                <li>Vào Hang = <span style={{color:'#ffd700'}}>THẮNG</span></li>
+                            </ul>
+                        </div>
+                        
+                        <div style={{ padding: '8px', background: 'rgba(96,165,250,0.1)', borderRadius: '6px', border: '1px solid rgba(96,165,250,0.2)' }}>
+                            <div style={{ fontSize: '0.7rem', color: '#60b5ff', fontWeight: 600 }}>🏞 Địa hình</div>
+                            <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>
+                                🌊 Sông | ⬜ Bẫy | 🏠 Hang
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* GIỮA: BÀN CỜ */}
+                <div style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '320px', padding: 0, margin: 0, maxHeight: '100%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', width: '100%', justifyContent: 'center', marginBottom: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: turn === myId ? 1 : 0.5 }}>
+                            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#4ade80' }} />
+                            <span style={{ fontWeight: 700, fontSize: '0.85rem', color: turn === myId ? '#4ade80' : '#fff' }}>BẠN</span>
+                        </div>
+                        <span style={{ color: '#fbbf24', fontSize: '0.75rem', fontWeight: 600 }}>{difficulty.toUpperCase()}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: turn !== myId ? 1 : 0.5 }}>
+                            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#60b5fa' }} />
+                            <span style={{ fontWeight: 700, fontSize: '0.85rem', color: turn !== myId ? '#60b5fa' : '#fff' }}>ĐỐI</span>
+                        </div>
+                    </div>
+
                     <div style={{
                         position: 'relative',
+                        border: '6px solid rgba(15, 15, 25, 0.95)',
+                        borderRadius: '12px',
+                        boxShadow: '0 30px 60px rgba(0, 0, 0, 0.6)',
+                        overflow: 'hidden',
+                        background: '#0f172a',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
                         width: '100%',
-                        maxWidth: `${MAP_SIZE_W}px`,
+                        maxHeight: 'calc(100vh - 120px)',
                         aspectRatio: '7 / 9'
                     }}>
                         {isLoading && (
@@ -426,109 +502,63 @@ export default function JungleGame() {
                     </div>
                 </div>
 
-                {/* PHẢI: CONTROLS + INFO 2 CỘT */}
-                <div style={{ flex: '0 0 280px', width: '280px', display: 'flex', flexDirection: 'column', gap: '0.75rem', marginLeft: '1rem', minHeight: 0 }}>
-                    
-                    {/* CỘT TRÊN: Header + Score/Level */}
-                    <div style={{ display: 'flex', gap: '0.75rem' }}>
-                        {/* Cột trái: Header + Turn */}
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                            <div className="nav-item active" style={{ padding: '8px', display: 'flex', alignSelf: 'center', alignItems: 'center', gap: '6px', fontSize: '1rem', fontWeight: 'bold' }}>
-                                <span style={{fontSize: '1.1rem'}}>♟</span> Cờ Thú
-                            </div>
-                            <div style={{ textAlign: 'center', fontSize: '0.85rem', color: isMyTurn ? '#4ade80' : '#94a3b8' }}>
-                                {isMyTurn ? '🎯 Lượt của bạn' : '⏳ Đợi đối thủ...'}
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#4ade80' }}></span>
-                                    Bạn
-                                </span>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#60b5fa' }}></span>
-                                    Đối
-                                </span>
-                            </div>
-                        </div>
+                {/* PHẢI: CONTROLS */}
+                <div style={{ flex: '0 0 240px', width: '240px', display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '100%', overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.1rem', color: '#fff' }}>♟ CỜ THÚ</div>
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <button className="btn-primary" onClick={handleReset} style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+                                <RotateCcw size={16} /> Chơi ván mới
+                            </button>
+                            
+                            <button className="btn-secondary" onClick={getHint} disabled={turn !== myId || isLoading} style={{ borderColor: '#fbbf24', color: '#fbbf24', padding: '10px', fontSize: '0.85rem' }}>
+                                <HelpCircle size={16} /> Gợi ý (AI)
+                            </button>
 
-                        {/* Cột phải: Animals list */}
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '0.75rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', maxHeight: '180px', overflowY: 'auto' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>Cấp bậc</div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px' }}>
-                                {[8,7,6,5,4,3,2,1].map(v => (
-                                    <div key={v} style={{ 
-                                        display: 'flex', 
-                                        flexDirection: 'column',
-                                        alignItems: 'center', 
-                                        padding: '4px',
-                                        background: v <= 2 ? 'rgba(251,191,36,0.08)' : (v >= 7 ? 'rgba(239,68,68,0.08)' : 'transparent'),
-                                        borderRadius: '4px'
-                                    }}>
-                                        <div style={{ 
-                                            width: '20px', height: '20px', 
-                                            borderRadius: '4px', 
-                                            background: ANIMAL_COLORS[v],
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            fontWeight: 700, fontSize: '0.65rem', color: '#fff'
+                            {hintMoves && hintMoves.length > 0 && (
+                                <div style={{ 
+                                    padding: '10px', 
+                                    background: 'rgba(251,191,36,0.1)', 
+                                    borderRadius: '8px', 
+                                    border: '1px solid rgba(251,191,36,0.3)',
+                                    animation: 'fadeIn 0.3s ease'
+                                }}>
+                                    <div style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 600, marginBottom: '6px' }}>💡 Gợi ý</div>
+                                    {hintMoves.slice(0, 3).map((move, idx) => {
+                                        const pct = move.percentage || 0;
+                                        let color;
+                                        if (pct >= 80) color = '#4ade80';
+                                        else if (pct >= 50) color = '#60b5fa';
+                                        else if (pct >= 20) color = '#fbbf24';
+                                        else color = '#ef4444';
+                                        
+                                        return (
+                                        <div key={idx} style={{ 
+                                            display: 'flex', alignItems: 'center', gap: '6px',
+                                            padding: '6px', marginBottom: '4px',
+                                            background: idx === 0 ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.05)',
+                                            borderRadius: '6px', fontSize: '0.75rem'
                                         }}>
-                                            {ANIMAL_SYMBOLS[v]?.char || v}
+                                            <span style={{ 
+                                                width: '16px', height: '16px', borderRadius: '50%', 
+                                                background: color, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                fontSize: '0.6rem', fontWeight: 700, color: '#000'
+                                            }}>{idx+1}</span>
+                                            <span style={{ color: '#fff' }}>
+                                                {ANIMAL_SYMBOLS[pieces.find(p => p.x === move.from.x && p.y === move.from.y)?.type]?.char || '?'}
+                                                {String.fromCharCode(65 + move.from.x)}{9 - move.from.y}→{String.fromCharCode(65 + move.to.x)}{9 - move.to.y}
+                                            </span>
                                         </div>
-                                        <span style={{ fontSize: '0.55rem', color: 'var(--text-secondary)', marginTop: '2px' }}>{PIECE_NAMES[v]}</span>
-                                    </div>
-                                ))}
-                            </div>
+                                    )})}
+                                    <button onClick={() => setHintMoves(null)} style={{ width: '100%', padding: '4px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem' }}>✕ Ẩn</button>
+                                </div>
+                            )}
+                            
+                            <button className="btn-secondary" onClick={() => navigate('/jungle')} style={{ padding: '10px', fontSize: '0.85rem' }}>
+                                <ArrowLeft size={16} /> Thoát
+                            </button>
                         </div>
-                    </div>
-
-                    {/* Controls */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <button className="btn-primary" onClick={handleReset} style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
-                            <RotateCcw size={16} /> Chơi ván mới
-                        </button>
-                        
-                        <button className="btn-secondary" onClick={getHint} disabled={turn !== myId || isLoading} style={{ borderColor: '#fbbf24', color: '#fbbf24', padding: '10px', fontSize: '0.85rem' }}>
-                            <HelpCircle size={16} /> Gợi ý (AI)
-                        </button>
-
-                        {hintMoves && hintMoves.length > 0 && (
-                            <div style={{ 
-                                padding: '10px', 
-                                background: 'rgba(251,191,36,0.1)', 
-                                borderRadius: '8px', 
-                                border: '1px solid rgba(251,191,36,0.3)'
-                            }}>
-                                <div style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 600, marginBottom: '6px' }}>💡 Gợi ý</div>
-                                {hintMoves.slice(0, 2).map((move, idx) => (
-                                    <div key={idx} style={{ 
-                                        display: 'flex', alignItems: 'center', gap: '6px',
-                                        padding: '6px',
-                                        background: idx === 0 ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.05)',
-                                        borderRadius: '6px', marginBottom: '4px',
-                                        fontSize: '0.75rem'
-                                    }}>
-                                        <span style={{ 
-                                            width: '16px', height: '16px', 
-                                            borderRadius: '50%', 
-                                            background: idx === 0 ? '#4ade80' : '#60b5fa',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            fontSize: '0.6rem', fontWeight: 700, color: '#000'
-                                        }}>{idx+1}</span>
-                                        <span style={{ color: '#fff' }}>
-                                            {ANIMAL_SYMBOLS[pieces.find(p => p.x === move.from.x && p.y === move.from.y)?.type]?.char || '?'}
-                                            {String.fromCharCode(65 + move.from.x)}{9 - move.from.y}→{String.fromCharCode(65 + move.to.x)}{9 - move.to.y}
-                                        </span>
-                                    </div>
-                                ))}
-                                <button 
-                                    onClick={() => setHintMoves(null)} 
-                                    style={{ width: '100%', padding: '4px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem' }}
-                                >✕ Ẩn</button>
-                            </div>
-                        )}
-                        
-                        <button className="btn-secondary" onClick={() => navigate('/jungle')} style={{ padding: '10px', fontSize: '0.85rem' }}>
-                            <ArrowLeft size={16} /> Thoát
-                        </button>
                     </div>
                 </div>
 

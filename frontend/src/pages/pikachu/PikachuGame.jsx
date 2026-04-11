@@ -162,6 +162,8 @@ export default function PikachuGame() {
                                     height: '100%',
                                     maxWidth: '100%',
                                     maxHeight: '100%',
+                                    aspectRatio: `${(COLS + 2) * 4.5} / ${(activeRows + 2) * 5.5}`, // Typical Pikachu tile ratio 45x55
+                                    margin: 'auto',
                                     display: 'grid',
                                     gridTemplateColumns: `repeat(${COLS + 2}, 1fr)`,
                                     gridTemplateRows: `repeat(${activeRows + 2}, 1fr)`,
@@ -206,7 +208,7 @@ export default function PikachuGame() {
                                                         style={{
                                                             width: '100%',
                                                             height: '100%',
-                                                            objectFit: 'contain',
+                                                            objectFit: 'fill',
                                                             display: 'block',
                                                             imageRendering: 'high-quality',
                                                             WebkitImageSmoothing: 'high',

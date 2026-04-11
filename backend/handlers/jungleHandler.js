@@ -119,7 +119,7 @@ const jungleHandler = (io, socket, roomManager) => {
         const oppId = room.players[0];
 
         setTimeout(() => {
-            const bestMove = jungleAI.getBestMove(
+            const bestMove = getBestMove(
                 state.pieces, 
                 aiId, 
                 oppId, 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, RotateCcw } from 'lucide-react';
 import { useXiangqiLogic } from './useXiangqiLogic';
+import { useAudio } from '../../utils/useAudio';
 
 // Unicode for Pieces
 const PIECE_TEXT = {
@@ -20,6 +21,11 @@ export default function XiangqiGame() {
     const navigate = useNavigate();
     const { mode, difficulty, playerColor } = location.state || { mode: 'solo', difficulty: 'Medium', playerColor: 'w' };
 
+    const { 
+        playXiangqiClickSound, playXiangqiMoveSound, playXiangqiCaptureSound, 
+        playXiangqiCheckSound, playXiangqiIllegalSound, playXiangqiWinSound, playXiangqiLossSound 
+    } = useAudio();
+
     const myColor = playerColor === 'w' ? 'r' : 'b'; // w maps to red, b to black
     const {
         board,
@@ -31,7 +37,13 @@ export default function XiangqiGame() {
         selectPiece,
         movePiece,
         makeRandomAIMove
-    } = useXiangqiLogic('r'); // Red always goes first
+    } = useXiangqiLogic('r', {
+        onClick: playXiangqiClickSound,
+        onMove: playXiangqiMoveSound,
+        onCapture: playXiangqiCaptureSound,
+        onCheck: playXiangqiCheckSound,
+        onIllegal: playXiangqiIllegalSound
+    }); // Red always goes first
 
     // AI Move
     useEffect(() => {
@@ -42,6 +54,14 @@ export default function XiangqiGame() {
             return () => clearTimeout(timer);
         }
     }, [turn, mode, isGameOver, myColor, makeRandomAIMove]);
+
+    // Game Over Sound
+    useEffect(() => {
+        if (isGameOver) {
+            if (winner === myColor) playXiangqiWinSound();
+            else playXiangqiLossSound();
+        }
+    }, [isGameOver, winner, myColor, playXiangqiWinSound, playXiangqiLossSound]);
 
     const handleSquareClick = (r, c) => {
         if (isGameOver || turn !== myColor) return;
@@ -156,8 +176,12 @@ export default function XiangqiGame() {
                         <div style={{ position: 'absolute', inset: '40px', pointerEvents: 'none' }}>
                             {board.map((rowArr, rowIndex) => 
                                 rowArr.map((piece, colIndex) => {
-                                    const leftPct = (colIndex / 8) * 100;
-                                    const topPct = (rowIndex / 9) * 100;
+                                    // Visual Rotation for Black Player
+                                    const displayRow = myColor === 'b' ? 9 - rowIndex : rowIndex;
+                                    const displayCol = myColor === 'b' ? 8 - colIndex : colIndex;
+                                    
+                                    const leftPct = (displayCol / 8) * 100;
+                                    const topPct = (displayRow / 9) * 100;
                                     
                                     const isSelected = selectedPos?.r === rowIndex && selectedPos?.c === colIndex;
                                     const isValidMove = validMoves.some(m => m.r === rowIndex && m.c === colIndex);
@@ -246,7 +270,7 @@ export default function XiangqiGame() {
                                                         pointerEvents: 'auto',
                                                         cursor: (turn === myColor && piece[0] === myColor) ? 'pointer' : isValidMove ? 'pointer' : 'default',
                                                         zIndex: 30,
-                                                        transition: 'all 0.1s'
+                                                        transition: 'left 0.3s ease, top 0.3s ease'
                                                     }}
                                                     onClick={() => handleSquareClick(rowIndex, colIndex)}
                                                 >

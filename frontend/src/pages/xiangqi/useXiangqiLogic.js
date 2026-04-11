@@ -201,7 +201,7 @@ const hasAnyLegalMove = (board, color) => {
     return false;
 };
 
-export const useXiangqiLogic = (initialTurn = 'r') => {
+export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}) => {
     const [board, setBoard] = useState(INITIAL_BOARD);
     const [turn, setTurn] = useState(initialTurn);
     const [history, setHistory] = useState([]);
@@ -216,8 +216,10 @@ export const useXiangqiLogic = (initialTurn = 'r') => {
         if (!hasAnyLegalMove(customBoard, currentTurn)) {
             setIsGameOver(true);
             setWinner(currentTurn === 'r' ? 'b' : 'r');
+        } else if (isCheck(customBoard, currentTurn)) {
+            if (callbacks.onCheck) callbacks.onCheck();
         }
-    }, []);
+    }, [callbacks]);
 
     const selectPiece = (r, c) => {
         if (isGameOver) return;
@@ -225,9 +227,13 @@ export const useXiangqiLogic = (initialTurn = 'r') => {
         if (piece && piece[0] === turn) {
             setSelectedPos({ r, c });
             setValidMoves(getLegalMoves(board, r, c));
+            if (callbacks.onClick) callbacks.onClick();
         } else {
             setSelectedPos(null);
             setValidMoves([]);
+            if (piece) { // clicked opponent piece
+                if (callbacks.onIllegal) callbacks.onIllegal();
+            }
         }
     };
 
@@ -235,7 +241,14 @@ export const useXiangqiLogic = (initialTurn = 'r') => {
         if (!selectedPos || isGameOver) return false;
         
         const move = validMoves.find(m => m.r === toR && m.c === toC);
-        if (!move) return false;
+        if (!move) {
+            if (callbacks.onIllegal) callbacks.onIllegal();
+            return false;
+        }
+
+        const target = board[toR][toC];
+        if (target && callbacks.onCapture) callbacks.onCapture();
+        else if (!target && callbacks.onMove) callbacks.onMove();
 
         setBoard(prevBoard => {
             const newBoard = cloneBoard(prevBoard);
@@ -273,6 +286,10 @@ export const useXiangqiLogic = (initialTurn = 'r') => {
             
             const chosenMove = bestMoves[Math.floor(Math.random() * bestMoves.length)];
             
+            const target = board[chosenMove.to.r][chosenMove.to.c];
+            if (target && callbacks.onCapture) callbacks.onCapture();
+            else if (!target && callbacks.onMove) callbacks.onMove();
+
             setBoard(prevBoard => {
                 const newBoard = cloneBoard(prevBoard);
                 const piece = newBoard[chosenMove.from.r][chosenMove.from.c];

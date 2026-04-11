@@ -131,35 +131,129 @@ export default function PacmanGame() {
     const mapTheme = getMapTheme();
 
     return (
-        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100vw', height: '100vh', padding: '2rem 1rem', boxSizing: 'border-box' }}>
+        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100vw', height: '100vh', padding: '1rem', boxSizing: 'border-box' }}>
             <div className="glass-panel" style={{ 
                 position: 'relative', 
-                width: '100%', 
-                maxWidth: '1200px', 
-                height: '88vh',
+                width: 'max-content',
+                maxWidth: '98%',
+                height: 'fit-content',
+                maxHeight: '96vh',
                 display: 'flex', 
                 flexDirection: 'row', 
-                padding: '1.2rem',
+                padding: '1rem',
                 borderRadius: '20px',
                 background: 'rgba(23, 23, 33, 0.85)',
                 boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)',
-                gap: '1.5rem',
+                gap: '1rem',
                 overflow: 'hidden',
                 boxSizing: 'border-box'
             }}>
-            {/* ── BOARD ── */}
+            
+            {/* ── TRÁI: INFO ── */}
             <div style={{
-                flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'stretch',
-                background: 'rgba(5, 10, 20, 0.5)', borderRadius: '12px', border: '3px solid rgba(255,255,255,0.06)', overflow: 'hidden'
+                flex: '0 0 220px',
+                width: '220px',
+                display: 'flex',
+                flexDirection: 'column',
+                maxHeight: '100%',
+                overflow: 'hidden',
+                background: 'rgba(255,255,255,0.03)',
+                borderRadius: '16px',
+                border: '1px solid rgba(255,255,255,0.08)',
+                padding: '1rem',
+                boxSizing: 'border-box'
             }}>
-                <div style={{ position: 'relative', flex: 1, minHeight: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <h3 style={{ margin: '0 0 12px 0', fontSize: '0.95rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>🎮</span> Thông tin
+                </h3>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, overflowY: 'auto' }}>
+                    <div style={{ padding: '12px', background: 'rgba(251,191,36,0.1)', borderRadius: '10px', border: '1px solid rgba(251,191,36,0.2)', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Score</div>
+                        <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#fbbf24' }}>{score}</div>
+                    </div>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                        <Heart size={20} color={lives > 0 ? '#ef4444' : '#374151'} fill={lives > 0 ? '#ef4444' : 'none'} />
+                        <Heart size={20} color={lives > 1 ? '#ef4444' : '#374151'} fill={lives > 1 ? '#ef4444' : 'none'} />
+                        <Heart size={20} color={lives > 2 ? '#ef4444' : '#374151'} fill={lives > 2 ? '#ef4444' : 'none'} />
+                    </div>
+
+                    <div style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '4px' }}>
+                            <span style={{ color: 'var(--text-secondary)' }}>Map</span>
+                            <span style={{ color: '#fff', fontWeight: 600 }}>{mapType}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '4px' }}>
+                            <span style={{ color: 'var(--text-secondary)' }}>Độ khó</span>
+                            <span style={{ fontWeight: 700, color: difficulty === 'hard' ? '#ef4444' : '#f59e0b' }}>
+                                {difficulty === 'hard' ? '🔥 Khó' : '⚡ TB'}
+                            </span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
+                            <span style={{ color: 'var(--text-secondary)' }}>Chấm</span>
+                            <span style={{ color: '#fbbf24', fontWeight: 600 }}>{dots.size}</span>
+                        </div>
+                    </div>
+
+                    <div style={{ padding: '8px', background: 'rgba(96,165,250,0.1)', borderRadius: '8px', border: '1px solid rgba(96,165,250,0.2)' }}>
+                        <div style={{ fontSize: '0.7rem', color: '#60b5ff', fontWeight: 600, marginBottom: '4px' }}>👻 Ghosts</div>
+                        {ghosts.map(g => (
+                            <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem', marginBottom: '3px' }}>
+                                <GhostArt color={g.color} dir={g.dir} state={g.state} frightenedFlash={false} size='16px' />
+                                <span style={{ color: 'var(--text-secondary)', flex: 1 }}>{g.id}</span>
+                                <span style={{ fontSize: '0.6rem' }}>
+                                    {g.state === 'frightened' ? '😱' : g.state === 'dead' ? '💀' : '🎯'}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                    
+                    {frightenedTimer > 0 && (
+                        <div style={{ padding: '8px', textAlign: 'center', borderRadius: '8px', border: '1px solid rgba(29,78,216,0.5)', background: 'rgba(29,78,216,0.1)' }}>
+                            <div style={{ fontSize: '0.65rem', color: '#93c5fd' }}>⚡ POWER</div>
+                            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#60b5fa' }}>{frightenedTimer}</div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* ── GIỮA: BOARD ── */}
+            <div style={{
+                flex: '1 1 auto',
+                minWidth: '320px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                maxHeight: '100%'
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '10px', padding: '8px 16px', background: 'rgba(0,0,0,0.3)', borderRadius: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#fbbf24', boxShadow: '0 0 10px #fbbf24' }} />
+                        <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#fff' }}>PAC-MAN</span>
+                    </div>
+                    <span style={{ color: '#fbbf24', fontSize: '0.7rem', fontWeight: 600 }}>{difficulty.toUpperCase()}</span>
+                    <div style={{ fontSize: '0.75rem', color: phase === 'playing' ? '#4ade80' : '#94a3b8' }}>
+                        {phase === 'playing' ? '🟢 Đang chơi' : phase === 'ready' ? '⏸ Sẵn sàng' : phase === 'paused' ? '⏸ Tạm dừng' : '🏁 Kết thúc'}
+                    </div>
+                </div>
+
+                <div style={{
+                    position: 'relative',
+                    width: '100%',
+                    aspectRatio: `${cols}/${rows}`,
+                    maxHeight: 'calc(100vh - 140px)',
+                    border: '4px solid rgba(255,255,255,0.1)',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    background: '#000'
+                }}>
                     <div style={{
-                        width: cols > rows ? '100%' : 'auto',
-                        height: rows > cols ? '100%' : 'auto',
-                        maxWidth: '100%', maxHeight: '100%',
-                        aspectRatio: `${cols}/${rows}`,
-                        display: 'grid', gridTemplateColumns: `repeat(${cols},1fr)`, gridTemplateRows: `repeat(${rows},1fr)`,
-                        background: '#000', borderRadius: '4px', boxSizing: 'border-box', position: 'relative'
+                        width: '100%', height: '100%',
+                        display: 'grid', 
+                        gridTemplateColumns: `repeat(${cols},1fr)`, 
+                        gridTemplateRows: `repeat(${rows},1fr)`
                     }}>
                         {mapGrid.map((row, y) => row.map((cell, x) => {
                             const isWall = cell === 'W' || cell === '|';
@@ -304,77 +398,30 @@ export default function PacmanGame() {
                 </div>
             </div>
 
-            {/* ── SIDEBAR 2 CỘT ── */}
-            <div style={{ display: 'flex', gap: '0.75rem', width: '260px', flexShrink: 0, height: '100%', overflow: 'hidden' }}>
-                {/* CỘT TRÁI: Score + Lives + Info */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem', minHeight: 0, overflow: 'hidden' }}>
-                    <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem', alignItems: 'center', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ textAlign: 'center', width: '100%' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '2px' }}>Score</div>
-                            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#fbbf24', lineHeight: 1 }}>{score}</div>
-                        </div>
-                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.6rem', width: '100%', textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '6px' }}>Lives</div>
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '4px' }}>
-                                {[...Array(3)].map((_, i) => <Heart key={i} size={20} color={i < lives ? '#ef4444' : '#374151'} fill={i < lives ? '#ef4444' : 'none'} />)}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '4px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', flex: 1, overflow: 'auto' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '2px' }}>Thông tin</div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}><span style={{ color: 'var(--text-secondary)' }}>Map</span><span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{mapType}</span></div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}><span style={{ color: 'var(--text-secondary)' }}>Độ khó</span><span style={{ fontWeight: 700, fontSize: '0.7rem', color: difficulty === 'hard' ? '#ef4444' : '#f59e0b' }}>{difficulty === 'hard' ? '🔥 Khó' : '⚡ TB'}</span></div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}><span style={{ color: 'var(--text-secondary)' }}>Chấm còn</span><span style={{ color: '#fbbf24', fontWeight: 600 }}>{dots.size}</span></div>
-                        {totalDotsRef.current > 0 && (() => {
-                            const eaten = totalDotsRef.current - dots.size;
-                            const pct = Math.round((eaten / totalDotsRef.current) * 100);
-                            return (
-                                <div style={{ marginTop: '4px' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--text-secondary)', marginBottom: '2px' }}><span>Ăn được</span><span>{pct}%</span></div>
-                                    <div style={{ height: '4px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
-                                        <div style={{ height: '100%', borderRadius: '2px', width: `${pct}%`, background: pct >= 60 ? '#ef4444' : pct >= 40 ? '#f59e0b' : '#4ade80', transition: 'width 0.3s ease' }} />
-                                    </div>
-                                </div>
-                            );
-                        })()}
-                    </div>
-                </div>
-
-                {/* CỘT PHẢI: Ghosts + Status + Controls */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem', minHeight: 0, overflow: 'hidden' }}>
-                    <div style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '4px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', flex: 1, overflow: 'auto' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '2px' }}>Ghosts</div>
-                        {ghosts.map(g => (
-                            <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem' }}>
-                                <div style={{ width: 16, height: 16, flexShrink: 0 }}>
-                                    <GhostArt color={g.color} dir={g.dir} state={g.state} size='100%' frightenedFlash={false} />
-                                </div>
-                                <span style={{ color: 'var(--text-secondary)', flex: 1 }}>{g.id[0] + g.id.slice(1).toLowerCase()}</span>
-                                <span style={{ fontSize: '0.65rem' }}>{g.state === 'frightened' ? '😱' : g.state === 'dead' ? '💀' : g.state === 'house' ? '🏠' : g.state === 'exiting' ? '🚪' : '🎯'}</span>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        {frightenedTimer > 0 && (
-                            <div style={{ flex: 1, padding: '0.6rem', textAlign: 'center', borderRadius: '10px', border: '1px solid rgba(29,78,216,0.5)', background: 'rgba(29,78,216,0.1)' }}>
-                                <div style={{ fontSize: '0.6rem', color: '#93c5fd' }}>⚡ POWER</div><div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#60a5fa' }}>{frightenedTimer}</div>
-                            </div>
-                        )}
-                        {isProtected && phase === 'playing' && (
-                            <div style={{ flex: 1, padding: '0.6rem', textAlign: 'center', borderRadius: '10px', border: '1px solid rgba(251,191,36,0.5)', background: 'rgba(251,191,36,0.1)' }}>
-                                <div style={{ fontSize: '0.65rem', color: '#fbbf24', animation: 'pacFlash 0.5s infinite' }}>🛡️ Bất Tử</div>
-                            </div>
-                        )}
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <button onClick={togglePause} disabled={phase === 'gameover' || phase === 'won'} style={{ padding: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px', width: '100%', fontSize: '0.8rem', background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.04)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: isPaused ? '#38bdf8' : '#fff', cursor: (phase === 'gameover' || phase === 'won') ? 'default' : 'pointer', opacity: (phase === 'gameover' || phase === 'won') ? 0.5 : 1 }}>
+            {/* ── PHẢI: CONTROLS ── */}
+            <div style={{ 
+                flex: '0 0 200px', 
+                width: '200px', 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '0.75rem', 
+                maxHeight: '100%',
+                overflow: 'hidden'
+            }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1rem', color: '#fff' }}>🍡 PAC-MAN</div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <button onClick={togglePause} disabled={phase === 'gameover' || phase === 'won'} style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', width: '100%', fontSize: '0.8rem', background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: isPaused ? '#38bdf8' : '#fff', cursor: (phase === 'gameover' || phase === 'won') ? 'default' : 'pointer', opacity: (phase === 'gameover' || phase === 'won') ? 0.5 : 1 }}>
                             {isPaused ? '▶ Tiếp tục' : '⏸ Tạm dừng'}
                         </button>
-                        <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}>
-                            <ArrowLeft size={14} /> Về Sảnh
+                        
+                        <button className="btn-primary" onClick={handleRestart} style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}>
+                            <RotateCcw size={16} /> Chơi lại
+                        </button>
+                        
+                        <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}>
+                            <ArrowLeft size={16} /> Thoát
                         </button>
                     </div>
                 </div>

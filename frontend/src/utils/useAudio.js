@@ -379,11 +379,20 @@ export const useAudio = () => {
         });
     }, []);
 
+    const playXiangqiClickSound = useCallback(() => { try { const a = new window.Audio('/xiangqi_audio/click.wav'); a.volume = 0.6; a.play().catch(()=>{}); } catch(e){} }, []);
+    const playXiangqiMoveSound = useCallback(() => { try { const a = new window.Audio('/xiangqi_audio/move.wav'); a.volume = 0.8; a.play().catch(()=>{}); } catch(e){} }, []);
+    const playXiangqiCaptureSound = useCallback(() => { try { const a = new window.Audio('/xiangqi_audio/capture.wav'); a.volume = 0.9; a.play().catch(()=>{}); } catch(e){} }, []);
+    const playXiangqiCheckSound = useCallback(() => { try { const a = new window.Audio('/xiangqi_audio/check.wav'); a.volume = 0.9; a.play().catch(()=>{}); } catch(e){} }, []);
+    const playXiangqiIllegalSound = useCallback(() => { try { const a = new window.Audio('/xiangqi_audio/illegal.wav'); a.volume = 0.7; a.play().catch(()=>{}); } catch(e){} }, []);
+    const playXiangqiWinSound = useCallback(() => { try { const a = new window.Audio('/xiangqi_audio/win.wav'); a.volume = 0.8; a.play().catch(()=>{}); } catch(e){} }, []);
+    const playXiangqiLossSound = useCallback(() => { try { const a = new window.Audio('/xiangqi_audio/loss.wav'); a.volume = 0.8; a.play().catch(()=>{}); } catch(e){} }, []);
+
     return { 
         playWinSound, playLoseSound, playClearLineSound, 
         playChessMoveSound, playChessCaptureSound, playChessCheckSound,
         playTetrisMoveSound, playTetrisRotateSound, playTetrisDropSound,
         playPacmanStartSound, playPacmanWakaSound, playPacmanPowerPillSound, playPacmanEatGhostSound, playPacmanDieSound,
-        playJungleMoveSound, playJungleCaptureSound, playJungleJumpSound, playJungleSelectSound, playJungleWinSound, playJungleLoseSound
+        playJungleMoveSound, playJungleCaptureSound, playJungleJumpSound, playJungleSelectSound, playJungleWinSound, playJungleLoseSound,
+        playXiangqiClickSound, playXiangqiMoveSound, playXiangqiCaptureSound, playXiangqiCheckSound, playXiangqiIllegalSound, playXiangqiWinSound, playXiangqiLossSound
     };
 };
