@@ -160,13 +160,17 @@ export default function PikachuGame() {
                                     position: 'relative',
                                     maxWidth: '100%',
                                     maxHeight: '100%',
-                                    aspectRatio: `${COLS + 2} / ${ROWS + 2}`,
+                                    aspectRatio: `${COLS + 2} / ${ROWS + 4}`,
                                     margin: 'auto',
                                     display: 'grid',
                                     gridTemplateColumns: `repeat(${COLS + 2}, 1fr)`,
-                                    gridTemplateRows: `repeat(${ROWS + 2}, 1fr)`,
+                                    gridTemplateRows: `repeat(${ROWS + 4}, 1fr)`,
                                 }}
                             >
+                                {/* Extra top border row */}
+                                {Array.from({ length: COLS + 2 }, (_, c) => (
+                                    <div key={`extra-top-${c}`} style={{ width: '100%', height: '100%' }} />
+                                ))}
                                 {board.map((row, r) =>
                                     row.map((id, c) => (
                                         <div
@@ -203,6 +207,10 @@ export default function PikachuGame() {
                                         </div>
                                     ))
                                 )}
+                                {/* Extra bottom border row */}
+                                {Array.from({ length: COLS + 2 }, (_, c) => (
+                                    <div key={`extra-bot-${c}`} style={{ width: '100%', height: '100%' }} />
+                                ))}
 
                                 {/* SVG Overlays - Pixel absolute line renderer like temp_sg11 LinesDrawer.cs */}
                                 {connectedPath && linePoints && (
