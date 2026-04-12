@@ -92,20 +92,20 @@ export default function PikachuGame() {
     };
 
     return (
-        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100vw', height: '100vh', padding: '2rem 1rem', boxSizing: 'border-box' }}>
+        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100vw', height: '100vh', padding: '1rem 1rem', boxSizing: 'border-box', overflow: 'hidden' }}>
             <div className="glass-panel" style={{
                 position: 'relative',
                 width: '100%',
                 maxWidth: '1200px',
-                height: '88vh',
+                maxHeight: '96vh',
                 display: 'flex',
                 flexDirection: 'column',
-                padding: '1.2rem',
+                padding: '0.8rem 1rem',
                 borderRadius: '20px',
                 background: 'rgba(23, 23, 33, 0.85)',
                 boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
             }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '8px 14px', marginBottom: '10px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '6px 14px', marginBottom: '6px', flexShrink: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Activity size={16} color="var(--primary-color)" />
                         <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }}>Level: {level}</span>
@@ -130,8 +130,8 @@ export default function PikachuGame() {
 
                 {/* Progress Bar for Time */}
                 <div style={{
-                    width: '100%', height: '12px', background: 'rgba(255,255,255,0.05)',
-                    borderRadius: '6px', overflow: 'hidden', marginBottom: '16px', position: 'relative'
+                    width: '100%', height: '10px', background: 'rgba(255,255,255,0.05)',
+                    borderRadius: '6px', overflow: 'hidden', marginBottom: '8px', position: 'relative', flexShrink: 0
                 }}>
                     <div style={{
                         height: '100%',
@@ -146,23 +146,21 @@ export default function PikachuGame() {
                     )}
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'row', gap: '16px', alignItems: 'stretch', flex: 1, minHeight: 0 }}>
+                <div style={{ display: 'flex', flexDirection: 'row', gap: '12px', alignItems: 'stretch', flex: 1, minHeight: 0, overflow: 'hidden' }}>
                     {/* Main Board - inner panel background */}
                     <div style={{
                         flex: 1, minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column', alignItems: 'stretch',
                         background: 'rgba(5, 10, 20, 0.5)', borderRadius: '12px', border: '3px solid rgba(255,255,255,0.06)', overflow: 'hidden'
                     }}>
-                        <div style={{ position: 'relative', flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                        <div style={{ position: 'relative', flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '4px' }}>
                             {/* Combined Grid and Overlays Container */}
                             <div
                                 ref={boardRef}
                                 style={{
                                     position: 'relative',
-                                    width: '100%',
-                                    height: 'auto',
                                     maxWidth: '100%',
                                     maxHeight: '100%',
-                                    aspectRatio: `${(COLS + 2) * 40} / ${(ROWS + 2) * 45}`,
+                                    aspectRatio: `${COLS + 2} / ${ROWS + 2}`,
                                     margin: 'auto',
                                     display: 'grid',
                                     gridTemplateColumns: `repeat(${COLS + 2}, 1fr)`,
