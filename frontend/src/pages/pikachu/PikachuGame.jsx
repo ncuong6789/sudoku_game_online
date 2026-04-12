@@ -92,20 +92,20 @@ export default function PikachuGame() {
     };
 
     return (
-        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100vw', height: '100vh', padding: '1rem 1rem', boxSizing: 'border-box', overflow: 'hidden' }}>
+        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100vw', height: '100vh', padding: '0.5rem', boxSizing: 'border-box', overflow: 'hidden' }}>
             <div className="glass-panel" style={{
                 position: 'relative',
                 width: '100%',
-                maxWidth: '1200px',
-                maxHeight: '96vh',
+                maxWidth: '1500px',
+                maxHeight: '98vh',
                 display: 'flex',
                 flexDirection: 'column',
-                padding: '0.8rem 1rem',
+                padding: '0.5rem 0.8rem',
                 borderRadius: '20px',
                 background: 'rgba(23, 23, 33, 0.85)',
                 boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
             }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '6px 14px', marginBottom: '6px', flexShrink: 0 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '5px 14px', marginBottom: '4px', flexShrink: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Activity size={16} color="var(--primary-color)" />
                         <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }}>Level: {level}</span>
@@ -130,8 +130,8 @@ export default function PikachuGame() {
 
                 {/* Progress Bar for Time */}
                 <div style={{
-                    width: '100%', height: '10px', background: 'rgba(255,255,255,0.05)',
-                    borderRadius: '6px', overflow: 'hidden', marginBottom: '8px', position: 'relative', flexShrink: 0
+                    width: '100%', height: '8px', background: 'rgba(255,255,255,0.05)',
+                    borderRadius: '6px', overflow: 'hidden', marginBottom: '4px', position: 'relative', flexShrink: 0
                 }}>
                     <div style={{
                         height: '100%',
@@ -146,7 +146,7 @@ export default function PikachuGame() {
                     )}
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'row', gap: '12px', alignItems: 'stretch', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                <div style={{ display: 'flex', flexDirection: 'row', gap: '10px', alignItems: 'stretch', flex: 1, minHeight: 0, overflow: 'hidden' }}>
                     {/* Main Board - inner panel background */}
                     <div style={{
                         flex: 1, minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column', alignItems: 'stretch',
