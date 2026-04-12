@@ -92,18 +92,23 @@ export default function PikachuGame() {
     };
 
     return (
-        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100vw', height: '100vh', padding: '0.5rem', boxSizing: 'border-box', overflow: 'hidden' }}>
+        <div className="full-page-mobile-scroll" style={{
+            display: 'flex', justifyContent: 'center', alignItems: 'center',
+            width: '100vw', height: '100vh', boxSizing: 'border-box', overflow: 'hidden'
+        }}>
             <div className="glass-panel" style={{
                 position: 'relative',
-                width: '100%',
-                maxWidth: '1500px',
-                maxHeight: '98vh',
+                /* Layout: khối chữ nhật cân đối ở giữa, không full màn hình */
+                width: 'min(calc(100vw - 2rem), calc((100vh - 2rem) * 1.35))',
+                height: 'min(calc(100vh - 2rem), calc((100vw - 2rem) / 1.35))',
+                maxWidth: '1150px',
+                maxHeight: '860px',
                 display: 'flex',
                 flexDirection: 'column',
                 padding: '0.5rem 0.8rem',
                 borderRadius: '20px',
-                background: 'rgba(23, 23, 33, 0.85)',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
+                background: 'rgba(23, 23, 33, 0.88)',
+                boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255,255,255,0.06)'
             }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '5px 14px', marginBottom: '4px', flexShrink: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -150,7 +155,7 @@ export default function PikachuGame() {
                     {/* Main Board - inner panel background */}
                     <div style={{
                         flex: 1, minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column', alignItems: 'stretch',
-                        background: 'rgba(5, 10, 20, 0.5)', borderRadius: '12px', border: '3px solid rgba(255,255,255,0.06)', overflow: 'hidden'
+                        background: 'rgba(5, 10, 20, 0.45)', borderRadius: '12px', border: '2px solid rgba(255,255,255,0.07)', overflow: 'hidden'
                     }}>
                         <div style={{ position: 'relative', flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '4px' }}>
                             {/* Combined Grid and Overlays Container */}
@@ -298,7 +303,7 @@ export default function PikachuGame() {
                     </div>
 
                     {/* Right Panel Controls */}
-                    <div style={{ width: '240px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '12px', overflowY: 'auto' }}>
+                    <div style={{ width: '185px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                             <button className="btn-secondary" onClick={useHint} disabled={hints <= 0 || status !== 'playing'} style={{
                                 padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
