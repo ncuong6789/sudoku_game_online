@@ -1,5 +1,6 @@
 const { EVENTS } = require('../utils/constants');
 const { getBestMove, getMoveSuggestions } = require('./jungleAI');
+const { getBestMoveFromZAI } = require('./zAI');
 
 /**
  * Jungle Chess (Cờ Thú) Handler
@@ -118,15 +119,32 @@ const jungleHandler = (io, socket, roomManager) => {
         const aiId = 'CPU';
         const oppId = room.players[0];
 
-        setTimeout(() => {
-            const bestMove = getBestMove(
-                state.pieces, 
-                aiId, 
-                oppId, 
-                1, // P2 Type
-                0, // P1 Type
-                room.difficulty
-            );
+        setTimeout(async () => {
+            const zApiKey = process.env.Z_API_KEY;
+            let bestMove = null;
+
+            if (zApiKey) {
+                console.log('[Jungle] Using Z AI for move...');
+                bestMove = await getBestMoveFromZAI(
+                    { pieces: state.pieces, turn: state.turn },
+                    zApiKey
+                );
+                if (bestMove) {
+                    console.log('[Jungle] Z AI move:', bestMove);
+                }
+            }
+
+            if (!bestMove) {
+                console.log('[Jungle] Falling back to local AI...');
+                bestMove = getBestMove(
+                    state.pieces, 
+                    aiId, 
+                    oppId, 
+                    1,
+                    0,
+                    room.difficulty
+                );
+            }
 
             if (bestMove) {
                 processMove(roomId, io, roomManager, aiId, bestMove.from, bestMove.to);
