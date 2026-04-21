@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { getBestMoveAsync } from './xiangqiAI';
+import { getBestMoveAsync, getEvalScore } from './xiangqiAI';
 
 const INITIAL_BOARD = [
     ['b_r', 'b_n', 'b_b', 'b_a', 'b_k', 'b_a', 'b_b', 'b_n', 'b_r'],
@@ -14,31 +14,25 @@ const INITIAL_BOARD = [
     ['r_r', 'r_n', 'r_b', 'r_a', 'r_k', 'r_a', 'r_b', 'r_n', 'r_r'],
 ];
 
-// Deep copy board
 const cloneBoard = (board) => board.map(row => [...row]);
 
-// Check if position is in Palace
 const inPalace = (r, c, color) => {
     if (c < 3 || c > 5) return false;
     if (color === 'w' || color === 'r') return r >= 7 && r <= 9;
     return r >= 0 && r <= 2;
 };
 
-// Generate pseudo-legal moves for a piece
 const getPseudoLegalMoves = (board, r, c) => {
     const piece = board[r][c];
     if (!piece) return [];
-    
-    const color = piece[0]; // 'r' or 'b'
-    const type = piece[2];  // 'r','n','b','a','k','c','p'
+    const color = piece[0];
+    const type = piece[2];
     const moves = [];
 
     const addMove = (nr, nc) => {
         if (nr >= 0 && nr <= 9 && nc >= 0 && nc <= 8) {
             const target = board[nr][nc];
-            if (!target || target[0] !== color) {
-                moves.push({ r: nr, c: nc });
-            }
+            if (!target || target[0] !== color) moves.push({ r: nr, c: nc });
         }
     };
 
@@ -47,29 +41,23 @@ const getPseudoLegalMoves = (board, r, c) => {
             const nr = r + dr, nc = c + dc;
             if (inPalace(nr, nc, color)) addMove(nr, nc);
         });
-    } 
-    else if (type === 'a') {
+    } else if (type === 'a') {
         [[1,1], [1,-1], [-1,1], [-1,-1]].forEach(([dr, dc]) => {
             const nr = r + dr, nc = c + dc;
             if (inPalace(nr, nc, color)) addMove(nr, nc);
         });
-    }
-    else if (type === 'b') { // Elephant
+    } else if (type === 'b') {
         [[2,2], [2,-2], [-2,2], [-2,-2]].forEach(([dr, dc]) => {
             const nr = r + dr, nc = c + dc;
-            // Check River bounds (Black: r 0..4, Red: r 5..9)
             if (color === 'b' && nr > 4) return;
             if (color === 'r' && nr < 5) return;
-            
-            // Eye block check
             const eyeR = r + dr / 2;
             const eyeC = c + dc / 2;
             if (nr >= 0 && nr <= 9 && nc >= 0 && nc <= 8) {
                 if (!board[eyeR][eyeC]) addMove(nr, nc);
             }
         });
-    }
-    else if (type === 'n') { // Horse
+    } else if (type === 'n') {
         const jumps = [
             [-2, -1, -1, 0], [-2, 1, -1, 0], [2, -1, 1, 0], [2, 1, 1, 0],
             [-1, -2, 0, -1], [1, -2, 0, -1], [-1, 2, 0, 1], [1, 2, 0, 1]
@@ -80,58 +68,41 @@ const getPseudoLegalMoves = (board, r, c) => {
                 if (!board[r + blockR][c + blockC]) addMove(nr, nc);
             }
         });
-    }
-    else if (type === 'r') { // Rook
+    } else if (type === 'r') {
         [[1,0], [-1,0], [0,1], [0,-1]].forEach(([dr, dc]) => {
             let nr = r + dr, nc = c + dc;
             while (nr >= 0 && nr <= 9 && nc >= 0 && nc <= 8) {
                 const target = board[nr][nc];
-                if (!target) {
-                    moves.push({ r: nr, c: nc });
-                } else {
-                    if (target[0] !== color) moves.push({ r: nr, c: nc });
-                    break;
-                }
+                if (!target) { moves.push({ r: nr, c: nc }); }
+                else { if (target[0] !== color) moves.push({ r: nr, c: nc }); break; }
                 nr += dr; nc += dc;
             }
         });
-    }
-    else if (type === 'c') { // Cannon
+    } else if (type === 'c') {
         [[1,0], [-1,0], [0,1], [0,-1]].forEach(([dr, dc]) => {
             let nr = r + dr, nc = c + dc;
             let jumped = false;
             while (nr >= 0 && nr <= 9 && nc >= 0 && nc <= 8) {
                 const target = board[nr][nc];
                 if (!jumped) {
-                    if (!target) {
-                        moves.push({ r: nr, c: nc });
-                    } else {
-                        jumped = true;
-                    }
+                    if (!target) moves.push({ r: nr, c: nc });
+                    else jumped = true;
                 } else {
-                    if (target) {
-                        if (target[0] !== color) moves.push({ r: nr, c: nc });
-                        break;
-                    }
+                    if (target) { if (target[0] !== color) moves.push({ r: nr, c: nc }); break; }
                 }
                 nr += dr; nc += dc;
             }
         });
-    }
-    else if (type === 'p') { // Pawn
+    } else if (type === 'p') {
         const dir = color === 'r' ? -1 : 1;
         const crossed = color === 'r' ? r <= 4 : r >= 5;
         addMove(r + dir, c);
-        if (crossed) {
-            addMove(r, c + 1);
-            addMove(r, c - 1);
-        }
+        if (crossed) { addMove(r, c + 1); addMove(r, c - 1); }
     }
 
     return moves;
 };
 
-// Check if moving exposes generals to face each other
 const isKingsFacing = (board) => {
     let rK, rC, bK, bC;
     for (let r = 0; r <= 9; r++) {
@@ -141,28 +112,21 @@ const isKingsFacing = (board) => {
         }
     }
     if (rC !== bC) return false;
-    
     let obstacles = 0;
     const minR = Math.min(rK, bK);
     const maxR = Math.max(rK, bK);
-    for (let r = minR + 1; r < maxR; r++) {
-        if (board[r][rC]) obstacles++;
-    }
+    for (let r = minR + 1; r < maxR; r++) { if (board[r][rC]) obstacles++; }
     return obstacles === 0;
 };
 
-// Check if a color is in check
 const isCheck = (board, color) => {
     let myK_r = -1, myK_c = -1;
     for (let r = 0; r <= 9; r++) {
         for (let c = 0; c <= 8; c++) {
-            if (board[r][c] === `${color}_k`) {
-                myK_r = r; myK_c = c; break;
-            }
+            if (board[r][c] === `${color}_k`) { myK_r = r; myK_c = c; break; }
         }
     }
     if (myK_r === -1) return false;
-
     const oppColor = color === 'r' ? 'b' : 'r';
     for (let r = 0; r <= 9; r++) {
         for (let c = 0; c <= 8; c++) {
@@ -179,8 +143,6 @@ const getLegalMoves = (board, r, c) => {
     const piece = board[r][c];
     if (!piece) return [];
     const pMoves = getPseudoLegalMoves(board, r, c);
-    
-    // Filter out moves that leave own king in check or cause kings to face
     return pMoves.filter(m => {
         const nextBoard = cloneBoard(board);
         nextBoard[m.r][m.c] = piece;
@@ -202,17 +164,32 @@ const hasAnyLegalMove = (board, color) => {
     return false;
 };
 
+const PIECE_TEXT = {
+    'r_k': '帥', 'r_a': '仕', 'r_b': '相', 'r_n': '傌', 'r_r': '俥', 'r_c': '炮', 'r_p': '兵',
+    'b_k': '將', 'b_a': '士', 'b_b': '象', 'b_n': '馬', 'b_r': '車', 'b_c': '砲', 'b_p': '卒',
+};
+
+function formatMoveNotation(piece, fromR, fromC, toR, toC, captured) {
+    const pName = PIECE_TEXT[piece] || '?';
+    const colNames = 'abcdefghi';
+    const from = `${colNames[fromC]}${9 - fromR}`;
+    const to = `${colNames[toC]}${9 - toR}`;
+    const cap = captured ? 'x' : '-';
+    return `${pName} ${from}${cap}${to}`;
+}
+
 export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}) => {
     const [board, setBoard] = useState(INITIAL_BOARD);
     const [turn, setTurn] = useState(initialTurn);
     const [history, setHistory] = useState([]);
-    
-    // UI selections
     const [selectedPos, setSelectedPos] = useState(null);
     const [validMoves, setValidMoves] = useState([]);
     const [isGameOver, setIsGameOver] = useState(false);
     const [winner, setWinner] = useState(null);
     const [inCheckColor, setInCheckColor] = useState(null);
+    const [moveList, setMoveList] = useState([]);
+    const [evalScore, setEvalScore] = useState(0);
+    const [hintMove, setHintMove] = useState(null);
 
     const checkWinCondition = useCallback((customBoard, currentTurn) => {
         if (!hasAnyLegalMove(customBoard, currentTurn)) {
@@ -227,6 +204,11 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}) => {
         }
     }, [callbacks]);
 
+    const updateEval = useCallback((currentBoard, currentTurn) => {
+        const score = getEvalScore(currentBoard, currentTurn);
+        setEvalScore(score);
+    }, []);
+
     const selectPiece = (r, c) => {
         if (isGameOver) return;
         const piece = board[r][c];
@@ -237,65 +219,115 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}) => {
         } else {
             setSelectedPos(null);
             setValidMoves([]);
-            if (piece) { // clicked opponent piece
-                if (callbacks.onIllegal) callbacks.onIllegal();
-            }
+            if (piece) { if (callbacks.onIllegal) callbacks.onIllegal(); }
         }
     };
 
     const movePiece = (toR, toC) => {
         if (!selectedPos || isGameOver) return false;
-        
         const move = validMoves.find(m => m.r === toR && m.c === toC);
         if (!move) {
             if (callbacks.onIllegal) callbacks.onIllegal();
             return false;
         }
 
+        const fromR = selectedPos.r;
+        const fromC = selectedPos.c;
+        const piece = board[fromR][fromC];
         const target = board[toR][toC];
+
         if (target && callbacks.onCapture) callbacks.onCapture();
         else if (!target && callbacks.onMove) callbacks.onMove();
 
         setBoard(prevBoard => {
             const newBoard = cloneBoard(prevBoard);
-            const piece = newBoard[selectedPos.r][selectedPos.c];
             newBoard[toR][toC] = piece;
-            newBoard[selectedPos.r][selectedPos.c] = null;
-            
+            newBoard[fromR][fromC] = null;
+
+            setHistory(prev => [...prev, {
+                board: cloneBoard(prevBoard),
+                turn,
+                inCheckColor,
+            }]);
+
+            const notation = formatMoveNotation(piece, fromR, fromC, toR, toC, target);
+            setMoveList(prev => [...prev, { notation, color: piece[0], captured: target }]);
+
             const nextTurn = turn === 'r' ? 'b' : 'r';
             setTurn(nextTurn);
-            
             checkWinCondition(newBoard, nextTurn);
+            updateEval(newBoard, nextTurn);
             return newBoard;
         });
 
         setSelectedPos(null);
         setValidMoves([]);
+        setHintMove(null);
         return true;
     };
 
-    const makeAIMove = (color) => {
+    const makeAIMove = (color, difficulty = 'Medium') => {
         if (isGameOver) return;
-        getBestMoveAsync(board, color, getLegalMoves, cloneBoard, isCheck, isKingsFacing, 2).then(chosenMove => {
-            if (!chosenMove) {
-                return; // Let checkWinCondition handle game over via hasAnyLegalMove
-            }
-            
-            const target = board[chosenMove.to.r][chosenMove.to.c];
+        getBestMoveAsync(board, color, getLegalMoves, cloneBoard, isCheck, isKingsFacing, difficulty).then(chosenMove => {
+            if (!chosenMove) return;
+
+            const fromR = chosenMove.from.r;
+            const fromC = chosenMove.from.c;
+            const toR = chosenMove.to.r;
+            const toC = chosenMove.to.c;
+            const piece = board[fromR][fromC];
+            const target = board[toR][toC];
+
             if (target && callbacks.onCapture) callbacks.onCapture();
             else if (!target && callbacks.onMove) callbacks.onMove();
 
             setBoard(prevBoard => {
                 const newBoard = cloneBoard(prevBoard);
-                const piece = newBoard[chosenMove.from.r][chosenMove.from.c];
-                newBoard[chosenMove.to.r][chosenMove.to.c] = piece;
-                newBoard[chosenMove.from.r][chosenMove.from.c] = null;
-                
+                newBoard[toR][toC] = piece;
+                newBoard[fromR][fromC] = null;
+
+                setHistory(prev => [...prev, {
+                    board: cloneBoard(prevBoard),
+                    turn,
+                    inCheckColor,
+                }]);
+
+                const notation = formatMoveNotation(piece, fromR, fromC, toR, toC, target);
+                setMoveList(prev => [...prev, { notation, color: piece[0], captured: target }]);
+
                 const nextTurn = turn === 'r' ? 'b' : 'r';
                 setTurn(nextTurn);
                 checkWinCondition(newBoard, nextTurn);
+                updateEval(newBoard, nextTurn);
                 return newBoard;
             });
+        });
+    };
+
+    const undoMove = (count = 2) => {
+        if (history.length < count) return false;
+        const targetState = history[history.length - count];
+        setBoard(targetState.board);
+        setTurn(targetState.turn);
+        setInCheckColor(targetState.inCheckColor);
+        setHistory(prev => prev.slice(0, -count));
+        setMoveList(prev => prev.slice(0, -count));
+        setIsGameOver(false);
+        setWinner(null);
+        setSelectedPos(null);
+        setValidMoves([]);
+        setHintMove(null);
+        updateEval(targetState.board, targetState.turn);
+        return true;
+    };
+
+    const getHint = () => {
+        if (isGameOver || turn !== (callbacks.myColor || 'r')) return;
+        getBestMoveAsync(board, turn, getLegalMoves, cloneBoard, isCheck, isKingsFacing, 3).then(chosenMove => {
+            if (chosenMove) {
+                setHintMove({ from: chosenMove.from, to: chosenMove.to });
+                setTimeout(() => setHintMove(null), 5000);
+            }
         });
     };
 
@@ -307,8 +339,13 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}) => {
         isGameOver,
         winner,
         inCheckColor,
+        moveList,
+        evalScore,
+        hintMove,
         selectPiece,
         movePiece,
-        makeAIMove
+        makeAIMove,
+        undoMove,
+        getHint,
     };
 };

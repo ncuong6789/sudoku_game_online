@@ -223,7 +223,7 @@ export function applyLevelMovement(board, p1, p2, level) {
     return newBoard;
 }
 
-export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true) {
+export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true, resume = false) {
     const [board, setBoard] = useState([]);
     const [activeRows, setActiveRows] = useState(ROWS);
     const [level, setLevel] = useState(1);
@@ -268,7 +268,33 @@ export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true) {
         return { board: b, isWin: false };
     }, []);
 
-    const initGame = useCallback((nextLevel = false) => {
+    const initGame = useCallback((nextLevel = false, isResume = false) => {
+        if (isResume) {
+            const savedStr = localStorage.getItem('pikachu_save');
+            if (savedStr) {
+                try {
+                    const saved = JSON.parse(savedStr);
+                    if (saved.status === 'playing') {
+                        setBoard(saved.board);
+                        setActiveRows(saved.activeRows);
+                        setLevel(saved.level);
+                        setScore(saved.score);
+                        setTimeLeft(saved.timeLeft);
+                        setHints(saved.hints);
+                        setShuffles(saved.shuffles);
+                        setStatus('playing');
+                        setIsPaused(true); // Pause directly to give the user time when resuming
+                        bgWinsound.pause(); bgWinsound.currentTime = 0;
+                        finishSound.pause(); finishSound.currentTime = 0;
+                        setSelected(null);
+                        setConnectedPath(null);
+                        setHintPair(null);
+                        return; // Skip standard init
+                    }
+                } catch(e) {}
+            }
+        }
+
         const newLvl = nextLevel ? level + 1 : 1;
         
         let targetLevel = newLvl;
@@ -308,8 +334,26 @@ export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true) {
     }, [level, gameMode, checkAndFixDeadlock]);
 
     useEffect(() => {
-        initGame();
+        initGame(false, resume);
         // eslint-disable-next-line
+    }, [resume]);
+
+    // Save/resume logic
+    const stateRef = useRef({ board, activeRows, level, score, timeLeft, hints, shuffles, status, gameMode, timeLimitEnabled });
+    useEffect(() => {
+        stateRef.current = { board, activeRows, level, score, timeLeft, hints, shuffles, status, gameMode, timeLimitEnabled };
+    }, [board, activeRows, level, score, timeLeft, hints, shuffles, status, gameMode, timeLimitEnabled]);
+
+    useEffect(() => {
+        const saveInterval = setInterval(() => {
+            const s = stateRef.current;
+            if (s.status === 'playing') {
+                localStorage.setItem('pikachu_save', JSON.stringify(s));
+            } else if (s.status === 'gameover' || s.status === 'finished') {
+                localStorage.removeItem('pikachu_save');
+            }
+        }, 2000);
+        return () => clearInterval(saveInterval);
     }, []);
 
     useEffect(() => {

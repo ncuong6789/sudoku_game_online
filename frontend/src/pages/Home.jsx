@@ -24,7 +24,7 @@ const games = {
     },
     caro: {
         id: 'caro',
-        name: 'Tic-Tac-Toe',
+        name: 'Cờ Caro',
         description: 'Trò chơi đấu trí kinh điển với nhiều kích thước bàn cờ: từ 3x3 nhanh gọn đến 15x15 và 20x20 đầy chiến thuật. Người chơi thay phiên đặt quân để tạo thành chuỗi chiến thắng, từ những ván đấu nhanh cho đến những màn so tài căng não.',
         path: '/caro',
         difficulty: 'Cao',
@@ -39,7 +39,7 @@ const games = {
     },
     chess: {
         id: 'chess',
-        name: 'Chess',
+        name: 'Cờ Vua',
         description: 'Trò chơi chiến thuật kinh điển trên bàn cờ 8x8, nơi mỗi nước đi đều mang tính quyết định. Điều khiển các quân cờ với quy tắc riêng biệt, xây dựng chiến lược và tìm cách chiếu bí vua đối phương để giành chiến thắng.',
         path: '/chess',
         difficulty: 'Rất cao',
@@ -53,7 +53,7 @@ const games = {
     },
     snake: {
         id: 'snake',
-        name: 'Snake',
+        name: 'Rắn Săn Mồi',
         description: 'Điều khiển chú rắn sinh tồn trên bản đồ lưới, thu thập thức ăn để lớn dần và tăng tốc độ. Càng dài, thử thách càng cao khi không gian di chuyển bị thu hẹp. Tham gia chế độ Multiplayer để cạnh tranh và loại bỏ đối thủ trong những pha đấu trí căng thẳng!',
         path: '/snake',
         difficulty: 'Tuỳ chỉnh',
@@ -67,7 +67,7 @@ const games = {
         ]
     },
     tetris: {
-        name: 'Tetris',
+        name: 'Xếp Gạch',
         description: 'Những khối gạch không ngừng rơi xuống – bạn có đủ nhanh và chính xác để kiểm soát chúng? Xoay, sắp xếp và tạo combo xóa hàng để ghi điểm tối đa. Tham gia chế độ Multiplayer và chứng minh ai mới là bậc thầy Tetris thực thụ!',
         path: '/tetris',
         difficulty: 'Vừa',
@@ -96,7 +96,7 @@ const games = {
     },
     pikachu: {
         id: 'pikachu',
-        name: 'Pikachu Onet',
+        name: 'Pikachu',
         description: 'Huyền thoại game nối thú kinh điển! Tìm và nối 2 hình giống nhau với tối đa 2 lần rẽ để làm chúng biến mất. Chinh phục các chướng ngại vật thay đổi liên tục qua từng vòng chơi với độ khó tăng dần!',
         path: '/pikachu',
         difficulty: 'Dễ - Khó',
@@ -110,7 +110,7 @@ const games = {
     },
     tank: {
         id: 'tank',
-        name: 'Tanks',
+        name: 'Bắn Xe Tăng',
         description: 'Cuộc chiến xe tăng nảy lửa! Điều khiển xe tăng của bạn, né tránh đạn và tiêu diệt đối thủ trong chiến trường cổ điển. Sử dụng địa hình để ẩn nấp và phản công bất ngờ!',
         path: '/tank',
         difficulty: 'Vừa - Cao',
@@ -189,8 +189,9 @@ export default function Home() {
 
         socket.on('matchFound', ({ roomId, gameType, mapSize, color }) => {
             setIsSearching(false);
-            const path = `/${gameType === 'tic-tac-toe' ? 'caro' : gameType}/game`; // Mapping logic
-            navigate(path, { state: { roomId, mode: 'multiplayer', mapSize, playerColor: color } });
+            let path = `/${gameType === 'tic-tac-toe' ? 'caro' : gameType}/game`; // Mapping logic
+            if (gameType === 'pikachu') path = '/pikachu/online-game';
+            navigate(path, { state: { roomId, mode: 'multiplayer', mapSize, playerColor: color, isHost: true } });
         });
 
         socket.on('waitingForMatch', () => {
@@ -214,7 +215,8 @@ export default function Home() {
 
         socket.emit('lookupRoom', { roomId: roomCode }, (res) => {
             if (res.success) {
-                const path = `/${res.gameType}/game`;
+                let path = `/${res.gameType}/game`;
+                if (res.gameType === 'pikachu') path = '/pikachu/online-game';
                 navigate(path, { state: { roomId: roomCode, mode: 'multiplayer', gridSize: res.gridSize, difficulty: res.difficulty } });
             } else {
                 alert(res.message || 'Không tìm thấy phòng!');
@@ -237,12 +239,12 @@ export default function Home() {
                     <nav style={{ display: 'flex', flexDirection: 'column', gap: '3px', overflowY: 'auto', flex: 1 }}>
                         {[
                             { id: 'sudoku', label: 'Sudoku', Icon: Grid3X3 },
-                            { id: 'caro', label: 'Tic-Tac-Toe', Icon: Swords },
-                            { id: 'chess', label: 'Chess', Icon: Crown },
+                            { id: 'caro', label: 'Cờ Caro', Icon: Swords },
+                            { id: 'chess', label: 'Cờ Vua', Icon: Crown },
                             { id: 'jungle', label: 'Cờ Thú', Icon: TreePine },
                             { id: 'xiangqi', label: 'Cờ Tướng', Icon: Hexagon },
-                            { id: 'snake', label: 'Snake', Icon: Zap },
-                            { id: 'tetris', label: 'Tetris', Icon: Layers },
+                            { id: 'snake', label: 'Rắn Săn Mồi', Icon: Zap },
+                            { id: 'tetris', label: 'Xếp Gạch', Icon: Layers },
                             { id: 'pacman', label: 'Pacman', Icon: Ghost },
                             { id: 'pikachu', label: 'Pikachu', Icon: Puzzle },
                         ].map(({ id, label, Icon }) => (
@@ -384,7 +386,7 @@ export default function Home() {
                         </div>
                     </div>
 
-                    {activeGame !== 'pacman' && activeGame !== 'pikachu' && (
+                    {activeGame !== 'pacman' && (
                         <div className="glass-panel" style={{ marginTop: '2rem', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.2rem' }}>
                                 <Swords size={24} color="var(--accent-color)" />

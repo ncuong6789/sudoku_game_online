@@ -6,6 +6,19 @@ export default function PikachuHome() {
     const navigate = useNavigate();
     const [gameMode, setGameMode] = useState('classic');
     const [timeLimitEnabled, setTimeLimitEnabled] = useState(true);
+    const [hasSave, setHasSave] = useState(false);
+
+    React.useEffect(() => {
+        try {
+            const savedStr = localStorage.getItem('pikachu_save');
+            if (savedStr) {
+                const s = JSON.parse(savedStr);
+                if (s.status === 'playing') {
+                    setHasSave(true);
+                }
+            }
+        } catch(e) {}
+    }, []);
 
     const handlePlay = () => {
         navigate('/pikachu/game', { state: { gameMode, timeLimitEnabled } });
@@ -105,6 +118,18 @@ export default function PikachuHome() {
                 </div>
 
                 {/* Actions */}
+                {hasSave && (
+                    <button className="btn-primary" onClick={() => navigate('/pikachu/game', { state: { resume: true } })} style={{
+                        width: '100%', padding: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        gap: '10px', fontSize: '1.1rem', fontWeight: 800,
+                        background: '#10b981', color: '#fff',
+                        border: 'none', borderRadius: '12px', cursor: 'pointer', marginBottom: '8px',
+                        transition: 'all 0.2s ease'
+                    }}>
+                        <Play size={18} fill="#fff" /> Chơi Tiếp Màn Đang Dở
+                    </button>
+                )}
+
                 <button className="btn-primary" onClick={handlePlay} style={{
                     width: '100%', padding: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     gap: '10px', fontSize: '1.1rem', fontWeight: 800,
@@ -113,11 +138,11 @@ export default function PikachuHome() {
                     border: 'none', borderRadius: '12px', cursor: 'pointer', marginBottom: '8px',
                     transition: 'all 0.2s ease'
                 }}>
-                    <Play size={18} fill={gameMode === 'classic' ? '#000' : '#fff'} /> Chơi Ngay (Solo)
+                    <Play size={18} fill={gameMode === 'classic' ? '#000' : '#fff'} /> Chơi Mới ({gameMode === 'classic' ? 'Classic' : 'Full'})
                 </button>
 
                 {/* Online multiplayer button */}
-                <button onClick={() => navigate('/pikachu/lobby')} style={{
+                <button onClick={() => navigate('/pikachu/lobby', { state: { autoCreate: true } })} style={{
                     width: '100%', padding: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     gap: '10px', fontSize: '1rem', fontWeight: 800,
                     background: 'linear-gradient(135deg, rgba(56,189,248,0.15), rgba(56,189,248,0.08))',
@@ -126,7 +151,7 @@ export default function PikachuHome() {
                     transition: 'all 0.2s ease',
                     boxShadow: '0 0 20px rgba(56,189,248,0.1)',
                 }}>
-                    <Globe size={17} /> Chơi Online (2 Người)
+                    <Globe size={17} /> Tạo phòng Online
                 </button>
 
                 <button className="btn-secondary" onClick={() => navigate('/')} style={{

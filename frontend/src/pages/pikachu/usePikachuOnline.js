@@ -21,8 +21,20 @@ const EVENTS = {
     OPPONENT_HINT_USED: 'pikachu:opponentHintUsed',
 };
 
-const MY_COLOR   = '#ef4444'; // đỏ – tự nhìn mình
-const OPP_COLOR  = '#38bdf8'; // xanh dương – màu đối thủ
+// ─── Audio ────────────────────────────────────────────────────────────────────
+const _tapSound    = new Audio('/pikachu_audio/click.mp3');
+const _leadSound   = new Audio('/pikachu_audio/linked.mp3');
+const _winSound    = new Audio('/pikachu_audio/win.mp3');
+const _errorSound  = new Audio('/pikachu_audio/oho.mp3');
+const _noMoveSound = new Audio('/pikachu_audio/no_move.mp3');
+
+function playSound(audio, muted = false) {
+    if (muted) return;
+    try { audio.currentTime = 0; audio.play().catch(() => {}); } catch (_) {}
+}
+
+const MY_COLOR  = '#ef4444'; // đỏ – tự nhìn mình
+const OPP_COLOR = '#38bdf8'; // xanh dương – màu đối thủ
 
 export function usePikachuOnline({ roomId, isHost }) {
     const [board, setBoard]                     = useState([]);
@@ -50,10 +62,20 @@ export function usePikachuOnline({ roomId, isHost }) {
     const [hintPair, setHintPair]               = useState(null);
 
     // Shuffle
-    const [shufflePending, setShufflePending]   = useState(false); // mình đã gửi request
-    const [shuffleRequest, setShuffleRequest]   = useState(null);  // {requestedBy, countdown}
+    const [shufflePending, setShufflePending]   = useState(false);
+    const [shuffleRequest, setShuffleRequest]   = useState(null);
     const [shuffleCountdown, setShuffleCountdown] = useState(0);
     const shuffleTimerRef                        = useRef(null);
+
+    // SFX toggle (độc lập với nhạc nền)
+    const sfxMutedRef                            = useRef(false);
+    const [sfxMuted, setSfxMuted]               = useState(false);
+    const toggleSfx = useCallback(() => {
+        setSfxMuted(prev => {
+            sfxMutedRef.current = !prev;
+            return !prev;
+        });
+    }, []);
 
     // Game over
     const [gameResult, setGameResult]           = useState(null);  // {winnerId, scores}
@@ -105,6 +127,7 @@ export function usePikachuOnline({ roomId, isHost }) {
 
         const onTileSelected = ({ by, r, c }) => {
             if (by === socket.id) {
+                playSound(_tapSound, sfxMutedRef.current);   // click của mình
                 setMySelected({ r, c });
             } else {
                 setOpponentSelected({ r, c });
@@ -124,6 +147,7 @@ export function usePikachuOnline({ roomId, isHost }) {
             const isMine = by === socket.id;
 
             if (isMine) {
+                playSound(_leadSound, sfxMutedRef.current);  // ghép đúng – của mình
                 setMyPath(path);
                 setMySelected(null);
                 setTimeout(() => setMyPath(null), 500);
@@ -139,6 +163,7 @@ export function usePikachuOnline({ roomId, isHost }) {
         };
 
         const onMatchFailed = () => {
+            playSound(_errorSound, sfxMutedRef.current); // ghép sai
             setMySelected(null);
             // Flash penalty
             setPenaltyFlash(true);
@@ -178,11 +203,18 @@ export function usePikachuOnline({ roomId, isHost }) {
         };
 
         const onGameOver = ({ scores, winnerId }) => {
+            // Phát âm thanh thắng/thua
+            if (winnerId === socket.id) {
+                playSound(_winSound, sfxMutedRef.current);
+            } else {
+                playSound(_noMoveSound, sfxMutedRef.current);
+            }
             setGameStatus('gameover');
             setGameResult({ scores, winnerId });
         };
 
         const onOpponentDisconnected = () => {
+            playSound(_winSound, sfxMutedRef.current); // đối thủ bỏ cuộc → mình thắng
             setGameStatus('gameover');
             setGameResult({ disconnected: true, winnerId: socket.id });
         };
@@ -271,6 +303,9 @@ export function usePikachuOnline({ roomId, isHost }) {
         // Result
         gameResult,
         penaltyFlash,
+        // SFX control
+        sfxMuted,
+        toggleSfx,
         // Actions
         handleTileClick,
         useHint,

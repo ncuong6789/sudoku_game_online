@@ -63,6 +63,7 @@ export default function PikachuOnlineGame() {
         hintPair,
         shufflePending, shuffleRequest, shuffleCountdown,
         gameResult, penaltyFlash,
+        sfxMuted, toggleSfx,
         handleTileClick,
         useHint, requestShuffle, respondToShuffle,
     } = usePikachuOnline({ roomId, isHost });
@@ -324,9 +325,39 @@ export default function PikachuOnlineGame() {
 
                         {/* Actions */}
                         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <button onClick={toggleMute} style={{ padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.04)', color: muted ? '#ef4444' : '#4ade80', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
-                                {muted ? '🔇 Bật nhạc' : '🔊 Tắt nhạc'}
-                            </button>
+                            {/* Nhạc nền + SFX – 2 nút cùng hàng */}
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
+                                <button
+                                    onClick={toggleMute}
+                                    title={muted ? 'Bật nhạc nền' : 'Tắt nhạc nền'}
+                                    style={{
+                                        padding: '9px 4px', borderRadius: '8px',
+                                        border: `1px solid ${muted ? 'rgba(239,68,68,0.3)' : 'rgba(74,222,128,0.25)'}`,
+                                        background: muted ? 'rgba(239,68,68,0.08)' : 'rgba(74,222,128,0.08)',
+                                        color: muted ? '#ef4444' : '#4ade80',
+                                        fontWeight: 700, fontSize: '0.72rem', cursor: 'pointer',
+                                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px',
+                                    }}
+                                >
+                                    <span style={{ fontSize: '1rem' }}>{muted ? '🔇' : '🎵'}</span>
+                                    <span>{muted ? 'Nhạc OFF' : 'Nhạc ON'}</span>
+                                </button>
+                                <button
+                                    onClick={toggleSfx}
+                                    title={sfxMuted ? 'Bật hiệu ứng âm thanh' : 'Tắt hiệu ứng âm thanh'}
+                                    style={{
+                                        padding: '9px 4px', borderRadius: '8px',
+                                        border: `1px solid ${sfxMuted ? 'rgba(239,68,68,0.3)' : 'rgba(56,189,248,0.25)'}`,
+                                        background: sfxMuted ? 'rgba(239,68,68,0.08)' : 'rgba(56,189,248,0.08)',
+                                        color: sfxMuted ? '#ef4444' : '#38bdf8',
+                                        fontWeight: 700, fontSize: '0.72rem', cursor: 'pointer',
+                                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px',
+                                    }}
+                                >
+                                    <span style={{ fontSize: '1rem' }}>{sfxMuted ? '🔕' : '🔔'}</span>
+                                    <span>{sfxMuted ? 'SFX OFF' : 'SFX ON'}</span>
+                                </button>
+                            </div>
                             <button onClick={() => navigate('/pikachu')} style={{ padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.04)', color: '#94a3b8', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                                 <ArrowLeft size={14} /> Thoát
                             </button>

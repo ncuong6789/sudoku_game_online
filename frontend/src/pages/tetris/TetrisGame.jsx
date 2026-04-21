@@ -63,17 +63,17 @@ const NextPiece = ({ type }) => {
     return (
         <div style={{ 
             display: 'grid', 
-            gridTemplateRows: `repeat(${shape.length}, 10px)`,
-            gridTemplateColumns: `repeat(${shape[0]?.length || 1}, 10px)`,
+            gridTemplateRows: `repeat(${shape.length}, 16px)`,
+            gridTemplateColumns: `repeat(${shape[0]?.length || 1}, 16px)`,
             margin: '0 auto',
             flexShrink: 0
         }}>
             {shape.map(row => row.map((cell, x) => (
                 <div key={x} style={{
-                    width: '10px', height: '10px',
+                    width: '16px', height: '16px',
                     backgroundColor: cell ? TETROMINOES[type].color : 'transparent',
-                    boxShadow: cell ? `inset 1px 1px 2px rgba(255,255,255,0.3)` : 'none',
-                    borderRadius: '1px'
+                    boxShadow: cell ? `inset 1.5px 1.5px 3px rgba(255,255,255,0.3)` : 'none',
+                    borderRadius: '2px'
                 }} />
             )))}
         </div>
@@ -291,57 +291,57 @@ export default function TetrisGame() {
                     )}
                 </div>
 
-                {/* PHẢI: BẢNG ĐIỀU KHIỂN - 2 CỘT */}
-                <div style={{ flex: '0 0 280px', width: '280px', display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '100vh', overflow: 'hidden', minHeight: 0 }}>
+                {/* PHẢI: BẢNG ĐIỀU KHIỂN DỌC TRÀN ĐẦY KHÔNG GIAN */}
+                <div style={{ flex: '0 0 250px', width: '250px', display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '100vh', overflow: 'hidden', minHeight: 0 }}>
                     
-                    {/* CỘT TRÊN: Header + Score/Level */}
-                    <div style={{ display: 'flex', gap: '0.75rem' }}>
-                        {/* Cột trái: Header + Score */}
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                            <div className="nav-item active" style={{ padding: '8px', display: 'flex', alignSelf: 'center', alignItems: 'center', gap: '6px', fontSize: '1rem', fontWeight: 'bold' }}>
-                                <span style={{fontSize: '1.1rem'}}>🧱</span> Tetris
-                            </div>
-                            <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-                                {mode === 'solo' ? difficulty : `Phòng: ${roomId}`}
-                            </div>
-                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>ĐIỂM</div>
-                                <div style={{ fontSize: '1.3rem', fontWeight: 'bold', color: 'var(--primary-color)' }}>{score}</div>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', padding: '0 4px' }}>
-                                <span style={{ color: 'var(--text-secondary)' }}>Hàng:</span>
-                                <b style={{ color: '#4ade80' }}>{rows}</b>
-                            </div>
-                        </div>
+                    <div className="nav-item active" style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', fontSize: '1.2rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px' }}>
+                        <span style={{fontSize: '1.4rem'}}>🧱</span> Tetris
+                    </div>
 
-                        {/* Cột phải: Level + Next Pieces */}
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '8px', textAlign: 'center' }}>
-                                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>CẤP ĐỘ</div>
-                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#a371f7' }}>{level}</div>
-                            </div>
-                            <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '8px', padding: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
-                                {nextPieces.map((type, idx) => (
-                                    <NextPiece key={idx} type={type} />
-                                ))}
-                            </div>
+                    <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                        {mode === 'solo' ? difficulty : `Phòng: ${roomId}`}
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 10px', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '4px', letterSpacing: '1px' }}>ĐIỂM</div>
+                            <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--primary-color)' }}>{score}</div>
+                        </div>
+                        <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 10px', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '4px', letterSpacing: '1px' }}>CẤP ĐỘ</div>
+                            <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#a371f7' }}>{level}</div>
+                        </div>
+                    </div>
+                    
+                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Số hàng đã xóa:</span>
+                        <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#4ade80' }}>{rows}</span>
+                    </div>
+
+                    {/* Next Pieces - Mở rộng dọc */}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.05)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '1.5rem', letterSpacing: '2px', fontWeight: 700 }}>KHỐI TIẾP THEO</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-evenly', flex: 1, gap: '1rem' }}>
+                            {nextPieces.map((type, idx) => (
+                                <NextPiece key={idx} type={type} />
+                            ))}
                         </div>
                     </div>
 
-                    {/* CỘT DƯỚI: Nút điều khiển */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    {/* Nút Khóa dưới cùng */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                         {mode === 'solo' && (
                             <>
-                                <button className="btn-primary" onClick={() => { startGame(); }} style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontSize: '0.9rem' }}>
-                                    <RefreshCw size={16} /> Chơi mới
+                                <button className="btn-primary" onClick={() => { startGame(); }} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.95rem' }}>
+                                    <RefreshCw size={18} /> Chơi mới
                                 </button>
-                                <button onClick={togglePause} disabled={!isStarted || gameOver} style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', width: '100%', background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: isPaused ? '#38bdf8' : '#fff', cursor: !isStarted || gameOver ? 'default' : 'pointer', opacity: !isStarted || gameOver ? 0.5 : 1, fontSize: '0.9rem' }}>
+                                <button onClick={togglePause} disabled={!isStarted || gameOver} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%', background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: isPaused ? '#38bdf8' : '#fff', cursor: !isStarted || gameOver ? 'default' : 'pointer', opacity: !isStarted || gameOver ? 0.5 : 1, fontSize: '0.95rem', fontWeight: 600 }}>
                                     {isPaused ? '▶ Tiếp tục (Space)' : '⏸ Tạm dừng (Space)'}
                                 </button>
                             </>
                         )}
-                        <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/tetris/multiplayer' : '/tetris')} style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontSize: '0.9rem' }}>
-                            <ArrowLeft size={16} /> Thoát
+                        <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/tetris/multiplayer' : '/tetris')} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.95rem', borderRadius: '10px' }}>
+                            <ArrowLeft size={18} /> Thoát
                         </button>
                     </div>
                 </div>

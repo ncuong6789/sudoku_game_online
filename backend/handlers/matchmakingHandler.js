@@ -19,7 +19,7 @@ module.exports = (io, socket, roomManager) => {
             
             let finalGameType = gameType;
             if (gameType === 'random') {
-                const types = ['sudoku', 'caro', 'chess', 'snake', 'tetris', 'tank', 'jungle'];
+                const types = ['sudoku', 'caro', 'chess', 'snake', 'tetris', 'tank', 'jungle', 'pikachu'];
                 finalGameType = types[Math.floor(Math.random() * types.length)];
             }
 

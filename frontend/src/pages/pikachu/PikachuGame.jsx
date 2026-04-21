@@ -10,12 +10,13 @@ export default function PikachuGame() {
     const state = location.state || {};
     const gameMode = state.gameMode || 'classic';
     const timeLimitEnabled = state.timeLimitEnabled !== undefined ? state.timeLimitEnabled : true;
+    const resume = state.resume === true;
 
     const {
         board, ROWS, COLS, activeRows, level, score, timeLeft, status, selected, connectedPath,
         hints, shuffles, hintPair, penaltyFlash, isPaused, togglePause,
         handleTileClick, useHint, handleShuffle, initGame, checkAndFixDeadlock
-    } = usePikachuLogic(gameMode, timeLimitEnabled);
+    } = usePikachuLogic(gameMode, timeLimitEnabled, resume);
 
     const { muted, toggleMute } = useBgMusic('/pikachu_audio/backgroundMusic.mp3', status === 'playing', 0.12);
 
