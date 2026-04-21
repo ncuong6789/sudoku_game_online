@@ -5,6 +5,7 @@ import { socket } from '../../utils/socket';
 import { INITIAL_SPEED, DASH_COOLDOWN } from './snakeAI';
 import { useSnakeLogic } from './useSnakeLogic';
 import { useBgMusic } from '../../hooks/useBgMusic';
+import { useTranslation } from 'react-i18next';
 
 // ─── CANVAS ──────────────────────────────────────────────────────────────────
 function roundRect(ctx, x, y, w, h, r) {
@@ -142,7 +143,7 @@ function SnakeCanvas({ gameRef, mapSize }) {
 }
 
 // ─── LEFT PANEL ──────────────────────────────────────────────────────────────
-function LeftPanel({ gameRef, gameOver, accentColor, resultEmoji, resultTitle, resultDetail }) {
+function LeftPanel({ gameRef, gameOver, accentColor, resultEmoji, resultTitle, resultDetail, t }) {
     const [cdRemain, setCdRemain] = useState(0);
     useEffect(() => {
         const t = setInterval(() => {
@@ -168,14 +169,14 @@ function LeftPanel({ gameRef, gameOver, accentColor, resultEmoji, resultTitle, r
     return (
         <div style={{ width: '240px', flexShrink: 0, paddingRight: '12px', display: 'flex', flexDirection: 'column' }}>
             <div style={{ ...cardStyle, background: 'rgba(96,165,250,0.04)', border: '1px solid rgba(96,165,250,0.2)' }}>
-                <div style={{ ...labelStyle, color: '#60a5fa' }}>🎮 Điều Khiển</div>
+                <div style={{ ...labelStyle, color: '#60a5fa' }}>🎮 {t('snake.controls')}</div>
                 <div style={rowStyle}>
                     <kbd style={kbdStyle}>W</kbd><kbd style={kbdStyle}>A</kbd><kbd style={kbdStyle}>S</kbd><kbd style={kbdStyle}>D</kbd>
-                    <span style={{ marginLeft: '4px' }}>Di chuyển</span>
+                    <span style={{ marginLeft: '4px' }}>{t('snake.move')}</span>
                 </div>
                 <div style={{ ...rowStyle, marginTop: '8px' }}>
                     <kbd style={kbdStyle}>↑</kbd><kbd style={kbdStyle}>↓</kbd><kbd style={kbdStyle}>←</kbd><kbd style={kbdStyle}>→</kbd>
-                    <span style={{ marginLeft: '4px' }}>Di chuyển</span>
+                    <span style={{ marginLeft: '4px' }}>{t('snake.move')}</span>
                 </div>
                 <div style={{
                     ...rowStyle, background: 'rgba(250,204,21,0.06)', borderRadius: '8px', padding: '8px 10px', marginTop: '10px',
@@ -183,9 +184,9 @@ function LeftPanel({ gameRef, gameOver, accentColor, resultEmoji, resultTitle, r
                 }}>
                     <kbd style={{ ...kbdStyle, background: canDash ? 'rgba(250,204,21,0.15)' : '#1e293b', color: canDash ? '#fbbf24' : '#64748b', border: `1px solid ${canDash ? '#fbbf24' : '#334155'}`, fontSize: '0.82rem', opacity: hasPoints ? 1 : 0.5 }}>SPACE</kbd>
                     <div>
-                        <div style={{ color: canDash ? '#fbbf24' : (ready ? '#94a3b8' : '#cbd5e1'), fontWeight: 700 }}>Lao Nhanh</div>
+                        <div style={{ color: canDash ? '#fbbf24' : (ready ? '#94a3b8' : '#cbd5e1'), fontWeight: 700 }}>{t('snake.dash')}</div>
                         <div style={{ fontSize: '0.74rem', color: canDash ? '#fbbf24' : '#64748b', marginTop: '1px' }}>
-                            {!ready ? `Hồi chiêu ${(cdRemain / 1000).toFixed(1)}s` : (!hasPoints ? `Cần 5 điểm (có ${score})` : '✓ Sẵn sàng!')}
+                            {!ready ? `${t('snake.cooldown')} ${(cdRemain / 1000).toFixed(1)}s` : (!hasPoints ? `${t('snake.needPoints')} (${score})` : '✓ ' + t('snake.ready'))}
                         </div>
                     </div>
                 </div>
@@ -194,12 +195,12 @@ function LeftPanel({ gameRef, gameOver, accentColor, resultEmoji, resultTitle, r
                 </div>
             </div>
             <div style={cardStyle}>
-                <div style={labelStyle}>⚡ Cơ Chế Lao Nhanh</div>
-                <div style={rowStyle}><span style={{ color: '#fbbf24', flexShrink: 0 }}>➤</span>Lao 3 ô về phía trước</div>
-                <div style={rowStyle}><span style={{ color: '#f87171', flexShrink: 0 }}>☠</span>Bỏ đuôi → hóa đá chắn đường</div>
-                <div style={rowStyle}><span style={{ color: '#f87171', flexShrink: 0 }}>−</span>Reset điểm về 2</div>
-                <div style={rowStyle}><span style={{ color: '#94a3b8', flexShrink: 0 }}>!</span>Cần ≥ <b style={{ color: '#fff', margin: '0 3px' }}>5</b> điểm</div>
-                <div style={rowStyle}><span style={{ color: '#60a5fa', flexShrink: 0 }}>⏱</span>Hồi chiêu <b style={{ color: '#fff', margin: '0 3px' }}>3s</b> hồi chiêu</div>
+                <div style={labelStyle}>⚡ {t('snake.dashMechanism')}</div>
+                <div style={rowStyle}><span style={{ color: '#fbbf24', flexShrink: 0 }}>➤</span>{t('snake.move3')}</div>
+                <div style={rowStyle}><span style={{ color: '#f87171', flexShrink: 0 }}>☠</span>{t('snake.tailTrap')}</div>
+                <div style={rowStyle}><span style={{ color: '#f87171', flexShrink: 0 }}>−</span>{t('snake.resetScore')}</div>
+                <div style={rowStyle}><span style={{ color: '#94a3b8', flexShrink: 0 }}>!</span>{t('snake.needPoints')}</div>
+                <div style={rowStyle}><span style={{ color: '#60a5fa', flexShrink: 0 }}>⏱</span>{t('snake.cooldown')}</div>
             </div>
             {gameOver && (
                 <div style={{ marginTop: 'auto', borderRadius: '12px', overflow: 'hidden', border: `2px solid ${accentColor}66`, background: `linear-gradient(160deg, ${accentColor}18 0%, rgba(10,14,22,0.9) 100%)`, boxShadow: `0 0 24px ${accentColor}22` }}>
@@ -217,7 +218,7 @@ function LeftPanel({ gameRef, gameOver, accentColor, resultEmoji, resultTitle, r
 }
 
 // ─── RIGHT PANEL ─────────────────────────────────────────────────────────────
-function RightPanel({ mode, gameOver, handleRestart, navigate, playerColor, muted, toggleMute }) {
+function RightPanel({ mode, gameOver, handleRestart, navigate, playerColor, muted, toggleMute, t }) {
     const cardStyle = { borderRadius: '10px', padding: '12px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '10px' };
     const labelStyle = { fontSize: '0.72rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' };
     const rowStyle = { display: 'flex', alignItems: 'flex-start', gap: '9px', fontSize: '0.82rem', color: '#cbd5e1', marginBottom: '6px', lineHeight: 1.4 };
@@ -225,41 +226,41 @@ function RightPanel({ mode, gameOver, handleRestart, navigate, playerColor, mute
     return (
         <div style={{ width: '240px', flexShrink: 0, paddingLeft: '12px', display: 'flex', flexDirection: 'column' }}>
             <div style={cardStyle}>
-                <div style={labelStyle}>🎯 Vật Phẩm</div>
+                <div style={labelStyle}>🎯 {t('snake.items')}</div>
                 <div style={{ background: 'rgba(239,68,68,0.08)', borderRadius: '8px', padding: '8px 10px', marginBottom: '8px', border: '1px solid rgba(239,68,68,0.2)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                         <div style={{ width: 13, height: 13, borderRadius: '50%', background: 'radial-gradient(circle,#f87171,#dc2626)', boxShadow: '0 0 6px #f87171', flexShrink: 0 }} />
-                        <span style={{ color: '#f87171', fontWeight: 700, fontSize: '0.85rem' }}>Mồi Đỏ +1 điểm</span>
+                        <span style={{ color: '#f87171', fontWeight: 700, fontSize: '0.85rem' }}>{t('snake.redBait')}</span>
                     </div>
-                    <div style={{ fontSize: '0.76rem', color: '#94a3b8' }}>Rắn dài thêm 1 đốt</div>
+                    <div style={{ fontSize: '0.76rem', color: '#94a3b8' }}>{t('snake.redDesc')}</div>
                 </div>
                 <div style={{ background: 'rgba(251,191,36,0.08)', borderRadius: '8px', padding: '8px 10px', border: '1px solid rgba(251,191,36,0.2)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                         <div style={{ width: 13, height: 13, borderRadius: '50%', background: 'radial-gradient(circle,#fbbf24,#d97706)', boxShadow: '0 0 8px #fbbf24', flexShrink: 0 }} />
-                        <span style={{ color: '#fbbf24', fontWeight: 700, fontSize: '0.85rem' }}>Mồi Vàng +2 điểm</span>
+                        <span style={{ color: '#fbbf24', fontWeight: 700, fontSize: '0.85rem' }}>{t('snake.goldBait')}</span>
                     </div>
-                    <div style={{ fontSize: '0.76rem', color: '#94a3b8', lineHeight: 1.6 }}>✂ Rút ngắn 2 đốt<br />⏳Biến mất sau 5s<br />🐢Đi chậm lại</div>
+                    <div style={{ fontSize: '0.76rem', color: '#94a3b8', lineHeight: 1.6 }}>{t('snake.shorten')}<br />{t('snake.disappear')}<br />{t('snake.slow')}</div>
                 </div>
             </div>
             <div style={cardStyle}>
-                <div style={labelStyle}>🗺 Ký Hiệu</div>
-                <div style={rowStyle}><div style={{ width: 14, height: 14, background: '#3f3f46', borderRadius: '3px', flexShrink: 0, marginTop: '2px' }} /><span>Xác rắn — chướng ngại</span></div>
-                <div style={rowStyle}><div style={{ width: 14, height: 14, background: 'rgba(40,40,55,0.9)', borderRadius: '3px', flexShrink: 0, marginTop: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '9px', color: 'rgba(120,120,150,0.9)', lineHeight: 1, fontWeight: 700 }}>✕</span></div><span>Ô cô lập — không có mồi</span></div>
-                <div style={rowStyle}><div style={{ width: 14, height: 14, background: playerColor === 'blue' ? '#60a5fa' : '#4ade80', borderRadius: '50%', flexShrink: 0, marginTop: '2px' }} /><span>Rắn của bạn</span></div>
-                <div style={rowStyle}><div style={{ width: 14, height: 14, background: playerColor === 'blue' ? '#4ade80' : '#60a5fa', borderRadius: '50%', flexShrink: 0, marginTop: '2px' }} /><span>{mode === 'solo' ? 'Rắn CPU' : 'Rắn đối thủ'}</span></div>
+                <div style={labelStyle}>🗺 {t('snake.legend')}</div>
+                <div style={rowStyle}><div style={{ width: 14, height: 14, background: '#3f3f46', borderRadius: '3px', flexShrink: 0, marginTop: '2px' }} /><span>{t('snake.deadSnake')}</span></div>
+                <div style={rowStyle}><div style={{ width: 14, height: 14, background: 'rgba(40,40,55,0.9)', borderRadius: '3px', flexShrink: 0, marginTop: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '9px', color: 'rgba(120,120,150,0.9)', lineHeight: 1, fontWeight: 700 }}>✕</span></div><span>{t('snake.isolated')}</span></div>
+                <div style={rowStyle}><div style={{ width: 14, height: 14, background: playerColor === 'blue' ? '#60a5fa' : '#4ade80', borderRadius: '50%', flexShrink: 0, marginTop: '2px' }} /><span>{t('snake.yourSnake')}</span></div>
+                <div style={rowStyle}><div style={{ width: 14, height: 14, background: playerColor === 'blue' ? '#4ade80' : '#60a5fa', borderRadius: '50%', flexShrink: 0, marginTop: '2px' }} /><span>{mode === 'solo' ? t('snake.cpuSnake') : t('snake.enemySnake')}</span></div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', marginTop: '2px' }}>
                 {mode === 'solo' && (
                     <button className={gameOver ? 'btn-primary' : 'btn-secondary'} onClick={handleRestart} style={{ width: '100%', padding: '9px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', fontSize: '0.9rem', fontWeight: 700 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}><RotateCcw size={15} /> Chơi lại</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}><RotateCcw size={15} /> {t('snake.restart')}</div>
                         {gameOver && <span style={{ fontSize: '0.65rem', opacity: 0.8, fontWeight: 400 }}>(Phím Space)</span>}
                     </button>
                 )}
                 <button onClick={toggleMute} style={{ width: '100%', padding: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.9rem', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: muted ? '#ef4444' : '#4ade80', cursor: 'pointer' }}>
-                    {muted ? <VolumeX size={15} /> : <Volume2 size={15} />} {muted ? 'Bật nhạc' : 'Tắt nhạc'}
+                    {muted ? <VolumeX size={15} /> : <Volume2 size={15} />} {muted ? t('snake.musicOn') : t('snake.musicOff')}
                 </button>
                 <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/snake/multiplayer' : '/snake')} style={{ width: '100%', padding: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', fontSize: '0.9rem' }}>
-                    <ArrowLeft size={15} /> Thoát
+                    <ArrowLeft size={15} /> {t('snake.exit')}
                 </button>
             </div>
         </div>
@@ -268,6 +269,7 @@ function RightPanel({ mode, gameOver, handleRestart, navigate, playerColor, mute
 
 // ─── MAIN GAME ───────────────────────────────────────────────────────────────
 export default function SnakeGame() {
+    const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
     const { mode, mapSize, roomId, playerColor, difficulty, hasBot } =
@@ -305,8 +307,8 @@ export default function SnakeGame() {
     const canvasRef2use = mode === 'multiplayer' ? mpRef : gameRef;
     const oppScore = mode === 'solo' ? uiState.botScore : (gameState ? Object.values(gameState.snakes).find(s => s.id !== socket.id)?.score ?? 0 : 0);
 
-    const isWin = uiState.statusMessage.includes('THẮNG') || uiState.statusMessage.includes('Thắng');
-    const isDraw = uiState.statusMessage.includes('HÒA') || uiState.statusMessage.includes('Hòa');
+    const isWin = uiState.statusMessage.includes('WIN') || uiState.statusMessage.includes('Thắng') || uiState.statusMessage.includes('win');
+    const isDraw = uiState.statusMessage.includes('DRAW') || uiState.statusMessage.includes('Hòa') || uiState.statusMessage.includes('draw');
     const accentColor = isWin ? '#4ade80' : isDraw ? '#fbbf24' : '#f87171';
     const resultEmoji = isWin ? '🏆' : isDraw ? '🤝' : '💀';
     const resultTitle = uiState.statusMessage.split('!')[0] + '!';
@@ -319,23 +321,23 @@ export default function SnakeGame() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Activity size={16} color="var(--primary-color)" />
                         <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }}>Snake {mapSize}</span>
-                        <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{mode === 'solo' ? `· vs CPU (${difficulty})` : `· ${roomId}`}</span>
+                        <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{mode === 'solo' ? `${t('snake.vs')} (${difficulty})` : `${roomId}`}</span>
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px', justifyContent: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Trophy size={16} color="#fbbf24" /><span style={{ fontWeight: 800, fontSize: '1rem' }}>Bạn: <span style={{ color: '#4ade80' }}>{uiState.score}</span></span></div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Trophy size={16} color="#fbbf24" /><span style={{ fontWeight: 800, fontSize: '1rem' }}>{t('snake.you')}: <span style={{ color: '#4ade80' }}>{uiState.score}</span></span></div>
                         {(hasBot || mode === 'multiplayer') && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: 11, height: 11, borderRadius: '50%', background: '#60a5fa' }} /><span style={{ fontWeight: 800, fontSize: '1rem' }}>{mode === 'solo' ? `CPU (${difficulty})` : 'Địch'}: <span style={{ color: '#60a5fa' }}>{oppScore}</span></span></div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: 11, height: 11, borderRadius: '50%', background: '#60a5fa' }} /><span style={{ fontWeight: 800, fontSize: '1rem' }}>{mode === 'solo' ? `${t('snake.cpu')} (${difficulty})` : t('snake.opp')}: <span style={{ color: '#60a5fa' }}>{oppScore}</span></span></div>
                         )}
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        {hasBot && gameRef.current?.botDead && !uiState.gameOver ? <span style={{ fontSize: '0.8rem', color: '#f59e0b', fontWeight: 700 }}>💀 CPU đã chết — tiếp tục ghi điểm!</span> : <span style={{ fontSize: '0.82rem', fontWeight: 700, color: uiState.gameOver ? accentColor : 'var(--text-secondary)' }}>{uiState.gameOver ? `${resultEmoji} ${resultTitle}` : 'Đang chơi...'}</span>}
+                        {hasBot && gameRef.current?.botDead && !uiState.gameOver ? <span style={{ fontSize: '0.8rem', color: '#f59e0b', fontWeight: 700 }}>💀 {t('snake.cpuDead')}</span> : <span style={{ fontSize: '0.82rem', fontWeight: 700, color: uiState.gameOver ? accentColor : 'var(--text-secondary)' }}>{uiState.gameOver ? `${resultEmoji} ${resultTitle}` : t('snake.playing')}</span>}
                     </div>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'stretch' }}>
-                    <LeftPanel gameRef={canvasRef2use} gameOver={uiState.gameOver} accentColor={accentColor} resultEmoji={resultEmoji} resultTitle={resultTitle} resultDetail={resultDetail} />
+                    <LeftPanel gameRef={canvasRef2use} gameOver={uiState.gameOver} accentColor={accentColor} resultEmoji={resultEmoji} resultTitle={resultTitle} resultDetail={resultDetail} t={t} />
 
                     <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ position: 'relative', width: '100%', aspectRatio: '1/1', border: '4px solid rgba(255,255,255,0.1)', borderRadius: '8px', boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5),0 10px 30px rgba(0,0,0,0.3)', overflow: 'hidden' }}>
@@ -343,9 +345,9 @@ export default function SnakeGame() {
 
                             {mode === 'multiplayer' && countdown !== null && (
                                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 60, gap: '16px' }}>
-                                    <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-secondary)' }}>Rắn của bạn:</p>
+                                    <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-secondary)' }}>{t('snake.ready')}</p>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><div style={{ width: 20, height: 20, borderRadius: '50%', background: myColor, boxShadow: `0 0 10px ${myColor}` }} /><span style={{ fontWeight: 700, fontSize: '1.2rem', color: myColor }}>{myColorLabel}</span></div>
-                                    <div style={{ fontSize: countdown === 0 ? '2.5rem' : '6rem', fontWeight: 900, color: countdown === 0 ? '#4ade80' : '#fff', textShadow: '0 0 20px currentColor', transition: 'all 0.3s' }}>{countdown === 0 ? 'BẮT ĐẦU!' : countdown}</div>
+                                    <div style={{ fontSize: countdown === 0 ? '2.5rem' : '6rem', fontWeight: 900, color: countdown === 0 ? '#4ade80' : '#fff', textShadow: '0 0 20px currentColor', transition: 'all 0.3s' }}>{countdown === 0 ? t('snake.start') : countdown}</div>
                                 </div>
                             )}
 
@@ -353,7 +355,7 @@ export default function SnakeGame() {
                         </div>
                     </div>
 
-                    <RightPanel mode={mode} gameOver={uiState.gameOver} handleRestart={handleRestart} navigate={navigate} playerColor={playerColor} muted={muted} toggleMute={toggleMute} />
+                    <RightPanel mode={mode} gameOver={uiState.gameOver} handleRestart={handleRestart} navigate={navigate} playerColor={playerColor} muted={muted} toggleMute={toggleMute} t={t} />
                 </div>
             </div>
         </div>

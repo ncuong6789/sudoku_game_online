@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Undo2, Lightbulb, History, ChevronRight, ChevronDown, Activity } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Undo2, Lightbulb, History, ChevronRight, ChevronDown, Activity, Hexagon } from 'lucide-react';
 import { useXiangqiLogic } from './useXiangqiLogic';
 import { useAudio } from '../../utils/useAudio';
 import { useTranslation } from 'react-i18next';
@@ -146,7 +146,7 @@ export default function XiangqiGame() {
                     <ArrowLeft size={14} /> {t('common.returnToMenu', 'Về sảnh')}
                 </button>
                 <h1 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 900, color: '#fca5a5', letterSpacing: '1px' }}>
-                    CỜ TƯỚNG
+                    {t('xiangqi.title').toUpperCase()}
                 </h1>
                 <div style={{ width: '100px' }} /> {/* Spacer */}
             </div>
@@ -173,27 +173,27 @@ export default function XiangqiGame() {
                         }}>
                             <Hexagon size={28} color="#fff" />
                         </div>
-                        <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#fca5a5', letterSpacing: '1px' }}>CỜ TƯỚNG</h2>
-                        <div style={{ color: '#ef4444', fontSize: '0.7rem', fontWeight: 700 }}>TRẬN BÀN GỖ</div>
+                        <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#fca5a5', letterSpacing: '1px' }}>{t('xiangqi.title')}</h2>
+                        <div style={{ color: '#ef4444', fontSize: '0.7rem', fontWeight: 700 }}>XIANGQI</div>
                     </div>
 
                     {/* Player Info */}
                     <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, marginBottom: '10px', letterSpacing: '1px' }}>THÔNG TIN</div>
+                        <div style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, marginBottom: '10px', letterSpacing: '1px' }}>{t('xiangqi.info')}</div>
 
                         <div className="xiangqi-player-avatars" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                             <div className="xiangqi-avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', color: '#fff', fontWeight: 'bold' }}>帥</div>
                             <div>
-                                <div style={{ fontSize: '0.65rem', color: '#888' }}>Đỏ (Tiên)</div>
-                                <div style={{ fontWeight: 700, color: '#fca5a5', fontSize: '0.8rem' }}>{myColor === 'r' ? 'Bạn' : 'CPU'}</div>
+                                <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('xiangqi.redSide')}</div>
+                                <div style={{ fontWeight: 700, color: '#fca5a5', fontSize: '0.8rem' }}>{myColor === 'r' ? t('xiangqi.redPlayer') : t('xiangqi.blackPlayer')}</div>
                             </div>
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#1e293b', border: '2px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', color: '#f8fafc', fontWeight: 'bold' }}>將</div>
                             <div>
-                                <div style={{ fontSize: '0.65rem', color: '#888' }}>Đen (Hậu)</div>
-                                <div style={{ fontWeight: 700, color: '#94a3b8', fontSize: '0.8rem' }}>{myColor === 'b' ? 'Bạn' : 'CPU'}</div>
+                                <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('xiangqi.blackSide')}</div>
+                                <div style={{ fontWeight: 700, color: '#94a3b8', fontSize: '0.8rem' }}>{myColor === 'b' ? t('xiangqi.redPlayer') : t('xiangqi.blackPlayer')}</div>
                             </div>
                         </div>
                     </div>
@@ -207,7 +207,7 @@ export default function XiangqiGame() {
                             cursor: moveList.length > 0 ? 'pointer' : 'default', fontSize: '0.75rem',
                             transition: 'all 0.2s'
                         }}>
-                            <Undo2 size={14} /> HOÀN TÁC
+                            <Undo2 size={14} /> {t('xiangqi.undo')}
                         </button>
                         <button onClick={handleHint} disabled={isGameOver || turn !== myColor} style={{
                             padding: '8px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
@@ -217,7 +217,7 @@ export default function XiangqiGame() {
                             cursor: (turn === myColor && !isGameOver) ? 'pointer' : 'default', fontSize: '0.75rem',
                             transition: 'all 0.2s'
                         }}>
-                            <Lightbulb size={14} /> GỢI Ý
+                            <Lightbulb size={14} /> {t('xiangqi.hint')}
                         </button>
                     </div>
                 </div>
@@ -372,15 +372,15 @@ export default function XiangqiGame() {
                             <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
                                 <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: `1px solid ${winner === myColor ? 'rgba(74,222,128,0.4)' : 'rgba(239,68,68,0.4)'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                                     <h2 style={{ fontSize: '2.5rem', color: winner === myColor ? '#4ade80' : '#ef4444', margin: 0, fontWeight: 900 }}>
-                                        {winner === myColor ? 'CHIẾN THẮNG!' : 'THẤT BẠI'}
+                                        {winner === myColor ? t('xiangqi.victory') : t('xiangqi.defeat')}
                                     </h2>
-                                    <p style={{ color: '#aaa' }}>{winner === 'r' ? 'Phe Đỏ (Tiên) thắng!' : 'Phe Đen (Hậu) thắng!'}</p>
+                                    <p style={{ color: '#aaa' }}>{winner === 'r' ? t('xiangqi.redWins') : t('xiangqi.blackWins')}</p>
                                     <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
                                         <button onClick={() => window.location.reload()} style={{ padding: '12px 24px', fontSize: '1rem', fontWeight: 700, background: '#fbbf24', color: '#000', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>
-                                            <RotateCcw size={16} style={{ display: 'inline', verticalAlign: 'text-bottom' }} /> {t('common.playAgain', 'CHƠI LẠI').toUpperCase()}
+                                            <RotateCcw size={16} style={{ display: 'inline', verticalAlign: 'text-bottom' }} /> {t('common.playAgain').toUpperCase()}
                                         </button>
                                         <button onClick={() => navigate('/xiangqi')} style={{ padding: '12px 24px', fontSize: '1rem', fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', cursor: 'pointer' }}>
-                                            {t('common.exit', 'THOÁT').toUpperCase()}
+                                            {t('common.exit').toUpperCase()}
                                         </button>
                                     </div>
                                 </div>
@@ -397,28 +397,28 @@ export default function XiangqiGame() {
                     {/* Turn Status */}
                     <div style={{ background: 'linear-gradient(180deg, rgba(234,179,8,0.08), transparent)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(234,179,8,0.15)' }}>
                         <div style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 800, marginBottom: '8px', letterSpacing: '1px' }}>
-                            TRẠNG THÁI
+                            {t('xiangqi.status')}
                         </div>
                         <div style={{ padding: '10px', background: 'rgba(0,0,0,0.25)', borderRadius: '8px', textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.7rem', color: '#aaa', marginBottom: '4px' }}>Lượt:</div>
+                            <div style={{ fontSize: '0.7rem', color: '#aaa', marginBottom: '4px' }}>{t('xiangqi.turnLabel')}:</div>
                             <div style={{ fontSize: '1.2rem', fontWeight: 900, color: turn === 'r' ? '#ef4444' : '#94a3b8' }}>
-                                {turn === 'r' ? 'ĐỎ' : 'ĐEN'}
+                                {turn === 'r' ? 'RED' : 'BLACK'}
                             </div>
                             <div style={{ fontSize: '0.75rem', color: isThinking ? '#fbbf24' : '#666', marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                                 {isThinking && <Activity size={12} className="spin" style={{ animation: 'spin 1s linear infinite' }} />}
-                                {turn === myColor ? 'Bạn' : 'CPU...'}
+                                {turn === myColor ? t('xiangqi.redPlayer') : t('xiangqi.thinking')}
                             </div>
                         </div>
                         {inCheckColor && (
                             <div style={{ marginTop: '6px', padding: '6px', background: 'rgba(239,68,68,0.15)', borderRadius: '6px', textAlign: 'center', fontSize: '0.75rem', color: '#ef4444', fontWeight: 700 }}>
-                                CHIẾU!
+                                {t('xiangqi.check')}
                             </div>
                         )}
                     </div>
 
                     {/* Eval */}
                     <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, marginBottom: '6px', letterSpacing: '1px' }}>ĐÁNH GIÁ</div>
+                        <div style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, marginBottom: '6px', letterSpacing: '1px' }}>{t('xiangqi.evaluate')}</div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <div style={{
                                 flex: 1, height: '6px', borderRadius: '3px', background: '#1e293b', overflow: 'hidden', position: 'relative'
@@ -445,14 +445,14 @@ export default function XiangqiGame() {
                         >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <History size={12} color="#888" />
-                                <span style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, letterSpacing: '1px' }}>NƯỚC ({moveList.length})</span>
+                                <span style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, letterSpacing: '1px' }}>{t('xiangqi.moves')} ({moveList.length})</span>
                             </div>
                             {showHistory ? <ChevronDown size={12} color="#888" /> : <ChevronRight size={12} color="#888" />}
                         </div>
                         {showHistory && (
                             <div style={{ flex: 1, overflowY: 'auto', padding: '6px 8px', minHeight: '0' }}>
                                 {moveList.length === 0 ? (
-                                    <p style={{ fontSize: '0.7rem', color: '#555', textAlign: 'center', margin: '6px 0' }}>Chưa có nước</p>
+                                    <p style={{ fontSize: '0.7rem', color: '#555', textAlign: 'center', margin: '6px 0' }}>{t('xiangqi.noMoves')}</p>
                                 ) : (
                                     moveList.map((m, i) => (
                                         <div key={i} style={{

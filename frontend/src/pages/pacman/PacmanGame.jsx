@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, Heart, Volume2, VolumeX } from 'lucide-react';
 import { usePacmanLogic } from './usePacmanLogic';
+import { useTranslation } from 'react-i18next';
 
 // ─── Custom Cute Ghost SVG ───────────────────────────────────────────────────
 function GhostArt({ color = '#ef4444', dir = { x: 0, y: 0 }, state = 'chase', size = '95%', frightenedFlash = false }) {
@@ -44,6 +45,7 @@ function GhostArt({ color = '#ef4444', dir = { x: 0, y: 0 }, state = 'chase', si
 
 // ─── Component ──────────────────────────────────────────────────────────────────
 export default function PacmanGame() {
+    const { t } = useTranslation();
     const { state = {} } = useLocation();
     const navigate = useNavigate();
     const { mapType = 'Classic', difficulty = 'medium' } = state;
@@ -162,11 +164,11 @@ export default function PacmanGame() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '10px', padding: '8px 16px', background: 'rgba(0,0,0,0.3)', borderRadius: '20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#fbbf24', boxShadow: '0 0 10px #fbbf24' }} />
-                        <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#fff' }}>PAC-MAN</span>
+                        <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#fff' }}>{t('pacman.title')}</span>
                     </div>
                     <span style={{ color: '#fbbf24', fontSize: '0.7rem', fontWeight: 600 }}>{difficulty.toUpperCase()}</span>
                     <div style={{ fontSize: '0.75rem', color: phase === 'playing' ? '#4ade80' : '#94a3b8' }}>
-                        {phase === 'playing' ? '🟢 Đang chơi' : phase === 'ready' ? '⏸ Sẵn sàng' : phase === 'paused' ? '⏸ Tạm dừng' : '🏁 Kết thúc'}
+                        {phase === 'playing' ? t('pacman.playing') : phase === 'ready' ? t('pacman.ready') : phase === 'paused' ? t('pacman.paused') : t('pacman.ended')}
                     </div>
                 </div>
 
@@ -313,18 +315,18 @@ export default function PacmanGame() {
                         }}>
                             <div style={{ fontSize: '5rem', marginBottom: '0.5rem', animation: phase === 'won' ? 'wonBounce 1s infinite' : 'none' }}>{phase === 'won' ? '🏆' : '💀'}</div>
                             <h2 style={{ fontSize: '3.5rem', margin: 0, color: phase === 'won' ? '#4ade80' : '#ef4444', fontWeight: 900, textShadow: phase === 'won' ? '0 0 20px rgba(74,222,128,0.5)' : '0 0 20px rgba(239,68,68,0.5)' }}>
-                                {phase === 'won' ? 'VICTORY!' : 'GAME OVER!'}
+                                {phase === 'won' ? t('pacman.victory') : t('pacman.gameOver')}
                             </h2>
                             <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px 30px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textTransform: 'uppercase' }}>Final Score: </span>
+                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textTransform: 'uppercase' }}>{t('pacman.finalScore')}: </span>
                                 <b style={{ fontSize: '1.8rem', color: '#fbbf24' }}>{score}</b>
                             </div>
                             <div style={{ display: 'flex', gap: '14px', marginTop: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
                                 <button className="btn-primary" style={{ padding: '14px 40px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px', background: phase === 'won' ? '#4ade80' : '#ef4444', color: phase === 'won' ? '#000' : '#fff' }} onClick={handleRestart}>
-                                    <RotateCcw size={22} /> CHƠI LẠI
+                                    <RotateCcw size={22} /> {t('pacman.restart').toUpperCase()}
                                 </button>
                                 <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '14px 40px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <ArrowLeft size={22} /> THOÁT
+                                    <ArrowLeft size={22} /> {t('pacman.exit').toUpperCase()}
                                 </button>
                             </div>
                         </div>
@@ -350,11 +352,11 @@ export default function PacmanGame() {
                         PAC-MAN
                     </div>
                     
-                    <div style={{ padding: '12px', background: 'rgba(251,191,36,0.1)', borderRadius: '10px', border: '1px solid rgba(251,191,36,0.2)', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Score</div>
+<div style={{ padding: '12px', background: 'rgba(251,191,36,0.1)', borderRadius: '10px', border: '1px solid rgba(251,191,36,0.2)', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{t('pacman.score')}</div>
                         <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#fbbf24' }}>{score}</div>
                     </div>
-                    
+
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', margin: '8px 0' }}>
                         <Heart size={24} color={lives > 0 ? '#ef4444' : '#374151'} fill={lives > 0 ? '#ef4444' : 'none'} />
                         <Heart size={24} color={lives > 1 ? '#ef4444' : '#374151'} fill={lives > 1 ? '#ef4444' : 'none'} />
@@ -363,20 +365,20 @@ export default function PacmanGame() {
 
                     <div style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
-                            <span style={{ color: 'var(--text-secondary)' }}>Map</span>
+                            <span style={{ color: 'var(--text-secondary)' }}>{t('pacman.map')}</span>
                             <span style={{ color: '#fff', fontWeight: 600 }}>{mapType}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                            <span style={{ color: 'var(--text-secondary)' }}>Độ khó</span>
+                            <span style={{ color: 'var(--text-secondary)' }}>{t('pacman.difficulty')}</span>
                             <span style={{ fontWeight: 700, color: difficulty === 'hard' ? '#ef4444' : '#f59e0b' }}>
-                                {difficulty === 'hard' ? '🔥 Khó' : '⚡ TB'}
+                                {difficulty === 'hard' ? t('pacman.hard') : t('pacman.easy')}
                             </span>
                         </div>
                     </div>
 
                     {frightenedTimer > 0 && (
                         <div style={{ padding: '8px', textAlign: 'center', borderRadius: '8px', border: '1px solid rgba(29,78,216,0.5)', background: 'rgba(29,78,216,0.1)' }}>
-                            <div style={{ fontSize: '0.65rem', color: '#93c5fd' }}>⚡ POWER</div>
+                            <div style={{ fontSize: '0.65rem', color: '#93c5fd' }}>⚡ {t('pacman.power')}</div>
                             <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#60b5fa' }}>{frightenedTimer}</div>
                         </div>
                     )}
@@ -386,15 +388,15 @@ export default function PacmanGame() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <button onClick={togglePause} disabled={phase === 'gameover' || phase === 'won'} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%', fontSize: '0.9rem', background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: isPaused ? '#38bdf8' : '#fff', cursor: (phase === 'gameover' || phase === 'won') ? 'default' : 'pointer', opacity: (phase === 'gameover' || phase === 'won') ? 0.5 : 1 }}>
-                            {isPaused ? '▶ Tiếp tục' : '⏸ Tạm dừng'}
+                            {isPaused ? t('pacman.resume') : t('pacman.pause')}
                         </button>
                         
                         <button className="btn-primary" onClick={handleRestart} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
-                            <RotateCcw size={18} /> Chơi lại
+                            <RotateCcw size={18} /> {t('pacman.restart')}
                         </button>
                         
                         <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
-                            <ArrowLeft size={18} /> Thoát
+                            <ArrowLeft size={18} /> {t('pacman.exit')}
                         </button>
                     </div>
                 </div>

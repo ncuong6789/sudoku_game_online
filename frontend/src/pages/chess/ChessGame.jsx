@@ -1,466 +1,216 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Chess } from 'chess.js';
-import { useAudio } from '../../utils/useAudio';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { socket } from '../../utils/socket';
-import { ArrowLeft, RotateCcw, Flag, Undo2, HelpCircle } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Undo2, Lightbulb, History, ChevronRight, ChevronDown, Activity, Crown } from 'lucide-react';
+import { useChessLogic } from './useChessLogic';
+import { useAudio } from '../../utils/useAudio';
+import { useTranslation } from 'react-i18next';
+
+function EvalBar({ score, myColor }) {
+    const normalizedScore = Math.max(-2000, Math.min(2000, score));
+    // Score is relative to white.
+    // If myColor is 'w', higher score means more white fill from bottom.
+    const whitePct = myColor === 'w'
+        ? 50 + (normalizedScore / 2000) * 50
+        : 50 - (normalizedScore / 2000) * 50;
+
+    return (
+        <div style={{
+            width: '28px', height: '100%', borderRadius: '14px', overflow: 'hidden',
+            background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)',
+            position: 'relative', flexShrink: 0
+        }}>
+            <div style={{
+                position: 'absolute', bottom: 0, left: 0, right: 0,
+                height: `${whitePct}%`, background: '#f1f5f9',
+                transition: 'height 0.5s ease'
+            }} />
+            <div style={{
+                position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
+                justifyContent: 'center', fontSize: '0.6rem', fontWeight: 700, color: '#64748b',
+                writingMode: 'vertical-rl', textOrientation: 'mixed', zIndex: 2,
+                mixBlendMode: 'difference'
+            }}>
+                {Math.abs(normalizedScore) >= 900 ? 'M' : (normalizedScore > 0 ? '+' : '') + (normalizedScore / 100).toFixed(1)}
+            </div>
+        </div>
+    );
+}
 
 export default function ChessGame() {
+    const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
     const { mode, roomId, difficulty, playerColor } = location.state || { mode: 'solo', difficulty: 'Medium', playerColor: 'w' };
 
-    const [game, setGame] = useState(new Chess());
-    const [realPlayerColor, setRealPlayerColor] = useState(() => {
-        if (playerColor === 'random') {
-            return Math.random() < 0.5 ? 'w' : 'b';
-        }
+    const {
+        playChessMoveSound, playChessCaptureSound, playChessCheckSound,
+        playChessIllegalSound, playWinSound, playLoseSound
+    } = useAudio();
+
+    const [realPlayerColor] = useState(() => {
+        if (playerColor === 'random') return Math.random() < 0.5 ? 'w' : 'b';
         return playerColor;
     });
-    const [moveHistory, setMoveHistory] = useState([]);
 
     const myColor = realPlayerColor || 'w';
 
-    // UI State
-    const [gameOver, setGameOver] = useState(false);
-    const [statusMessage, setStatusMessage] = useState('');
-    const [moveFrom, setMoveFrom] = useState(null);
-    const [optionSquares, setOptionSquares] = useState({});
+    const {
+        game, turn, isGameOver, winner, selectedSquare, validMoves, moveHistory,
+        evalScore, hintMove, hintSuggestions, isThinkingHint,
+        selectSquare, movePiece, makeAIMove, undoMove, getHint, resetGame,
+        setHintMove, setHintSuggestions
+    } = useChessLogic(mode, roomId, difficulty, myColor, {
+        onClick: playChessMoveSound,
+        onMove: playChessMoveSound,
+        onCapture: playChessCaptureSound,
+        onCheck: playChessCheckSound,
+        onIllegal: playChessIllegalSound, // you'd map this inside if needed
+        myColor
+    });
 
-    const { playChessMoveSound, playChessCaptureSound, playChessCheckSound, playWinSound, playLoseSound } = useAudio();
-
-    // 1. Cập nhật Status, History mỗi khi `game` thay đổi.
-    useEffect(() => {
-        const history = game.history({ verbose: true });
-        setMoveHistory(history);
-
-        if (history.length > 0) {
-            const lastMove = history[history.length - 1];
-            if (game.isCheckmate()) {
-                if (game.turn() === myColor) playLoseSound(); // Mình thua
-                else playWinSound(); // Mình thắng
-            } else if (game.isDraw()) {
-                playChessMoveSound();
-            } else if (game.isCheck()) {
-                playChessCheckSound();
-            } else if (lastMove.flags.includes('c')) {
-                playChessCaptureSound();
-            } else {
-                playChessMoveSound();
-            }
-        }
-
-        let status = '';
-        if (game.isCheckmate()) {
-            status = `Chiếu Bí! ${game.turn() === 'w' ? 'Đen' : 'Trắng'} thắng.`;
-            setGameOver(true);
-        } else if (game.isDraw()) {
-            status = 'Hòa cờ!';
-            setGameOver(true);
-        } else {
-            status = game.turn() === myColor
-                ? 'Đến lượt bạn.'
-                : `Đến lượt đối thủ.`;
-        }
-        setStatusMessage(status);
-
-    }, [game, myColor, playChessMoveSound, playChessCaptureSound, playChessCheckSound, playWinSound, playLoseSound]);
-
-    // Lắng nghe Socket cho Multiplayer
-    useEffect(() => {
-        if (mode === 'multiplayer' && roomId) {
-            const handleOpponentMove = ({ move, fen: newFen }) => {
-                setGame((g) => {
-                    const newGame = new Chess();
-                    newGame.loadPgn(g.pgn());
-
-                    if (move) {
-                        try {
-                            newGame.move(move);
-                            return newGame;
-                        } catch (e) {
-                            console.error("Lỗi đồng bộ move, dùng FEN fallback");
-                        }
-                    }
-
-                    try { newGame.load(newFen); } catch (e) { return g; }
-                    return newGame;
-                });
-            };
-            const handleOpponentDisconnect = () => {
-                if (!gameOver) {
-                    setGameOver(true);
-                    setStatusMessage(`Bạn đã thắng! Đối thủ thoái thác.`);
-                }
-            };
-            socket.on('chessMoved', handleOpponentMove);
-            socket.on('opponentDisconnected', handleOpponentDisconnect);
-            return () => {
-                socket.off('chessMoved', handleOpponentMove);
-                socket.off('opponentDisconnected', handleOpponentDisconnect);
-            };
-        }
-    }, [mode, roomId, gameOver, myColor]);
+    const [showHistory, setShowHistory] = useState(false);
+    const isThinking = mode === 'solo' && !isGameOver && turn !== myColor;
 
     useEffect(() => {
-        return () => {
-            if (roomId) socket.emit('leaveRoom', roomId);
-        };
-    }, [roomId]);
-
-    // --- STOCKFISH ENGINE INTEGRATION ---
-    const engine = useRef(null);
-    const [isEngineReady, setIsEngineReady] = useState(false);
-    const [hintMove, setHintMove] = useState(null);
-    const [isThinkingHint, setIsThinkingHint] = useState(false);
-    const [hintSuggestions, setHintSuggestions] = useState(null); // Store multiple suggestions
-
-    useEffect(() => {
-        // Khởi tạo Engine cho cả Solo và Multiplayer (để dùng Hint)
-        const stockfishWorker = new Worker(
-            URL.createObjectURL(
-                new Blob([`importScripts('https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js');`], { type: 'application/javascript' })
-            )
-        );
-
-        stockfishWorker.onmessage = (e) => {
-            const line = e.data;
-            if (line === 'readyok') {
-                setIsEngineReady(true);
-            } else if (line.startsWith('bestmove')) {
-                const moveMatch = line.match(/bestmove\s([a-h][1-8][a-h][1-8])(n|b|r|q)?/);
-                if (moveMatch && mode === 'solo' && !isThinkingHint) {
-                    const moveStr = moveMatch[1];
-                    const promotion = moveMatch[2];
-                    const from = moveStr.substring(0, 2);
-                    const to = moveStr.substring(2, 4);
-
-                    setGame((g) => {
-                        const newGame = new Chess();
-                        newGame.loadPgn(g.pgn());
-                        try {
-                            newGame.move({ from, to, promotion: promotion || 'q' });
-                            return newGame;
-                        } catch (err) { return g; }
-                    });
-                }
-            }
-        };
-
-        stockfishWorker.postMessage('uci');
-        stockfishWorker.postMessage('isready');
-        const skillLevel = difficulty === 'Easy' ? 0 : difficulty === 'Medium' ? 10 : 20;
-        stockfishWorker.postMessage(`setoption name Skill Level value ${skillLevel}`);
-        engine.current = stockfishWorker;
-
-        return () => {
-            stockfishWorker.terminate();
-        };
-    }, [difficulty]);
-
-    const makeAIMove = useCallback(() => {
-        if (engine.current && isEngineReady && !game.isGameOver()) {
-            const depth = difficulty === 'Easy' ? 1 : difficulty === 'Medium' ? 8 : 15;
-            engine.current.postMessage(`position fen ${game.fen()}`);
-            engine.current.postMessage(`go depth ${depth}`);
-        }
-    }, [game, isEngineReady, difficulty]);
-
-    const getAIHint = useCallback(() => {
-        if (engine.current && isEngineReady && !game.isGameOver() && game.turn() === myColor) {
-            setIsThinkingHint(true);
-            setHintMove(null);
-            setHintSuggestions(null);
-            
-            const suggestions = [];
-            
-            const onHintMessage = (e) => {
-                const line = e.data;
-                
-                // Parse evaluation score (centipawns)
-                if (line.startsWith('info depth')) {
-                    const scoreMatch = line.match(/score cp (-?\d+)/);
-                    const pvMatch = line.match(/pv\s+([a-h][1-8][a-h][1-8])/);
-                    
-                    if (scoreMatch && pvMatch && suggestions.length < 5) {
-                        const score = parseInt(scoreMatch[1]);
-                        const moveStr = pvMatch[1];
-                        const move = { from: moveStr.substring(0, 2), to: moveStr.substring(2, 4) };
-                        
-                        // Avoid duplicates
-                        if (!suggestions.find(s => s.from === move.from && s.to === move.to)) {
-                            suggestions.push({ ...move, score });
-                        }
-                    }
-                }
-                
-                if (line.startsWith('bestmove')) {
-                    const moveMatch = line.match(/bestmove\s([a-h][1-8][a-h][1-8])(n|b|r|q)?/);
-                    if (moveMatch) {
-                        const moveStr = moveMatch[1];
-                        const bestMove = { from: moveStr.substring(0, 2), to: moveStr.substring(2, 4) };
-                        setHintMove(bestMove);
-                        
-                        // Build suggestions with labels and percentages
-                        if (suggestions.length > 0) {
-                            // Sort by score (higher is better)
-                            suggestions.sort((a, b) => b.score - a.score);
-                            
-                            const best = suggestions[0].score;
-                            const worst = suggestions[suggestions.length - 1].score;
-                            const range = best - worst || 1;
-                            
-                            const labeled = suggestions.slice(0, 3).map((s, i) => {
-                                const pct = Math.round(((s.score - worst) / range) * 100);
-                                let label, color;
-                                if (pct >= 80) { label = '✅ Tuyệt vời!'; color = '#4ade80'; }
-                                else if (pct >= 50) { label = '✓ Tốt'; color = '#60b5fa'; }
-                                else if (pct >= 20) { label = '⚠️ Bình thường'; color = '#fbbf24'; }
-                                else { label = '❌ Yếu'; color = '#ef4444'; }
-                                
-                                return { 
-                                    ...s, 
-                                    label, 
-                                    color,
-                                    percentage: pct,
-                                    evalDisplay: (s.score > 0 ? '+' : '') + (s.score / 100).toFixed(1)
-                                };
-                            });
-                            setHintSuggestions(labeled);
-                        }
-                    }
-                    setIsThinkingHint(false);
-                    engine.current.removeEventListener('message', onHintMessage);
-                }
-            };
-            
-            engine.current.addEventListener('message', onHintMessage);
-            engine.current.postMessage(`position fen ${game.fen()}`);
-            engine.current.postMessage(`go depth 15`);
-        }
-    }, [game, isEngineReady, myColor]);
-
-    useEffect(() => {
-        if (mode === 'solo' && !gameOver && isEngineReady && game.turn() !== myColor) {
+        if (mode === 'solo' && !isGameOver && turn !== myColor) {
             const timer = setTimeout(() => {
                 makeAIMove();
-            }, 600);
-            return () => clearTimeout(timer);
+            }, 150);
+            return () => { clearTimeout(timer); };
         }
-    }, [game, mode, gameOver, myColor, makeAIMove, isEngineReady]);
-
-    function attemptPlayerMove(sourceSquare, targetSquare) {
-        const gameCopy = new Chess();
-        gameCopy.loadPgn(game.pgn());
-        const legalMoves = gameCopy.moves({ square: sourceSquare, verbose: true });
-        const foundMove = legalMoves.find(m => m.to === targetSquare);
-
-        if (!foundMove) return false;
-        const moveObj = { from: sourceSquare, to: targetSquare };
-        if (foundMove.promotion) moveObj.promotion = 'q';
-
-        try {
-            gameCopy.move(moveObj);
-            setGame(gameCopy);
-            setMoveFrom(null);
-            setOptionSquares({});
-            setHintMove(null);
-            setHintSuggestions(null); // Clear hint suggestions after move
-            if (mode === 'multiplayer') {
-                socket.emit('chessMove', { roomId, move: moveObj, fen: gameCopy.fen() });
-            }
-            return true;
-        } catch (e) {
-            console.error('Lỗi di chuyển: ', e);
-            return false;
-        }
-    }
-
-    function onSquareClick(square) {
-        if (gameOver || game.turn() !== myColor) return;
-
-        function resetFirstMove(sq) {
-            const hasPiece = game.get(sq);
-            if (hasPiece && hasPiece.color === myColor) {
-                setMoveFrom(sq);
-                const moves = game.moves({ square: sq, verbose: true });
-                if (moves.length === 0) {
-                    setOptionSquares({});
-                    return false;
-                }
-                const newSquares = {};
-                moves.map((move) => {
-                    newSquares[move.to] = {
-                        background: game.get(move.to) && game.get(move.to).color !== game.get(sq).color
-                            ? 'radial-gradient(circle, rgba(239, 68, 68, 0.4) 85%, transparent 85%)'
-                            : 'radial-gradient(circle, rgba(79, 172, 254, 0.6) 25%, transparent 25%)',
-                        borderRadius: '50%'
-                    };
-                });
-                newSquares[sq] = { background: 'rgba(79, 172, 254, 0.5)' };
-                setOptionSquares(newSquares);
-                return true;
-            }
-            setMoveFrom(null);
-            setOptionSquares({});
-            return false;
-        }
-
-        if (!moveFrom) {
-            return resetFirstMove(square);
-        }
-        const isSuccess = attemptPlayerMove(moveFrom, square);
-        if (!isSuccess) {
-            return resetFirstMove(square);
-        }
-        return true;
-    }
-
-    const handleReset = () => {
-        if (mode === 'solo') {
-            setGame(new Chess());
-            setGameOver(false);
-            setMoveFrom(null);
-            setOptionSquares({});
-            setHintMove(null);
-        }
-    };
-
-    const handleUndo = () => {
-        if (mode !== 'solo' || gameOver) return;
-
-        setGame((g) => {
-            const newGame = new Chess();
-            newGame.loadPgn(g.pgn());
-            if (newGame.history().length === 0) return g;
-            if (newGame.turn() === myColor) {
-                newGame.undo();
-                newGame.undo();
-            } else {
-                newGame.undo();
-            }
-            return newGame;
-        });
-
-        setMoveFrom(null);
-        setOptionSquares({});
-        setHintMove(null);
-    };
-
-    const handleSurrender = () => {
-        setGameOver(true);
-        setStatusMessage('Bạn đã đầu hàng!');
-        playLoseSound();
-    };
+    }, [turn, mode, isGameOver, myColor, makeAIMove]);
 
     useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (gameOver && mode === 'solo' && (e.key === ' ' || e.code === 'Space')) {
-                e.preventDefault();
-                handleReset();
-            }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [gameOver, mode]);
+        if (isGameOver && winner) {
+            if (winner === myColor) playWinSound();
+            else if (winner !== 'draw') playLoseSound();
+        }
+    }, [isGameOver, winner, myColor, playWinSound, playLoseSound]);
 
-    const customSquareStyles = useMemo(() => {
-        const styles = { ...optionSquares };
-        if (moveHistory.length > 0) {
-            const lastMove = moveHistory[moveHistory.length - 1];
-            styles[lastMove.from] = { ...styles[lastMove.from], backgroundColor: 'rgba(255, 235, 59, 0.4)' };
-            styles[lastMove.to] = { ...styles[lastMove.to], backgroundColor: 'rgba(255, 235, 59, 0.4)' };
+    const handleSquareClick = (sq) => {
+        if (isGameOver || turn !== myColor) return;
+        if (selectedSquare && validMoves.includes(sq)) {
+            movePiece(sq);
+        } else {
+            selectSquare(sq);
         }
-        if (hintMove) {
-            styles[hintMove.from] = { ...styles[hintMove.from], border: '4px solid #fbbf24' };
-            styles[hintMove.to] = { 
-                ...styles[hintMove.to], 
-                border: '4px solid #fbbf24', 
-                background: 'rgba(251, 191, 36, 0.2)' 
-            };
-        }
-        return styles;
-    }, [optionSquares, moveHistory, hintMove]);
+    };
+
+    const beautifulUnicode = {
+        'w': { 'p': '♙', 'n': '♘', 'b': '♗', 'r': '♖', 'q': '♕', 'k': '♔' },
+        'b': { 'p': '♟', 'n': '♞', 'b': '♝', 'r': '♜', 'q': '♛', 'k': '♚' }
+    };
 
     return (
-        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100vw', height: '100vh', padding: '0.5rem', boxSizing: 'border-box' }}>
-            <div className="glass-panel game-play-panel" style={{
-                position: 'relative',
-                overflow: 'hidden',
-                padding: '1.2rem',
-                gap: '1.5rem',
-                alignItems: 'stretch',
-                justifyContent: 'center',
-                height: 'fit-content',
-                maxHeight: '96vh',
-                width: 'max-content',
-                maxWidth: '98%',
-                borderRadius: '20px',
-                background: 'rgba(23, 23, 33, 0.85)',
-                backdropFilter: 'blur(25px)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
+        <div className="chess-main-container" style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100,
+            display: 'flex', flexDirection: 'column', overflow: 'hidden',
+            background: 'radial-gradient(circle at center, #0f172a 0%, #020617 100%)',
+        }}>
+            {/* Top bar area */}
+            <div className="chess-top-bar" style={{
+                flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '10px 1rem', borderBottom: '1px solid rgba(255,255,255,0.08)',
+                background: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(10px)',
             }}>
-
-                {/* LEFT: MOVE HISTORY */}
-                <div style={{
-                    flex: '0 1 260px',
-                    width: '260px',
-                    minWidth: '220px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    maxHeight: '100%',
-                    overflow: 'hidden',
-                    background: 'rgba(255,255,255,0.03)',
-                    borderRadius: '16px',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    padding: '1.2rem',
-                    boxSizing: 'border-box'
+                <button onClick={() => navigate('/chess')} style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    padding: '8px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.08)', color: '#fff',
+                    fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer'
                 }}>
-                    <h3 style={{ margin: '0 0 15px 0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)' }}>
-                        <span style={{ fontSize: '1.2rem' }}>📊</span> Lịch sử
-                    </h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '30px 1fr 1fr', marginBottom: '0.6rem', padding: '0 4px' }}>
-                        <span></span>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Trắng</span>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Đen</span>
+                    <ArrowLeft size={14} /> {t('common.returnToMenu', 'Về sảnh')}
+                </button>
+                <h1 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 900, color: '#f8fafc', letterSpacing: '1px' }}>
+                    CỜ VUA
+                </h1>
+                <div style={{ width: '100px' }} /> {/* Spacer */}
+            </div>
+
+            {/* Main content */}
+            <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+                {/* LEFT CONTROL PANEL */}
+                <div className="chess-left-panel" style={{
+                    flex: '0 0 180px', display: 'flex', flexDirection: 'column', gap: '0.8rem',
+                    padding: '1rem', overflowY: 'auto', borderRight: '1px solid rgba(255,255,255,0.06)',
+                    background: 'rgba(15,23,42,0.6)',
+                }}>
+                    <div style={{ textAlign: 'center' }}>
+                        <div style={{
+                            width: '50px', height: '50px', margin: '0 auto 8px',
+                            background: 'linear-gradient(135deg, #475569, #1e293b)',
+                            borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: '0 0 20px rgba(100,116,139,0.3)', border: '2px solid #cbd5e1'
+                        }}>
+                            <Crown size={28} color="#fff" />
+                        </div>
+                        <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#f8fafc', letterSpacing: '1px' }}>CỜ VUA</h2>
+                        <div style={{ color: '#94a3b8', fontSize: '0.7rem', fontWeight: 700 }}>GIAO DIỆN CHUẨN</div>
                     </div>
-                    <div style={{
-                        flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)',
-                        borderRadius: '12px', padding: '8px', border: '1px solid rgba(255,255,255,0.05)',
-                        scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.1) transparent'
-                    }}>
-                        {moveHistory.length === 0 && (
-                            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '0.85rem' }}>
-                                Bắt đầu...
+
+                    {/* Player Info */}
+                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, marginBottom: '10px', letterSpacing: '1px' }}>{t('chess.info')}</div>
+
+                        <div className="chess-player-avatars" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                            <div className="chess-avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', color: '#000', fontWeight: 'bold' }}>♔</div>
+                            <div>
+                                <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('chess.white')}</div>
+                                <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.8rem' }}>{myColor === 'w' ? t('chess.you') : t('chess.cpu')}</div>
                             </div>
-                        )}
-                        {Array.from({ length: Math.ceil(moveHistory.length / 2) }).map((_, i) => (
-                            <div key={i} style={{
-                                display: 'grid',
-                                gridTemplateColumns: '30px 1fr 1fr',
-                                fontSize: '0.9rem',
-                                padding: '8px 4px',
-                                borderBottom: '1px solid rgba(255,255,255,0.03)',
-                                alignItems: 'center'
-                            }}>
-                                <span style={{ color: 'rgba(255,255,255,0.2)', fontWeight: 'bold', fontSize: '0.75rem' }}>{i + 1}.</span>
-                                <span style={{ color: '#fff', fontWeight: 500 }}>{moveHistory[i * 2]?.san}</span>
-                                <span style={{ color: 'rgba(255,255,255,0.6)' }}>{moveHistory[i * 2 + 1]?.san || ''}</span>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#0f172a', border: '2px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', color: '#fff', fontWeight: 'bold' }}>♚</div>
+                            <div>
+                                <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('chess.black')}</div>
+                                <div style={{ fontWeight: 700, color: '#94a3b8', fontSize: '0.8rem' }}>{myColor === 'b' ? t('chess.you') : t('chess.cpu')}</div>
                             </div>
-                        ))}
+                        </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <button onClick={undoMove} disabled={isGameOver || moveHistory.length === 0} style={{
+                            padding: '8px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                            color: moveHistory.length > 0 ? '#fbbf24' : '#555', border: '1px solid rgba(255,255,255,0.08)',
+                            cursor: moveHistory.length > 0 ? 'pointer' : 'default', fontSize: '0.75rem',
+                            transition: 'all 0.2s'
+                        }}>
+                            <Undo2 size={14} /> {t('chess.redo')}
+                        </button>
+                        <button onClick={getHint} disabled={isGameOver || turn !== myColor || isThinkingHint} style={{
+                            padding: '8px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                            color: (turn === myColor && !isGameOver) ? '#4ade80' : '#555',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            cursor: (turn === myColor && !isGameOver) ? 'pointer' : 'default', fontSize: '0.75rem',
+                            transition: 'all 0.2s'
+                        }}>
+                            <Lightbulb size={14} /> {isThinkingHint ? t('chess.thinking') : t('chess.hint')}
+                        </button>
                     </div>
                 </div>
 
-                {/* MIDDLE: BOARD */}
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 0, margin: 0 }}>
-                    <div className="game-play-board chess-board" style={{
+                {/* EVAL BAR + CENTER BOARD */}
+                <div className="chess-board-area" style={{
+                    flex: '1 1 auto', display: 'flex', justifyContent: 'center',
+                    minWidth: 0, minHeight: 0, gap: '12px', padding: '0 0.5rem',
+                    overflow: 'hidden', alignItems: 'center'
+                }}>
+                    <EvalBar score={evalScore} myColor={myColor} />
+
+                    <div className="chess-board-container" style={{
                         position: 'relative',
+                        width: 'clamp(260px, min(80vw - 70px, 60vh), 600px)', // aspect ratio 1:1
+                        aspectRatio: '1',
+                        boxSizing: 'border-box',
+                        backgroundColor: '#5f8099',
                         border: '8px solid rgba(15, 15, 25, 0.95)',
-                        borderRadius: '12px',
-                        boxShadow: '0 30px 60px rgba(0, 0, 0, 0.6)',
+                        borderRadius: '6px',
+                        boxShadow: '0 0 30px rgba(0,0,0,0.6)',
                         overflow: 'hidden',
-                        background: '#d1dee6',
                         display: 'grid',
                         gridTemplateColumns: 'repeat(8, 1fr)',
                         gridTemplateRows: 'repeat(8, 1fr)'
@@ -471,10 +221,7 @@ export default function ChessGame() {
                             const isFlipped = myColor === 'b';
                             const displayRanks = isFlipped ? [...ranksArr].reverse() : ranksArr;
                             const displayFiles = isFlipped ? [...filesArr].reverse() : filesArr;
-                            const beautifulUnicode = {
-                                'w': { 'p': '♙', 'n': '♘', 'b': '♗', 'r': '♖', 'q': '♕', 'k': '♔' },
-                                'b': { 'p': '♟', 'n': '♞', 'b': '♝', 'r': '♜', 'q': '♛', 'k': '♚' }
-                            };
+                            
                             const squares = [];
                             for (let i = 0; i < 8; i++) {
                                 for (let j = 0; j < 8; j++) {
@@ -483,30 +230,51 @@ export default function ChessGame() {
                                     const sq = f + r;
                                     const isLight = (r + filesArr.indexOf(f)) % 2 !== 0;
                                     const bgColor = isLight ? '#d1dee6' : '#5f8099';
+                                    
                                     const piece = game.get(sq);
-                                    const highlightStyle = customSquareStyles[sq] || {};
-                                    let finalBg = highlightStyle.backgroundColor || bgColor;
-                                    let dotOverlay = optionSquares[sq]?.background;
-                                    if (game.isCheck() && piece && piece.type === 'k' && piece.color === game.turn()) {
-                                        finalBg = 'rgba(239, 68, 68, 0.8)';
-                                    }
+                                    let finalBg = bgColor;
+                                    
+                                    const isSelected = selectedSquare === sq;
+                                    const isValidMove = validMoves.includes(sq);
+                                    const isLastMoveFrom = moveHistory.length > 0 && moveHistory[moveHistory.length - 1].from === sq;
+                                    const isLastMoveTo = moveHistory.length > 0 && moveHistory[moveHistory.length - 1].to === sq;
+                                    const isHintFrom = hintMove?.from === sq;
+                                    const isHintTo = hintMove?.to === sq;
+                                    
+                                    if (isSelected) finalBg = 'rgba(79, 172, 254, 0.5)';
+                                    else if (isLastMoveFrom || isLastMoveTo) finalBg = 'rgba(255, 235, 59, 0.4)';
+                                    else if (isHintFrom || isHintTo) finalBg = 'rgba(251, 191, 36, 0.3)';
+                                    
+                                    const inCheckMatch = game.isCheck() && piece?.type === 'k' && piece?.color === game.turn();
+                                    if (inCheckMatch) finalBg = 'rgba(239, 68, 68, 0.8)';
+
                                     squares.push(
-                                        <div key={sq} onClick={() => onSquareClick(sq)}
+                                        <div key={sq} onClick={() => handleSquareClick(sq)}
                                             style={{
                                                 backgroundColor: finalBg, position: 'relative', display: 'flex',
                                                 justifyContent: 'center', alignItems: 'center',
-                                                cursor: game.turn() === myColor ? 'pointer' : 'default',
-                                                border: highlightStyle.border || 'none',
+                                                cursor: (turn === myColor || isValidMove) ? 'pointer' : 'default',
+                                                border: isHintTo || isHintFrom ? '4px solid #fbbf24' : 'none',
                                                 boxSizing: 'border-box'
                                             }}
                                         >
-                                            {dotOverlay && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: dotOverlay, borderRadius: '50%', transform: 'scale(0.3)', opacity: 0.6 }} />}
+                                            {isValidMove && !piece && (
+                                                <div style={{ width: '25%', height: '25%', background: 'rgba(74, 222, 128, 0.6)', borderRadius: '50%' }} />
+                                            )}
+                                            {isValidMove && piece && (
+                                                <div style={{ position: 'absolute', inset: 0, border: '4px solid rgba(239, 68, 68, 0.8)', borderRadius: '50%' }} />
+                                            )}
                                             {piece && (
                                                 <span style={{
-                                                    fontSize: 'min(7.5vh, 7.5vw)', lineHeight: 1, color: piece.color === 'w' ? '#fff' : '#1e1e1e',
-                                                    textShadow: piece.color === 'w' ? '0px 2px 4px rgba(0,0,0,0.8)' : '0px 2px 4px rgba(255,255,255,0.4)',
-                                                    position: 'relative', zIndex: 2
-                                                }}>{beautifulUnicode[piece.color][piece.type]}</span>
+                                                    fontSize: 'min(7vh, 7vw)', lineHeight: 1, 
+                                                    color: piece.color === 'w' ? '#fff' : '#1e1e1e',
+                                                    textShadow: piece.color === 'w' ? '0px 2px 5px rgba(0,0,0,0.8)' : '0px 2px 2px rgba(255,255,255,0.3)',
+                                                    position: 'relative', zIndex: 2, pointerEvents: 'none',
+                                                    transition: 'transform 0.1s ease',
+                                                    transform: isValidMove ? 'scale(1.1)' : 'scale(1)'
+                                                }}>
+                                                    {beautifulUnicode[piece.color][piece.type]}
+                                                </span>
                                             )}
                                         </div>
                                     );
@@ -515,129 +283,212 @@ export default function ChessGame() {
                             return squares;
                         })()}
                     </div>
-                </div>
 
-                {/* RIGHT: CONTROLS */}
-                <div style={{ flex: '0 1 260px', width: '260px', minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '0.8rem', maxHeight: '100%', overflow: 'hidden' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.2rem', color: '#fff' }}>CỜ VUA</div>
-                        
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <button className="btn-primary" onClick={handleReset}><RotateCcw size={18} /> Chơi ván mới</button>
-                            
-                            <button className="btn-secondary" onClick={getAIHint} disabled={isThinkingHint || game.turn() !== myColor} style={{ borderColor: '#fbbf24', color: '#fbbf24' }}>
-                                <HelpCircle size={18} /> {isThinkingHint ? 'Đang tính...' : 'Gợi ý nước đi (CPU)'}
-                            </button>
-
-                            {/* Hint Suggestions Popup */}
-                            {hintSuggestions && hintSuggestions.length > 0 && (
-                                <div style={{ 
-                                    marginTop: '10px', 
-                                    padding: '12px', 
-                                    background: 'rgba(251,191,36,0.1)', 
-                                    borderRadius: '10px', 
-                                    border: '1px solid rgba(251,191,36,0.3)',
-                                    animation: 'fadeIn 0.3s ease'
+                    {/* Hint Suggestions Overlay directly mapped near board */}
+                    {hintSuggestions && hintSuggestions.length > 0 && (
+                        <div style={{ 
+                            position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)',
+                            padding: '12px', background: 'rgba(30,30,40,0.95)', borderRadius: '12px', 
+                            border: '1px solid rgba(251,191,36,0.5)', animation: 'fadeIn 0.3s ease', zIndex: 50,
+                            boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+                        }}>
+                            <div style={{ fontSize: '0.75rem', color: '#fbbf24', fontWeight: 700, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span>💡</span> Gợi ý nước đi tốt nhất
+                            </div>
+                            {hintSuggestions.map((m, idx) => (
+                                <div key={idx} onClick={() => setHintMove(m)} style={{ 
+                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                    padding: '6px 12px', marginBottom: '6px', cursor: 'pointer', gap: '16px',
+                                    background: idx === 0 ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.05)',
+                                    borderRadius: '8px', border: `1px solid ${m.color || 'rgba(255,255,255,0.05)'}`,
                                 }}>
-                                    <div style={{ fontSize: '0.75rem', color: '#fbbf24', fontWeight: 700, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <span>💡</span> Gợi ý nước đi tốt nhất
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span style={{ 
+                                            width: '20px', height: '20px', borderRadius: '50%', 
+                                            background: m.color || '#94a3b8', display: 'flex', alignItems: 'center', 
+                                            justifyContent: 'center', fontSize: '0.7rem', fontWeight: 700, color: idx < 2 ? '#000' : '#fff'
+                                        }}>{idx + 1}</span>
+                                        <span style={{ color: '#fff', fontSize: '0.85rem' }}>{m.from} → {m.to}</span>
                                     </div>
-                                    {hintSuggestions.map((move, idx) => (
-                                        <div key={idx} style={{ 
-                                            display: 'flex', 
-                                            alignItems: 'center', 
-                                            justifyContent: 'space-between',
-                                            padding: '8px 10px',
-                                            marginBottom: '6px',
-                                            background: idx === 0 ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.05)',
-                                            borderRadius: '8px',
-                                            border: `1px solid ${move.color || 'rgba(255,255,255,0.05)'}`,
-                                            cursor: 'pointer',
-                                            transition: 'all 0.2s',
-                                            fontSize: '0.8rem'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = idx === 0 ? 'rgba(74,222,128,0.25)' : 'rgba(255,255,255,0.1)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.background = idx === 0 ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.05)';
-                                        }}
-                                        onClick={() => {
-                                            setHintMove(move);
-                                        }}
-                                        >
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <span style={{ 
-                                                    width: '20px', height: '20px', 
-                                                    borderRadius: '50%', 
-                                                    background: move.color || (idx === 0 ? '#4ade80' : (idx === 1 ? '#60b5fa' : '#94a3b8')),
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    fontSize: '0.7rem', fontWeight: 700, color: idx < 2 ? '#000' : '#fff'
-                                                }}>
-                                                    {idx + 1}
-                                                </span>
-                                                <span style={{ color: '#fff' }}>
-                                                    {move.from} → {move.to}
-                                                </span>
-                                            </div>
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
-                                                <span style={{ 
-                                                    color: move.color || '#94a3b8',
-                                                    fontWeight: 600,
-                                                    fontSize: '0.75rem'
-                                                }}>
-                                                    {move.label}
-                                                </span>
-                                                <span style={{ fontSize: '0.65rem', color: move.color || 'rgba(255,255,255,0.5)' }}>
-                                                    {move.evalDisplay}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    <button 
-                                        onClick={() => setHintSuggestions(null)} 
-                                        style={{ 
-                                            width: '100%', 
-                                            padding: '6px', 
-                                            background: 'transparent', 
-                                            border: '1px solid rgba(255,255,255,0.1)', 
-                                            borderRadius: '6px',
-                                            color: 'rgba(255,255,255,0.6)',
-                                            fontSize: '0.75rem',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        ✕ Ẩn gợi ý
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+                                        <span style={{ color: m.color, fontWeight: 600, fontSize: '0.75rem' }}>{m.label}</span>
+                                        <span style={{ fontSize: '0.65rem', color: m.color }}>{m.evalDisplay}</span>
+                                    </div>
+                                </div>
+                            ))}
+                            <button onClick={() => { setHintSuggestions(null); setHintMove(null); }} style={{ 
+                                width: '100%', padding: '6px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', 
+                                borderRadius: '6px', color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem', cursor: 'pointer', marginTop: '4px'
+                            }}>✕ Ẩn gợi ý</button>
+                        </div>
+                    )}
+
+                    {/* GAME OVER MODAL */}
+                    {isGameOver && (
+                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+                            <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: `1px solid ${winner === myColor ? 'rgba(74,222,128,0.4)' : winner === 'draw' ? 'rgba(156,163,175,0.4)' : 'rgba(239,68,68,0.4)'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                                <h2 style={{ fontSize: '2.5rem', color: winner === myColor ? '#4ade80' : winner === 'draw' ? '#9ca3af' : '#ef4444', margin: 0, fontWeight: 900 }}>
+                                    {winner === myColor ? 'CHIẾN THẮNG!' : winner === 'draw' ? 'HÒA CỜ' : 'THẤT BẠI'}
+                                </h2>
+                                <p style={{ color: '#aaa' }}>{winner === 'w' ? 'Bên Trắng thắng!' : winner === 'b' ? 'Bên Đen thắng!' : 'Ván cờ kết thúc với kết quả Hòa'}</p>
+                                <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                                    <button onClick={resetGame} style={{ padding: '12px 24px', fontSize: '1rem', fontWeight: 700, background: '#fbbf24', color: '#000', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>
+                                        <RotateCcw size={16} style={{ display: 'inline', verticalAlign: 'text-bottom' }} /> {t('common.playAgain', 'CHƠI LẠI').toUpperCase()}
+                                    </button>
+                                    <button onClick={() => navigate('/chess')} style={{ padding: '12px 24px', fontSize: '1rem', fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', cursor: 'pointer' }}>
+                                        {t('common.exit', 'THOÁT').toUpperCase()}
                                     </button>
                                 </div>
-                            )}
-
-                            {mode === 'solo' && !gameOver && moveHistory.length > 0 && (
-                                <button className="btn-secondary" onClick={handleUndo}><Undo2 size={18} /> Đi lại</button>
-                            )}
-                            
-                            <button className="btn-secondary" onClick={() => navigate(mode === 'multiplayer' ? '/chess/multiplayer' : '/chess')}><ArrowLeft size={18} /> Thoát</button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* GAME OVER PANEL */}
-                {gameOver && (
-                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(13, 17, 23, 0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-                        <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: '1px solid rgba(74,222,128,0.4)', boxShadow: '0 0 40px rgba(74,222,128,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                            <h2 style={{ fontSize: '1.8rem', color: '#4ade80', margin: 0, fontWeight: 900 }}>KẾT THÚC</h2>
-                            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                                <button onClick={handleReset} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: '#4ade80', color: '#000', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>
-                                    CHƠI LẠI
-                                </button>
-                                <button onClick={() => navigate(mode === 'multiplayer' ? '/chess/multiplayer' : '/chess')} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', cursor: 'pointer' }}>
-                                    THOÁT
-                                </button>
                             </div>
                         </div>
+                    )}
+                </div>
+
+                {/* RIGHT PANEL - Status + History */}
+                <div className="chess-right-panel" style={{
+                    flex: '0 0 180px', display: 'flex', flexDirection: 'column',
+                    gap: '0.6rem', overflow: 'hidden', padding: '1rem 1rem 1rem 0'
+                }}>
+                    {/* Turn Status */}
+                    <div style={{ background: 'linear-gradient(180deg, rgba(234,179,8,0.08), transparent)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(234,179,8,0.15)' }}>
+                        <div style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 800, marginBottom: '8px', letterSpacing: '1px' }}>
+                            TRẠNG THÁI
+                        </div>
+                        <div style={{ padding: '10px', background: 'rgba(0,0,0,0.25)', borderRadius: '8px', textAlign: 'center' }}>
+                            <div style={{ fontSize: '0.7rem', color: '#aaa', marginBottom: '4px' }}>Lượt:</div>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: turn === 'w' ? '#f8fafc' : '#94a3b8' }}>
+                                {turn === 'w' ? 'TRẮNG' : 'ĐEN'}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: isThinking ? '#fbbf24' : '#666', marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                {isThinking && <Activity size={12} className="spin" style={{ animation: 'spin 1s linear infinite' }} />}
+                                {turn === myColor ? 'Bạn' : 'CPU...'}
+                            </div>
+                        </div>
+                        {game.isCheck() && (
+                            <div style={{ marginTop: '6px', padding: '6px', background: 'rgba(239,68,68,0.15)', borderRadius: '6px', textAlign: 'center', fontSize: '0.75rem', color: '#ef4444', fontWeight: 700 }}>
+                                CHIẾU!
+                            </div>
+                        )}
                     </div>
-                )}
+
+                    {/* Eval */}
+                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, marginBottom: '6px', letterSpacing: '1px' }}>ĐÁNH GIÁ (TRẮNG)</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div style={{
+                                flex: 1, height: '6px', borderRadius: '3px', background: '#1e293b', overflow: 'hidden', position: 'relative'
+                            }}>
+                                <div style={{
+                                    position: 'absolute', left: 0, top: 0, bottom: 0,
+                                    width: `${Math.max(3, Math.min(97, 50 + (evalScore / 25)))}%`, // Maps ~1200cp to edge
+                                    background: evalScore > 0 ? '#f8fafc' : evalScore < 0 ? '#475569' : '#fbbf24',
+                                    transition: 'width 0.4s ease, background 0.3s',
+                                    borderRadius: '3px'
+                                }} />
+                            </div>
+                            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: evalScore > 0 ? '#f8fafc' : evalScore < 0 ? '#94a3b8' : '#fbbf24', minWidth: '32px', textAlign: 'right' }}>
+                                {(evalScore / 100).toFixed(1)}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Move History */}
+                    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+                        <div
+                            onClick={() => setShowHistory(!showHistory)}
+                            style={{ padding: '10px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+                        >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <History size={12} color="#888" />
+                                <span style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, letterSpacing: '1px' }}>NƯỚC ({moveHistory.length})</span>
+                            </div>
+                            {showHistory ? <ChevronDown size={12} color="#888" /> : <ChevronRight size={12} color="#888" />}
+                        </div>
+                        {showHistory && (
+                            <div style={{ flex: 1, overflowY: 'auto', padding: '6px 8px', minHeight: '0', display: 'flex', flexDirection: 'column' }}>
+                                {moveHistory.length === 0 ? (
+                                    <p style={{ fontSize: '0.7rem', color: '#555', textAlign: 'center', margin: 'auto' }}>Chưa có nước</p>
+                                ) : (
+                                    Array.from({ length: Math.ceil(moveHistory.length / 2) }).map((_, i) => (
+                                        <div key={i} style={{
+                                            display: 'grid', gridTemplateColumns: 'min-content 1fr 1fr', gap: '8px',
+                                            padding: '4px 6px', borderRadius: '4px',
+                                            background: i === Math.floor((moveHistory.length - 1) / 2) ? 'rgba(255,255,255,0.04)' : 'transparent',
+                                            fontSize: '0.75rem', alignItems: 'center'
+                                        }}>
+                                            <span style={{ color: '#555', fontSize: '0.65rem' }}>{i + 1}.</span>
+                                            <span style={{ color: '#f8fafc', fontFamily: 'monospace' }}>{moveHistory[i * 2]?.san}</span>
+                                            <span style={{ color: '#94a3b8', fontFamily: 'monospace' }}>{moveHistory[i * 2 + 1]?.san || ''}</span>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
+
+            <style>{`
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translate(-50%, -10px); }
+                    to { opacity: 1; transform: translate(-50%, 0); }
+                }
+
+                @media (max-width: 850px) {
+                    .chess-main-container {
+                        flex-direction: column !important;
+                        overflow-y: auto !important;
+                        height: 100vh !important;
+                    }
+                    .chess-left-panel {
+                        flex: 0 0 auto !important;
+                        width: 100% !important;
+                        border-right: none !important;
+                        border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+                        max-height: none !important;
+                    }
+                    .chess-board-area {
+                        flex: 0 0 auto !important;
+                        display: flex !important;
+                        justify-content: center !important;
+                        padding: 0.5rem !important;
+                    }
+                    .chess-right-panel {
+                        flex: 0 0 auto !important;
+                        width: 100% !important;
+                        border-left: none !important;
+                        border-top: 1px solid rgba(255,255,255,0.06) !important;
+                        padding: 0.5rem !important;
+                    }
+                    .chess-top-bar {
+                        padding: 8px 12px !important;
+                    }
+                    .chess-top-bar h1 {
+                        font-size: 1rem !important;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .chess-left-panel {
+                        padding: 0.5rem !important;
+                    }
+                    .chess-player-avatars {
+                        gap: 6px !important;
+                    }
+                    .chess-avatar {
+                        width: 24px !important;
+                        height: 24px !important;
+                        font-size: 1.2rem !important;
+                    }
+                    .chess-board-container {
+                        border-width: 4px !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 }

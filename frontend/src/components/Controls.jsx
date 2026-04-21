@@ -3,33 +3,34 @@ import { Eraser, Lightbulb, Pencil } from 'lucide-react';
 
 export default function Controls({ onNumberClick, onActionClick, notesMode, completedNumbers = [] }) {
     return (
-        <>
-            <div className="action-buttons">
-                <button className="btn-action" onClick={() => onActionClick('erase')}>
+        <div className="controls-panel-premium">
+            <div className="action-buttons-premium">
+                <button className="btn-action-premium" onClick={() => onActionClick('erase')}>
                     <Eraser size={20} />
-                    <span>Erase</span>
+                    <span>Xóa</span>
                 </button>
-                <button className={`btn-action ${notesMode ? 'active' : ''}`} onClick={() => onActionClick('notes')}>
-                    <Pencil size={20} />
-                    <span>Notes {notesMode ? 'On' : 'Off'}</span>
+                <button className={`btn-action-premium ${notesMode ? 'active-glow' : ''}`} onClick={() => onActionClick('notes')}>
+                    <Pencil size={20} className={notesMode ? 'pencil-wiggle' : ''} />
+                    <span>Nháp {notesMode ? 'BẬT' : 'TẮT'}</span>
                 </button>
-                <button className="btn-action" onClick={() => onActionClick('hint')}>
+                <button className="btn-action-premium" onClick={() => onActionClick('hint')}>
                     <Lightbulb size={20} />
-                    <span>Hint</span>
+                    <span>Gợi ý</span>
                 </button>
             </div>
-            <div className="numpad">
+            
+            <div className="numpad-premium">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
                     <button
                         key={n}
-                        className="btn-num"
-                        onClick={() => onNumberClick(n)}
-                        style={{ visibility: completedNumbers.includes(n) ? 'hidden' : 'visible' }}
+                        className={`btn-num-premium ${completedNumbers.includes(n) ? 'num-completed' : ''}`}
+                        onClick={() => !completedNumbers.includes(n) && onNumberClick(n)}
+                        disabled={completedNumbers.includes(n)}
                     >
                         {n}
                     </button>
                 ))}
             </div>
-        </>
+        </div>
     );
 }

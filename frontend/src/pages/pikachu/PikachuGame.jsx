@@ -3,8 +3,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, Shuffle, HelpCircle, Activity, Clock, LayoutGrid, Volume2, VolumeX, Pause, Play } from 'lucide-react';
 import { usePikachuLogic } from './usePikachuLogic';
 import { useBgMusic } from '../../hooks/useBgMusic';
+import { useTranslation } from 'react-i18next';
 
 export default function PikachuGame() {
+    const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
     const state = location.state || {};
@@ -114,13 +116,13 @@ export default function PikachuGame() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '5px 14px', marginBottom: '4px', flexShrink: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Activity size={16} color="var(--primary-color)" />
-                        <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }}>Level: {level}</span>
-                        <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>· {gameMode === 'classic' ? 'Classic' : 'Full'}</span>
+                        <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }}>{t('pikachu.level')}: {level}</span>
+                        <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>· {gameMode === 'classic' ? t('pikachu.classic') : t('pikachu.full')}</span>
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px', justifyContent: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ fontWeight: 800, fontSize: '1rem', color: '#eab308' }}>Score: {score}</span>
+                            <span style={{ fontWeight: 800, fontSize: '1rem', color: '#eab308' }}>{t('pikachu.score')}: {score}</span>
                         </div>
                     </div>
 
@@ -251,8 +253,8 @@ export default function PikachuGame() {
                                     <button onClick={togglePause} style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, #38bdf8, #0ea5e9)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 0 30px rgba(56,189,248,0.5)', transition: 'transform 0.2s' }}>
                                         <Play size={36} fill="#fff" />
                                     </button>
-                                    <div style={{ color: '#fff', fontSize: '1.1rem', fontWeight: 600 }}>Tiếp tục</div>
-                                    <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>Nhấn để chơi tiếp</div>
+                                    <div style={{ color: '#fff', fontSize: '1.1rem', fontWeight: 600 }}>{t('pikachu.continue')}</div>
+                                    <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>{t('pikachu.playToContinue')}</div>
                                 </div>
                             </div>
                         )}
@@ -261,10 +263,10 @@ export default function PikachuGame() {
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', zIndex: 50, backdropFilter: 'blur(8px)' }}>
                                 <div style={{ background: 'rgba(20,20,30,0.95)', borderRadius: '24px', padding: '40px 50px', border: '1px solid rgba(74,222,128,0.3)', boxShadow: '0 0 40px rgba(74,222,128,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                                     <div style={{ fontSize: '4rem' }}>🏆</div>
-                                    <h2 style={{ fontSize: '1.8rem', color: '#4ade80', margin: 0, fontWeight: 900 }}>HOÀN THÀNH!</h2>
-                                    <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1rem', margin: 0 }}>Màn {level}</p>
+                                    <h2 style={{ fontSize: '1.8rem', color: '#4ade80', margin: 0, fontWeight: 900 }}>{t('pikachu.won')}</h2>
+                                    <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1rem', margin: 0 }}>{t('pikachu.levelComplete')} {level}</p>
                                     <button onClick={() => initGame(true)} style={{ marginTop: '8px', padding: '12px 32px', fontSize: '1rem', fontWeight: 700, background: '#4ade80', color: '#000', border: 'none', borderRadius: '12px', cursor: 'pointer', boxShadow: '0 0 20px rgba(74,222,128,0.4)' }}>
-                                        TIẾP TỤC
+                                        {t('pikachu.continue').toUpperCase()}
                                     </button>
                                 </div>
                             </div>
@@ -273,13 +275,13 @@ export default function PikachuGame() {
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', zIndex: 50, backdropFilter: 'blur(12px)' }}>
                                 <div style={{ background: 'rgba(20,20,30,0.95)', borderRadius: '24px', padding: '40px 50px', border: '1px solid rgba(234,179,8,0.3)', boxShadow: '0 0 40px rgba(234,179,8,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                                     <div style={{ fontSize: '4rem' }}>👑</div>
-                                    <h2 style={{ fontSize: '1.8rem', color: '#eab308', margin: 0, fontWeight: 900 }}>PHÁ ĐẢO!</h2>
+                                    <h2 style={{ fontSize: '1.8rem', color: '#eab308', margin: 0, fontWeight: 900 }}>{t('pikachu.finished')}</h2>
                                     <div style={{ background: 'rgba(255,255,255,0.05)', padding: '16px 32px', borderRadius: '12px' }}>
-                                        <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem' }}>TỔNG ĐIỂM</div>
+                                        <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem' }}>{t('pikachu.totalScore')}</div>
                                         <div style={{ color: '#eab308', fontSize: '2rem', fontWeight: 900 }}>{score}</div>
                                     </div>
                                     <button onClick={() => navigate('/pikachu')} style={{ marginTop: '8px', padding: '12px 32px', fontSize: '1rem', fontWeight: 700, background: '#eab308', color: '#000', border: 'none', borderRadius: '12px', cursor: 'pointer' }}>
-                                        VỀ SẢNH
+                                        {t('common.returnToMenu').toUpperCase()}
                                     </button>
                                 </div>
                             </div>
@@ -288,14 +290,14 @@ export default function PikachuGame() {
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.9)', zIndex: 50, backdropFilter: 'blur(8px)' }}>
                                 <div style={{ background: 'rgba(20,20,30,0.95)', borderRadius: '24px', padding: '40px 50px', border: '1px solid rgba(239,68,68,0.3)', boxShadow: '0 0 40px rgba(239,68,68,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                                     <div style={{ fontSize: '4rem' }}>💀</div>
-                                    <h2 style={{ fontSize: '1.8rem', color: '#ef4444', margin: 0, fontWeight: 900 }}>HẾT GIỜ</h2>
-                                    <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem' }}>Điểm: <span style={{ color: '#fff', fontWeight: 700 }}>{score}</span></div>
+                                    <h2 style={{ fontSize: '1.8rem', color: '#ef4444', margin: 0, fontWeight: 900 }}>{t('pikachu.gameover')}</h2>
+                                    <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem' }}>{t('pikachu.score')}: <span style={{ color: '#fff', fontWeight: 700 }}>{score}</span></div>
                                     <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
                                         <button onClick={() => initGame()} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: '#ef4444', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <RotateCcw size={16} /> THỬ LẠI
+                                            <RotateCcw size={16} /> {t('pikachu.retry').toUpperCase()}
                                         </button>
                                         <button onClick={() => navigate('/pikachu')} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', cursor: 'pointer' }}>
-                                            THOÁT
+                                            {t('common.exit').toUpperCase()}
                                         </button>
                                     </div>
                                 </div>
@@ -311,7 +313,7 @@ export default function PikachuGame() {
                                 background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.3)', color: '#d8b4fe', borderRadius: '10px'
                             }}>
                                 <HelpCircle size={22} />
-                                <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Gợi ý ({hints})</div>
+                                <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t('pikachu.hintBtn')} ({hints})</div>
                             </button>
 
                             <button className="btn-secondary" onClick={handleShuffle} disabled={shuffles <= 0 || status !== 'playing'} style={{
@@ -319,16 +321,16 @@ export default function PikachuGame() {
                                 background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.3)', color: '#bae6fd', borderRadius: '10px'
                             }}>
                                 <Shuffle size={22} />
-                                <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Đảo ({shuffles})</div>
+                                <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t('pikachu.shuffleBtn')} ({shuffles})</div>
                             </button>
                         </div>
 
                         <div style={{ padding: '16px', borderRadius: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)' }}>
                             <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <Clock size={14} /> {timeLimitEnabled ? 'Thời Gian (Limit)' : 'Thời Gian (Tự Do)'}
+                                <Clock size={14} /> {timeLimitEnabled ? t('pikachu.time') + ' (' + t('pikachu.limit') + ')' : t('pikachu.time') + ' (' + t('pikachu.relax') + ')'}
                             </div>
                             <div style={{ fontSize: '0.85rem', color: timeLimitEnabled ? '#38bdf8' : '#a855f7', fontWeight: 600 }}>
-                                {timeLimitEnabled ? 'Penalty: Trừ -5% / nhát' : 'Mode Rảnh Tay'}
+                                {timeLimitEnabled ? t('pikachu.penalty') : t('pikachu.relax')}
                             </div>
                         </div>
 
@@ -341,7 +343,7 @@ export default function PikachuGame() {
                                 borderRadius: '8px', color: isPaused ? '#38bdf8' : '#fff', cursor: 'pointer'
                             }}>
                                 {isPaused ? <Play size={20} fill="#38bdf8" /> : <Pause size={20} fill="#fff" />}
-                                Tạm dừng
+                                {t('pikachu.pause')}
                             </button>
                             <button onClick={toggleMute} style={{
                                 width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
@@ -350,19 +352,19 @@ export default function PikachuGame() {
                                 color: muted ? '#ef4444' : '#4ade80', cursor: 'pointer'
                             }}>
                                 {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                                {muted ? 'BẬT NHẠC' : 'TẮT NHẠC'}
+                                {muted ? t('pikachu.musicOn') : t('pikachu.musicOff')}
                             </button>
                             <button className="btn-secondary" onClick={() => initGame()} style={{
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px',
                                 fontSize: '0.92rem', fontWeight: 800, textTransform: 'uppercase'
                             }}>
-                                <RotateCcw size={18} /> Chơi lại màn mới
+                                <RotateCcw size={18} /> {t('pikachu.newGame')}
                             </button>
                             <button className="btn-secondary" onClick={() => navigate('/pikachu')} style={{
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px',
                                 fontSize: '0.92rem', fontWeight: 800, textTransform: 'uppercase'
                             }}>
-                                <ArrowLeft size={18} /> Thoát Game
+                                <ArrowLeft size={18} /> {t('common.exit')}
                             </button>
                         </div>
                     </div>

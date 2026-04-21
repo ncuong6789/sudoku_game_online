@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTankLogic } from './useTankLogic';
 import { useTankSounds } from '../../hooks/useTankSounds';
 import { Swords, Trophy, Activity, ArrowLeft, RotateCcw, Shield, Star, Info, Target, History } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 // ─── Constants ──────────────────────────────────────────────────
 const MAP_COLS = 26;
@@ -232,6 +233,7 @@ function drawItem(ctx, item, TILE, tick) {
 // ─── Component ───────────────────────────────────────────────────
 
 export default function TankGame() {
+    const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
     const { roomId, mode, level = 1 } = location.state || { roomId: 'local', mode: 'single', level: 1 };
@@ -353,29 +355,29 @@ export default function TankGame() {
                 {/* LEFT: Info/Controls */}
                 <div style={{ flex: '0 0 240px', display: 'flex', flexDirection: 'column', gap: '1.2rem', overflowY: 'auto' }}>
                     <div style={{ textAlign: 'center' }}>
-                        <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 900, color: '#fff', letterSpacing: '2px' }}>TANKS</h1>
-                        <div style={{ color: '#ffd700', fontSize: '0.8rem', fontWeight: 800 }}>BATTLE CITY CLONE</div>
+                        <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 900, color: '#fff', letterSpacing: '2px' }}>{t('tank.title')}</h1>
+                        <div style={{ color: '#ffd700', fontSize: '0.8rem', fontWeight: 800 }}>{t('tank.subtitle')}</div>
                     </div>
                     
                     <button className="btn-secondary" onClick={() => navigate('/tank')} style={{
                         padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)'
                     }}>
-                        <ArrowLeft size={18} /> THOÁT
+                        <ArrowLeft size={18} /> {t('tank.exit')}
                     </button>
 
                     <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: '16px', padding: '15px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#888', fontWeight: 800, marginBottom: '12px', letterSpacing: '1px' }}>🕹 ĐIỀU KHIỂN</div>
+                        <div style={{ fontSize: '0.75rem', color: '#888', fontWeight: 800, marginBottom: '12px', letterSpacing: '1px' }}>🕹 {t('tank.controls')}</div>
                         <div style={{ fontSize: '0.85rem', color: '#ddd', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span style={{ color: '#888' }}>Di chuyển:</span> <span style={{background: 'rgba(255,255,255,0.1)', padding:'2px 6px', borderRadius:'4px'}}>WASD</span></div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span style={{ color: '#888' }}>Bắn:</span> <span style={{background: 'rgba(255,255,255,0.1)', padding:'2px 6px', borderRadius:'4px'}}>SPACE</span></div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span style={{ color: '#888' }}>{t('tank.move')}:</span> <span style={{background: 'rgba(255,255,255,0.1)', padding:'2px 6px', borderRadius:'4px'}}>WASD</span></div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span style={{ color: '#888' }}>{t('tank.fire')}:</span> <span style={{background: 'rgba(255,255,255,0.1)', padding:'2px 6px', borderRadius:'4px'}}>SPACE</span></div>
                         </div>
                     </div>
 
                     <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: '16px', padding: '15px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#888', fontWeight: 800, marginBottom: '12px', letterSpacing: '1px' }}>🗺 ĐỊA HÌNH</div>
+                        <div style={{ fontSize: '0.75rem', color: '#888', fontWeight: 800, marginBottom: '12px', letterSpacing: '1px' }}>🗺 {t('tank.map')}</div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                            {[['#b03a14', 'Gạch'], ['#6080a0', 'Thép'], ['#1060a0', 'Nước'], ['#1a6020', 'Cây']].map(([c, l]) => (
+                            {[['#b03a14', t('tank.brick')], ['#6080a0', t('tank.steel')], ['#1060a0', t('tank.water')], ['#1a6020', t('tank.bush')]].map(([c, l]) => (
                                 <div key={l} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.05)', padding: '6px 10px', borderRadius: '8px' }}>
                                     <div style={{ width: 12, height: 12, background: c, borderRadius: '2px', boxShadow: '0 2px 4px rgba(0,0,0,0.5)' }} />
                                     <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>{l}</span>
@@ -394,22 +396,22 @@ export default function TankGame() {
                     }}>
                         {gameState === 'waiting' && map.length === 0 && (
                             <div style={{ position: 'absolute', inset: 0, background: '#050508', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, color: '#ffd700', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                                ĐANG TẢI BẢN ĐỒ...
+                                {t('tank.loadingMap')}
                             </div>
                         )}
                         {(gameState === 'finished' || gameState === 'win') && (
                             <div style={{ position: 'absolute', inset: 0, zIndex: 100, background: 'rgba(10,10,15,0.9)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <div style={{ background: 'rgba(20,20,30,0.95)', borderRadius: '24px', padding: '40px 50px', border: `1px solid ${gameState === 'win' ? 'rgba(255,215,0,0.4)' : 'rgba(239,68,68,0.4)'}`, boxShadow: gameState === 'win' ? '0 0 60px rgba(255,215,0,0.2)' : '0 0 60px rgba(239,68,68,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                                     <div style={{fontSize: '4rem'}}>{gameState === 'win' ? '🏆' : '💀'}</div>
-                                    <h1 style={{ color: gameState === 'win' ? '#ffd700' : '#ff4444', fontSize: '2.5rem', margin: 0, fontWeight: 900 }}>{gameState === 'win' ? 'CHIẾN THẮNG!' : 'THẤT BẠI'}</h1>
+                                    <h1 style={{ color: gameState === 'win' ? '#ffd700' : '#ff4444', fontSize: '2.5rem', margin: 0, fontWeight: 900 }}>{gameState === 'win' ? t('tank.victory') : t('tank.defeat')}</h1>
                                     {gameState === 'win' && currentLevel >= maxLevel && (
-                                        <p style={{ color: '#fbbf24', fontSize: '1.1rem', marginTop: '4px', background: 'rgba(255,215,0,0.1)', padding: '5px 15px', borderRadius: '20px' }}>Tất cả {maxLevel} màn!</p>
+                                        <p style={{ color: '#fbbf24', fontSize: '1.1rem', marginTop: '4px', background: 'rgba(255,215,0,0.1)', padding: '5px 15px', borderRadius: '20px' }}>{t('tank.allLevels')} {maxLevel}!</p>
                                     )}
                                     {gameState === 'win' && currentLevel < maxLevel && (
-                                        <p style={{ color: '#60a5fa', fontSize: '1.1rem', marginTop: '4px', background: 'rgba(96,165,250,0.1)', padding: '5px 15px', borderRadius: '20px' }}>Màn {currentLevel}</p>
+                                        <p style={{ color: '#60a5fa', fontSize: '1.1rem', marginTop: '4px', background: 'rgba(96,165,250,0.1)', padding: '5px 15px', borderRadius: '20px' }}>{t('tank.level')} {currentLevel}</p>
                                     )}
                                     <button onClick={() => navigate('/tank')} style={{ marginTop: '10px', padding: '14px 40px', fontSize: '1.1rem', fontWeight: 800, background: gameState === 'win' ? '#ffd700' : '#ef4444', color: '#000', border: 'none', borderRadius: '12px', cursor: 'pointer', transition: 'transform 0.2s' }} onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}>
-                                        TRỞ VỀ
+                                        {t('tank.return')}
                                     </button>
                                 </div>
                             </div>
@@ -422,28 +424,22 @@ export default function TankGame() {
                 <div style={{ flex: '0 0 240px', display: 'flex', flexDirection: 'column', gap: '1.2rem', overflowY: 'auto' }}>
                     <div style={{ background: 'linear-gradient(180deg, rgba(74,222,128,0.1), transparent)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(74,222,128,0.2)' }}>
                         <div style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '1px' }}>
-                            <Target size={18} /> TRẠNG THÁI
+                            <Target size={18} /> {t('tank.status')}
                         </div>
                         <div style={{ marginBottom: '16px', background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '12px' }}>
-                            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }}>Màn hiện tại:</div>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fbbf24' }}>{currentLevel} <span style={{fontSize: '1rem', color: '#666', fontWeight: 600}}>/ {maxLevel}</span></div>
-                        </div>
-                        <div style={{ marginBottom: '16px', background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '12px' }}>
-                            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }}>Sinh mệnh:</div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>{livesIcons(myPlayer?.lives || 0)}</div>
-                        </div>
-                         <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '12px' }}>
-                            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }}>Địch thủ:</div>
+<div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }}>{t('tank.currentLevel')}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }}>{t('tank.lives')}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }}>{t('tank.enemies')}</div>
                             <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ff4444' }}>{enemiesLeft}</div>
                         </div>
                     </div>
 
                     <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '20px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#666', fontWeight: 800, letterSpacing: '1px' }}>📡 HỆ THỐNG</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px' }}>
-                            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 10px #4ade80', animation: 'pulse 2s infinite' }} />
-                            <span style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 600 }}>Máy chủ ổn định</span>
-                        </div>
+<div style={{ fontSize: '0.75rem', color: '#666', fontWeight: 800, letterSpacing: '1px' }}>📡 {t('tank.system')}</div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px' }}>
+                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 10px #4ade80', animation: 'pulse 2s infinite' }} />
+                                <span style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 600 }}>{t('tank.stable')}</span>
+                            </div>
                     </div>
                 </div>
             </div>

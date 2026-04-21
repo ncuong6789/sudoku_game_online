@@ -4,6 +4,7 @@ import { ArrowLeft, RefreshCw, Trophy } from 'lucide-react';
 import { socket } from '../../utils/socket';
 import { useTetris, STAGE_WIDTH, STAGE_HEIGHT, TETROMINOES } from '../../utils/useTetris';
 import { useAudio } from '../../utils/useAudio';
+import { useTranslation } from 'react-i18next';
 
 // Reference to shared AudioContext from useAudio
 let audioCtx;
@@ -81,6 +82,7 @@ const NextPiece = ({ type }) => {
 };
 
 export default function TetrisGame() {
+    const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
     const locationState = location.state || {};
@@ -279,13 +281,13 @@ export default function TetrisGame() {
                 {/* TRÁI: KHU VỰC BÀN CỜ (CẢ CỦA MÌNH & ĐỐI THỦ) */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px', alignItems: 'center' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                        <h3 style={{ margin: 0, color: '#4ade80', fontSize: '1.1rem' }}>Bạn ({score})</h3>
+                        <h3 style={{ margin: 0, color: '#4ade80', fontSize: '1.1rem' }}>{t('tetris.you')} ({score})</h3>
                         <Stage stage={stage} />
                     </div>
                     
                     {mode === 'multiplayer' && (
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                            <h3 style={{ margin: 0, color: '#f87171', fontSize: '1.1rem' }}>Đối thủ ({opponentScore})</h3>
+                            <h3 style={{ margin: 0, color: '#f87171', fontSize: '1.1rem' }}>{t('tetris.opponent')} ({opponentScore})</h3>
                             <Stage stage={opponentStage} isOpponent={true} />
                         </div>
                     )}
@@ -295,26 +297,26 @@ export default function TetrisGame() {
                 <div style={{ flex: '0 0 250px', width: '250px', display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '100vh', overflow: 'hidden', minHeight: 0 }}>
                     
                     <div className="nav-item active" style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', fontSize: '1.2rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px' }}>
-                        <span style={{fontSize: '1.4rem'}}>🧱</span> Tetris
+                        <span style={{fontSize: '1.4rem'}}>🧱</span> {t('tetris.title')}
                     </div>
 
                     <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                        {mode === 'solo' ? difficulty : `Phòng: ${roomId}`}
+                        {mode === 'solo' ? difficulty : `${t('tetris.room')}: ${roomId}`}
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                         <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 10px', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '4px', letterSpacing: '1px' }}>ĐIỂM</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '4px', letterSpacing: '1px' }}>{t('tetris.points')}</div>
                             <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--primary-color)' }}>{score}</div>
                         </div>
                         <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 10px', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '4px', letterSpacing: '1px' }}>CẤP ĐỘ</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '4px', letterSpacing: '1px' }}>{t('tetris.level')}</div>
                             <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#a371f7' }}>{level}</div>
                         </div>
                     </div>
                     
                     <div style={{ background: 'rgba(0,0,0,0.3)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Số hàng đã xóa:</span>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t('tetris.cleared')}</span>
                         <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#4ade80' }}>{rows}</span>
                     </div>
 

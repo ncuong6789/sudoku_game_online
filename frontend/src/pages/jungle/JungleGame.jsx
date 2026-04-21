@@ -5,6 +5,7 @@ import { useJungleSounds } from './useJungleSounds';
 import { Swords, Trophy, Activity, ArrowLeft, RotateCcw, RefreshCw, HelpCircle } from 'lucide-react';
 import { socket } from '../../utils/socket';
 import { EVENTS } from '../../utils/constants';
+import { useTranslation } from 'react-i18next';
 
 const MAP_WIDTH = 7;
 const MAP_HEIGHT = 9;
@@ -63,6 +64,7 @@ const ANIMAL_SYMBOLS = {
 };
 
 export default function JungleGame() {
+    const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
     const { roomId, mode, difficulty } = location.state || { roomId: 'local', mode: 'solo', difficulty: 'medium' };
@@ -400,7 +402,7 @@ export default function JungleGame() {
                     boxSizing: 'border-box'
                 }}>
                     <h3 style={{ margin: '0 0 12px 0', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
-                        <span>📊</span> Cấp bậc & Kỹ năng
+                        <span>📊</span> {t('jungle.rankSkill')}
                     </h3>
 
                     <div style={{
@@ -432,19 +434,19 @@ export default function JungleGame() {
                         ))}
                         
                         <div style={{ marginTop: '8px', padding: '10px', background: 'rgba(251,191,36,0.1)', borderRadius: '8px', border: '1px solid rgba(251,191,36,0.2)' }}>
-                            <div style={{ fontSize: '0.75rem', color: '#fbbf24', fontWeight: 600, marginBottom: '6px' }}>🎯 LUẬT</div>
+                            <div style={{ fontSize: '0.75rem', color: '#fbbf24', fontWeight: 600, marginBottom: '6px' }}>🎯 {t('jungle.rules')}</div>
                             <ul style={{ margin: 0, paddingLeft: '14px', fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)', lineHeight: '1.5' }}>
-                                <li>Lớn ăn nhỏ (8 vs 1 ngoại lệ)</li>
-                                <li>Hổ/Sư tử <span style={{color:'#4ade80'}}>nhảy sông</span> 2 ô</li>
-                                <li>Chuột <span style={{color:'#4ade80'}}>bơi</span> & ăn Voi</li>
-                                <li>Vào Hang = <span style={{color:'#ffd700'}}>THẮNG</span></li>
+                                <li>{t('jungle.bigEatSmall')} (8 vs 1)</li>
+                                <li>Lion/Tiger <span style={{color:'#4ade80'}}>{t('jungle.jumpRiver')}</span></li>
+                                <li>Rat <span style={{color:'#4ade80'}}>{t('jungle.swim')}</span> & eat Elephant</li>
+                                <li>{t('jungle.enterDen')}</li>
                             </ul>
                         </div>
                         
                         <div style={{ padding: '8px', background: 'rgba(96,165,250,0.1)', borderRadius: '6px', border: '1px solid rgba(96,165,250,0.2)' }}>
-                            <div style={{ fontSize: '0.7rem', color: '#60b5ff', fontWeight: 600 }}>🏞 Địa hình</div>
+                            <div style={{ fontSize: '0.7rem', color: '#60b5ff', fontWeight: 600 }}>{t('jungle.terrain')}</div>
                             <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>
-                                🌊 Sông | ⬜ Bẫy | 🏠 Hang
+                                🌊 River | ⬜ Trap | 🏠 Den
                             </div>
                         </div>
                     </div>
@@ -455,12 +457,12 @@ export default function JungleGame() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px', width: '100%', justifyContent: 'center', marginBottom: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: turn === myId ? 1 : 0.5 }}>
                             <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#4ade80' }} />
-                            <span style={{ fontWeight: 700, fontSize: '0.85rem', color: turn === myId ? '#4ade80' : '#fff' }}>BẠN</span>
+                            <span style={{ fontWeight: 700, fontSize: '0.85rem', color: turn === myId ? '#4ade80' : '#fff' }}>{t('jungle.you')}</span>
                         </div>
                         <span style={{ color: '#fbbf24', fontSize: '0.75rem', fontWeight: 600 }}>{difficulty.toUpperCase()}</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: turn !== myId ? 1 : 0.5 }}>
                             <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#60b5fa' }} />
-                            <span style={{ fontWeight: 700, fontSize: '0.85rem', color: turn !== myId ? '#60b5fa' : '#fff' }}>ĐỐI</span>
+                            <span style={{ fontWeight: 700, fontSize: '0.85rem', color: turn !== myId ? '#60b5fa' : '#fff' }}>{t('jungle.opponent')}</span>
                         </div>
                     </div>
 
@@ -481,7 +483,7 @@ export default function JungleGame() {
                         {isLoading && (
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 10, background: 'rgba(15, 23, 42, 0.9)' }}>
                                 <RefreshCw className="animate-spin" size={48} color="#4ade80" style={{ marginBottom: '15px' }} />
-                                <span style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>ĐANG KẾT NỐI...</span>
+                                <span style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>{t('jungle.connecting')}</span>
                             </div>
                         )}
                         
@@ -508,11 +510,11 @@ export default function JungleGame() {
                         
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             <button className="btn-primary" onClick={handleReset} style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
-                                <RotateCcw size={16} /> Chơi ván mới
+                                <RotateCcw size={16} /> {t('jungle.restart')}
                             </button>
                             
                             <button className="btn-secondary" onClick={getHint} disabled={turn !== myId || isLoading} style={{ borderColor: '#fbbf24', color: '#fbbf24', padding: '10px', fontSize: '0.85rem' }}>
-                                <HelpCircle size={16} /> Gợi ý (AI)
+                                <HelpCircle size={16} /> {t('jungle.hint')}
                             </button>
 
                             {hintMoves && hintMoves.length > 0 && (
@@ -523,7 +525,7 @@ export default function JungleGame() {
                                     border: '1px solid rgba(251,191,36,0.3)',
                                     animation: 'fadeIn 0.3s ease'
                                 }}>
-                                    <div style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 600, marginBottom: '6px' }}>💡 Gợi ý</div>
+                                    <div style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 600, marginBottom: '6px' }}>💡 {t('jungle.hintTitle')}</div>
                                     {hintMoves.slice(0, 3).map((move, idx) => {
                                         const pct = move.percentage || 0;
                                         let color;
@@ -555,7 +557,7 @@ export default function JungleGame() {
                             )}
                             
                             <button className="btn-secondary" onClick={() => navigate('/jungle')} style={{ padding: '10px', fontSize: '0.85rem' }}>
-                                <ArrowLeft size={16} /> Thoát
+                                <ArrowLeft size={16} /> {t('jungle.exit')}
                             </button>
                         </div>
                     </div>
@@ -567,7 +569,7 @@ export default function JungleGame() {
                         <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: `1px solid ${gameOver === myId ? 'rgba(251,191,36,0.4)' : 'rgba(255,255,255,0.1)'}`, boxShadow: gameOver === myId ? '0 0 40px rgba(251,191,36,0.3)' : 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                             <Trophy size={60} color={gameOver === myId ? '#fbbf24' : '#94a3b8'} />
                             <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: gameOver === myId ? '#fbbf24' : '#fff', margin: 0 }}>
-                                {gameOver === myId ? 'THẮNG!' : 'THUA'}
+                                {gameOver === myId ? t('jungle.victory') : t('jungle.defeat')}
                             </h2>
                             <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
                                 <button onClick={handleReset} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: gameOver === myId ? '#fbbf24' : '#ef4444', color: '#000', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>
