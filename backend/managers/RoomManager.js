@@ -11,6 +11,7 @@ class RoomManager {
             chess: [],
             snake: [],
             tetris: [],
+            pikachu: [],
             random: []
         };
         this.statsUpdateTimeout = null;
@@ -83,6 +84,13 @@ class RoomManager {
                     }
                 }
 
+                if (this.rooms[roomId].gameType === 'pikachu' && this.rooms[roomId].pikachuState) {
+                    this.rooms[roomId].pikachuState.status = 'finished';
+                    if (this.rooms[roomId].pikachuState.shuffleVotes?.timeoutId) {
+                        clearTimeout(this.rooms[roomId].pikachuState.shuffleVotes.timeoutId);
+                    }
+                }
+
                 socket.to(roomId).emit(EVENTS.OPPONENT_DISCONNECTED);
                 if (this.rooms[roomId].players.length === 0) {
                     delete this.rooms[roomId];
@@ -108,6 +116,13 @@ class RoomManager {
                     if (this.rooms[roomId].tankState.intervalId) {
                         clearInterval(this.rooms[roomId].tankState.intervalId);
                         this.rooms[roomId].tankState.intervalId = null;
+                    }
+                }
+
+                if (this.rooms[roomId].gameType === 'pikachu' && this.rooms[roomId].pikachuState) {
+                    this.rooms[roomId].pikachuState.status = 'finished';
+                    if (this.rooms[roomId].pikachuState.shuffleVotes?.timeoutId) {
+                        clearTimeout(this.rooms[roomId].pikachuState.shuffleVotes.timeoutId);
                     }
                 }
 

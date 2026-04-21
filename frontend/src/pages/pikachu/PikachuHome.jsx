@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Play, Puzzle, Trophy, Zap, Clock, Flame } from 'lucide-react';
+import { ArrowLeft, Play, Puzzle, Trophy, Zap, Clock, Flame, Globe } from 'lucide-react';
 
 export default function PikachuHome() {
     const navigate = useNavigate();
@@ -113,8 +113,22 @@ export default function PikachuHome() {
                     border: 'none', borderRadius: '12px', cursor: 'pointer', marginBottom: '8px',
                     transition: 'all 0.2s ease'
                 }}>
-                    <Play size={18} fill={gameMode === 'classic' ? '#000' : '#fff'} /> Chơi Ngay
+                    <Play size={18} fill={gameMode === 'classic' ? '#000' : '#fff'} /> Chơi Ngay (Solo)
                 </button>
+
+                {/* Online multiplayer button */}
+                <button onClick={() => navigate('/pikachu/lobby')} style={{
+                    width: '100%', padding: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    gap: '10px', fontSize: '1rem', fontWeight: 800,
+                    background: 'linear-gradient(135deg, rgba(56,189,248,0.15), rgba(56,189,248,0.08))',
+                    color: '#38bdf8',
+                    border: '1.5px solid rgba(56,189,248,0.4)', borderRadius: '12px', cursor: 'pointer', marginBottom: '8px',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 0 20px rgba(56,189,248,0.1)',
+                }}>
+                    <Globe size={17} /> Chơi Online (2 Người)
+                </button>
+
                 <button className="btn-secondary" onClick={() => navigate('/')} style={{
                     width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     gap: '8px', fontSize: '0.92rem', borderRadius: '10px'

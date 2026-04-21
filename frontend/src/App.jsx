@@ -33,6 +33,8 @@ import PacmanGame from './pages/pacman/PacmanGame';
 
 import PikachuHome from './pages/pikachu/PikachuHome';
 import PikachuGame from './pages/pikachu/PikachuGame';
+import PikachuLobby from './pages/pikachu/PikachuLobby';
+import PikachuOnlineGame from './pages/pikachu/PikachuOnlineGame';
 
 // Tank Components
 import TankHome from './pages/tank/TankHome';
@@ -91,6 +93,8 @@ function App() {
         {/* Pikachu Module */}
         <Route path="/pikachu" element={<PikachuHome />} />
         <Route path="/pikachu/game" element={<PikachuGame />} />
+        <Route path="/pikachu/lobby" element={<PikachuLobby />} />
+        <Route path="/pikachu/online-game" element={<PikachuOnlineGame />} />
 
         {/* Tank Module */}
         <Route path="/tank" element={<TankHome />} />

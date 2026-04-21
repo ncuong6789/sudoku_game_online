@@ -79,7 +79,25 @@ const EVENTS = {
     JUNGLE_GAME_OVER: 'jungleGameOver',
     JUNGLE_GAME_STATE: 'jungleGameState',
     JUNGLE_GET_HINT: 'jungleGetHint',
-    JUNGLE_HINT_RECEIVED: 'jungleHintReceived'
+    JUNGLE_HINT_RECEIVED: 'jungleHintReceived',
+
+    // Pikachu Online
+    PIKACHU_START_GAME: 'pikachu:startGame',
+    PIKACHU_GAME_STARTED: 'pikachu:gameStarted',
+    PIKACHU_SELECT_TILE: 'pikachu:selectTile',
+    PIKACHU_TILE_SELECTED: 'pikachu:tileSelected',
+    PIKACHU_TILE_DESELECTED: 'pikachu:tileDeselected',
+    PIKACHU_MATCH_ATTEMPT: 'pikachu:matchAttempt',
+    PIKACHU_MATCHED_PAIR: 'pikachu:matchedPair',
+    PIKACHU_MATCH_FAILED: 'pikachu:matchFailed',
+    PIKACHU_USE_HINT: 'pikachu:useHint',
+    PIKACHU_HINT_RESULT: 'pikachu:hintResult',
+    PIKACHU_REQUEST_SHUFFLE: 'pikachu:requestShuffle',
+    PIKACHU_SHUFFLE_CONSENT: 'pikachu:shuffleConsent',
+    PIKACHU_SHUFFLE_REQUEST_RECEIVED: 'pikachu:shuffleRequestReceived',
+    PIKACHU_SHUFFLE_REJECTED: 'pikachu:shuffleRejected',
+    PIKACHU_BOARD_SHUFFLED: 'pikachu:boardShuffled',
+    PIKACHU_GAME_OVER: 'pikachu:gameOver',
 };
 
 module.exports = { EVENTS };
