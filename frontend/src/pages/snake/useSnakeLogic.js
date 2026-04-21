@@ -192,11 +192,11 @@ export function useSnakeLogic(mode, mapSize, roomId, hasBot, difficulty) {
                 let msg;
                 if (hasBot) {
                     if (!g.botDead && bDied) {
-                        msg = g.score > g.botScore ? `CHIẾN THẮNG! (Bạn:${g.score} - Bot:${g.botScore})` : g.score < g.botScore ? `THẤT BẠI! (Bạn:${g.score} - Bot:${g.botScore})` : `HÒA! (Cùng ${g.score} điểm)`;
+                        msg = g.score > g.botScore ? `CHIẾN THẮNG! (Bạn:${g.score} - CPU:${g.botScore})` : g.score < g.botScore ? `THẤT BẠI! (Bạn:${g.score} - CPU:${g.botScore})` : `HÒA! (Cùng ${g.score} điểm)`;
                     } else if (g.botDead) {
-                        msg = g.score > g.botScore ? `CHIẾN THẮNG! (Bạn:${g.score} - Bot:${g.botScore})` : g.score < g.botScore ? `THẤT BẠI! (Bạn:${g.score} - Bot:${g.botScore})` : `HÒA! (Cùng ${g.score} điểm)`;
+                        msg = g.score > g.botScore ? `CHIẾN THẮNG! (Bạn:${g.score} - CPU:${g.botScore})` : g.score < g.botScore ? `THẤT BẠI! (Bạn:${g.score} - CPU:${g.botScore})` : `HÒA! (Cùng ${g.score} điểm)`;
                     } else {
-                        msg = `THẤT BẠI! (Bạn:${g.score} - Bot:${g.botScore})`;
+                        msg = `THẤT BẠI! (Bạn:${g.score} - CPU:${g.botScore})`;
                     }
                     if (msg.includes('THẮNG')) playWinSound(); else if (msg.includes('THẤT')) playLoseSound();
                 } else {

@@ -8,21 +8,21 @@ const DIFF_INFO = {
         icon: <Smile size={16} />,
         color: '#22c55e',
         glow: 'rgba(34,197,94,0.35)',
-        desc: 'Bot AI di chuyển thong thả. Dễ vượt qua.',
+        desc: 'CPU di chuyển thong thả. Dễ vượt qua.',
     },
     Medium: {
         label: 'Thường',
         icon: <Star size={16} />,
         color: '#f59e0b',
         glow: 'rgba(245,158,11,0.35)',
-        desc: 'Bot AI linh hoạt. Cần tập trung.',
+        desc: 'CPU linh hoạt. Cần tập trung.',
     },
     Expert: {
         label: 'Expert',
         icon: <Flame size={16} />,
         color: '#ef4444',
         glow: 'rgba(239,68,68,0.35)',
-        desc: 'Bot AI rất nhanh & thông minh. Khó thắng!',
+        desc: 'CPU rất nhanh & thông minh. Khó thắng!',
     },
 };
 
@@ -67,7 +67,7 @@ export default function SnakeHome() {
                         </div>
                     </div>
 
-                    {/* Bot AI Settings */}
+                    {/* CPU Settings */}
                     <div style={{ textAlign: 'left' }}>
                         {/* Toggle Card */}
                         <div
@@ -87,7 +87,7 @@ export default function SnakeHome() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <Flame size={18} color={hasBot ? '#4facfe' : 'var(--text-secondary)'} />
                                 <div style={{ fontWeight: 700, fontSize: '0.95rem', color: hasBot ? '#4facfe' : 'var(--text-secondary)' }}>
-                                    Thách Đấu Bot AI
+                                    Thách Đấu CPU
                                 </div>
                             </div>
                             <div style={{ flexShrink: 0 }}>

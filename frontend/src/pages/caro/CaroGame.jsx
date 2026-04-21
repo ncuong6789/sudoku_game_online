@@ -103,7 +103,7 @@ export default function CaroGame() {
                             <div style={{ display: 'flex', alignItems: 'center', color: 'var(--text-secondary)', fontWeight: 'bold' }}>VS</div>
                             <div style={{ flex: '1 1 0%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,71,87,0.1)', padding: '10px 4px', borderRadius: '10px', border: '1px solid rgba(255,71,87,0.2)', overflow: 'hidden' }}>
                                 <span style={{ fontSize: '1.4rem', fontWeight: 900, color: realPlayerSymbol === 'O' ? 'var(--primary-color)' : '#ff4757', lineHeight: 1, whiteSpace: 'nowrap' }}>{realPlayerSymbol === 'X' ? 'O' : 'X'}</span>
-                                <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginTop: '6px', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase' }}>{mode === 'solo' ? 'BOT' : 'Đ.THỦ'}</span>
+                                <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginTop: '6px', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase' }}>{mode === 'solo' ? 'CPU' : 'Đ.THỦ'}</span>
                             </div>
                         </div>
 
@@ -111,7 +111,7 @@ export default function CaroGame() {
                             <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.2rem', color: isXNext ? 'var(--primary-color)' : '#ff4757', padding: '12px 0', borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                                 Lượt thứ: <strong>{currentTurn}</strong>
                                 <div style={{ fontSize: '0.9rem', fontWeight: 500, marginTop: '8px', color: 'var(--text-secondary)' }}>
-                                    {(isXNext && realPlayerSymbol === 'X') || (!isXNext && realPlayerSymbol === 'O') ? '👉 Lượt của bạn!' : (isProcessing ? '⏳ Bot đang tính toán...' : '⏳ Đang chờ...')}
+                                    {(isXNext && realPlayerSymbol === 'X') || (!isXNext && realPlayerSymbol === 'O') ? '👉 Lượt của bạn!' : (isProcessing ? '⏳ CPU đang tính toán...' : '⏳ Đang chờ...')}
                                 </div>
                             </div>
                         )}

@@ -147,7 +147,7 @@ const games = {
             'Tướng và Sĩ bị giam lỏng trong Cung, Tượng không được qua sông.',
             'Pháo khi muốn ăn quân phải nhảy trùm qua 1 quân khác làm Ngòi.',
             'Chú ý luật Cản Mã, Cản Tượng và Lộ Mặt Tướng.',
-            'Chế độ Hiện tại: Luyện tập Solo với AI.'
+            'Chế độ Hiện tại: Luyện tập Solo với CPU.'
         ]
     }
 };

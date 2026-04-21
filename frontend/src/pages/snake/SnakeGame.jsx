@@ -246,7 +246,7 @@ function RightPanel({ mode, gameOver, handleRestart, navigate, playerColor, mute
                 <div style={rowStyle}><div style={{ width: 14, height: 14, background: '#3f3f46', borderRadius: '3px', flexShrink: 0, marginTop: '2px' }} /><span>Xác rắn — chướng ngại</span></div>
                 <div style={rowStyle}><div style={{ width: 14, height: 14, background: 'rgba(40,40,55,0.9)', borderRadius: '3px', flexShrink: 0, marginTop: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '9px', color: 'rgba(120,120,150,0.9)', lineHeight: 1, fontWeight: 700 }}>✕</span></div><span>Ô cô lập — không có mồi</span></div>
                 <div style={rowStyle}><div style={{ width: 14, height: 14, background: playerColor === 'blue' ? '#60a5fa' : '#4ade80', borderRadius: '50%', flexShrink: 0, marginTop: '2px' }} /><span>Rắn của bạn</span></div>
-                <div style={rowStyle}><div style={{ width: 14, height: 14, background: playerColor === 'blue' ? '#4ade80' : '#60a5fa', borderRadius: '50%', flexShrink: 0, marginTop: '2px' }} /><span>{mode === 'solo' ? 'Rắn Bot AI' : 'Rắn đối thủ'}</span></div>
+                <div style={rowStyle}><div style={{ width: 14, height: 14, background: playerColor === 'blue' ? '#4ade80' : '#60a5fa', borderRadius: '50%', flexShrink: 0, marginTop: '2px' }} /><span>{mode === 'solo' ? 'Rắn CPU' : 'Rắn đối thủ'}</span></div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', marginTop: '2px' }}>
                 {mode === 'solo' && (
@@ -319,18 +319,18 @@ export default function SnakeGame() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Activity size={16} color="var(--primary-color)" />
                         <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }}>Snake {mapSize}</span>
-                        <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{mode === 'solo' ? `· vs Bot AI (${difficulty})` : `· ${roomId}`}</span>
+                        <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{mode === 'solo' ? `· vs CPU (${difficulty})` : `· ${roomId}`}</span>
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px', justifyContent: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Trophy size={16} color="#fbbf24" /><span style={{ fontWeight: 800, fontSize: '1rem' }}>Bạn: <span style={{ color: '#4ade80' }}>{uiState.score}</span></span></div>
                         {(hasBot || mode === 'multiplayer') && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: 11, height: 11, borderRadius: '50%', background: '#60a5fa' }} /><span style={{ fontWeight: 800, fontSize: '1rem' }}>{mode === 'solo' ? `Bot (${difficulty})` : 'Địch'}: <span style={{ color: '#60a5fa' }}>{oppScore}</span></span></div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: 11, height: 11, borderRadius: '50%', background: '#60a5fa' }} /><span style={{ fontWeight: 800, fontSize: '1rem' }}>{mode === 'solo' ? `CPU (${difficulty})` : 'Địch'}: <span style={{ color: '#60a5fa' }}>{oppScore}</span></span></div>
                         )}
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        {hasBot && gameRef.current?.botDead && !uiState.gameOver ? <span style={{ fontSize: '0.8rem', color: '#f59e0b', fontWeight: 700 }}>💀 Bot đã chết — tiếp tục ghi điểm!</span> : <span style={{ fontSize: '0.82rem', fontWeight: 700, color: uiState.gameOver ? accentColor : 'var(--text-secondary)' }}>{uiState.gameOver ? `${resultEmoji} ${resultTitle}` : 'Đang chơi...'}</span>}
+                        {hasBot && gameRef.current?.botDead && !uiState.gameOver ? <span style={{ fontSize: '0.8rem', color: '#f59e0b', fontWeight: 700 }}>💀 CPU đã chết — tiếp tục ghi điểm!</span> : <span style={{ fontSize: '0.82rem', fontWeight: 700, color: uiState.gameOver ? accentColor : 'var(--text-secondary)' }}>{uiState.gameOver ? `${resultEmoji} ${resultTitle}` : 'Đang chơi...'}</span>}
                     </div>
                 </div>
 

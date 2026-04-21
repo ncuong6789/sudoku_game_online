@@ -4,7 +4,7 @@ import { ArrowLeft, Users, Gamepad, Hexagon, Smile, Star, Flame, Trophy } from '
 
 const DIFFICULTY_OPTIONS = [
     { key: 'Easy', label: 'Dễ', icon: <Smile size={18} />, color: '#22c55e', desc: 'Phù hợp người mới' },
-    { key: 'Medium', label: 'Trung Bình', icon: <Star size={18} />, color: '#f59e0b', desc: 'AI biết dùng Pháo, Mã' },
+    { key: 'Medium', label: 'Trung Bình', icon: <Star size={18} />, color: '#f59e0b', desc: 'CPU biết dùng Pháo, Mã' },
     { key: 'Hard', label: 'Khó', icon: <Flame size={18} />, color: '#f97316', desc: 'Sâu sắc, tấn công mạnh' },
     { key: 'Expert', label: 'Chuyên Gia', icon: <Trophy size={18} />, color: '#ef4444', desc: 'Tối đa sức mạnh' },
 ];
@@ -74,7 +74,7 @@ export default function XiangqiHome() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '5px', justifyContent: 'center' }}>
                             <Star size={12} color="#fbbf24" />
                             <span style={{ fontSize: '0.75rem', color: '#fbbf24', fontWeight: 700, letterSpacing: '1px' }}>
-                                AI MẠNH MẼ
+                                CPU MẠNH MẼ
                             </span>
                         </div>
                     </div>

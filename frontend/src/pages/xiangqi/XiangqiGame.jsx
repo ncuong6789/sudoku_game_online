@@ -155,7 +155,7 @@ export default function XiangqiGame() {
                             <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', color: '#fff', fontWeight: 'bold' }}>帥</div>
                             <div>
                                 <div style={{ fontSize: '0.7rem', color: '#888' }}>Phe Đỏ (Tiên)</div>
-                                <div style={{ fontWeight: 'bold', color: '#fca5a5', fontSize: '0.85rem' }}>{myColor === 'r' ? 'Bạn' : 'Máy (AI)'}</div>
+                                <div style={{ fontWeight: 'bold', color: '#fca5a5', fontSize: '0.85rem' }}>{myColor === 'r' ? 'Bạn' : 'Máy (CPU)'}</div>
                             </div>
                         </div>
 
@@ -163,7 +163,7 @@ export default function XiangqiGame() {
                             <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#1e293b', border: '2px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', color: '#f8fafc', fontWeight: 'bold' }}>將</div>
                             <div>
                                 <div style={{ fontSize: '0.7rem', color: '#888' }}>Phe Đen (Hậu)</div>
-                                <div style={{ fontWeight: 'bold', color: '#94a3b8', fontSize: '0.85rem' }}>{myColor === 'b' ? 'Bạn' : 'Máy (AI)'}</div>
+                                <div style={{ fontWeight: 'bold', color: '#94a3b8', fontSize: '0.85rem' }}>{myColor === 'b' ? 'Bạn' : 'Máy (CPU)'}</div>
                             </div>
                         </div>
                     </div>
@@ -198,16 +198,16 @@ export default function XiangqiGame() {
 
                     <div style={{
                         position: 'relative',
-                        width: '100vw',
-                        maxWidth: 'calc(100% - 60px)',
-                        maxHeight: 'calc(100% - 20px)',
+                        width: '100%',
+                        maxWidth: 'min(90vw, 650px)',
                         aspectRatio: '9/10',
-                        boxSizing: 'content-box',
+                        boxSizing: 'border-box',
                         backgroundColor: '#e6c28f',
                         border: '10px solid #8b5a2b',
                         borderRadius: '4px',
                         boxShadow: '0 0 50px rgba(0,0,0,0.8), inset 0 0 40px rgba(139,90,43,0.5)',
-                        overflow: 'hidden'
+                        overflow: 'hidden',
+                        alignSelf: 'center'
                     }}>
                         <svg width="100%" height="100%" viewBox="0 0 900 1000" preserveAspectRatio="xMidYMid meet" style={{ position: 'absolute', inset: 0 }}>
                             <g stroke="#3e2723" strokeWidth="3">
@@ -250,7 +250,7 @@ export default function XiangqiGame() {
                                                 <div
                                                     style={{
                                                         position: 'absolute', left: `${leftPct}%`, top: `${topPct}%`,
-                                                        width: '20px', height: '20px', transform: 'translate(-50%, -50%)',
+                                                        width: '5%', aspectRatio: '1', transform: 'translate(-50%, -50%)',
                                                         backgroundColor: 'rgba(74, 222, 128, 0.7)', borderRadius: '50%',
                                                         pointerEvents: 'auto', cursor: 'pointer', zIndex: 20
                                                     }}
@@ -262,8 +262,7 @@ export default function XiangqiGame() {
                                                 <div
                                                     style={{
                                                         position: 'absolute', left: `${leftPct}%`, top: `${topPct}%`,
-                                                        width: 'min(65px, 7.5vw)', height: 'min(65px, 7.5vw)',
-                                                        transform: 'translate(-50%, -50%)',
+                                                        width: '10%', aspectRatio: '1', transform: 'translate(-50%, -50%)',
                                                         border: '4px solid rgba(239, 68, 68, 0.9)', borderRadius: '50%',
                                                         pointerEvents: 'none', zIndex: 40,
                                                     }}
@@ -273,7 +272,7 @@ export default function XiangqiGame() {
                                             {isHintTo && !piece && (
                                                 <div style={{
                                                     position: 'absolute', left: `${leftPct}%`, top: `${topPct}%`,
-                                                    width: '24px', height: '24px', transform: 'translate(-50%, -50%)',
+                                                    width: '6%', aspectRatio: '1', transform: 'translate(-50%, -50%)',
                                                     backgroundColor: 'rgba(74, 222, 128, 0.9)', borderRadius: '50%',
                                                     pointerEvents: 'none', zIndex: 45,
                                                     animation: 'pulse 1s ease-in-out infinite',
@@ -285,8 +284,8 @@ export default function XiangqiGame() {
                                                 <div
                                                     style={{
                                                         position: 'absolute', left: `${leftPct}%`, top: `${topPct}%`,
-                                                        width: 'min(40px, 4.5vw)', height: 'min(40px, 4.5vw)',
-                                                        transform: 'translate(-50%, -50%)', pointerEvents: 'auto', cursor: 'default'
+                                                        width: '10%', aspectRatio: '1', transform: 'translate(-50%, -50%)',
+                                                        pointerEvents: 'auto', cursor: 'default'
                                                     }}
                                                     onClick={() => handleSquareClick(rowIndex, colIndex)}
                                                 />
@@ -298,8 +297,7 @@ export default function XiangqiGame() {
                                                     <div
                                                         style={{
                                                             position: 'absolute', left: `${leftPct}%`, top: `${topPct}%`,
-                                                            width: 'min(55px, 6.5vw)', height: 'min(55px, 6.5vw)',
-                                                            transform: 'translate(-50%, -50%)',
+                                                            width: '8.5%', aspectRatio: '1', transform: 'translate(-50%, -50%)',
                                                             backgroundColor: isHintFrom ? '#4ade80' : isHintTo ? '#4ade80' : '#e6c28f',
                                                             borderRadius: '50%',
                                                             border: `2px solid ${isSelected ? '#fbbf24' : isHintFrom || isHintTo ? '#4ade80' : isKingInCheck ? '#ef4444' : '#8b5a2b'}`,
@@ -311,7 +309,7 @@ export default function XiangqiGame() {
                                                                         ? '0 0 20px rgba(239,68,68,0.9), inset 0 0 15px rgba(239,68,68,0.6)'
                                                                         : '0 4px 10px rgba(0,0,0,0.6), inset 0 0 10px rgba(139,90,43,0.8)',
                                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                            fontSize: 'min(35px, 4vw)', fontWeight: 900,
+                                                            fontSize: 'min(28px, 3.5vw)', fontWeight: 900,
                                                             fontFamily: '"KaiTi", "Kaiti SC", "STKaiti", serif',
                                                             color: PIECE_COLORS[piece[0]],
                                                             textShadow: '0 1px 2px rgba(255,255,255,0.5)',
@@ -371,7 +369,7 @@ export default function XiangqiGame() {
                             </div>
                             <div style={{ fontSize: '0.8rem', color: isThinking ? '#fbbf24' : '#666', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                                 {isThinking && <Activity size={14} className="spin" style={{ animation: 'spin 1s linear infinite' }} />}
-                                {turn === myColor ? '(Lượt bạn)' : '(AI suy nghĩ...)'}
+                                {turn === myColor ? '(Lượt bạn)' : '(CPU suy nghĩ...)'}
                             </div>
                         </div>
                         {inCheckColor && (

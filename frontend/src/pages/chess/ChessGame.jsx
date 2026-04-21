@@ -526,7 +526,7 @@ export default function ChessGame() {
                             <button className="btn-primary" onClick={handleReset}><RotateCcw size={18} /> Chơi ván mới</button>
                             
                             <button className="btn-secondary" onClick={getAIHint} disabled={isThinkingHint || game.turn() !== myColor} style={{ borderColor: '#fbbf24', color: '#fbbf24' }}>
-                                <HelpCircle size={18} /> {isThinkingHint ? 'Đang tính...' : 'Gợi ý nước đi (AI)'}
+                                <HelpCircle size={18} /> {isThinkingHint ? 'Đang tính...' : 'Gợi ý nước đi (CPU)'}
                             </button>
 
                             {/* Hint Suggestions Popup */}

@@ -130,18 +130,18 @@ export default function TetrisGame() {
     const move = useCallback((e) => {
         const { keyCode } = e;
         if (isStarted) {
-            // Pause toggle with Space
-            if (keyCode === 32 && !gameOver && isStarted) {
+            // Pause toggle with Enter (keyCode 13)
+            if (keyCode === 13 && !gameOver && isStarted) {
                 e.preventDefault();
                 togglePause();
                 return;
             }
-            if (gameOver && mode === 'solo' && keyCode === 32) {
+            if (gameOver && mode === 'solo' && keyCode === 13) {
                 e.preventDefault();
                 startGame();
                 return;
             }
-            if (!gameOver && !isPaused && [37, 38, 39, 40, 32].includes(keyCode)) {
+            if (!gameOver && !isPaused && [37, 38, 39, 40, 32, 13].includes(keyCode)) {
                 e.preventDefault();
             }
             if (isPaused) return;
@@ -168,7 +168,7 @@ export default function TetrisGame() {
     const keyUp = useCallback((e) => {
         const { keyCode } = e;
         if (!gameOver) {
-            if ([37, 38, 39, 40, 32].includes(keyCode)) {
+            if ([37, 38, 39, 40, 32, 13].includes(keyCode)) {
                 e.preventDefault();
             }
             if (keyCode === 40) {
@@ -336,7 +336,7 @@ export default function TetrisGame() {
                                     <RefreshCw size={18} /> Chơi mới
                                 </button>
                                 <button onClick={togglePause} disabled={!isStarted || gameOver} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%', background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: isPaused ? '#38bdf8' : '#fff', cursor: !isStarted || gameOver ? 'default' : 'pointer', opacity: !isStarted || gameOver ? 0.5 : 1, fontSize: '0.95rem', fontWeight: 600 }}>
-                                    {isPaused ? '▶ Tiếp tục (Space)' : '⏸ Tạm dừng (Space)'}
+                                    {isPaused ? '▶ Tiếp tục (Enter)' : '⏸ Tạm dừng (Enter)'}
                                 </button>
                             </>
                         )}

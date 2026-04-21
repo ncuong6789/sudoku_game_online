@@ -8,21 +8,21 @@ const DIFF_INFO = {
         icon: <Smile size={16} />,
         color: '#22c55e',
         glow: 'rgba(34,197,94,0.35)',
-        desc: 'AI mức cơ bản. Phù hợp người mới học cờ.',
+        desc: 'CPU mức cơ bản. Phù hợp người mới học cờ.',
     },
     Medium: {
         label: 'Nghiệp Dư',
         icon: <Star size={16} />,
         color: '#f59e0b',
         glow: 'rgba(245,158,11,0.35)',
-        desc: 'AI tư duy chiến thuật. Cần suy nghĩ kỹ.',
+        desc: 'CPU tư duy chiến thuật. Cần suy nghĩ kỹ.',
     },
     Expert: {
         label: 'Đại Kiện Tướng',
         icon: <Flame size={16} />,
         color: '#ef4444',
         glow: 'rgba(239,68,68,0.35)',
-        desc: 'AI mức cao thủ. Gần như không thể thắng!',
+        desc: 'CPU mức cao thủ. Gần như không thể thắng!',
     },
 };
 
@@ -77,7 +77,7 @@ export default function ChessHome() {
                     {/* Difficulty */}
                     <div>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                            <Flame size={18} /> Độ Khó AI
+                            <Flame size={18} /> Độ Khó CPU
                         </label>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '10px' }}>
                             {Object.entries(DIFF_INFO).map(([key, info]) => (

@@ -14,21 +14,21 @@ const DIFF_INFO = {
         icon: <Smile size={16} />,
         color: '#22c55e',
         glow: 'rgba(34,197,94,0.35)',
-        desc: 'AI suy nghĩ nông. Dễ dàng vượt qua.',
+        desc: 'CPU suy nghĩ nông. Dễ dàng vượt qua.',
     },
     Medium: {
         label: 'Thường',
         icon: <Star size={16} />,
         color: '#f59e0b',
         glow: 'rgba(245,158,11,0.35)',
-        desc: 'AI cân bằng giữa tấn công và phòng thủ.',
+        desc: 'CPU cân bằng giữa tấn công và phòng thủ.',
     },
     Expert: {
         label: 'Expert',
         icon: <Flame size={16} />,
         color: '#ef4444',
         glow: 'rgba(239,68,68,0.35)',
-        desc: 'AI đọc trước nhiều nước. Rất khó thắng!',
+        desc: 'CPU đọc trước nhiều nước. Rất khó thắng!',
     },
 };
 
@@ -55,7 +55,7 @@ export default function CaroHome() {
                 {/* Difficulty Selection */}
                 <div style={{ width: '100%', marginBottom: '0.5rem' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                        <Flame size={18} /> Độ Khó AI
+                        <Flame size={18} /> Độ Khó CPU
                     </label>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '10px' }}>
                         {Object.entries(DIFF_INFO).map(([key, info]) => (
