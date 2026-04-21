@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { LayoutGrid, Grid3X3, Swords, Trophy, Users, X, Activity, Ghost, Crown, Zap, Layers, Hash, Menu, User as UserIcon, LogOut, Info, Heart, Puzzle, TreePine, Target, Hexagon } from 'lucide-react';
 import { socket } from '../utils/socket';
 import AuthModal from '../components/AuthModal';
@@ -153,6 +154,7 @@ const games = {
 };
 
 export default function Home() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const auth = useAuth();
     const { user, logout } = auth || {};
@@ -245,13 +247,13 @@ export default function Home() {
                             { id: 'xiangqi', label: 'Cờ Tướng', Icon: Hexagon },
                             { id: 'snake', label: 'Rắn Săn Mồi', Icon: Zap },
                             { id: 'tetris', label: 'Xếp Gạch', Icon: Layers },
-                            { id: 'pacman', label: 'Pacman', Icon: Ghost },
                             { id: 'pikachu', label: 'Pikachu', Icon: Puzzle },
+                            { id: 'pacman', label: 'Pacman', Icon: Ghost },
                         ].map(({ id, label, Icon }) => (
                             <div key={id}
                                 className={`nav-item ${activeGame === id ? 'active' : ''}`}
                                 onClick={() => { setActiveGame(id); setShowHelp(false); if (isMobile) setIsSidebarOpen(false); }}>
-                                <Icon size={20} /> {label}
+                                <Icon size={20} /> {t(`home.games.${id}`)}
                             </div>
                         ))}
 
@@ -289,9 +291,9 @@ export default function Home() {
                         </div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', textAlign: 'center' }}>Đăng nhập để xem xếp hạng</p>
+                            <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', textAlign: 'center' }}>{t('home.loginToViewRank', 'Đăng nhập để xem xếp hạng')}</p>
                             <button className="btn-primary" onClick={() => setShowAuthModal(true)} style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.88rem' }}>
-                                <UserIcon size={15} /> Đăng Nhập
+                                <UserIcon size={15} /> {t('home.login', 'Đăng Nhập')}
                             </button>
                         </div>
                     )}
@@ -326,7 +328,7 @@ export default function Home() {
                             {activeGame === 'jungle' && <TreePine size={32} color="var(--accent-color)" />}
                             {activeGame === 'xiangqi' && <Hexagon size={32} color="#dc2626" />}
                         </div>
-                        <h1 className="game-title" style={{ margin: 0, fontSize: '3rem' }}>{game.name}</h1>
+                        <h1 className="game-title" style={{ margin: 0, fontSize: '3rem' }}>{t(`home.games.${activeGame}`)}</h1>
                     </div>
 
                     <p className="game-desc" style={{ 
@@ -349,7 +351,7 @@ export default function Home() {
                             }}
                             disabled={isUnplayableOnMobile}
                         >
-                            {isUnplayableOnMobile ? 'Sắp có trên Mobile' : 'Bắt đầu chơi'}
+                            {isUnplayableOnMobile ? t('home.notOptimizedMobile', 'Sắp có trên Mobile') : t('home.playNow', 'Bắt đầu chơi')}
                         </button>
                         <button
                             className={showHelp ? "btn-primary" : "btn-secondary"}
@@ -359,14 +361,14 @@ export default function Home() {
                                 padding: '14px'
                             }}
                         >
-                            <Info size={20} style={{ marginRight: '8px' }} /> Hướng dẫn
+                            <Info size={20} style={{ marginRight: '8px' }} /> {t('home.instructions', 'Hướng dẫn')}
                         </button>
                     </div>
 
                     {showHelp && (
                         <div className="glass-panel" style={{ padding: '1.2rem', marginBottom: '1.5rem', animation: 'fadeIn 0.2s ease' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-                                <h3 style={{ margin: 0 }}>Cách chơi {game.name}</h3>
+                                <h3 style={{ margin: 0 }}>{t('home.howToPlay', { gameName: t(`home.games.${activeGame}`) })}</h3>
                                 <X size={18} style={{ cursor: 'pointer' }} onClick={() => setShowHelp(false)} />
                             </div>
                             <ul style={{ paddingLeft: '1.2rem', color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.5' }}>
@@ -377,11 +379,11 @@ export default function Home() {
 
                     <div className="stats-grid" style={{ gap: '1rem' }}>
                         <div className="stat-card" style={{ padding: '1.2rem' }}>
-                            <span className="stat-label">Người chơi Online</span>
+                            <span className="stat-label">{t('home.onlinePlayers', 'Người chơi Online')}</span>
                             <span className="stat-value" style={{ fontSize: '1.5rem' }}>{stats.online}</span>
                         </div>
                         <div className="stat-card" style={{ padding: '1.2rem' }}>
-                            <span className="stat-label">Phòng đang mở</span>
+                            <span className="stat-label">{t('home.openRooms', 'Phòng đang mở')}</span>
                             <span className="stat-value" style={{ fontSize: '1.5rem' }}>{stats.rooms}</span>
                         </div>
                     </div>
@@ -396,39 +398,39 @@ export default function Home() {
                             <div className="matchmaking-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '1.5rem' }}>
                                 {/* Cột 1: Tìm ngẫu nhiên */}
                                 <div className="matchmaking-col-1" style={{ borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '1.5rem' }}>
-                                    <h4 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: 'var(--text-secondary)' }}>Ghép cặp trực tuyến</h4>
+                                    <h4 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: 'var(--text-secondary)' }}>{t('home.onlineMatchmaking', 'Ghép cặp trực tuyến')}</h4>
                                     <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
                                         <button
                                             className={searchMode === 'active' ? 'btn-primary' : 'btn-secondary'}
                                             onClick={() => setSearchMode('active')}
                                             style={{ flex: 1, padding: '8px', fontSize: '0.85rem' }}
                                         >
-                                            Game hiện tại
+                                            {t('home.currentGame', 'Game hiện tại')}
                                         </button>
                                         <button
                                             className={searchMode === 'random' ? 'btn-primary' : 'btn-secondary'}
                                             onClick={() => setSearchMode('random')}
                                             style={{ flex: 1, padding: '8px', fontSize: '0.85rem' }}
                                         >
-                                            🎲 Random Game
+                                            {t('home.randomGame', '🎲 Random Game')}
                                         </button>
                                     </div>
                                     <button
                                         className="btn-primary"
                                         style={{ width: '100%', padding: '12px', background: isSearching ? '#ef4444' : 'var(--accent-color)', opacity: isUnplayableOnMobile && searchMode === 'active' ? 0.5 : 1 }}
                                         onClick={() => {
-                                            if (isUnplayableOnMobile && searchMode === 'active') return alert('Game này chưa tối ưu trên điện thoại!');
+                                            if (isUnplayableOnMobile && searchMode === 'active') return alert(t('home.notOptimizedMobileAlert', 'Game này chưa tối ưu trên điện thoại!'));
                                             isSearching ? (socket.emit('leaveMatchmaking'), setIsSearching(false)) : handleFindMatch();
                                         }}
                                         disabled={isUnplayableOnMobile && searchMode === 'active'}
                                     >
-                                        {isSearching ? '⏳ Đang tìm... (Hủy)' : `Tìm đối thủ ${searchMode === 'active' ? game.name : ''}`}
+                                        {isSearching ? t('home.findMatchSearching', '⏳ Đang tìm... (Hủy)') : t('home.findMatchActive', { gameName: searchMode === 'active' ? t(`home.games.${activeGame}`) : '' }, `Tìm đối thủ ${searchMode === 'active' ? game.name : ''}`)}
                                     </button>
                                 </div>
 
                                 {/* Cột 2: Vào bằng mã */}
                                 <div>
-                                    <h4 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: 'var(--text-secondary)' }}>Tham gia bằng mã</h4>
+                                    <h4 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: 'var(--text-secondary)' }}>{t('home.joinByCode', 'Tham gia bằng mã')}</h4>
                                     <div style={{ display: 'flex', gap: '8px' }}>
                                         <input
                                             type="text"
@@ -442,11 +444,11 @@ export default function Home() {
                                             }}
                                         />
                                         <button className="btn-secondary" style={{ padding: '0 15px' }} onClick={handleJoinByCode}>
-                                            Vào
+                                            {t('home.join', 'Vào')}
                                         </button>
                                     </div>
                                     <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
-                                        Hệ thống sẽ tự nhận diện loại game từ mã bạn nhập.
+                                        {t('home.systemDetectGame', 'Hệ thống sẽ tự nhận diện loại game từ mã bạn nhập.')}
                                     </p>
                                 </div>
                             </div>

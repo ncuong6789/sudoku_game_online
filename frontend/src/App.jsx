@@ -1,6 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import './i18n';
+import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
+import GlobalSettings from './components/GlobalSettings';
 import Home from './pages/Home';
 import SudokuHome from './pages/sudoku/SudokuHome';
 import SoloGame from './pages/sudoku/SudokuGameSolo';
@@ -55,9 +58,11 @@ import GameTestDashboard from './pages/test/GameTestDashboard';
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <GlobalSettings />
+          <Routes>
         <Route path="/" element={<Home />} />
         
         {/* Sudoku Module */}
@@ -113,8 +118,9 @@ function App() {
         {/* Test Dashboard */}
         <Route path="/test" element={<GameTestDashboard />} />
         </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

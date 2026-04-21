@@ -1,0 +1,36 @@
+{
+  "home": {
+    "loginToViewRank": "Login to view ranking",
+    "login": "Login",
+    "logout": "Logout",
+    "supportProject": "Support Project",
+    "matchmakingHub": "Matchmaking Hub",
+    "onlineMatchmaking": "Online Matchmaking",
+    "currentGame": "Current Game",
+    "randomGame": "🎲 Random Game",
+    "findMatchActive": "Find Match for {{gameName}}",
+    "findMatchSearching": "⏳ Searching... (Cancel)",
+    "notOptimizedMobile": "Coming to Mobile soon",
+    "notOptimizedMobileAlert": "This game is not optimized for mobile yet!",
+    "joinByCode": "Join by Code",
+    "roomCodePlaceholder": "ROOM CODE...",
+    "join": "Join",
+    "systemDetectGame": "System will auto-detect game from your code.",
+    "playNow": "Play Now",
+    "instructions": "Instructions",
+    "howToPlay": "How to play {{gameName}}",
+    "onlinePlayers": "Online Players",
+    "openRooms": "Open Rooms",
+    "games": {
+      "sudoku": "Sudoku",
+      "caro": "Tic Tac Toe",
+      "chess": "Chess",
+      "jungle": "Jungle Chess",
+      "xiangqi": "Xiangqi",
+      "snake": "Snake",
+      "tetris": "Tetris",
+      "pikachu": "Pikachu",
+      "pacman": "Pacman"
+    }
+  }
+}

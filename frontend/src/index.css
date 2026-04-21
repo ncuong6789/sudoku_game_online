@@ -830,3 +830,107 @@ h1 {
     align-items: center !important;
   }
 }
+
+/* --- Light Theme Styling --- */
+.light-theme {
+  --bg-color: #f1f5f9;
+  --panel-bg: #ffffff;
+  --border-color: #cbd5e1;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --accent-color: #2563eb;
+  --accent-hover: #1d4ed8;
+  --cell-bg: #ffffff;
+  --cell-selected: #bfdbfe;
+  --cell-highlighted-region: #e2e8f0;
+  --cell-highlighted-same: #cbd5e1;
+}
+
+.light-theme * {
+  /* Prevent inverted colors issues if previously relying on generic dark styles */
+}
+
+.light-theme .glass-panel {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.light-theme .sidebar {
+  background: rgba(248, 250, 252, 0.9);
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.light-theme .sidebar-logo {
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-color) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.light-theme .header-info {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.light-theme .nav-item:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
+}
+
+.light-theme .cell {
+  background: #ffffff;
+  color: var(--text-primary);
+}
+
+.light-theme .cell:hover:not(.fixed) {
+  background: #f1f5f9;
+}
+
+.light-theme .cell.highlighted-region:not(.selected) {
+  background: var(--cell-highlighted-region) !important;
+}
+
+.light-theme .cell.highlighted-region.fixed {
+  color: var(--text-primary) !important;
+}
+
+.light-theme .btn-num {
+  background: #ffffff;
+}
+
+/* Global Settings (Theme & Lang Toggles) */
+.global-settings {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  z-index: 9999;
+  display: flex;
+  gap: 10px;
+  background: rgba(30, 41, 59, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 6px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.light-theme .global-settings {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.light-theme .icon-btn:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+
+@media (max-width: 768px) {
+  .global-settings {
+    right: 55px; /* Leave space for the hamburger menu */
+  }
+}

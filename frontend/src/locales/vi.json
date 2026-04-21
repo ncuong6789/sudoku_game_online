@@ -1,0 +1,36 @@
+{
+  "home": {
+    "loginToViewRank": "Đăng nhập để xem xếp hạng",
+    "login": "Đăng Nhập",
+    "logout": "Đăng xuất",
+    "supportProject": "Ủng hộ dự án",
+    "matchmakingHub": "Matchmaking Hub",
+    "onlineMatchmaking": "Ghép cặp trực tuyến",
+    "currentGame": "Game hiện tại",
+    "randomGame": "🎲 Random Game",
+    "findMatchActive": "Tìm đối thủ {{gameName}}",
+    "findMatchSearching": "⏳ Đang tìm... (Hủy)",
+    "notOptimizedMobile": "Sắp có trên Mobile",
+    "notOptimizedMobileAlert": "Game này chưa tối ưu trên điện thoại!",
+    "joinByCode": "Tham gia bằng mã",
+    "roomCodePlaceholder": "MÃ PHÒNG...",
+    "join": "Vào",
+    "systemDetectGame": "Hệ thống sẽ tự nhận diện loại game từ mã bạn nhập.",
+    "playNow": "Bắt đầu chơi",
+    "instructions": "Hướng dẫn",
+    "howToPlay": "Cách chơi {{gameName}}",
+    "onlinePlayers": "Người chơi Online",
+    "openRooms": "Phòng đang mở",
+    "games": {
+      "sudoku": "Sudoku",
+      "caro": "Cờ Caro",
+      "chess": "Cờ Vua",
+      "jungle": "Cờ Thú",
+      "xiangqi": "Cờ Tướng",
+      "snake": "Rắn Săn Mồi",
+      "tetris": "Xếp Gạch",
+      "pikachu": "Pikachu",
+      "pacman": "Pacman"
+    }
+  }
+}

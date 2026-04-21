@@ -119,51 +119,79 @@ export default function XiangqiGame() {
     };
 
     return (
-        <div style={{
+        <div className="xiangqi-main-container" style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100,
-            display: 'flex', justifyContent: 'center', alignItems: 'center',
+            display: 'flex', flexDirection: 'column', overflow: 'hidden',
             background: 'radial-gradient(circle at center, #292524 0%, #1c1917 100%)',
-            overflow: 'hidden', padding: '1rem', boxSizing: 'border-box'
         }}>
+            {/* Top bar area */}
+            <div className="xiangqi-top-bar" style={{
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '10px 1rem',
+                borderBottom: '1px solid rgba(255,255,255,0.08)',
+                background: 'rgba(23,23,33,0.9)',
+                backdropFilter: 'blur(10px)',
+            }}>
+                <button onClick={() => navigate('/xiangqi')} style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    padding: '8px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.08)', color: '#fff',
+                    fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer'
+                }}>
+                    <ArrowLeft size={14} /> Về sảnh
+                </button>
+                <h1 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 900, color: '#fca5a5', letterSpacing: '1px' }}>
+                    CỜ TƯỚNG
+                </h1>
+                <div style={{ width: '100px' }} /> {/* Spacer */}
+            </div>
+
+            {/* Main content */}
             <div style={{
-                position: 'relative', display: 'flex', flexDirection: 'row', flexWrap: 'nowrap',
-                padding: '1.5rem', gap: '1rem', alignItems: 'stretch', justifyContent: 'center',
-                height: '100%', maxHeight: '850px', width: '100%', maxWidth: '1200px',
-                borderRadius: '24px', background: 'rgba(23,23,33,0.85)', backdropFilter: 'blur(25px)',
-                border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.8)',
-                boxSizing: 'border-box'
+                flex: 1, display: 'flex', overflow: 'hidden',
             }}>
                 {/* LEFT CONTROL PANEL */}
-                <div style={{ flex: '0 0 220px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="xiangqi-left-panel" style={{
+                    flex: '0 0 180px',
+                    display: 'flex', flexDirection: 'column', gap: '0.8rem',
+                    padding: '1rem',
+                    overflowY: 'auto',
+                    borderRight: '1px solid rgba(255,255,255,0.06)',
+                    background: 'rgba(23,23,33,0.6)',
+                }}>
                     <div style={{ textAlign: 'center' }}>
-                        <h1 style={{ margin: 0, fontSize: '1.8rem', fontWeight: 900, color: '#fca5a5', letterSpacing: '2px' }}>CỜ TƯỚNG</h1>
-                        <div style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 800 }}>TRẬN BÀN GỖ</div>
+                        <div style={{
+                            width: '50px', height: '50px', margin: '0 auto 8px',
+                            background: 'linear-gradient(135deg, #dc2626, #991b1b)',
+                            borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: '0 0 20px rgba(220,38,38,0.3)', border: '2px solid #fecaca'
+                        }}>
+                            <Hexagon size={28} color="#fff" />
+                        </div>
+                        <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#fca5a5', letterSpacing: '1px' }}>CỜ TƯỚNG</h2>
+                        <div style={{ color: '#ef4444', fontSize: '0.7rem', fontWeight: 700 }}>TRẬN BÀN GỖ</div>
                     </div>
 
-                    <button onClick={() => navigate('/xiangqi')} style={{
-                        padding: '10px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', fontSize: '0.9rem'
-                    }}>
-                        <ArrowLeft size={16} /> THOÁT
-                    </button>
-
                     {/* Player Info */}
-                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#888', fontWeight: 800, marginBottom: '12px', letterSpacing: '1px' }}>THÔNG TIN TRẬN</div>
+                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, marginBottom: '10px', letterSpacing: '1px' }}>THÔNG TIN</div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', color: '#fff', fontWeight: 'bold' }}>帥</div>
+                        <div className="xiangqi-player-avatars" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                            <div className="xiangqi-avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', color: '#fff', fontWeight: 'bold' }}>帥</div>
                             <div>
-                                <div style={{ fontSize: '0.7rem', color: '#888' }}>Phe Đỏ (Tiên)</div>
-                                <div style={{ fontWeight: 'bold', color: '#fca5a5', fontSize: '0.85rem' }}>{myColor === 'r' ? 'Bạn' : 'Máy (CPU)'}</div>
+                                <div style={{ fontSize: '0.65rem', color: '#888' }}>Đỏ (Tiên)</div>
+                                <div style={{ fontWeight: 700, color: '#fca5a5', fontSize: '0.8rem' }}>{myColor === 'r' ? 'Bạn' : 'CPU'}</div>
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#1e293b', border: '2px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', color: '#f8fafc', fontWeight: 'bold' }}>將</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#1e293b', border: '2px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', color: '#f8fafc', fontWeight: 'bold' }}>將</div>
                             <div>
-                                <div style={{ fontSize: '0.7rem', color: '#888' }}>Phe Đen (Hậu)</div>
-                                <div style={{ fontWeight: 'bold', color: '#94a3b8', fontSize: '0.85rem' }}>{myColor === 'b' ? 'Bạn' : 'Máy (CPU)'}</div>
+                                <div style={{ fontSize: '0.65rem', color: '#888' }}>Đen (Hậu)</div>
+                                <div style={{ fontWeight: 700, color: '#94a3b8', fontSize: '0.8rem' }}>{myColor === 'b' ? 'Bạn' : 'CPU'}</div>
                             </div>
                         </div>
                     </div>
@@ -171,43 +199,47 @@ export default function XiangqiGame() {
                     {/* Action Buttons */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         <button onClick={handleUndo} disabled={isGameOver || moveList.length === 0} style={{
-                            padding: '10px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                            padding: '8px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                             color: moveList.length > 0 ? '#fbbf24' : '#555', border: '1px solid rgba(255,255,255,0.08)',
-                            cursor: moveList.length > 0 ? 'pointer' : 'default', fontSize: '0.85rem',
+                            cursor: moveList.length > 0 ? 'pointer' : 'default', fontSize: '0.75rem',
                             transition: 'all 0.2s'
                         }}>
-                            <Undo2 size={16} /> HOÀN TÁC
+                            <Undo2 size={14} /> HOÀN TÁC
                         </button>
                         <button onClick={handleHint} disabled={isGameOver || turn !== myColor} style={{
-                            padding: '10px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                            padding: '8px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                             color: (turn === myColor && !isGameOver) ? '#4ade80' : '#555',
                             border: '1px solid rgba(255,255,255,0.08)',
-                            cursor: (turn === myColor && !isGameOver) ? 'pointer' : 'default', fontSize: '0.85rem',
+                            cursor: (turn === myColor && !isGameOver) ? 'pointer' : 'default', fontSize: '0.75rem',
                             transition: 'all 0.2s'
                         }}>
-                            <Lightbulb size={16} /> GỢI Ý
+                            <Lightbulb size={14} /> GỢI Ý
                         </button>
                     </div>
                 </div>
 
                 {/* EVAL BAR + CENTER BOARD */}
-                <div style={{ flex: '1 1 auto', display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: 0, minHeight: 0, gap: '8px' }}>
+                <div className="xiangqi-board-area" style={{
+                    flex: '1 1 auto', display: 'flex', justifyContent: 'center',
+                    minWidth: 0, minHeight: 0, gap: '8px', padding: '0 0.5rem',
+                    overflow: 'hidden', alignItems: 'flex-start'
+                }}>
                     <EvalBar score={evalScore} myColor={myColor} />
 
-                    <div style={{
+                    <div className="xiangqi-board-container" style={{
                         position: 'relative',
-                        width: '100%',
-                        maxWidth: 'min(90vw, 650px)',
+                        width: 'clamp(260px, min(88vw - 70px, 540px), 500px)',
                         aspectRatio: '9/10',
                         boxSizing: 'border-box',
                         backgroundColor: '#e6c28f',
-                        border: '10px solid #8b5a2b',
-                        borderRadius: '4px',
-                        boxShadow: '0 0 50px rgba(0,0,0,0.8), inset 0 0 40px rgba(139,90,43,0.5)',
+                        border: '6px solid #8b5a2b',
+                        borderRadius: '3px',
+                        boxShadow: '0 0 30px rgba(0,0,0,0.6), inset 0 0 25px rgba(139,90,43,0.3)',
                         overflow: 'hidden',
-                        alignSelf: 'center'
+                        alignSelf: 'flex-start',
+                        marginTop: '4px',
                     }}>
                         <svg width="100%" height="100%" viewBox="0 0 900 1000" preserveAspectRatio="xMidYMid meet" style={{ position: 'absolute', inset: 0 }}>
                             <g stroke="#3e2723" strokeWidth="3">
@@ -297,22 +329,22 @@ export default function XiangqiGame() {
                                                     <div
                                                         style={{
                                                             position: 'absolute', left: `${leftPct}%`, top: `${topPct}%`,
-                                                            width: '8.5%', aspectRatio: '1', transform: 'translate(-50%, -50%)',
+                                                            width: '7.2%', aspectRatio: '1', transform: 'translate(-50%, -50%)',
                                                             backgroundColor: isHintFrom ? '#4ade80' : isHintTo ? '#4ade80' : '#e6c28f',
                                                             borderRadius: '50%',
                                                             border: `2px solid ${isSelected ? '#fbbf24' : isHintFrom || isHintTo ? '#4ade80' : isKingInCheck ? '#ef4444' : '#8b5a2b'}`,
                                                             boxShadow: isSelected
-                                                                ? '0 0 20px #fbbf24, inset 0 0 10px rgba(0,0,0,0.5)'
+                                                                ? '0 0 12px #fbbf24, inset 0 0 6px rgba(0,0,0,0.4)'
                                                                 : isHintFrom || isHintTo
-                                                                    ? '0 0 20px rgba(74,222,128,0.8), inset 0 0 10px rgba(74,222,128,0.3)'
+                                                                    ? '0 0 12px rgba(74,222,128,0.7), inset 0 0 6px rgba(74,222,128,0.2)'
                                                                     : isKingInCheck
-                                                                        ? '0 0 20px rgba(239,68,68,0.9), inset 0 0 15px rgba(239,68,68,0.6)'
-                                                                        : '0 4px 10px rgba(0,0,0,0.6), inset 0 0 10px rgba(139,90,43,0.8)',
+                                                                        ? '0 0 14px rgba(239,68,68,0.8), inset 0 0 8px rgba(239,68,68,0.5)'
+                                                                        : '0 2px 6px rgba(0,0,0,0.5), inset 0 0 6px rgba(139,90,43,0.6)',
                                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                            fontSize: 'min(28px, 3.5vw)', fontWeight: 900,
+                                                            fontSize: 'min(22px, 2.8vw)', fontWeight: 900,
                                                             fontFamily: '"KaiTi", "Kaiti SC", "STKaiti", serif',
                                                             color: PIECE_COLORS[piece[0]],
-                                                            textShadow: '0 1px 2px rgba(255,255,255,0.5)',
+                                                            textShadow: '0 1px 1px rgba(255,255,255,0.4)',
                                                             pointerEvents: 'auto',
                                                             cursor: (turn === myColor && piece[0] === myColor) ? 'pointer' : isValidMove ? 'pointer' : 'default',
                                                             zIndex: 30,
@@ -356,76 +388,79 @@ export default function XiangqiGame() {
                 </div>
 
                 {/* RIGHT PANEL - Status + History */}
-                <div style={{ flex: '0 0 220px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="xiangqi-right-panel" style={{
+                    flex: '0 0 160px', display: 'flex', flexDirection: 'column',
+                    gap: '0.6rem', overflow: 'hidden', padding: '0 0.5rem 0.5rem 0'
+                }}>
                     {/* Turn Status */}
-                    <div style={{ background: 'linear-gradient(180deg, rgba(234,179,8,0.1), transparent)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(234,179,8,0.2)' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#fbbf24', fontWeight: 800, marginBottom: '12px', letterSpacing: '1px' }}>
-                            Trạng thái
+                    <div style={{ background: 'linear-gradient(180deg, rgba(234,179,8,0.08), transparent)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(234,179,8,0.15)' }}>
+                        <div style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 800, marginBottom: '8px', letterSpacing: '1px' }}>
+                            TRẠNG THÁI
                         </div>
-                        <div style={{ padding: '12px', background: 'rgba(0,0,0,0.3)', borderRadius: '10px', textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.75rem', color: '#aaa', marginBottom: '6px' }}>Lượt đánh:</div>
-                            <div style={{ fontSize: '1.4rem', fontWeight: 900, color: turn === 'r' ? '#ef4444' : '#94a3b8' }}>
+                        <div style={{ padding: '10px', background: 'rgba(0,0,0,0.25)', borderRadius: '8px', textAlign: 'center' }}>
+                            <div style={{ fontSize: '0.7rem', color: '#aaa', marginBottom: '4px' }}>Lượt:</div>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: turn === 'r' ? '#ef4444' : '#94a3b8' }}>
                                 {turn === 'r' ? 'ĐỎ' : 'ĐEN'}
                             </div>
-                            <div style={{ fontSize: '0.8rem', color: isThinking ? '#fbbf24' : '#666', marginTop: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                                {isThinking && <Activity size={14} className="spin" style={{ animation: 'spin 1s linear infinite' }} />}
-                                {turn === myColor ? '(Lượt bạn)' : '(CPU suy nghĩ...)'}
+                            <div style={{ fontSize: '0.75rem', color: isThinking ? '#fbbf24' : '#666', marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                                {isThinking && <Activity size={12} className="spin" style={{ animation: 'spin 1s linear infinite' }} />}
+                                {turn === myColor ? 'Bạn' : 'CPU...'}
                             </div>
                         </div>
                         {inCheckColor && (
-                            <div style={{ marginTop: '8px', padding: '8px', background: 'rgba(239,68,68,0.15)', borderRadius: '8px', textAlign: 'center', fontSize: '0.8rem', color: '#ef4444', fontWeight: 700 }}>
+                            <div style={{ marginTop: '6px', padding: '6px', background: 'rgba(239,68,68,0.15)', borderRadius: '6px', textAlign: 'center', fontSize: '0.75rem', color: '#ef4444', fontWeight: 700 }}>
                                 CHIẾU!
                             </div>
                         )}
                     </div>
 
                     {/* Eval */}
-                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#888', fontWeight: 800, marginBottom: '8px', letterSpacing: '1px' }}>ĐÁNH GIÁ</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, marginBottom: '6px', letterSpacing: '1px' }}>ĐÁNH GIÁ</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <div style={{
-                                flex: 1, height: '8px', borderRadius: '4px', background: '#1e293b', overflow: 'hidden', position: 'relative'
+                                flex: 1, height: '6px', borderRadius: '3px', background: '#1e293b', overflow: 'hidden', position: 'relative'
                             }}>
                                 <div style={{
                                     position: 'absolute', left: 0, top: 0, bottom: 0,
-                                    width: `${Math.max(5, Math.min(95, 50 + (evalScore / 20)))}%`,
+                                    width: `${Math.max(3, Math.min(97, 50 + (evalScore / 25)))}%`,
                                     background: evalScore > 0 ? '#dc2626' : evalScore < 0 ? '#475569' : '#fbbf24',
-                                    transition: 'width 0.5s ease, background 0.3s',
-                                    borderRadius: '4px'
+                                    transition: 'width 0.4s ease, background 0.3s',
+                                    borderRadius: '3px'
                                 }} />
                             </div>
-                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: evalScore > 0 ? '#ef4444' : evalScore < 0 ? '#94a3b8' : '#fbbf24', minWidth: '40px', textAlign: 'right' }}>
+                            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: evalScore > 0 ? '#ef4444' : evalScore < 0 ? '#94a3b8' : '#fbbf24', minWidth: '32px', textAlign: 'right' }}>
                                 {(evalScore / 100).toFixed(1)}
                             </span>
                         </div>
                     </div>
 
                     {/* Move History */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+                    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
                         <div
                             onClick={() => setShowHistory(!showHistory)}
-                            style={{ padding: '12px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+                            style={{ padding: '10px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
                         >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <History size={14} color="#888" />
-                                <span style={{ fontSize: '0.75rem', color: '#888', fontWeight: 800, letterSpacing: '1px' }}>NƯỚC ĐI ({moveList.length})</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <History size={12} color="#888" />
+                                <span style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, letterSpacing: '1px' }}>NƯỚC ({moveList.length})</span>
                             </div>
-                            {showHistory ? <ChevronDown size={14} color="#888" /> : <ChevronRight size={14} color="#888" />}
+                            {showHistory ? <ChevronDown size={12} color="#888" /> : <ChevronRight size={12} color="#888" />}
                         </div>
                         {showHistory && (
-                            <div style={{ flex: 1, overflowY: 'auto', padding: '8px 12px', maxHeight: '300px' }}>
+                            <div style={{ flex: 1, overflowY: 'auto', padding: '6px 8px', minHeight: '0' }}>
                                 {moveList.length === 0 ? (
-                                    <p style={{ fontSize: '0.75rem', color: '#555', textAlign: 'center', margin: '8px 0' }}>Chưa có nước đi</p>
+                                    <p style={{ fontSize: '0.7rem', color: '#555', textAlign: 'center', margin: '6px 0' }}>Chưa có nước</p>
                                 ) : (
                                     moveList.map((m, i) => (
                                         <div key={i} style={{
-                                            display: 'flex', alignItems: 'center', gap: '6px',
-                                            padding: '4px 6px', borderRadius: '6px',
-                                            background: i === moveList.length - 1 ? 'rgba(255,255,255,0.05)' : 'transparent',
-                                            fontSize: '0.75rem', color: m.color === 'r' ? '#fca5a5' : '#94a3b8',
+                                            display: 'flex', alignItems: 'center', gap: '4px',
+                                            padding: '3px 4px', borderRadius: '4px',
+                                            background: i === moveList.length - 1 ? 'rgba(255,255,255,0.04)' : 'transparent',
+                                            fontSize: '0.7rem', color: m.color === 'r' ? '#fca5a5' : '#94a3b8',
                                             fontFamily: 'monospace'
                                         }}>
-                                            <span style={{ color: '#555', minWidth: '20px' }}>{i + 1}.</span>
+                                            <span style={{ color: '#555', minWidth: '14px', fontSize: '0.65rem' }}>{i + 1}.</span>
                                             <span>{m.notation}</span>
                                         </div>
                                     ))
@@ -445,6 +480,60 @@ export default function XiangqiGame() {
                     0% { transform: translate(-50%, -50%) scale(1); }
                     50% { transform: translate(-50%, -50%) scale(1.3); }
                     100% { transform: translate(-50%, -50%) scale(1); }
+                }
+
+                @media (max-width: 850px) {
+                    .xiangqi-main-container {
+                        flex-direction: column !important;
+                        overflow-y: auto !important;
+                        height: 100vh !important;
+                    }
+                    .xiangqi-left-panel {
+                        flex: 0 0 auto !important;
+                        width: 100% !important;
+                        border-right: none !important;
+                        border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+                        max-height: none !important;
+                    }
+                    .xiangqi-board-area {
+                        flex: 0 0 auto !important;
+                        display: flex !important;
+                        justify-content: center !important;
+                        padding: 0.5rem !important;
+                    }
+                    .xiangqi-right-panel {
+                        flex: 0 0 auto !important;
+                        width: 100% !important;
+                        border-left: none !important;
+                        border-top: 1px solid rgba(255,255,255,0.06) !important;
+                        padding: 0.5rem !important;
+                    }
+                    .xiangqi-top-bar {
+                        padding: 8px 12px !important;
+                    }
+                    .xiangqi-top-bar h1 {
+                        font-size: 1rem !important;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .xiangqi-left-panel {
+                        padding: 0.5rem !important;
+                    }
+                    .xiangqi-player-avatars {
+                        gap: 6px !important;
+                    }
+                    .xiangqi-avatar {
+                        width: 24px !important;
+                        height: 24px !important;
+                        font-size: 0.75rem !important;
+                    }
+                    .xiangqi-board-container {
+                        border-width: 4px !important;
+                    }
+                    .xiangqi-piece {
+                        font-size: min(18px, 3.5vw) !important;
+                    }
                 }
             `}</style>
         </div>
