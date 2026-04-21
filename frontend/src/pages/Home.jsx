@@ -239,13 +239,12 @@ export default function Home() {
                             { id: 'sudoku', label: 'Sudoku', Icon: Grid3X3 },
                             { id: 'caro', label: 'Tic-Tac-Toe', Icon: Swords },
                             { id: 'chess', label: 'Chess', Icon: Crown },
+                            { id: 'jungle', label: 'Cờ Thú', Icon: TreePine },
+                            { id: 'xiangqi', label: 'Cờ Tướng', Icon: Hexagon },
                             { id: 'snake', label: 'Snake', Icon: Zap },
                             { id: 'tetris', label: 'Tetris', Icon: Layers },
                             { id: 'pacman', label: 'Pacman', Icon: Ghost },
                             { id: 'pikachu', label: 'Pikachu', Icon: Puzzle },
-                            { id: 'tank', label: 'Tanks', Icon: Target },
-                            { id: 'jungle', label: 'Cờ Thú', Icon: TreePine },
-                            { id: 'xiangqi', label: 'Cờ Tướng', Icon: Hexagon },
                         ].map(({ id, label, Icon }) => (
                             <div key={id}
                                 className={`nav-item ${activeGame === id ? 'active' : ''}`}
