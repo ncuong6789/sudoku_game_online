@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, Undo2, Lightbulb, History, ChevronRight, ChevronDown, Activity } from 'lucide-react';
 import { useXiangqiLogic } from './useXiangqiLogic';
 import { useAudio } from '../../utils/useAudio';
+import { useTranslation } from 'react-i18next';
 
 const PIECE_TEXT = {
     'r_k': '帥', 'r_a': '仕', 'r_b': '相', 'r_n': '傌', 'r_r': '俥', 'r_c': '炮', 'r_p': '兵',
@@ -43,6 +44,7 @@ function EvalBar({ score, myColor }) {
 }
 
 export default function XiangqiGame() {
+    const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
     const { mode, difficulty, playerColor } = location.state || { mode: 'solo', difficulty: 'Medium', playerColor: 'w' };
@@ -141,7 +143,7 @@ export default function XiangqiGame() {
                     border: '1px solid rgba(255,255,255,0.08)', color: '#fff',
                     fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer'
                 }}>
-                    <ArrowLeft size={14} /> Về sảnh
+                    <ArrowLeft size={14} /> {t('common.returnToMenu', 'Về sảnh')}
                 </button>
                 <h1 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 900, color: '#fca5a5', letterSpacing: '1px' }}>
                     CỜ TƯỚNG
@@ -375,10 +377,10 @@ export default function XiangqiGame() {
                                     <p style={{ color: '#aaa' }}>{winner === 'r' ? 'Phe Đỏ (Tiên) thắng!' : 'Phe Đen (Hậu) thắng!'}</p>
                                     <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
                                         <button onClick={() => window.location.reload()} style={{ padding: '12px 24px', fontSize: '1rem', fontWeight: 700, background: '#fbbf24', color: '#000', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>
-                                            <RotateCcw size={16} style={{ display: 'inline', verticalAlign: 'text-bottom' }} /> CHƠI LẠI
+                                            <RotateCcw size={16} style={{ display: 'inline', verticalAlign: 'text-bottom' }} /> {t('common.playAgain', 'CHƠI LẠI').toUpperCase()}
                                         </button>
                                         <button onClick={() => navigate('/xiangqi')} style={{ padding: '12px 24px', fontSize: '1rem', fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', cursor: 'pointer' }}>
-                                            THOÁT
+                                            {t('common.exit', 'THOÁT').toUpperCase()}
                                         </button>
                                     </div>
                                 </div>

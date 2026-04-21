@@ -4,8 +4,10 @@ import Board from '../../components/Board';
 import Controls from '../../components/Controls';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAudio } from '../../utils/useAudio';
+import { useTranslation } from 'react-i18next';
 
 export default function SoloGame() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const [difficulty, setDifficulty] = useState(location.state?.difficulty || 'Medium');
@@ -191,7 +193,7 @@ export default function SoloGame() {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [selectedCell, handleNumberClick, handleActionClick]);
 
-    if (!initialPuzzle) return <div className="glass-panel">Loading...</div>;
+    if (!initialPuzzle) return <div className="glass-panel">{t('common.loading', 'Loading...')}</div>;
 
     const formatTime = (secs) => {
         const m = Math.floor(secs / 60).toString().padStart(2, '0');
@@ -230,7 +232,7 @@ export default function SoloGame() {
                         />
 
                         <button className="btn-secondary" style={{ marginTop: '20px' }} onClick={() => navigate('/sudoku')}>
-                            Return to Menu
+                            {t('common.returnToMenu', 'Return to Menu')}
                         </button>
                     </div>
                 </div>
@@ -252,13 +254,13 @@ export default function SoloGame() {
                         <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
                             <button className="btn-primary" style={{ padding: '0.8rem 1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }} onClick={() => startNewGame(difficulty)}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    🔄 Chơi lại
+                                    🔄 {t('common.playAgain', 'Chơi lại')}
                                 </div>
                                 <span style={{ fontSize: '0.7rem', opacity: 0.8, fontWeight: 'normal' }}>(Phím Space)</span>
                             </button>
                             <button className="btn-secondary" style={{ padding: '12px 24px', fontSize: '1rem' }}
                                 onClick={() => { navigate('/sudoku'); }}>
-                                🏠 Thoát
+                                🏠 {t('common.exit', 'Thoát')}
                             </button>
                         </div>
                     </div>

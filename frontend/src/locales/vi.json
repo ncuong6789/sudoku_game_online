@@ -30,7 +30,131 @@
       "snake": "Rắn Săn Mồi",
       "tetris": "Xếp Gạch",
       "pikachu": "Pikachu",
-      "pacman": "Pacman"
+      "pacman": "Pacman",
+      "tank": "Bắn Xe Tăng"
     }
+  },
+  "gamesData": {
+    "sudoku": {
+        "description": "Một bài toán logic tưởng chừng đơn giản nhưng đầy thử thách. Mỗi con số bạn đặt xuống đều ảnh hưởng đến toàn bộ bàn cờ. Quan sát, suy luận và từng bước giải mã để hoàn thành bảng Sudoku hoàn hảo.",
+        "difficulty": "Vừa",
+        "instructions": [
+            "Điền các số từ 1 đến 9 vào các ô trống.",
+            "Không được lặp lại số trong cùng một hàng, cột hoặc vùng 3x3.",
+            "Phân tích các ô đã có để suy ra vị trí hợp lệ.",
+            "Tránh đoán mò – hãy dựa vào logic để giải bài.",
+            "Kiên nhẫn và tập trung là chìa khóa để hoàn thành.",
+            "Hoàn thành toàn bộ bảng mà không sai sót để chiến thắng."
+        ]
+    },
+    "caro": {
+        "description": "Trò chơi đấu trí kinh điển với nhiều kích thước bàn cờ: từ 3x3 nhanh gọn đến 15x15 và 20x20 đầy chiến thuật. Người chơi thay phiên đặt quân để tạo thành chuỗi chiến thắng, từ những ván đấu nhanh cho đến những màn so tài căng não.",
+        "difficulty": "Cao",
+        "instructions": [
+            "Chọn chế độ phù hợp: 3x3 (casual), 15x15 hoặc 20x20 (chiến thuật).",
+            "Thay phiên đặt quân X và O lên bàn cờ.",
+            "Tạo chuỗi 5 quân liên tiếp để chiến thắng (3 quân với chế độ 3x3).",
+            "Kết hợp tấn công và phòng thủ để kiểm soát thế trận.",
+            "Dự đoán nước đi của đối thủ để tránh rơi vào bẫy.",
+            "Một sai lầm nhỏ có thể khiến bạn thua ngay lúc."
+        ]
+    },
+    "chess": {
+        "description": "Trò chơi chiến thuật kinh điển trên bàn cờ 8x8, nơi mỗi nước đi đều mang tính quyết định. Điều khiển các quân cờ với quy tắc riêng biệt, xây dựng chiến lược và tìm cách chiếu bí vua đối phương để giành chiến thắng.",
+        "difficulty": "Rất cao",
+        "instructions": [
+            "Cờ vua là trò chơi chiến thuật dành cho hai người chơi trên bàn cờ 8x8.",
+            "Mỗi loại quân cờ có cách di chuyển riêng (Tốt, Mã, Tượng, Xe, Hậu, Vua).",
+            "Mục tiêu là đặt Vua đối phương vào trạng thái chiếu bí (không thể thoát).",
+            "Bảo vệ Vua của bạn và tận dụng các quân cờ để kiểm soát thế trận.",
+            "Lên kế hoạch trước nhiều nước đi để chiếm ưu thế và kết thúc ván đấu."
+        ]
+    },
+    "snake": {
+        "description": "Điều khiển chú rắn sinh tồn trên bản đồ lưới, thu thập thức ăn để lớn dần và tăng tốc độ. Càng dài, thử thách càng cao khi không gian di chuyển bị thu hẹp. Tham gia chế độ Multiplayer để cạnh tranh và loại bỏ đối thủ trong những pha đấu trí căng thẳng!",
+        "difficulty": "Tuỳ chỉnh",
+        "instructions": [
+            "Sử dụng các phím mũi tên (Lên, Xuống, Trái, Phải) để điều khiển hướng di chuyển của rắn.",
+            "Ăn mồi để tăng chiều dài và tốc độ của rắn.",
+            "Tránh va chạm với tường và chính cơ thể của bạn.",
+            "Trong chế độ Multiplayer, va chạm với đối thủ sẽ khiến bạn bị loại.",
+            "Rắn bị loại sẽ trở thành chướng ngại vật trên bản đồ.",
+            "Càng sống lâu và ăn nhiều, điểm số của bạn càng cao."
+        ]
+    },
+    "tetris": {
+        "description": "Những khối gạch không ngừng rơi xuống – bạn có đủ nhanh và chính xác để kiểm soát chúng? Xoay, sắp xếp và tạo combo xóa hàng để ghi điểm tối đa. Tham gia chế độ Multiplayer và chứng minh ai mới là bậc thầy Tetris thực thụ!",
+        "difficulty": "Vừa",
+        "instructions": [
+            "Dùng phím TRÁI/PHẢI để điều khiển vị trí khối gạch.",
+            "Nhấn XUỐNG để tăng tốc độ rơi và kiểm soát nhịp độ.",
+            "Nhấn LÊN để xoay khối gạch theo ý muốn.",
+            "Nhấn Space để thực hiện Hard Drop – thả nhanh xuống vị trí cuối.",
+            "Xóa nhiều hàng cùng lúc để ghi điểm cao hơn.",
+            "Nếu khối gạch chạm đỉnh màn hình, trò chơi sẽ kết thúc."
+        ]
+    },
+    "pacman": {
+        "description": "Khám phá mê cung đầy thử thách, nơi mỗi bước đi đều có thể là sống hoặc bị bắt. Thu thập chấm, né tránh bầy ma và tận dụng Power Pill để đảo ngược tình thế, biến kẻ săn thành con mồi!",
+        "difficulty": "Tuỳ chỉnh",
+        "instructions": [
+            "Sử dụng các phím mũi tên để điều khiển Pacman di chuyển trong mê cung.",
+            "Thu thập toàn bộ chấm nhỏ (dots) để hoàn thành màn chơi.",
+            "Ăn Power Pill để tạm thời trở nên mạnh mẽ và có thể tiêu diệt các con ma.",
+            "Tận dụng các lối đi và cổng dịch chuyển để né tránh hoặc đánh lừa kẻ địch.",
+            "Tránh va chạm với ma khi không có sức mạnh, nếu không bạn sẽ thua cuộc."
+        ]
+    },
+    "pikachu": {
+        "description": "Huyền thoại game nối thú kinh điển! Tìm và nối 2 hình giống nhau với tối đa 2 lần rẽ để làm chúng biến mất. Chinh phục các chướng ngại vật thay đổi liên tục qua từng vòng chơi với độ khó tăng dần!",
+        "difficulty": "Dễ - Khó",
+        "instructions": [
+            "Nhấp vào 2 hình giống nhau để nối và ghi điểm.",
+            "Đường nối giữa 2 hình không được có vật cản và tối đa 2 lần rẽ vuông góc (tạo thành hình chữ U, Z hoặc L).",
+            "Sử dụng nút Gợi ý (tốn một ít thời gian) hoặc chức năng Đảo hình (Shuffle) khi bế tắc.",
+            "Ở mỗi vòng, sau khi nối ô thì bản đồ có thể rớt khối, dồn sang trái phải để tăng độ khó.",
+            "Dọn dẹp toàn bộ bản đồ trước khi hết giờ để sang vòng tiếp theo."
+        ]
+    },
+    "tank": {
+        "description": "Cuộc chiến xe tăng nảy lửa! Điều khiển xe tăng của bạn, né tránh đạn và tiêu diệt đối thủ trong chiến trường cổ điển. Sử dụng địa hình để ẩn nấp và phản công bất ngờ!",
+        "difficulty": "Vừa - Cao",
+        "instructions": [
+            "Sử dụng các phím WASD hoặc Mũi tên để di chuyển xe tăng.",
+            "Nhấn SPACE để bắn đạn vào đối phương.",
+            "Lợi dụng các chướng ngại vật để che chắn khỏi làn đạn.",
+            "Mỗi xe tăng có một lượng máu nhất định, hãy bảo toàn máu của bạn.",
+            "Tiêu diệt đối thủ để giành chiến thắng trong trận đấu."
+        ]
+    },
+    "jungle": {
+        "description": "Trò chơi chiến thuật cổ điển với 8 loài mãnh thú. Hãy sử dụng tư duy để đưa quân vào hang đối phương và giành chiến thắng trên bàn cờ rực rỡ.",
+        "difficulty": "Dễ - Khó",
+        "instructions": [
+            "Mỗi bên có 8 quân thú với cấp bậc từ 1 (Chuột) đến 8 (Voi).",
+            "Cấp cao hơn ăn được cấp thấp hơn, ngoại trừ Chuột ăn được Voi.",
+            "Hổ và Sư tử có thể nhảy qua sông nếu không có quân nào chắn đường.",
+            "Chuột là quân duy nhất có thể đi vào ô sông (nước).",
+            "Chiến thắng bằng cách đưa bất kỳ quân nào vào Hang (Den) của đối phương."
+        ]
+    },
+    "xiangqi": {
+        "description": "Trò chơi chiến thuật kinh điển Châu Á. Điều khiển quân cờ trên bàn cờ 9x10 vượt qua Sở Hà Hán Giới, tuân thủ luật lệ khắt khe của từng loại binh chủng để sát bạt Tướng đối phương.",
+        "difficulty": "Rất Khó",
+        "instructions": [
+            "Mỗi loại quân cờ có cách di chuyển nghiêm ngặt (Tướng, Sĩ, Tượng, Xe, Pháo, Mã, Tốt).",
+            "Tướng và Sĩ bị giam lỏng trong Cung, Tượng không được qua sông.",
+            "Pháo khi muốn ăn quân phải nhảy trùm qua 1 quân khác làm Ngòi.",
+            "Chú ý luật Cản Mã, Cản Tượng và Lộ Mặt Tướng.",
+            "Chế độ Hiện tại: Luyện tập Solo với CPU."
+        ]
+    }
+  },
+  "common": {
+    "playAgain": "Chơi lại",
+    "exit": "Thoát",
+    "returnToMenu": "Về sảnh",
+    "loading": "Đang tải...",
+    "difficulty": "Độ khó"
   }
 }

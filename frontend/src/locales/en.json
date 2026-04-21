@@ -30,7 +30,131 @@
       "snake": "Snake",
       "tetris": "Tetris",
       "pikachu": "Pikachu",
-      "pacman": "Pacman"
+      "pacman": "Pacman",
+      "tank": "Battle City"
     }
+  },
+  "gamesData": {
+    "sudoku": {
+        "description": "A seemingly simple but challenging logic puzzle. Every number you place affects the entire board. Observe, deduce, and solve step by step to complete the perfect Sudoku board.",
+        "difficulty": "Medium",
+        "instructions": [
+            "Fill in the numbers from 1 to 9 in the empty cells.",
+            "Do not repeat a number in the same row, column, or 3x3 region.",
+            "Analyze the existing numbers to deduce valid positions.",
+            "Avoid guessing – rely on logic to solve the puzzle.",
+            "Patience and focus are key to completion.",
+            "Complete the entire board without errors to win."
+        ]
+    },
+    "caro": {
+        "description": "A classic mind game with various board sizes: from a quick 3x3 to a highly tactical 15x15 and 20x20. Players take turns placing pieces to form a winning chain, ranging from quick matches to intense strategic battles.",
+        "difficulty": "High",
+        "instructions": [
+            "Select the appropriate mode: 3x3 (casual), 15x15, or 20x20 (tactical).",
+            "Take turns placing X and O pieces on the board.",
+            "Form a chain of 5 consecutive pieces to win (3 pieces for 3x3 mode).",
+            "Combine attack and defense to control the game.",
+            "Predict your opponent's moves to avoid falling into traps.",
+            "A small mistake can make you lose immediately."
+        ]
+    },
+    "chess": {
+        "description": "A classic strategy game on an 8x8 board, where every move is decisive. Control pieces with unique rules, build strategies, and find a way to checkmate the opponent's king to win.",
+        "difficulty": "Very High",
+        "instructions": [
+            "Chess is a strategy game for two players on an 8x8 board.",
+            "Each piece type has its own movement rules (Pawn, Knight, Bishop, Rook, Queen, King).",
+            "The goal is to put the opponent's King in a 'checkmate' state (unable to escape).",
+            "Protect your King and use your pieces to control the board.",
+            "Plan ahead multiple moves to gain an advantage and end the game."
+        ]
+    },
+    "snake": {
+        "description": "Control a snake surviving on a grid map, collecting food to grow longer and increase speed. The longer you get, the higher the challenge as movement space shrinks. Join Multiplayer mode to compete and eliminate opponents in intense mind battles!",
+        "difficulty": "Customizable",
+        "instructions": [
+            "Use the arrow keys (Up, Down, Left, Right) to control the snake's movement direction.",
+            "Eat food to increase the snake's length and speed.",
+            "Avoid colliding with walls and your own body.",
+            "In Multiplayer mode, colliding with an opponent will eliminate you.",
+            "Eliminated snakes will become obstacles on the map.",
+            "The longer you live and the more you eat, the higher your score."
+        ]
+    },
+    "tetris": {
+        "description": "Falling blocks never stop – are you fast and precise enough to control them? Rotate, arrange, and create line-clearing combos to score maximum points. Join Multiplayer mode and prove who the true Tetris master is!",
+        "difficulty": "Medium",
+        "instructions": [
+            "Use LEFT/RIGHT keys to control the block's position.",
+            "Press DOWN to increase falling speed and control the pace.",
+            "Press UP to rotate the block as desired.",
+            "Press Space to perform a Hard Drop – drop quickly to the final position.",
+            "Clear multiple lines at once to score higher.",
+            "If the blocks touch the top of the screen, the game is over."
+        ]
+    },
+    "pacman": {
+        "description": "Explore a challenging maze where every step can result in life or getting caught. Collect dots, dodge ghosts, and use Power Pills to turn the tables, turning hunters into prey!",
+        "difficulty": "Customizable",
+        "instructions": [
+            "Use the arrow keys to control Pacman's movement in the maze.",
+            "Collect all small dots to complete the level.",
+            "Eat a Power Pill to temporarily become powerful and able to eat ghosts.",
+            "Utilize paths and teleportation gates to dodge or deceive enemies.",
+            "Avoid colliding with ghosts without power, or you will lose."
+        ]
+    },
+    "pikachu": {
+        "description": "The legendary classic animal matching game! Find and connect 2 identical images with a maximum of 2 turns to make them disappear. Conquer constantly changing obstacles through each level with increasing difficulty!",
+        "difficulty": "Easy - Hard",
+        "instructions": [
+            "Click on 2 identical images to connect and score points.",
+            "The path between 2 images must have no obstacles and a maximum of 2 right-angle turns (forming a U, Z, or L shape).",
+            "Use the Hint button (costs some time) or the Shuffle function when stuck.",
+            "In each level, after connecting, the map may drop blocks or shift left/right to increase difficulty.",
+            "Clear the entire map before time runs out to proceed to the next level."
+        ]
+    },
+    "tank": {
+        "description": "A fiery tank battle! Control your tank, dodge bullets, and destroy opponents in a classic battlefield. Use the terrain to hide and counterattack unexpectedly!",
+        "difficulty": "Medium - Hard",
+        "instructions": [
+            "Use WASD or Arrow keys to move the tank.",
+            "Press SPACE to fire bullets at the opponent.",
+            "Take advantage of obstacles to shield against incoming fire.",
+            "Each tank has a certain amount of health, preserve it.",
+            "Destroy opponents to win the match."
+        ]
+    },
+    "jungle": {
+        "description": "A classic strategy game with 8 beasts. Use your thinking to bring pieces into the opponent's den and win on a colorful board.",
+        "difficulty": "Easy - Hard",
+        "instructions": [
+            "Each side has 8 beast pieces with ranks from 1 (Rat) to 8 (Elephant).",
+            "A higher rank captures a lower rank, except Rat captures Elephant.",
+            "Tiger and Lion can jump over the river if there are no blocking pieces.",
+            "Rat is the only piece that can enter river (water) tiles.",
+            "Win by moving any piece into the opponent's Den."
+        ]
+    },
+    "xiangqi": {
+        "description": "Classic Asian strategy game. Control pieces on a 9x10 board crossing the Chu River and Han Border, adhering to strict rules for each type to checkmate the opponent's General.",
+        "difficulty": "Very Hard",
+        "instructions": [
+            "Each piece type has strict movement rules (General, Advisor, Elephant, Chariot, Cannon, Horse, Soldier).",
+            "General and Advisor are confined to the Palace, Elephant cannot cross the river.",
+            "Cannon needs to jump over exactly 1 piece to capture.",
+            "Pay attention to the rules of Blocking Horse, Blocking Elephant, and Flying General.",
+            "Current Mode: Solo Practice with CPU."
+        ]
+    }
+  },
+  "common": {
+    "playAgain": "Play Again",
+    "exit": "Exit",
+    "returnToMenu": "Return to Menu",
+    "loading": "Loading...",
+    "difficulty": "Difficulty"
   }
 }

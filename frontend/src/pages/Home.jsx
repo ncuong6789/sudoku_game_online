@@ -336,7 +336,7 @@ export default function Home() {
                         fontSize: '1.1rem',
                         textAlign: 'left'
                     }}>
-                        {game.description}
+                        {t(`gamesData.${activeGame}.description`)}
                     </p>
 
                     <div className="action-row" style={{ marginBottom: '2rem', display: 'flex', gap: '0.8rem' }}>
@@ -372,7 +372,7 @@ export default function Home() {
                                 <X size={18} style={{ cursor: 'pointer' }} onClick={() => setShowHelp(false)} />
                             </div>
                             <ul style={{ paddingLeft: '1.2rem', color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.5' }}>
-                                {game.instructions.map((ins, idx) => <li key={idx} style={{ marginBottom: '0.4rem' }}>{ins}</li>)}
+                                {t(`gamesData.${activeGame}.instructions`, { returnObjects: true }).map((ins, idx) => <li key={idx} style={{ marginBottom: '0.4rem' }}>{ins}</li>)}
                             </ul>
                         </div>
                     )}

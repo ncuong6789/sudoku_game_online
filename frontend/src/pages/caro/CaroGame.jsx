@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, MessageSquare, Send, Swords } from 'lucide-react';
 import { getFilledCellsCount } from './caroAI';
 import { useCaroLogic } from './useCaroLogic';
 import { socket } from '../../utils/socket';
+import { useTranslation } from 'react-i18next';
 
 const CaroCell = React.memo(({ r, c, cell, isWinCell, onClick, isGameOver, isProcessing, boardSize, sizeRatio }) => {
     return (
@@ -33,6 +33,7 @@ const CaroCell = React.memo(({ r, c, cell, isWinCell, onClick, isGameOver, isPro
 });
 
 export default function CaroGame() {
+    const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
     const { mode, roomId, difficulty, gridSize, playerSymbol: initSymbol } = location.state || { mode: 'solo', difficulty: 'Medium', gridSize: 15 };
@@ -118,10 +119,10 @@ export default function CaroGame() {
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '0.5rem' }}>
                             <button className="btn-primary" onClick={resetGame} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%' }}>
-                                <RotateCcw size={18} /> {isGameOver ? `Chơi ván ${soloGameCount + 2}` : 'Bỏ cuộc & Chơi ván mới'}
+                                <RotateCcw size={18} /> {isGameOver ? t('common.playAgain', 'Chơi lại') : 'Bỏ cuộc & Chơi ván mới'}
                             </button>
                             <button className="btn-secondary" onClick={handleExit} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%' }}>
-                                <ArrowLeft size={18} /> Thoát
+                                <ArrowLeft size={18} /> {t('common.exit', 'Thoát')}
                             </button>
                         </div>
                     </div>
@@ -173,10 +174,10 @@ export default function CaroGame() {
                             </h2>
                             <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
                                 <button onClick={resetGame} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: '#4ade80', color: '#000', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>
-                                    CHƠI LẠI
+                                    {t('common.playAgain', 'CHƠI LẠI').toUpperCase()}
                                 </button>
                                 <button onClick={handleExit} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', cursor: 'pointer' }}>
-                                    THOÁT
+                                    {t('common.exit', 'THOÁT').toUpperCase()}
                                 </button>
                             </div>
                         </div>
