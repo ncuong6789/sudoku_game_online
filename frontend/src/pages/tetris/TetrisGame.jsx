@@ -64,16 +64,16 @@ const NextPiece = ({ type }) => {
     return (
         <div style={{ 
             display: 'grid', 
-            gridTemplateRows: `repeat(${shape.length}, 14px)`,
-            gridTemplateColumns: `repeat(${shape[0]?.length || 1}, 14px)`,
+            gridTemplateRows: `repeat(${shape.length}, 16px)`,
+            gridTemplateColumns: `repeat(${shape[0]?.length || 1}, 16px)`,
             margin: '0 auto',
             flexShrink: 0
         }}>
             {shape.map(row => row.map((cell, x) => (
                 <div key={x} style={{
-                    width: '14px', height: '14px',
+                    width: '16px', height: '16px',
                     backgroundColor: cell ? TETROMINOES[type].color : 'transparent',
-                    boxShadow: cell ? `inset 1px 1px 2px rgba(255,255,255,0.3)` : 'none',
+                    boxShadow: cell ? `inset 1.5px 1.5px 3px rgba(255,255,255,0.3)` : 'none',
                     borderRadius: '2px'
                 }} />
             )))}
@@ -356,30 +356,34 @@ export default function TetrisGame() {
 
                 <div className="tetris-right-panel" style={{
                     flex: '0 0 200px', display: 'flex', flexDirection: 'column',
-                    gap: '0.75rem', padding: '4rem 1rem 1.5rem',
+                    padding: '1.5rem 1rem',
                     borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)'
                 }}>
-                    {/* Next Pieces — centered */}
-                    <div style={{ display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.05)', padding: '1rem 0.8rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', minHeight: 0 }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '1rem', letterSpacing: '2px', fontWeight: 700 }}>KHỐI TIẾP THEO</div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.6rem' }}>
+                    <div style={{ flex: 1 }} />
+
+                    {/* Next Pieces — centered vertically */}
+                    <div style={{ display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.05)', padding: '1.2rem 0.8rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '1.2rem', letterSpacing: '2px', fontWeight: 700 }}>KHỐI TIẾP THEO</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.2rem' }}>
                             {nextPieces.map((type, idx) => (
                                 <NextPiece key={idx} type={type} />
                             ))}
                         </div>
                     </div>
 
-                    {/* Zoom Controls — pinned at bottom-right, safe from theme toggle */}
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.04)', padding: '8px 10px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                        <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
-                            <ZoomOut size={16} />
-                        </button>
-                        <span style={{ color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 600, minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
-                            {zoomLevel}%
-                        </span>
-                        <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
-                            <ZoomIn size={16} />
-                        </button>
+                    {/* Bottom Area: Spacer + Zoom Controls */}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', paddingTop: '1rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.04)', padding: '8px 10px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                            <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                                <ZoomOut size={16} />
+                            </button>
+                            <span style={{ color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 600, minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
+                                {zoomLevel}%
+                            </span>
+                            <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                                <ZoomIn size={16} />
+                            </button>
+                        </div>
                     </div>
                 </div>
 

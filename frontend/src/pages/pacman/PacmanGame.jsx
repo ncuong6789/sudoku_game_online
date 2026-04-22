@@ -150,7 +150,7 @@ export default function PacmanGame() {
                 {/* LEFT PANEL */}
                 <div className="pacman-left-panel" style={{
                     flex: '0 0 240px', display: 'flex', flexDirection: 'column',
-                    justifyContent: 'center', gap: '1rem', overflowY: 'auto', padding: '1.5rem',
+                    gap: '1rem', overflowY: 'auto', padding: '1.5rem',
                     borderRight: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)'
                 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', padding: '1rem', boxSizing: 'border-box' }}>
@@ -182,6 +182,26 @@ export default function PacmanGame() {
                                 </span>
                             </div>
                         </div>
+                    </div>
+
+                    {/* CONTROLS (Moved from right panel) */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <button onClick={togglePause} disabled={phase === 'gameover' || phase === 'won'} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%', fontSize: '0.9rem', background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: isPaused ? '#38bdf8' : '#fff', cursor: (phase === 'gameover' || phase === 'won') ? 'default' : 'pointer', opacity: (phase === 'gameover' || phase === 'won') ? 0.5 : 1, transition: 'all 0.2s' }} onMouseEnter={(e) => { if (!isPaused && phase !== 'gameover' && phase !== 'won') e.currentTarget.style.background='rgba(255,255,255,0.1)'; }} onMouseLeave={(e) => { if (!isPaused) e.currentTarget.style.background='rgba(255,255,255,0.06)'; }}>
+                            {isPaused ? t('pacman.resume') : t('pacman.pause')}
+                        </button>
+                        <button className="btn-primary" onClick={handleRestart} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.9rem', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s' }}>
+                            <RotateCcw size={18} /> {t('pacman.restart')}
+                        </button>
+                        <button className="btn-secondary" onClick={toggleMute} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.9rem', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.1)'; }} onMouseLeave={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.06)'; }}>
+                            {muted ? <VolumeX size={18} /> : <Volume2 size={18} />} {muted ? t('pacman.musicOn') : t('pacman.musicOff')}
+                        </button>
+                    </div>
+
+                    {/* EXIT BUTTON (Pinned to bottom) */}
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 'auto', paddingTop: '14px' }}>
+                        <button onClick={() => navigate('/pacman')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
+                            <ArrowLeft size={16} /> Thoát khỏi phòng
+                        </button>
                     </div>
                 </div>
 
@@ -360,50 +380,99 @@ export default function PacmanGame() {
                 {/* RIGHT PANEL */}
                 <div className="pacman-right-panel" style={{
                     flex: '0 0 240px', display: 'flex', flexDirection: 'column',
-                    justifyContent: 'center', gap: '1rem', overflowY: 'auto', padding: '1.5rem',
+                    padding: '4rem 1rem 1.5rem',
                     borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)'
                 }}>
-                    {/* ZOOM CONTROLS */}
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
-                            <ZoomOut size={18} />
-                        </button>
-                        <span style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600, minWidth: '45px', textAlign: 'center', userSelect: 'none' }}>
-                            {zoomLevel}%
-                        </span>
-                        <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
-                            <ZoomIn size={18} />
-                        </button>
-                    </div>
+                    <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', paddingRight: '4px' }}>
+                        {frightenedTimer > 0 && (
+                            <div style={{ padding: '12px', textAlign: 'center', borderRadius: '12px', border: '1px solid rgba(29,78,216,0.5)', background: 'rgba(29,78,216,0.1)', flexShrink: 0 }}>
+                                <div style={{ fontSize: '0.75rem', color: '#93c5fd', textTransform: 'uppercase' }}>⚡ {t('pacman.power')}</div>
+                                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#60b5fa' }}>{frightenedTimer}</div>
+                            </div>
+                        )}
 
-                    {frightenedTimer > 0 && (
-                        <div style={{ padding: '12px', textAlign: 'center', borderRadius: '12px', border: '1px solid rgba(29,78,216,0.5)', background: 'rgba(29,78,216,0.1)' }}>
-                            <div style={{ fontSize: '0.75rem', color: '#93c5fd', textTransform: 'uppercase' }}>⚡ {t('pacman.power')}</div>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#60b5fa' }}>{frightenedTimer}</div>
-                        </div>
-                    )}
-
-                    {/* CONTROLS */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <button onClick={togglePause} disabled={phase === 'gameover' || phase === 'won'} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%', fontSize: '0.9rem', background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: isPaused ? '#38bdf8' : '#fff', cursor: (phase === 'gameover' || phase === 'won') ? 'default' : 'pointer', opacity: (phase === 'gameover' || phase === 'won') ? 0.5 : 1 }}>
-                                {isPaused ? t('pacman.resume') : t('pacman.pause')}
-                            </button>
+                        {/* GHOST BESTIARY */}
+                        <div style={{ display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', gap: '10px' }}>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', letterSpacing: '1px', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Hồ Sơ Ma</div>
                             
-                            <button className="btn-primary" onClick={handleRestart} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
-                                <RotateCcw size={18} /> {t('pacman.restart')}
-                            </button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div style={{ width: '28px', height: '28px' }}><GhostArt color="#ef4444" state="chase" size="100%" /></div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ef4444' }}>Blinky</div>
+                                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Kẻ truy đuổi</div>
+                                </div>
+                            </div>
+                            
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div style={{ width: '28px', height: '28px' }}><GhostArt color="#f472b6" state="chase" size="100%" /></div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f472b6' }}>Pinky</div>
+                                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Kẻ mai phục</div>
+                                </div>
+                            </div>
+                            
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div style={{ width: '28px', height: '28px' }}><GhostArt color="#38bdf8" state="chase" size="100%" /></div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#38bdf8' }}>Inky</div>
+                                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Kẻ khó đoán</div>
+                                </div>
+                            </div>
+                            
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div style={{ width: '28px', height: '28px' }}><GhostArt color="#fb923c" state="chase" size="100%" /></div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fb923c' }}>Clyde</div>
+                                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Kẻ lang thang</div>
+                                </div>
+                            </div>
+                        </div>
 
-                            <button className="btn-secondary" onClick={toggleMute} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
-                                {muted ? <VolumeX size={18} /> : <Volume2 size={18} />} {muted ? t('pacman.musicOn') : t('pacman.musicOff')}
-                            </button>
+                        {/* SCORE LEGEND */}
+                        <div style={{ display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', gap: '10px' }}>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', letterSpacing: '1px', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Bảng Tính Điểm</div>
+                            
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <div style={{ width: '16px', height: '16px', background: '#fbbf24', borderRadius: '50%', margin: '0 6px' }} />
+                                    <span style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Thức ăn nhỏ</span>
+                                </div>
+                                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fbbf24' }}>10</span>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <div style={{ width: '20px', height: '20px', background: '#ef4444', borderRadius: '50%', margin: '0 4px', position: 'relative' }}>
+                                        <div style={{ position: 'absolute', top: '-2px', left: '4px', width: '6px', height: '8px', background: '#22c55e', borderRadius: '2px', transform: 'rotate(20deg)' }} />
+                                    </div>
+                                    <span style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Sức mạnh</span>
+                                </div>
+                                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ef4444' }}>50</span>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <div style={{ width: '28px', height: '28px' }}><GhostArt color="#1d4ed8" state="frightened" size="100%" /></div>
+                                    <span style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Ăn Ma</span>
+                                </div>
+                                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#60b5fa' }}>200+</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 'auto', paddingTop: '14px' }}>
-                        <button onClick={() => navigate('/pacman')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
-                            <ArrowLeft size={16} /> Thoát khỏi phòng
-                        </button>
+                    {/* ZOOM CONTROLS - Fixed at bottom */}
+                    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', paddingTop: '1rem', marginTop: 'auto' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.04)', padding: '8px 10px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                            <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                                <ZoomOut size={16} />
+                            </button>
+                            <span style={{ color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 600, minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
+                                {zoomLevel}%
+                            </span>
+                            <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                                <ZoomIn size={16} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

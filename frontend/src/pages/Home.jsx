@@ -258,6 +258,7 @@ export default function Home() {
                         ))}
 
                         {/* Social — chỉ hiện khi đã đăng nhập */}
+                        {/* [HIDDEN LOGIN FEATURE - Uncomment to enable
                         {user && (
                             <>
                                 <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '8px 0' }} />
@@ -265,6 +266,7 @@ export default function Home() {
                                 <div className="nav-item"><Users size={20} /> Bạn bè</div>
                             </>
                         )}
+                        */}
                         <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', margin: '8px 0' }} />
                         <div className="nav-item" onClick={() => setShowDonateModal(true)} style={{ color: '#ef4444', fontWeight: 'bold' }}>
                             <Heart size={20} fill="#ef4444" /> Ủng hộ dự án
@@ -291,10 +293,12 @@ export default function Home() {
                         </div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            {/* [HIDDEN LOGIN FEATURE - Uncomment to enable login button
                             <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', textAlign: 'center' }}>{t('home.loginToViewRank', 'Đăng nhập để xem xếp hạng')}</p>
                             <button className="btn-primary" onClick={() => setShowAuthModal(true)} style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.88rem' }}>
                                 <UserIcon size={15} /> {t('home.login', 'Đăng Nhập')}
                             </button>
+                            */}
                         </div>
                     )}
                 </div>
