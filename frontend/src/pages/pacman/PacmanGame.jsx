@@ -105,6 +105,10 @@ export default function PacmanGame() {
         }
     }, [phase, frightenedTimer, isPlaying, muted]);
 
+    const [zoomLevel, setZoomLevel] = React.useState(100);
+    const handleZoomIn = () => setZoomLevel(z => Math.min(200, z + 20));
+    const handleZoomOut = () => setZoomLevel(z => Math.max(60, z - 20));
+
     if (!mapGrid.length || !pacman) return (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
             <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center' }}>
@@ -131,10 +135,6 @@ export default function PacmanGame() {
         return themes[mapType] || themes['Classic'];
     };
     const mapTheme = getMapTheme();
-
-    const [zoomLevel, setZoomLevel] = React.useState(100);
-    const handleZoomIn = () => setZoomLevel(z => Math.min(200, z + 20));
-    const handleZoomOut = () => setZoomLevel(z => Math.max(60, z - 20));
 
     return (
         <div className="pacman-main-container" style={{

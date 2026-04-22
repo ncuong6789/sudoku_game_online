@@ -421,7 +421,7 @@ export default function TankGame() {
                 </div>
 
                 {/* RIGHT: Status */}
-                <div style={{ flex: '0 0 240px', display: 'flex', flexDirection: 'column', gap: '1.2rem', overflowY: 'auto' }}>
+                <div style={{ flex: '0 0 240px', display: 'flex', flexDirection: 'column', gap: '1.2rem', overflowY: 'auto', justifyContent: 'center' }}>
                     <div style={{ background: 'linear-gradient(180deg, rgba(74,222,128,0.1), transparent)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(74,222,128,0.2)' }}>
                         <div style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '1px' }}>
                             <Target size={18} /> {t('tank.status')}
