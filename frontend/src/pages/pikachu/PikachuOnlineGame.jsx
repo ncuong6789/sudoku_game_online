@@ -284,8 +284,8 @@ export default function PikachuOnlineGame() {
 
                 {/* RIGHT PANEL - CONTROLS */}
                 <div className="sudoku-right-panel" style={{
-                    flex: '0 0 220px', display: 'flex', flexDirection: 'column', gap: '12px',
-                    padding: '60px 1.5rem 1.5rem 1.5rem', overflowY: 'auto', borderLeft: '1px solid rgba(255,255,255,0.06)',
+                    flex: '0 0 220px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '12px',
+                    padding: '1.5rem', overflowY: 'auto', borderLeft: '1px solid rgba(255,255,255,0.06)',
                     background: 'rgba(15,23,42,0.6)',
                 }}>
                     <button

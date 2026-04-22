@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Trophy, Activity, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Trophy, Activity, Volume2, VolumeX, ZoomIn, ZoomOut } from 'lucide-react';
 import { socket } from '../../utils/socket';
 import { INITIAL_SPEED, DASH_COOLDOWN } from './snakeAI';
 import { useSnakeLogic } from './useSnakeLogic';
@@ -167,7 +167,7 @@ function LeftPanel({ gameRef, gameOver, accentColor, resultEmoji, resultTitle, r
     const kbdStyle = { background: '#1e293b', border: '1px solid #334155', borderRadius: '5px', padding: '2px 7px', fontSize: '0.78rem', whiteSpace: 'nowrap', flexShrink: 0 };
 
     return (
-        <div style={{ width: '240px', flexShrink: 0, paddingRight: '12px', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ width: '100%', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
             <div style={{ ...cardStyle, background: 'rgba(96,165,250,0.04)', border: '1px solid rgba(96,165,250,0.2)' }}>
                 <div style={{ ...labelStyle, color: '#60a5fa' }}>🎮 {t('snake.controls')}</div>
                 <div style={rowStyle}>
@@ -224,7 +224,7 @@ function RightPanel({ mode, gameOver, handleRestart, navigate, playerColor, mute
     const rowStyle = { display: 'flex', alignItems: 'flex-start', gap: '9px', fontSize: '0.82rem', color: '#cbd5e1', marginBottom: '6px', lineHeight: 1.4 };
 
     return (
-        <div style={{ width: '240px', flexShrink: 0, paddingLeft: '12px', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ width: '100%', flexShrink: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={cardStyle}>
                 <div style={labelStyle}>🎯 {t('snake.items')}</div>
                 <div style={{ background: 'rgba(239,68,68,0.08)', borderRadius: '8px', padding: '8px 10px', marginBottom: '8px', border: '1px solid rgba(239,68,68,0.2)' }}>
@@ -314,50 +314,121 @@ export default function SnakeGame() {
     const resultTitle = uiState.statusMessage.split('!')[0] + '!';
     const resultDetail = uiState.statusMessage.includes('(') ? uiState.statusMessage.split('(')[1]?.replace(')', '') : uiState.statusMessage.split('!').slice(1).join('!').trim();
 
+    const [zoomLevel, setZoomLevel] = useState(100);
+    const handleZoomIn = () => setZoomLevel(z => Math.min(200, z + 20));
+    const handleZoomOut = () => setZoomLevel(z => Math.max(60, z - 20));
+
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 0.5rem' }}>
-            <div className="glass-panel" style={{ position: 'relative', width: '100%', maxWidth: '1050px', display: 'flex', flexDirection: 'column', padding: '1rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '8px 14px', marginBottom: '10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Activity size={16} color="var(--primary-color)" />
-                        <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }}>Snake {mapSize}</span>
-                        <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{mode === 'solo' ? `${t('snake.vs')} (${difficulty})` : `${roomId}`}</span>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', justifyContent: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Trophy size={16} color="#fbbf24" /><span style={{ fontWeight: 800, fontSize: '1rem' }}>{t('snake.you')}: <span style={{ color: '#4ade80' }}>{uiState.score}</span></span></div>
-                        {(hasBot || mode === 'multiplayer') && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: 11, height: 11, borderRadius: '50%', background: '#60a5fa' }} /><span style={{ fontWeight: 800, fontSize: '1rem' }}>{mode === 'solo' ? `${t('snake.cpu')} (${difficulty})` : t('snake.opp')}: <span style={{ color: '#60a5fa' }}>{oppScore}</span></span></div>
-                        )}
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        {hasBot && gameRef.current?.botDead && !uiState.gameOver ? <span style={{ fontSize: '0.8rem', color: '#f59e0b', fontWeight: 700 }}>💀 {t('snake.cpuDead')}</span> : <span style={{ fontSize: '0.82rem', fontWeight: 700, color: uiState.gameOver ? accentColor : 'var(--text-secondary)' }}>{uiState.gameOver ? `${resultEmoji} ${resultTitle}` : t('snake.playing')}</span>}
-                    </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'stretch' }}>
-                    <LeftPanel gameRef={canvasRef2use} gameOver={uiState.gameOver} accentColor={accentColor} resultEmoji={resultEmoji} resultTitle={resultTitle} resultDetail={resultDetail} t={t} />
-
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ position: 'relative', width: '100%', aspectRatio: '1/1', border: '4px solid rgba(255,255,255,0.1)', borderRadius: '8px', boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5),0 10px 30px rgba(0,0,0,0.3)', overflow: 'hidden' }}>
-                            <SnakeCanvas gameRef={canvasRef2use} mapSize={mapSize} />
-
-                            {mode === 'multiplayer' && countdown !== null && (
-                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 60, gap: '16px' }}>
-                                    <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-secondary)' }}>{t('snake.ready')}</p>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><div style={{ width: 20, height: 20, borderRadius: '50%', background: myColor, boxShadow: `0 0 10px ${myColor}` }} /><span style={{ fontWeight: 700, fontSize: '1.2rem', color: myColor }}>{myColorLabel}</span></div>
-                                    <div style={{ fontSize: countdown === 0 ? '2.5rem' : '6rem', fontWeight: 900, color: countdown === 0 ? '#4ade80' : '#fff', textShadow: '0 0 20px currentColor', transition: 'all 0.3s' }}>{countdown === 0 ? t('snake.start') : countdown}</div>
-                                </div>
-                            )}
-
-                            {uiState.gameOver && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(10,14,22,0.42)', zIndex: 5, pointerEvents: 'none', borderRadius: '4px' }} />}
+        <div className="snake-main-container" style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100,
+            display: 'flex', overflow: 'hidden',
+            background: 'radial-gradient(circle at center, #292524 0%, #1c1917 100%)',
+            outline: 'none'
+        }}>
+            <div style={{ flex: 1, display: 'flex', width: '100%', height: '100%' }}>
+                
+                {/* LEFT PANEL */}
+                <div className="snake-left-panel" style={{
+                    flex: '0 0 240px', display: 'flex', flexDirection: 'column',
+                    gap: '1rem', overflowY: 'auto', padding: '1.5rem',
+                    borderRight: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)'
+                }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                            <Activity size={18} color="var(--primary-color)" />
+                            <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-primary)' }}>Snake {mapSize}</span>
+                        </div>
+                        <div style={{ textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                            {mode === 'solo' ? `${t('snake.vs')} (${difficulty})` : `${roomId}`}
                         </div>
                     </div>
 
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Trophy size={14} color="#fbbf24" /><span style={{ fontSize: '0.9rem' }}>{t('snake.you')}</span></div>
+                            <span style={{ fontWeight: 'bold', color: '#4ade80', fontSize: '1.1rem' }}>{uiState.score}</span>
+                        </div>
+                        {(hasBot || mode === 'multiplayer') && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: 10, height: 10, borderRadius: '50%', background: '#60a5fa' }} /><span style={{ fontSize: '0.9rem' }}>{mode === 'solo' ? `${t('snake.cpu')}` : t('snake.opp')}</span></div>
+                                <span style={{ fontWeight: 'bold', color: '#60a5fa', fontSize: '1.1rem' }}>{oppScore}</span>
+                            </div>
+                        )}
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        {hasBot && gameRef.current?.botDead && !uiState.gameOver ? <span style={{ fontSize: '0.85rem', color: '#f59e0b', fontWeight: 700 }}>💀 {t('snake.cpuDead')}</span> : <span style={{ fontSize: '0.85rem', fontWeight: 700, color: uiState.gameOver ? accentColor : 'var(--text-secondary)' }}>{uiState.gameOver ? `${resultEmoji} ${resultTitle}` : t('snake.playing')}</span>}
+                    </div>
+
+                    <LeftPanel gameRef={canvasRef2use} gameOver={uiState.gameOver} accentColor={accentColor} resultEmoji={resultEmoji} resultTitle={resultTitle} resultDetail={resultDetail} t={t} />
+                </div>
+
+                {/* CENTER BOARD AREA */}
+                <div className="snake-board-area" style={{
+                    flex: '1 1 auto', display: 'flex', justifyContent: 'center',
+                    minWidth: 0, minHeight: 0, padding: '1rem',
+                    overflow: 'hidden', alignItems: 'center', position: 'relative'
+                }}>
+                    <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(15,23,42,0.8)', padding: '6px 12px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', zIndex: 110, backdropFilter: 'blur(8px)' }}>
+                        <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                            <ZoomOut size={18} />
+                        </button>
+                        <span style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600, minWidth: '45px', textAlign: 'center', userSelect: 'none' }}>
+                            {zoomLevel}%
+                        </span>
+                        <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                            <ZoomIn size={18} />
+                        </button>
+                    </div>
+
+                    <div style={{ position: 'relative', width: '100%', maxWidth: '85vh', aspectRatio: '1/1', border: '4px solid rgba(255,255,255,0.1)', borderRadius: '8px', boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5),0 10px 30px rgba(0,0,0,0.3)', overflow: 'hidden', transform: `scale(${zoomLevel/100})`, transition: 'transform 0.2s', transformOrigin: 'center center' }}>
+                        <SnakeCanvas gameRef={canvasRef2use} mapSize={mapSize} />
+
+                        {mode === 'multiplayer' && countdown !== null && (
+                            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 60, gap: '16px' }}>
+                                <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-secondary)' }}>{t('snake.ready')}</p>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><div style={{ width: 20, height: 20, borderRadius: '50%', background: myColor, boxShadow: `0 0 10px ${myColor}` }} /><span style={{ fontWeight: 700, fontSize: '1.2rem', color: myColor }}>{myColorLabel}</span></div>
+                                <div style={{ fontSize: countdown === 0 ? '2.5rem' : '6rem', fontWeight: 900, color: countdown === 0 ? '#4ade80' : '#fff', textShadow: '0 0 20px currentColor', transition: 'all 0.3s' }}>{countdown === 0 ? t('snake.start') : countdown}</div>
+                            </div>
+                        )}
+
+                        {uiState.gameOver && <div style={{ position: 'absolute', inset: 0, background: 'rgba(10,14,22,0.42)', zIndex: 5, pointerEvents: 'none', borderRadius: '4px' }} />}
+                    </div>
+                </div>
+
+                {/* RIGHT PANEL */}
+                <div className="snake-right-panel" style={{
+                    flex: '0 0 240px', display: 'flex', flexDirection: 'column',
+                    justifyContent: 'center', gap: '1rem', overflowY: 'auto', padding: '1.5rem',
+                    borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)'
+                }}>
                     <RightPanel mode={mode} gameOver={uiState.gameOver} handleRestart={handleRestart} navigate={navigate} playerColor={playerColor} muted={muted} toggleMute={toggleMute} t={t} />
                 </div>
             </div>
+            <style>{`
+                @media (max-width: 850px) {
+                    .snake-main-container > div {
+                        flex-direction: column !important;
+                        overflow-y: auto !important;
+                        height: auto !important;
+                    }
+                    .snake-left-panel, .snake-right-panel {
+                        flex: 0 0 auto !important;
+                        width: 100% !important;
+                        border-right: none !important;
+                        border-left: none !important;
+                        border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+                        max-height: none !important;
+                    }
+                    .snake-board-area {
+                        flex: 0 0 auto !important;
+                        display: flex !important;
+                        justify-content: center !important;
+                        padding: 0.5rem !important;
+                        min-height: 60vh;
+                    }
+                }
+            `}</style>
         </div>
     );
 }

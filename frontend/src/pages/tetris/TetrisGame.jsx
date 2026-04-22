@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, RefreshCw, Trophy } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Trophy, ZoomIn, ZoomOut } from 'lucide-react';
 import { socket } from '../../utils/socket';
 import { useTetris, STAGE_WIDTH, STAGE_HEIGHT, TETROMINOES } from '../../utils/useTetris';
 import { useAudio } from '../../utils/useAudio';
@@ -127,6 +127,10 @@ export default function TetrisGame() {
     const [opponentStage, setOpponentStage] = useState(Array.from(Array(STAGE_HEIGHT), () => Array(STAGE_WIDTH).fill([0, 'clear'])));
     const [opponentScore, setOpponentScore] = useState(0);
     const [gameResult, setGameResult] = useState(''); // 'Win', 'Lose', 'Draw'
+
+    const [zoomLevel, setZoomLevel] = useState(100);
+    const handleZoomIn = () => setZoomLevel(z => Math.min(200, z + 20));
+    const handleZoomOut = () => setZoomLevel(z => Math.max(60, z - 20));
 
     // Keyboard handlers
     const move = useCallback((e) => {
@@ -270,32 +274,20 @@ export default function TetrisGame() {
     }, [roomId]);
 
     return (
-        <div className="game-container" style={{ outline: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', overflow: 'hidden', padding: '0', boxSizing: 'border-box' }} tabIndex="0">
-            <div className="glass-panel" style={{ 
-                position: 'relative', overflow: 'hidden',
-                display: 'flex', flexDirection: 'row', 
-                padding: '1rem', gap: '1.5rem', alignItems: 'center', justifyContent: 'center',
-                maxHeight: '100vh', maxWidth: '100vw',
-            }}>
+        <div className="tetris-main-container" style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100,
+            display: 'flex', overflow: 'hidden',
+            background: 'radial-gradient(circle at center, #292524 0%, #1c1917 100%)',
+            outline: 'none'
+        }} tabIndex="0">
+            <div style={{ flex: 1, display: 'flex', width: '100%', height: '100%' }}>
                 
-                {/* TRÁI: KHU VỰC BÀN CỜ (CẢ CỦA MÌNH & ĐỐI THỦ) */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                        <h3 style={{ margin: 0, color: '#4ade80', fontSize: '1.1rem' }}>{t('tetris.you')} ({score})</h3>
-                        <Stage stage={stage} />
-                    </div>
-                    
-                    {mode === 'multiplayer' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                            <h3 style={{ margin: 0, color: '#f87171', fontSize: '1.1rem' }}>{t('tetris.opponent')} ({opponentScore})</h3>
-                            <Stage stage={opponentStage} isOpponent={true} />
-                        </div>
-                    )}
-                </div>
-
-                {/* PHẢI: BẢNG ĐIỀU KHIỂN DỌC TRÀN ĐẦY KHÔNG GIAN */}
-                <div style={{ flex: '0 0 250px', width: '250px', display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '100vh', overflow: 'hidden', minHeight: 0 }}>
-                    
+                {/* LEFT PANEL */}
+                <div className="tetris-left-panel" style={{
+                    flex: '0 0 240px', display: 'flex', flexDirection: 'column',
+                    justifyContent: 'center', gap: '1rem', overflowY: 'auto', padding: '1.5rem',
+                    borderRight: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)'
+                }}>
                     <div className="nav-item active" style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', fontSize: '1.2rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px' }}>
                         <span style={{fontSize: '1.4rem'}}>🧱</span> {t('tetris.title')}
                     </div>
@@ -319,8 +311,47 @@ export default function TetrisGame() {
                         <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t('tetris.cleared')}</span>
                         <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#4ade80' }}>{rows}</span>
                     </div>
+                </div>
 
-                    {/* Next Pieces - Mở rộng dọc */}
+                {/* CENTER BOARD AREA */}
+                <div className="tetris-board-area" style={{
+                    flex: '1 1 auto', display: 'flex', justifyContent: 'center',
+                    minWidth: 0, minHeight: 0, gap: '12px', padding: '1rem',
+                    overflow: 'hidden', alignItems: 'center', position: 'relative'
+                }}>
+                    <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(15,23,42,0.8)', padding: '6px 12px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', zIndex: 110, backdropFilter: 'blur(8px)' }}>
+                        <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                            <ZoomOut size={18} />
+                        </button>
+                        <span style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600, minWidth: '45px', textAlign: 'center', userSelect: 'none' }}>
+                            {zoomLevel}%
+                        </span>
+                        <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                            <ZoomIn size={18} />
+                        </button>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '20px', alignItems: 'center', transform: `scale(${zoomLevel/100})`, transition: 'transform 0.2s', transformOrigin: 'center center' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+                            <h3 style={{ margin: 0, color: '#4ade80', fontSize: '1.1rem' }}>{t('tetris.you')} ({score})</h3>
+                            <Stage stage={stage} />
+                        </div>
+                        
+                        {mode === 'multiplayer' && (
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+                                <h3 style={{ margin: 0, color: '#f87171', fontSize: '1.1rem' }}>{t('tetris.opponent')} ({opponentScore})</h3>
+                                <Stage stage={opponentStage} isOpponent={true} />
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* RIGHT PANEL */}
+                <div className="tetris-right-panel" style={{
+                    flex: '0 0 240px', display: 'flex', flexDirection: 'column',
+                    justifyContent: 'center', gap: '1rem', overflowY: 'auto', padding: '1.5rem',
+                    borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)'
+                }}>
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.05)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '1.5rem', letterSpacing: '2px', fontWeight: 700 }}>KHỐI TIẾP THEO</div>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-evenly', flex: 1, gap: '1rem' }}>
@@ -330,7 +361,6 @@ export default function TetrisGame() {
                         </div>
                     </div>
 
-                    {/* Nút Khóa dưới cùng */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                         {mode === 'solo' && (
                             <>
@@ -350,7 +380,7 @@ export default function TetrisGame() {
 
                 {/* GAME OVER BANNER OVERLAY FULL PANEL */}
                 {gameOver && gameResult && (
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13, 17, 23, 0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(13, 17, 23, 0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
                         <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: `1px solid ${gameResult === 'Win' ? 'rgba(74,222,128,0.4)' : gameResult === 'Draw' ? 'rgba(251,191,36,0.4)' : 'rgba(239,68,68,0.4)'}`, boxShadow: `0 0 40px ${gameResult === 'Win' ? 'rgba(74,222,128,0.3)' : gameResult === 'Draw' ? 'rgba(251,191,36,0.3)' : 'rgba(239,68,68,0.3)'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                             <div style={{ fontSize: '3.5rem' }}>{gameResult === 'Win' ? '🏆' : gameResult === 'Draw' ? '🤝' : '💀'}</div>
                             <h2 style={{ margin: 0, fontSize: '1.8rem', color: gameResult === 'Win' ? '#4ade80' : gameResult === 'Draw' ? '#fbbf24' : '#ef4444', fontWeight: 900 }}>
@@ -372,7 +402,7 @@ export default function TetrisGame() {
                 )}
 
                 {gameOver && !gameResult && mode === 'solo' && (
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(13, 17, 23, 0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(13, 17, 23, 0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
                         <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: '1px solid rgba(239,68,68,0.4)', boxShadow: '0 0 40px rgba(239,68,68,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                             <div style={{ fontSize: '3.5rem' }}>💀</div>
                             <h2 style={{ margin: 0, fontSize: '1.8rem', color: '#ef4444', fontWeight: 900 }}>THUA</h2>
@@ -390,6 +420,30 @@ export default function TetrisGame() {
                 )}
 
             </div>
+            <style>{`
+                @media (max-width: 850px) {
+                    .tetris-main-container > div {
+                        flex-direction: column !important;
+                        overflow-y: auto !important;
+                        height: auto !important;
+                    }
+                    .tetris-left-panel, .tetris-right-panel {
+                        flex: 0 0 auto !important;
+                        width: 100% !important;
+                        border-right: none !important;
+                        border-left: none !important;
+                        border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+                        max-height: none !important;
+                    }
+                    .tetris-board-area {
+                        flex: 0 0 auto !important;
+                        display: flex !important;
+                        justify-content: center !important;
+                        padding: 0.5rem !important;
+                        min-height: 60vh;
+                    }
+                }
+            `}</style>
         </div>
     );
 }

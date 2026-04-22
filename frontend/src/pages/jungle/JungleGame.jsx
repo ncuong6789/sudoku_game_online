@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useJungleLogic } from './useJungleLogic';
 import { useJungleSounds } from './useJungleSounds';
-import { Swords, Trophy, Activity, ArrowLeft, RotateCcw, RefreshCw, HelpCircle } from 'lucide-react';
+import { Swords, Trophy, Activity, ArrowLeft, RotateCcw, RefreshCw, HelpCircle, ZoomIn, ZoomOut } from 'lucide-react';
 import { socket } from '../../utils/socket';
 import { EVENTS } from '../../utils/constants';
 import { useTranslation } from 'react-i18next';
@@ -367,38 +367,23 @@ export default function JungleGame() {
 
     const isMyTurn = turn === myId;
 
+    const [zoomLevel, setZoomLevel] = useState(100);
+    const handleZoomIn = () => setZoomLevel(z => Math.min(200, z + 20));
+    const handleZoomOut = () => setZoomLevel(z => Math.max(60, z - 20));
+
     return (
-        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100vw', height: '100vh', padding: '0.5rem', boxSizing: 'border-box' }}>
-            <div className="glass-panel game-play-panel" style={{
-                position: 'relative',
-                overflow: 'hidden',
-                padding: '1.2rem',
-                gap: '1.5rem',
-                alignItems: 'stretch',
-                justifyContent: 'center',
-                height: 'fit-content',
-                maxHeight: '96vh',
-                width: 'max-content',
-                maxWidth: '98%',
-                borderRadius: '20px',
-                background: 'rgba(23, 23, 33, 0.85)',
-                backdropFilter: 'blur(25px)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
-            }}>
+        <div className="jungle-main-container" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100, display: 'flex', overflow: 'hidden', background: 'radial-gradient(circle at center, #0f172a 0%, #020617 100%)' }}>
+            <div style={{ flex: 1, display: 'flex', width: '100%', height: '100%' }}>
                 
-                {/* TRÁI: INFO & RULES */}
-                <div style={{
+                {/* LEFT PANEL: INFO & RULES */}
+                <div className="jungle-left-panel" style={{
                     flex: '0 0 260px',
-                    width: '260px',
                     display: 'flex',
                     flexDirection: 'column',
-                    maxHeight: '100%',
-                    overflow: 'hidden',
-                    background: 'rgba(255,255,255,0.03)',
-                    borderRadius: '16px',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    padding: '1rem',
+                    overflowY: 'auto',
+                    background: 'rgba(15,23,42,0.6)',
+                    borderRight: '1px solid rgba(255,255,255,0.06)',
+                    padding: '1.5rem',
                     boxSizing: 'border-box'
                 }}>
                     <h3 style={{ margin: '0 0 12px 0', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
@@ -452,8 +437,22 @@ export default function JungleGame() {
                     </div>
                 </div>
 
-                {/* GIỮA: BÀN CỜ */}
-                <div style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '320px', padding: 0, margin: 0, maxHeight: '100%' }}>
+                {/* CENTER: BOARD */}
+                <div className="jungle-board-area" style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '320px', padding: '1rem', overflow: 'auto', position: 'relative' }}>
+                    
+                    {/* Zoom Controls */}
+                    <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(15,23,42,0.8)', padding: '6px 12px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', zIndex: 110, backdropFilter: 'blur(8px)' }}>
+                        <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                            <ZoomOut size={18} />
+                        </button>
+                        <span style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600, minWidth: '45px', textAlign: 'center', userSelect: 'none' }}>
+                            {zoomLevel}%
+                        </span>
+                        <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                            <ZoomIn size={18} />
+                        </button>
+                    </div>
+
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px', width: '100%', justifyContent: 'center', marginBottom: '10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: turn === myId ? 1 : 0.5 }}>
                             <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#4ade80' }} />
@@ -476,8 +475,7 @@ export default function JungleGame() {
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        width: '100%',
-                        maxHeight: 'calc(100vh - 120px)',
+                        height: zoomLevel > 100 ? `${630 * (zoomLevel/100)}px` : 'min(85vh - 60px, 630px)',
                         aspectRatio: '7 / 9'
                     }}>
                         {isLoading && (
@@ -503,8 +501,8 @@ export default function JungleGame() {
                     </div>
                 </div>
 
-                {/* PHẢI: CONTROLS */}
-                <div style={{ flex: '0 0 240px', width: '240px', display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '100%', overflow: 'hidden' }}>
+                {/* RIGHT: CONTROLS */}
+                <div className="jungle-right-panel" style={{ flex: '0 0 240px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.8rem', overflowY: 'auto', padding: '1.5rem', borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
                         <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.1rem', color: '#fff' }}>♟ CỜ THÚ</div>
                         
@@ -563,9 +561,9 @@ export default function JungleGame() {
                     </div>
                 </div>
 
-                {/* GAME OVER SYNC OVERLAY */}
+                {/* GAME OVER OVERLAY */}
                 {gameOver !== null && (
-                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(13, 17, 23, 0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+                    <div style={{ position: 'fixed', inset: 0, background: 'rgba(13, 17, 23, 0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}>
                         <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: `1px solid ${gameOver === myId ? 'rgba(251,191,36,0.4)' : 'rgba(255,255,255,0.1)'}`, boxShadow: gameOver === myId ? '0 0 40px rgba(251,191,36,0.3)' : 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                             <Trophy size={60} color={gameOver === myId ? '#fbbf24' : '#94a3b8'} />
                             <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: gameOver === myId ? '#fbbf24' : '#fff', margin: 0 }}>
@@ -583,6 +581,33 @@ export default function JungleGame() {
                     </div>
                 )}
             </div>
+
+            <style>{`
+                @media (max-width: 850px) {
+                    .jungle-main-container > div {
+                        flex-direction: column !important;
+                        overflow-y: auto !important;
+                        height: auto !important;
+                    }
+                    .jungle-left-panel {
+                        flex: 0 0 auto !important;
+                        width: 100% !important;
+                        border-right: none !important;
+                        border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+                    }
+                    .jungle-board-area {
+                        flex: 0 0 auto !important;
+                        padding: 0.5rem !important;
+                    }
+                    .jungle-right-panel {
+                        flex: 0 0 auto !important;
+                        width: 100% !important;
+                        border-left: none !important;
+                        border-top: 1px solid rgba(255,255,255,0.06) !important;
+                        padding: 0.5rem !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 }

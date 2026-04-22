@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Heart, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Heart, Volume2, VolumeX, ZoomIn, ZoomOut } from 'lucide-react';
 import { usePacmanLogic } from './usePacmanLogic';
 import { useTranslation } from 'react-i18next';
 
@@ -132,272 +132,269 @@ export default function PacmanGame() {
     };
     const mapTheme = getMapTheme();
 
+    const [zoomLevel, setZoomLevel] = React.useState(100);
+    const handleZoomIn = () => setZoomLevel(z => Math.min(200, z + 20));
+    const handleZoomOut = () => setZoomLevel(z => Math.max(60, z - 20));
+
     return (
-        <div className="full-page-mobile-scroll" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100vw', height: '100vh', padding: '1rem', boxSizing: 'border-box' }}>
-            <div className="glass-panel" style={{ 
-                position: 'relative', 
-                width: '100%',
-                maxWidth: '900px',
-                height: 'fit-content',
-                maxHeight: '96vh',
-                display: 'flex', 
-                flexDirection: 'row', 
-                padding: '1rem',
-                borderRadius: '20px',
-                background: 'rgba(23, 23, 33, 0.85)',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6)',
-                gap: '1rem',
-                overflow: 'hidden',
-                boxSizing: 'border-box'
-            }}>
-            {/* ── GIỮA: BOARD ── */}
-            <div style={{
-                flex: '1 1 auto',
-                minWidth: 0,
-                minHeight: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '0'
-            }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '10px', padding: '8px 16px', background: 'rgba(0,0,0,0.3)', borderRadius: '20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#fbbf24', boxShadow: '0 0 10px #fbbf24' }} />
-                        <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#fff' }}>{t('pacman.title')}</span>
-                    </div>
-                    <span style={{ color: '#fbbf24', fontSize: '0.7rem', fontWeight: 600 }}>{difficulty.toUpperCase()}</span>
-                    <div style={{ fontSize: '0.75rem', color: phase === 'playing' ? '#4ade80' : '#94a3b8' }}>
-                        {phase === 'playing' ? t('pacman.playing') : phase === 'ready' ? t('pacman.ready') : phase === 'paused' ? t('pacman.paused') : t('pacman.ended')}
+        <div className="pacman-main-container" style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100,
+            display: 'flex', overflow: 'hidden',
+            background: 'radial-gradient(circle at center, #292524 0%, #1c1917 100%)',
+            outline: 'none'
+        }}>
+            <div style={{ flex: 1, display: 'flex', width: '100%', height: '100%' }}>
+                
+                {/* LEFT PANEL */}
+                <div className="pacman-left-panel" style={{
+                    flex: '0 0 240px', display: 'flex', flexDirection: 'column',
+                    justifyContent: 'center', gap: '1rem', overflowY: 'auto', padding: '1.5rem',
+                    borderRight: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)'
+                }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', padding: '1rem', boxSizing: 'border-box' }}>
+                        <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.1rem', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '8px' }}>
+                            <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#fbbf24', boxShadow: '0 0 10px #fbbf24' }} />
+                            {t('pacman.title')}
+                        </div>
+                        
+                        <div style={{ padding: '12px', background: 'rgba(251,191,36,0.1)', borderRadius: '10px', border: '1px solid rgba(251,191,36,0.2)', textAlign: 'center' }}>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{t('pacman.score')}</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#fbbf24' }}>{score}</div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', margin: '8px 0' }}>
+                            <Heart size={24} color={lives > 0 ? '#ef4444' : '#374151'} fill={lives > 0 ? '#ef4444' : 'none'} />
+                            <Heart size={24} color={lives > 1 ? '#ef4444' : '#374151'} fill={lives > 1 ? '#ef4444' : 'none'} />
+                            <Heart size={24} color={lives > 2 ? '#ef4444' : '#374151'} fill={lives > 2 ? '#ef4444' : 'none'} />
+                        </div>
+
+                        <div style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
+                                <span style={{ color: 'var(--text-secondary)' }}>{t('pacman.map')}</span>
+                                <span style={{ color: '#fff', fontWeight: 600 }}>{mapType}</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                                <span style={{ color: 'var(--text-secondary)' }}>{t('pacman.difficulty')}</span>
+                                <span style={{ fontWeight: 700, color: difficulty === 'hard' ? '#ef4444' : '#f59e0b' }}>
+                                    {difficulty === 'hard' ? t('pacman.hard') : t('pacman.easy')}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div style={{
-                    position: 'relative',
-                    width: '100%',
-                    maxWidth: `calc((85vh - 60px) * ${cols} / ${rows})`,
-                    maxHeight: 'calc(85vh - 60px)',
-                    aspectRatio: `${cols}/${rows}`,
-                    margin: '0 auto',
-                    boxSizing: 'border-box',
-                    border: '4px solid rgba(255,255,255,0.1)',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    background: '#000'
+                {/* CENTER BOARD AREA */}
+                <div className="pacman-board-area" style={{
+                    flex: '1 1 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                    minWidth: 0, minHeight: 0, padding: '1rem',
+                    overflow: 'hidden', alignItems: 'center', position: 'relative'
                 }}>
+                    <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(15,23,42,0.8)', padding: '6px 12px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', zIndex: 110, backdropFilter: 'blur(8px)' }}>
+                        <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                            <ZoomOut size={18} />
+                        </button>
+                        <span style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600, minWidth: '45px', textAlign: 'center', userSelect: 'none' }}>
+                            {zoomLevel}%
+                        </span>
+                        <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                            <ZoomIn size={18} />
+                        </button>
+                    </div>
+
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: phase === 'playing' ? '#4ade80' : '#94a3b8', marginBottom: '10px', background: 'rgba(0,0,0,0.5)', padding: '4px 12px', borderRadius: '12px' }}>
+                        {phase === 'playing' ? t('pacman.playing') : phase === 'ready' ? t('pacman.ready') : phase === 'paused' ? t('pacman.paused') : t('pacman.ended')}
+                    </div>
+
                     <div style={{
-                        width: '100%', height: '100%',
-                        display: 'grid', 
-                        gridTemplateColumns: `repeat(${cols},1fr)`, 
-                        gridTemplateRows: `repeat(${rows},1fr)`
+                        position: 'relative',
+                        width: '100%',
+                        maxWidth: `calc((85vh - 60px) * ${cols} / ${rows})`,
+                        aspectRatio: `${cols}/${rows}`,
+                        margin: '0 auto',
+                        boxSizing: 'border-box',
+                        border: '4px solid rgba(255,255,255,0.1)',
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        background: '#000',
+                        transform: `scale(${zoomLevel/100})`,
+                        transition: 'transform 0.2s',
+                        transformOrigin: 'center center'
                     }}>
-                        {mapGrid.map((row, y) => row.map((cell, x) => {
-                            const isWall = cell === 'W' || cell === '|';
-                            const isGate = cell === 'H' || cell === '-';
-                            
-                            if (isGate) {
-                                return (
-                                    <div key={`c${x}${y}`} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <div style={{ 
-                                            width: '100%', 
-                                            height: '25%', 
-                                            background: '#fbcfe8', // Lighter pink stroke center
-                                            boxShadow: '0 0 6px #f43f5e' // Rose/Red glow
-                                            // No border-radius makes blocks merge fully into 1 continuous line
-                                        }} />
+                        <div style={{
+                            width: '100%', height: '100%',
+                            display: 'grid', 
+                            gridTemplateColumns: `repeat(${cols},1fr)`, 
+                            gridTemplateRows: `repeat(${rows},1fr)`
+                        }}>
+                            {mapGrid.map((row, y) => row.map((cell, x) => {
+                                const isWall = cell === 'W' || cell === '|';
+                                const isGate = cell === 'H' || cell === '-';
+                                
+                                if (isGate) {
+                                    return (
+                                        <div key={`c${x}${y}`} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <div style={{ 
+                                                width: '100%', 
+                                                height: '25%', 
+                                                background: '#fbcfe8',
+                                                boxShadow: '0 0 6px #f43f5e'
+                                            }} />
+                                        </div>
+                                    );
+                                } else if (isWall) {
+                                    const cW = (r, c) => r >= 0 && r < rows && c >= 0 && c < cols && (mapGrid[r][c] === 'W' || mapGrid[r][c] === '|');
+                                    const tw = cW(y - 1, x);
+                                    const bw = cW(y + 1, x);
+                                    const lw = cW(y, x - 1);
+                                    const rw = cW(y, x + 1);
+
+                                    const bd = `2px solid ${mapTheme.border}`;
+                                    const style = {
+                                        width: '100%', height: '100%',
+                                        boxSizing: 'border-box',
+                                        background: '#000',
+                                        borderTop: !tw ? bd : 'none',
+                                        borderBottom: !bw ? bd : 'none',
+                                        borderLeft: !lw ? bd : 'none',
+                                        borderRight: !rw ? bd : 'none',
+                                        borderTopLeftRadius: (!tw && !lw) ? '50%' : '0',
+                                        borderTopRightRadius: (!tw && !rw) ? '50%' : '0',
+                                        borderBottomLeftRadius: (!bw && !lw) ? '50%' : '0',
+                                        borderBottomRightRadius: (!bw && !rw) ? '50%' : '0',
+                                        boxShadow: `inset 0 0 12px ${mapTheme.glow}`,
+                                        zIndex: 1
+                                    };
+                                    return <div key={`c${x}${y}`} style={style} />;
+                                }
+                                
+                                return <div key={`c${x}${y}`} style={{ width: '100%', height: '100%', background: 'transparent' }} />;
+                            }))}
+
+                            {Array.from(dots).map(k => {
+                                const [x, y] = k.split(',').map(Number); return (
+                                    <div key={`d${k}`} style={{
+                                        position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
+                                        left: `${(x / cols) * 100}%`, top: `${(y / rows) * 100}%`,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none'
+                                    }}>
+                                        <div style={{ width: '35%', height: '35%', background: '#fbbf24', borderRadius: '50%' }} />
                                     </div>
                                 );
-                            } else if (isWall) {
-                                // Auto-Tiling Logic for hollow tubular arcade styling
-                                const cW = (r, c) => r >= 0 && r < rows && c >= 0 && c < cols && (mapGrid[r][c] === 'W' || mapGrid[r][c] === '|');
-                                const tw = cW(y - 1, x);
-                                const bw = cW(y + 1, x);
-                                const lw = cW(y, x - 1);
-                                const rw = cW(y, x + 1);
+                            })}
 
-                                const bd = `2px solid ${mapTheme.border}`;
-                                const style = {
-                                    width: '100%', height: '100%',
-                                    boxSizing: 'border-box',
-                                    background: '#000', // Hollow interior
-                                    borderTop: !tw ? bd : 'none',
-                                    borderBottom: !bw ? bd : 'none',
-                                    borderLeft: !lw ? bd : 'none',
-                                    borderRight: !rw ? bd : 'none',
-                                    borderTopLeftRadius: (!tw && !lw) ? '50%' : '0',
-                                    borderTopRightRadius: (!tw && !rw) ? '50%' : '0',
-                                    borderBottomLeftRadius: (!bw && !lw) ? '50%' : '0',
-                                    borderBottomRightRadius: (!bw && !rw) ? '50%' : '0',
-                                    boxShadow: `inset 0 0 12px ${mapTheme.glow}`,
-                                    zIndex: 1
-                                };
-                                return <div key={`c${x}${y}`} style={style} />;
-                            }
-                            
-                            return <div key={`c${x}${y}`} style={{ width: '100%', height: '100%', background: 'transparent' }} />;
-                        }))}
-
-                        {Array.from(dots).map(k => {
-                            const [x, y] = k.split(',').map(Number); return (
-                                <div key={`d${k}`} style={{
-                                    position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
-                                    left: `${(x / cols) * 100}%`, top: `${(y / rows) * 100}%`,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none'
-                                }}>
-                                    <div style={{ width: '35%', height: '35%', background: '#fbbf24', borderRadius: '50%' }} />
-                                </div>
-                            );
-                        })}
-
-                        {Array.from(pills).map(k => {
-                            const [x, y] = k.split(',').map(Number); return (
-                                <div key={`p${k}`} style={{
-                                    position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
-                                    left: `${(x / cols) * 100}%`, top: `${(y / rows) * 100}%`,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none'
-                                }}>
-                                    <div style={{ width: '70%', height: '70%', background: '#ef4444', borderRadius: '50%', animation: 'pacPulse 0.6s infinite alternate', position: 'relative', boxShadow: '0 0 10px rgba(239,68,68,0.5)' }}>
-                                        <div style={{ position: 'absolute', top: '-25%', left: '40%', width: '20%', height: '40%', background: '#22c55e', borderRadius: '4px', transform: 'rotate(20deg)' }} />
+                            {Array.from(pills).map(k => {
+                                const [x, y] = k.split(',').map(Number); return (
+                                    <div key={`p${k}`} style={{
+                                        position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
+                                        left: `${(x / cols) * 100}%`, top: `${(y / rows) * 100}%`,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none'
+                                    }}>
+                                        <div style={{ width: '70%', height: '70%', background: '#ef4444', borderRadius: '50%', animation: 'pacPulse 0.6s infinite alternate', position: 'relative', boxShadow: '0 0 10px rgba(239,68,68,0.5)' }}>
+                                            <div style={{ position: 'absolute', top: '-25%', left: '40%', width: '20%', height: '40%', background: '#22c55e', borderRadius: '4px', transform: 'rotate(20deg)' }} />
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })}
 
-                        {ghosts.map(g => {
-                            const fr = g.state === 'frightened';
-                            const flash = fr && frightenedTimer < 8 && frightenedTimer % 2 === 0;
-                            const skipTrans = Math.abs(g.x - (g.prevX ?? g.x)) > 1;
-                            return (
-                                <div key={g.id} style={{
-                                    position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
-                                    left: `${(g.x / cols) * 100}%`, top: `${(g.y / rows) * 100}%`,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10,
-                                    transition: skipTrans ? 'none' : `left ${fr ? 0.3 : 0.1}s linear, top ${fr ? 0.3 : 0.1}s linear`, pointerEvents: 'none'
-                                }}>
-                                    <GhostArt color={g.color} dir={g.dir} state={g.state} frightenedFlash={flash} size='95%' />
-                                </div>
-                            );
-                        })}
+                            {ghosts.map(g => {
+                                const fr = g.state === 'frightened';
+                                const flash = fr && frightenedTimer < 8 && frightenedTimer % 2 === 0;
+                                const skipTrans = Math.abs(g.x - (g.prevX ?? g.x)) > 1;
+                                return (
+                                    <div key={g.id} style={{
+                                        position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
+                                        left: `${(g.x / cols) * 100}%`, top: `${(g.y / rows) * 100}%`,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10,
+                                        transition: skipTrans ? 'none' : `left ${fr ? 0.3 : 0.1}s linear, top ${fr ? 0.3 : 0.1}s linear`, pointerEvents: 'none'
+                                    }}>
+                                        <GhostArt color={g.color} dir={g.dir} state={g.state} frightenedFlash={flash} size='95%' />
+                                    </div>
+                                );
+                            })}
 
-                        {(() => {
-                            const skipTrans = Math.abs(pacman.x - (pacman.prevX ?? pacman.x)) > 1;
-                            return (
-                                <div style={{
-                                    position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
-                                    left: `${(pacman.x / cols) * 100}%`, top: `${(pacman.y / rows) * 100}%`,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 11,
-                                    transition: (isDying || skipTrans) ? 'none' : 'left 0.1s linear,top 0.1s linear',
-                                    pointerEvents: 'none', animation: isDying ? 'pacDie 1.2s forwards' : isProtected ? 'pacFlash 0.25s infinite' : undefined
-                                }}>
-                                    <svg width='88%' height='88%' viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg' style={{ transform: `rotate(${pacman.dir.x === 1 ? 0 : pacman.dir.y === 1 ? 90 : pacman.dir.x === -1 ? 180 : -90}deg)`, display: 'block' }}>
-                                        <path fill='#fbbf24' d='M14,14 L28,5 A13,13 0 1,0 28,23 Z'>
-                                            {!isDying && !isProtected && (
-                                                <animate attributeName='d' values='M14,14 L28,5 A13,13 0 1,0 28,23 Z;M14,14 L28,13 A13,13 0 1,0 28,15 Z' dur='0.25s' repeatCount='indefinite' calcMode='linear' />
-                                            )}
-                                        </path>
-                                    </svg>
-                                </div>
-                            );
-                        })()}
+                            {(() => {
+                                const skipTrans = Math.abs(pacman.x - (pacman.prevX ?? pacman.x)) > 1;
+                                return (
+                                    <div style={{
+                                        position: 'absolute', width: `${100 / cols}%`, height: `${100 / rows}%`,
+                                        left: `${(pacman.x / cols) * 100}%`, top: `${(pacman.y / rows) * 100}%`,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 11,
+                                        transition: (isDying || skipTrans) ? 'none' : 'left 0.1s linear,top 0.1s linear',
+                                        pointerEvents: 'none', animation: isDying ? 'pacDie 1.2s forwards' : isProtected ? 'pacFlash 0.25s infinite' : undefined
+                                    }}>
+                                        <svg width='88%' height='88%' viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg' style={{ transform: `rotate(${pacman.dir.x === 1 ? 0 : pacman.dir.y === 1 ? 90 : pacman.dir.x === -1 ? 180 : -90}deg)`, display: 'block' }}>
+                                            <path fill='#fbbf24' d='M14,14 L28,5 A13,13 0 1,0 28,23 Z'>
+                                                {!isDying && !isProtected && (
+                                                    <animate attributeName='d' values='M14,14 L28,5 A13,13 0 1,0 28,23 Z;M14,14 L28,13 A13,13 0 1,0 28,15 Z' dur='0.25s' repeatCount='indefinite' calcMode='linear' />
+                                                )}
+                                            </path>
+                                        </svg>
+                                    </div>
+                                );
+                            })()}
 
-                        {phase === 'ready' && !isDying && (
-                            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.65)', zIndex: 20, borderRadius: '4px' }}>
-                                <h2 style={{ color: '#fbbf24', fontSize: 'clamp(1rem,4vw,2.5rem)', animation: 'pacFlash 0.8s infinite', margin: 0 }}>READY!</h2>
+                            {phase === 'ready' && !isDying && (
+                                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.65)', zIndex: 20, borderRadius: '4px' }}>
+                                    <h2 style={{ color: '#fbbf24', fontSize: 'clamp(1rem,4vw,2.5rem)', animation: 'pacFlash 0.8s infinite', margin: 0 }}>READY!</h2>
+                                </div>
+                            )}
+                        </div>
+
+                        {(phase === 'over' || phase === 'won') && (
+                            <div style={{
+                                position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                zIndex: 100, gap: '16px'
+                            }}>
+                                <div style={{ fontSize: '5rem', marginBottom: '0.5rem', animation: phase === 'won' ? 'wonBounce 1s infinite' : 'none' }}>{phase === 'won' ? '🏆' : '💀'}</div>
+                                <h2 style={{ fontSize: '3.5rem', margin: 0, color: phase === 'won' ? '#4ade80' : '#ef4444', fontWeight: 900, textShadow: phase === 'won' ? '0 0 20px rgba(74,222,128,0.5)' : '0 0 20px rgba(239,68,68,0.5)' }}>
+                                    {phase === 'won' ? t('pacman.victory') : t('pacman.gameOver')}
+                                </h2>
+                                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px 30px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textTransform: 'uppercase' }}>{t('pacman.finalScore')}: </span>
+                                    <b style={{ fontSize: '1.8rem', color: '#fbbf24' }}>{score}</b>
+                                </div>
+                                <div style={{ display: 'flex', gap: '14px', marginTop: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                                    <button className="btn-primary" style={{ padding: '14px 40px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px', background: phase === 'won' ? '#4ade80' : '#ef4444', color: phase === 'won' ? '#000' : '#fff' }} onClick={handleRestart}>
+                                        <RotateCcw size={22} /> {t('pacman.restart').toUpperCase()}
+                                    </button>
+                                    <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '14px 40px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <ArrowLeft size={22} /> {t('pacman.exit').toUpperCase()}
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>
-
-                    {(phase === 'over' || phase === 'won') && (
-                        <div style={{
-                            position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
-                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                            zIndex: 100, gap: '16px'
-                        }}>
-                            <div style={{ fontSize: '5rem', marginBottom: '0.5rem', animation: phase === 'won' ? 'wonBounce 1s infinite' : 'none' }}>{phase === 'won' ? '🏆' : '💀'}</div>
-                            <h2 style={{ fontSize: '3.5rem', margin: 0, color: phase === 'won' ? '#4ade80' : '#ef4444', fontWeight: 900, textShadow: phase === 'won' ? '0 0 20px rgba(74,222,128,0.5)' : '0 0 20px rgba(239,68,68,0.5)' }}>
-                                {phase === 'won' ? t('pacman.victory') : t('pacman.gameOver')}
-                            </h2>
-                            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px 30px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textTransform: 'uppercase' }}>{t('pacman.finalScore')}: </span>
-                                <b style={{ fontSize: '1.8rem', color: '#fbbf24' }}>{score}</b>
-                            </div>
-                            <div style={{ display: 'flex', gap: '14px', marginTop: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                                <button className="btn-primary" style={{ padding: '14px 40px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px', background: phase === 'won' ? '#4ade80' : '#ef4444', color: phase === 'won' ? '#000' : '#fff' }} onClick={handleRestart}>
-                                    <RotateCcw size={22} /> {t('pacman.restart').toUpperCase()}
-                                </button>
-                                <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '14px 40px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <ArrowLeft size={22} /> {t('pacman.exit').toUpperCase()}
-                                </button>
-                            </div>
-                        </div>
-                    )}
                 </div>
-            </div>
 
-            {/* ── PHẢI: INFO & CONTROLS ── */}
-            <div style={{ 
-                flex: '0 0 240px', 
-                width: '240px', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'space-between',
-                gap: '1rem', 
-                maxHeight: '100%',
-                overflow: 'hidden'
-            }}>
-                {/* INFO (Điểm & Máu) */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', padding: '1rem', boxSizing: 'border-box' }}>
-                    <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.1rem', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '8px' }}>
-                        <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#fbbf24', boxShadow: '0 0 10px #fbbf24' }} />
-                        PAC-MAN
-                    </div>
-                    
-<div style={{ padding: '12px', background: 'rgba(251,191,36,0.1)', borderRadius: '10px', border: '1px solid rgba(251,191,36,0.2)', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{t('pacman.score')}</div>
-                        <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#fbbf24' }}>{score}</div>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', margin: '8px 0' }}>
-                        <Heart size={24} color={lives > 0 ? '#ef4444' : '#374151'} fill={lives > 0 ? '#ef4444' : 'none'} />
-                        <Heart size={24} color={lives > 1 ? '#ef4444' : '#374151'} fill={lives > 1 ? '#ef4444' : 'none'} />
-                        <Heart size={24} color={lives > 2 ? '#ef4444' : '#374151'} fill={lives > 2 ? '#ef4444' : 'none'} />
-                    </div>
-
-                    <div style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
-                            <span style={{ color: 'var(--text-secondary)' }}>{t('pacman.map')}</span>
-                            <span style={{ color: '#fff', fontWeight: 600 }}>{mapType}</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                            <span style={{ color: 'var(--text-secondary)' }}>{t('pacman.difficulty')}</span>
-                            <span style={{ fontWeight: 700, color: difficulty === 'hard' ? '#ef4444' : '#f59e0b' }}>
-                                {difficulty === 'hard' ? t('pacman.hard') : t('pacman.easy')}
-                            </span>
-                        </div>
-                    </div>
-
+                {/* RIGHT PANEL */}
+                <div className="pacman-right-panel" style={{
+                    flex: '0 0 240px', display: 'flex', flexDirection: 'column',
+                    justifyContent: 'center', gap: '1rem', overflowY: 'auto', padding: '1.5rem',
+                    borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)'
+                }}>
                     {frightenedTimer > 0 && (
-                        <div style={{ padding: '8px', textAlign: 'center', borderRadius: '8px', border: '1px solid rgba(29,78,216,0.5)', background: 'rgba(29,78,216,0.1)' }}>
-                            <div style={{ fontSize: '0.65rem', color: '#93c5fd' }}>⚡ {t('pacman.power')}</div>
-                            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#60b5fa' }}>{frightenedTimer}</div>
+                        <div style={{ padding: '12px', textAlign: 'center', borderRadius: '12px', border: '1px solid rgba(29,78,216,0.5)', background: 'rgba(29,78,216,0.1)' }}>
+                            <div style={{ fontSize: '0.75rem', color: '#93c5fd', textTransform: 'uppercase' }}>⚡ {t('pacman.power')}</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#60b5fa' }}>{frightenedTimer}</div>
                         </div>
                     )}
-                </div>
 
-                {/* CONTROLS */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <button onClick={togglePause} disabled={phase === 'gameover' || phase === 'won'} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%', fontSize: '0.9rem', background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: isPaused ? '#38bdf8' : '#fff', cursor: (phase === 'gameover' || phase === 'won') ? 'default' : 'pointer', opacity: (phase === 'gameover' || phase === 'won') ? 0.5 : 1 }}>
-                            {isPaused ? t('pacman.resume') : t('pacman.pause')}
-                        </button>
-                        
-                        <button className="btn-primary" onClick={handleRestart} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
-                            <RotateCcw size={18} /> {t('pacman.restart')}
-                        </button>
-                        
-                        <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
-                            <ArrowLeft size={18} /> {t('pacman.exit')}
-                        </button>
+                    {/* CONTROLS */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <button onClick={togglePause} disabled={phase === 'gameover' || phase === 'won'} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%', fontSize: '0.9rem', background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: isPaused ? '#38bdf8' : '#fff', cursor: (phase === 'gameover' || phase === 'won') ? 'default' : 'pointer', opacity: (phase === 'gameover' || phase === 'won') ? 0.5 : 1 }}>
+                                {isPaused ? t('pacman.resume') : t('pacman.pause')}
+                            </button>
+                            
+                            <button className="btn-primary" onClick={handleRestart} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
+                                <RotateCcw size={18} /> {t('pacman.restart')}
+                            </button>
+                            
+                            <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
+                                <ArrowLeft size={18} /> {t('pacman.exit')}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -420,8 +417,29 @@ export default function PacmanGame() {
                 @keyframes pacFlash { 0%,100%{opacity:1} 50%{opacity:0.2} }
                 @keyframes pacPulse { 0%{transform:scale(0.8)} 100%{transform:scale(1.2)} }
                 @keyframes wonBounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+                @media (max-width: 850px) {
+                    .pacman-main-container > div {
+                        flex-direction: column !important;
+                        overflow-y: auto !important;
+                        height: auto !important;
+                    }
+                    .pacman-left-panel, .pacman-right-panel {
+                        flex: 0 0 auto !important;
+                        width: 100% !important;
+                        border-right: none !important;
+                        border-left: none !important;
+                        border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+                        max-height: none !important;
+                    }
+                    .pacman-board-area {
+                        flex: 0 0 auto !important;
+                        display: flex !important;
+                        justify-content: center !important;
+                        padding: 0.5rem !important;
+                        min-height: 60vh;
+                    }
+                }
             `}</style>
         </div>
-    </div>
     );
 }

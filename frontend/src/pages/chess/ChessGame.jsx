@@ -1,36 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Undo2, Lightbulb, History, ChevronRight, ChevronDown, Activity, Crown } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Undo2, Lightbulb, History, ChevronRight, ChevronDown, Activity, Crown, ZoomIn, ZoomOut } from 'lucide-react';
 import { useChessLogic } from './useChessLogic';
 import { useAudio } from '../../utils/useAudio';
 import { useTranslation } from 'react-i18next';
 
 function EvalBar({ score, myColor }) {
     const normalizedScore = Math.max(-2000, Math.min(2000, score));
-    // Score is relative to white.
-    // If myColor is 'w', higher score means more white fill from bottom.
     const whitePct = myColor === 'w'
         ? 50 + (normalizedScore / 2000) * 50
         : 50 - (normalizedScore / 2000) * 50;
 
     return (
         <div style={{
-            width: '28px', height: '100%', borderRadius: '14px', overflow: 'hidden',
-            background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)',
-            position: 'relative', flexShrink: 0
+            width: '12px', height: '100%', borderRadius: '6px', overflow: 'hidden',
+            background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)',
+            position: 'relative', flexShrink: 0, boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.5)'
         }}>
             <div style={{
                 position: 'absolute', bottom: 0, left: 0, right: 0,
-                height: `${whitePct}%`, background: '#f1f5f9',
-                transition: 'height 0.5s ease'
+                height: `${whitePct}%`, background: '#f8fafc',
+                boxShadow: '0 0 10px rgba(255,255,255,0.5)',
+                transition: 'height 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
             }} />
+            <div style={{ position: 'absolute', top: '50%', left: '-4px', right: '-4px', height: '2px', background: 'rgba(255,255,255,0.3)', zIndex: 2 }} />
             <div style={{
-                position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
-                justifyContent: 'center', fontSize: '0.6rem', fontWeight: 700, color: '#64748b',
-                writingMode: 'vertical-rl', textOrientation: 'mixed', zIndex: 2,
-                mixBlendMode: 'difference'
+                position: 'absolute', [whitePct > 50 ? 'bottom' : 'top']: '10px', left: '50%', transform: 'translateX(-50%)',
+                fontSize: '0.6rem', fontWeight: 800, color: whitePct > 50 ? '#0f172a' : '#f8fafc',
+                zIndex: 3, writingMode: 'vertical-rl'
             }}>
-                {Math.abs(normalizedScore) >= 900 ? 'M' : (normalizedScore > 0 ? '+' : '') + (normalizedScore / 100).toFixed(1)}
+                {Math.abs(normalizedScore) >= 900 ? 'M' : (Math.abs(normalizedScore) / 100).toFixed(1)}
             </div>
         </div>
     );
@@ -101,38 +100,21 @@ export default function ChessGame() {
         'b': { 'p': '♟', 'n': '♞', 'b': '♝', 'r': '♜', 'q': '♛', 'k': '♚' }
     };
 
+    const [zoomLevel, setZoomLevel] = useState(100);
+    const handleZoomIn = () => setZoomLevel(z => Math.min(200, z + 20));
+    const handleZoomOut = () => setZoomLevel(z => Math.max(60, z - 20));
+
     return (
         <div className="chess-main-container" style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100,
-            display: 'flex', flexDirection: 'column', overflow: 'hidden',
+            display: 'flex', overflow: 'hidden',
             background: 'radial-gradient(circle at center, #0f172a 0%, #020617 100%)',
         }}>
-            {/* Top bar area */}
-            <div className="chess-top-bar" style={{
-                flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '10px 1rem', borderBottom: '1px solid rgba(255,255,255,0.08)',
-                background: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(10px)',
-            }}>
-                <button onClick={() => navigate('/chess')} style={{
-                    display: 'flex', alignItems: 'center', gap: '6px',
-                    padding: '8px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.08)', color: '#fff',
-                    fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer'
-                }}>
-                    <ArrowLeft size={14} /> {t('common.returnToMenu', 'Về sảnh')}
-                </button>
-                <h1 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 900, color: '#f8fafc', letterSpacing: '1px' }}>
-                    CỜ VUA
-                </h1>
-                <div style={{ width: '100px' }} /> {/* Spacer */}
-            </div>
-
-            {/* Main content */}
-            <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+            <div style={{ flex: 1, display: 'flex', width: '100%', height: '100%' }}>
                 {/* LEFT CONTROL PANEL */}
                 <div className="chess-left-panel" style={{
-                    flex: '0 0 180px', display: 'flex', flexDirection: 'column', gap: '0.8rem',
-                    padding: '1rem', overflowY: 'auto', borderRight: '1px solid rgba(255,255,255,0.06)',
+                    flex: '0 0 240px', display: 'flex', flexDirection: 'column', gap: '0.8rem',
+                    padding: '1.5rem', overflowY: 'auto', borderRight: '1px solid rgba(255,255,255,0.06)',
                     background: 'rgba(15,23,42,0.6)',
                 }}>
                     <div style={{ textAlign: 'center' }}>
@@ -191,30 +173,51 @@ export default function ChessGame() {
                             <Lightbulb size={14} /> {isThinkingHint ? t('chess.thinking') : t('chess.hint')}
                         </button>
                     </div>
+
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 'auto', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <button onClick={() => navigate('/chess')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
+                            <ArrowLeft size={16} /> Thoát khỏi phòng
+                        </button>
+                    </div>
                 </div>
 
                 {/* EVAL BAR + CENTER BOARD */}
                 <div className="chess-board-area" style={{
                     flex: '1 1 auto', display: 'flex', justifyContent: 'center',
-                    minWidth: 0, minHeight: 0, gap: '12px', padding: '0 0.5rem',
-                    overflow: 'hidden', alignItems: 'center'
+                    minWidth: 0, minHeight: 0, gap: '12px', padding: '1rem',
+                    overflow: 'auto', alignItems: 'center', position: 'relative'
                 }}>
-                    <EvalBar score={evalScore} myColor={myColor} />
+                    
+                    {/* Zoom Controls */}
+                    <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(15,23,42,0.8)', padding: '6px 12px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', zIndex: 110, backdropFilter: 'blur(8px)' }}>
+                        <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                            <ZoomOut size={18} />
+                        </button>
+                        <span style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600, minWidth: '45px', textAlign: 'center', userSelect: 'none' }}>
+                            {zoomLevel}%
+                        </span>
+                        <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                            <ZoomIn size={18} />
+                        </button>
+                    </div>
 
-                    <div className="chess-board-container" style={{
-                        position: 'relative',
-                        width: 'clamp(260px, min(80vw - 70px, 60vh), 600px)', // aspect ratio 1:1
-                        aspectRatio: '1',
-                        boxSizing: 'border-box',
-                        backgroundColor: '#5f8099',
-                        border: '8px solid rgba(15, 15, 25, 0.95)',
-                        borderRadius: '6px',
-                        boxShadow: '0 0 30px rgba(0,0,0,0.6)',
-                        overflow: 'hidden',
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(8, 1fr)',
-                        gridTemplateRows: 'repeat(8, 1fr)'
-                    }}>
+                    <div style={{ display: 'flex', gap: '12px', height: zoomLevel > 100 ? `${600 * (zoomLevel/100)}px` : 'min(80vw - 70px, 85vh)' }}>
+                        <EvalBar score={evalScore} myColor={myColor} />
+
+                        <div className="chess-board-container" style={{
+                            position: 'relative',
+                            height: '100%',
+                            aspectRatio: '1',
+                            boxSizing: 'border-box',
+                            backgroundColor: '#5f8099',
+                            border: '8px solid rgba(15, 15, 25, 0.95)',
+                            borderRadius: '6px',
+                            boxShadow: '0 0 30px rgba(0,0,0,0.6)',
+                            overflow: 'hidden',
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(8, 1fr)',
+                            gridTemplateRows: 'repeat(8, 1fr)'
+                        }}>
                         {(() => {
                             const ranksArr = [8, 7, 6, 5, 4, 3, 2, 1];
                             const filesArr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
@@ -283,6 +286,7 @@ export default function ChessGame() {
                             return squares;
                         })()}
                     </div>
+                    </div>
 
                     {/* Hint Suggestions Overlay directly mapped near board */}
                     {hintSuggestions && hintSuggestions.length > 0 && (
@@ -346,8 +350,9 @@ export default function ChessGame() {
 
                 {/* RIGHT PANEL - Status + History */}
                 <div className="chess-right-panel" style={{
-                    flex: '0 0 180px', display: 'flex', flexDirection: 'column',
-                    gap: '0.6rem', overflow: 'hidden', padding: '1rem 1rem 1rem 0'
+                    flex: '0 0 240px', display: 'flex', flexDirection: 'column',
+                    justifyContent: 'center', gap: '0.8rem', overflowY: 'auto', padding: '1.5rem',
+                    borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)'
                 }}>
                     {/* Turn Status */}
                     <div style={{ background: 'linear-gradient(180deg, rgba(234,179,8,0.08), transparent)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(234,179,8,0.15)' }}>
@@ -439,10 +444,10 @@ export default function ChessGame() {
                 }
 
                 @media (max-width: 850px) {
-                    .chess-main-container {
+                    .chess-main-container > div {
                         flex-direction: column !important;
                         overflow-y: auto !important;
-                        height: 100vh !important;
+                        height: auto !important;
                     }
                     .chess-left-panel {
                         flex: 0 0 auto !important;

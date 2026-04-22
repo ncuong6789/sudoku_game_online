@@ -92,7 +92,7 @@ export default function CaroGame() {
                 </div>
 
                 {/* PHẢI: ĐIỀU KHIỂN & CHAT */}
-                <div style={{ flex: '1 1 250px', maxWidth: '300px', display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: 'min(calc(100vh - 150px), calc(100vw - 320px))' }}>
+                <div style={{ flex: '1 1 250px', maxWidth: '300px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1rem', maxHeight: 'min(calc(100vh - 150px), calc(100vw - 320px))' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
                         <div className="nav-item active" style={{ padding: '10px', display: 'flex', alignSelf: 'center', alignItems: 'center', gap: '8px', fontSize: '1.2rem', fontWeight: 'bold' }}><Swords size={20} /> {t('caro.title')} {BOARD_SIZE}x{BOARD_SIZE}</div>
                         <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{mode === 'solo' ? `${t('caro.vsAI')} (${difficulty})` : `${t('caro.room')}: ${roomId}`}</div>
