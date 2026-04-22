@@ -324,7 +324,7 @@ export default function PikachuGame() {
                 {/* RIGHT PANEL - Hint, Shuffle centered + Zoom at bottom */}
                 <div className="sudoku-right-panel" style={{
                     flex: '0 0 190px', display: 'flex', flexDirection: 'column', gap: '12px',
-                    padding: '1.5rem 1rem', borderLeft: '1px solid rgba(255,255,255,0.06)',
+                    padding: '4rem 1rem 1.5rem', borderLeft: '1px solid rgba(255,255,255,0.06)',
                     background: 'rgba(15,23,42,0.6)',
                 }}>
                     {/* Hint + Shuffle centered */}

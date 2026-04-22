@@ -64,16 +64,16 @@ const NextPiece = ({ type }) => {
     return (
         <div style={{ 
             display: 'grid', 
-            gridTemplateRows: `repeat(${shape.length}, 16px)`,
-            gridTemplateColumns: `repeat(${shape[0]?.length || 1}, 16px)`,
+            gridTemplateRows: `repeat(${shape.length}, 14px)`,
+            gridTemplateColumns: `repeat(${shape[0]?.length || 1}, 14px)`,
             margin: '0 auto',
             flexShrink: 0
         }}>
             {shape.map(row => row.map((cell, x) => (
                 <div key={x} style={{
-                    width: '16px', height: '16px',
+                    width: '14px', height: '14px',
                     backgroundColor: cell ? TETROMINOES[type].color : 'transparent',
-                    boxShadow: cell ? `inset 1.5px 1.5px 3px rgba(255,255,255,0.3)` : 'none',
+                    boxShadow: cell ? `inset 1px 1px 2px rgba(255,255,255,0.3)` : 'none',
                     borderRadius: '2px'
                 }} />
             )))}
@@ -354,16 +354,15 @@ export default function TetrisGame() {
                     </div>
                 </div>
 
-                {/* RIGHT PANEL */}
                 <div className="tetris-right-panel" style={{
                     flex: '0 0 200px', display: 'flex', flexDirection: 'column',
-                    gap: '0.75rem', padding: '1.5rem 1rem',
+                    gap: '0.75rem', padding: '4rem 1rem 1.5rem',
                     borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)'
                 }}>
                     {/* Next Pieces — centered */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.05)', padding: '1rem 0.8rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', minHeight: 0 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.05)', padding: '1rem 0.8rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', minHeight: 0 }}>
                         <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '1rem', letterSpacing: '2px', fontWeight: 700 }}>KHỐI TIẾP THEO</div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: '1.2rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.6rem' }}>
                             {nextPieces.map((type, idx) => (
                                 <NextPiece key={idx} type={type} />
                             ))}
