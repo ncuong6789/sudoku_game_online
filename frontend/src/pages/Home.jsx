@@ -215,13 +215,13 @@ export default function Home() {
     const handleJoinByCode = () => {
         if (!roomCode || roomCode.length < 4) return alert('Vui lòng nhập mã phòng hợp lệ!');
 
-        socket.emit('lookupRoom', { roomId: roomCode }, (res) => {
+        socket.emit('joinRoom', { roomId: roomCode }, (res) => {
             if (res.success) {
                 let path = `/${res.gameType}/game`;
                 if (res.gameType === 'pikachu') path = '/pikachu/online-game';
-                navigate(path, { state: { roomId: roomCode, mode: 'multiplayer', gridSize: res.gridSize, difficulty: res.difficulty } });
+                navigate(path, { state: { roomId: roomCode, mode: 'multiplayer', gridSize: res.gridSize, difficulty: res.difficulty, isHost: false } });
             } else {
-                alert(res.message || 'Không tìm thấy phòng!');
+                alert(res.message || 'Không tìm thấy phòng hoặc phòng đã đầy!');
             }
         });
     };

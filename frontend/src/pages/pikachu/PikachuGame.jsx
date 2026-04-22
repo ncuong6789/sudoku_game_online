@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Shuffle, HelpCircle, Activity, Clock, LayoutGrid, Volume2, VolumeX, Pause, Play } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Shuffle, HelpCircle, Target, Clock, Volume2, VolumeX, Pause, Play, ShieldAlert, Award } from 'lucide-react';
 import { usePikachuLogic } from './usePikachuLogic';
 import { useBgMusic } from '../../hooks/useBgMusic';
 import { useTranslation } from 'react-i18next';
@@ -15,22 +15,19 @@ export default function PikachuGame() {
     const resume = state.resume === true;
 
     const {
-        board, ROWS, COLS, activeRows, level, score, timeLeft, status, selected, connectedPath,
+        board, ROWS, COLS, level, score, timeLeft, status, selected, connectedPath,
         hints, shuffles, hintPair, penaltyFlash, isPaused, togglePause,
-        handleTileClick, useHint, handleShuffle, initGame, checkAndFixDeadlock
+        handleTileClick, useHint, handleShuffle, initGame
     } = usePikachuLogic(gameMode, timeLimitEnabled, resume);
 
     const { muted, toggleMute } = useBgMusic('/pikachu_audio/backgroundMusic.mp3', status === 'playing', 0.12);
 
-    // Mảng lưới board sẽ có size (ROWS+2) x (COLS+2) (Padding)
-    // Map tile ID sang icon (sg11 used 0-35, but we use 1-36 internally to reserve 0 for empty space)
     const getIconSrc = (id) => `/pikachu_sprites/${id - 1}.png`;
 
     const boardRef = React.useRef(null);
     const cellRefs = React.useRef({});
     const [linePoints, setLinePoints] = React.useState('');
 
-    // Bắt chước logic temp_sg11 LinesDrawer.cs (dùng Position/DOM absolute tracking) để đường line 100% trúng tâm Icon mà k bị ảnh hưởng bởi Grid.
     React.useEffect(() => {
         if (!connectedPath || connectedPath.length < 2 || !boardRef.current) {
             setLinePoints('');
@@ -48,7 +45,6 @@ export default function PikachuGame() {
             setLinePoints(pts);
         };
 
-        // Render point exactly onto elements
         computePoints();
         window.addEventListener('resize', computePoints);
         return () => window.removeEventListener('resize', computePoints);
@@ -94,159 +90,150 @@ export default function PikachuGame() {
         };
     };
 
+    if (!board) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#020617', color: '#fff' }}>Đang tải...</div>;
+
     return (
-        <div className="full-page-mobile-scroll" style={{
-            display: 'flex', justifyContent: 'center', alignItems: 'center',
-            width: '100vw', height: '100vh', boxSizing: 'border-box', overflow: 'hidden'
+        <div className="sudoku-main-container full-page-mobile-scroll" style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100,
+            display: 'flex', flexDirection: 'column', overflow: 'hidden',
+            background: 'radial-gradient(circle at center, #0f172a 0%, #020617 100%)',
         }}>
-            <div className="glass-panel" style={{
-                position: 'relative',
-                /* Layout: khối chữ nhật cân đối ở giữa, không full màn hình */
-                width: 'min(calc(100vw - 2rem), calc((100vh - 2rem) * 1.35))',
-                height: 'min(calc(100vh - 2rem), calc((100vw - 2rem) / 1.35))',
-                maxWidth: '1150px',
-                maxHeight: '860px',
-                display: 'flex',
-                flexDirection: 'column',
-                padding: '0.5rem 0.8rem',
-                borderRadius: '20px',
-                background: 'rgba(23, 23, 33, 0.88)',
-                boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255,255,255,0.06)'
-            }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '5px 14px', marginBottom: '4px', flexShrink: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Activity size={16} color="var(--primary-color)" />
-                        <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }}>{t('pikachu.level')}: {level}</span>
-                        <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>· {gameMode === 'classic' ? t('pikachu.classic') : t('pikachu.full')}</span>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', justifyContent: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ fontWeight: 800, fontSize: '1rem', color: '#eab308' }}>{t('pikachu.score')}: {score}</span>
-                        </div>
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '15px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#a855f7' }}>
-                            <HelpCircle size={15} /> <b>{hints}</b>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#38bdf8' }}>
-                            <Shuffle size={15} /> <b>{shuffles}</b>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Progress Bar for Time */}
-                <div style={{
-                    width: '100%', height: '8px', background: 'rgba(255,255,255,0.05)',
-                    borderRadius: '6px', overflow: 'hidden', marginBottom: '4px', position: 'relative', flexShrink: 0
+            {/* Main content wrapper */}
+            <div className="sudoku-layout-wrapper" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+                
+                {/* LEFT PANEL - Stats */}
+                <div className="sudoku-left-panel" style={{
+                    flex: '0 0 220px', display: 'flex', flexDirection: 'column', gap: '1rem',
+                    padding: '1.5rem', overflowY: 'auto', borderRight: '1px solid rgba(255,255,255,0.06)',
+                    background: 'rgba(15,23,42,0.6)',
                 }}>
-                    <div style={{
-                        height: '100%',
-                        width: timeLimitEnabled ? `${timeLeft}%` : '100%',
-                        background: penaltyFlash ? ('#ef4444') : (timeLeft < 20 && timeLimitEnabled ? '#ef4444' : 'linear-gradient(90deg, #4ade80, #38bdf8)'),
-                        transition: penaltyFlash ? 'none' : 'width 0.1s linear, background 0.3s ease',
-                        boxShadow: penaltyFlash ? '0 0 10px #ef4444' : 'none'
-                    }} />
-                    {!timeLimitEnabled && (
-                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 900, color: 'rgba(255,255,255,0.5)', letterSpacing: '2px' }}>
-                        </div>
-                    )}
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'row', gap: '10px', alignItems: 'stretch', flex: 1, minHeight: 0, overflow: 'hidden' }}>
-                    {/* Main Board - inner panel background */}
-                    <div style={{
-                        flex: 1, minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column', alignItems: 'stretch',
-                        background: 'rgba(5, 10, 20, 0.45)', borderRadius: '12px', border: '2px solid rgba(255,255,255,0.07)', overflow: 'hidden'
-                    }}>
-                        <div style={{ position: 'relative', flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '4px' }}>
-                            {/* Combined Grid and Overlays Container */}
-                            <div
-                                ref={boardRef}
-                                style={{
-                                    position: 'relative',
-                                    maxWidth: '100%',
-                                    maxHeight: '100%',
-                                    aspectRatio: `${COLS + 2} / ${ROWS + 4}`,
-                                    margin: 'auto',
-                                    display: 'grid',
-                                    gridTemplateColumns: `repeat(${COLS + 2}, 1fr)`,
-                                    gridTemplateRows: `repeat(${ROWS + 4}, 1fr)`,
-                                }}
-                            >
-                                {/* Extra top border row */}
-                                {Array.from({ length: COLS + 2 }, (_, c) => (
-                                    <div key={`extra-top-${c}`} style={{ width: '100%', height: '100%' }} />
-                                ))}
-                                {board.map((row, r) =>
-                                    row.map((id, c) => (
-                                        <div
-                                            key={`cell-${r}-${c}`}
-                                            ref={(el) => {
-                                                if (el) cellRefs.current[`${r}-${c}`] = el;
-                                            }}
-                                            onClick={() => handleTileClick(r, c)}
-                                            style={{
-                                                width: '100%',
-                                                height: '100%',
-                                                margin: 0,
-                                                padding: 0,
-                                                cursor: id !== 0 ? 'pointer' : 'default',
-                                            }}
-                                        >
-                                            {id !== 0 && (
-                                                <img
-                                                    src={getIconSrc(id)}
-                                                    alt={`Tile ${id}`}
-                                                    style={{
-                                                        width: '100%',
-                                                        height: '100%',
-                                                        objectFit: 'fill',
-                                                        display: 'block',
-                                                        margin: 0,
-                                                        padding: 0,
-                                                        ...getTileStyle(r, c, id),
-                                                    }}
-                                                    draggable="false"
-                                                    loading="eager"
-                                                />
-                                            )}
-                                        </div>
-                                    ))
-                                )}
-                                {/* Extra bottom border row */}
-                                {Array.from({ length: COLS + 2 }, (_, c) => (
-                                    <div key={`extra-bot-${c}`} style={{ width: '100%', height: '100%' }} />
-                                ))}
-
-                                {/* SVG Overlays - Pixel absolute line renderer like temp_sg11 LinesDrawer.cs */}
-                                {connectedPath && linePoints && (
-                                    <svg
-                                        style={{
-                                            position: 'absolute',
-                                            inset: 0,
-                                            width: '100%',
-                                            height: '100%',
-                                            pointerEvents: 'none',
-                                            zIndex: 100,
-                                            overflow: 'visible'
-                                        }}
-                                    >
-                                        <polyline
-                                            points={linePoints}
-                                            fill="none"
-                                            stroke="#ef4444"
-                                            strokeWidth="5"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            style={{ filter: 'drop-shadow(0 0 6px rgba(239,68,68,1))' }}
-                                        />
-                                    </svg>
-                                )}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        
+                        {/* Level Card */}
+                        <div style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', padding: '15px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ background: 'rgba(59,130,246,0.2)', padding: '8px', borderRadius: '8px' }}>
+                                <Target size={20} color="#60a5fa" />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Cấp độ</div>
+                                <div style={{ fontSize: '1.1rem', color: '#f8fafc', fontWeight: 800 }}>{level}</div>
                             </div>
                         </div>
 
+                        {/* Score Card */}
+                        <div style={{ background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.2)', padding: '15px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ background: 'rgba(234,179,8,0.2)', padding: '8px', borderRadius: '8px' }}>
+                                <Award size={20} color="#fcd34d" />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Điểm số</div>
+                                <div style={{ fontSize: '1.1rem', color: '#fcd34d', fontWeight: 800 }}>{score}</div>
+                            </div>
+                        </div>
+
+                        {/* Time Card with integrated Progress */}
+                        <div style={{ 
+                            background: penaltyFlash ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.03)', 
+                            border: `1px solid ${penaltyFlash ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.05)'}`, 
+                            padding: '15px', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '10px',
+                            transition: penaltyFlash ? 'none' : 'all 0.3s'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '8px' }}>
+                                    <Clock size={20} color={timeLimitEnabled ? (timeLeft < 20 ? "#ef4444" : "#38bdf8") : "#a855f7"} />
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>
+                                        {timeLimitEnabled ? t('pikachu.time') : t('pikachu.relax')}
+                                    </div>
+                                    <div style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>
+                                        {timeLimitEnabled ? t('pikachu.limit') : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            {timeLimitEnabled && (
+                                <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+                                    <div style={{ 
+                                        height: '100%', width: `${timeLeft}%`, 
+                                        background: timeLeft < 20 ? '#ef4444' : 'linear-gradient(90deg, #4ade80, #38bdf8)',
+                                        transition: 'width 0.1s linear'
+                                    }} />
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '10px', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <button onClick={() => initGame()} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.background='transparent'}>
+                                <RotateCcw size={16} /> Bắt đầu ván mới
+                            </button>
+                            <button onClick={() => navigate('/pikachu')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
+                                <ArrowLeft size={16} /> {t('common.returnToMenu', 'Về sảnh')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* CENTER - BOARD */}
+                <div className="sudoku-board-area" style={{ flex: '1 1 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', overflowY: 'auto' }}>
+                    <div style={{ 
+                        position: 'relative', width: '100%', height: '100%', maxHeight: '860px', maxWidth: '1150px',
+                        background: 'rgba(5, 10, 20, 0.45)', borderRadius: '12px', border: '2px solid rgba(255,255,255,0.07)', 
+                        overflow: 'hidden', display: 'flex', padding: '10px', boxShadow: '0 10px 40px -5px rgba(0, 0, 0, 0.6)'
+                    }}>
+                        
+                        {/* Board Grid */}
+                        <div
+                            ref={boardRef}
+                            style={{
+                                position: 'relative', width: '100%', height: '100%',
+                                aspectRatio: `${COLS + 2} / ${ROWS + 4}`,
+                                margin: 'auto', display: 'grid',
+                                gridTemplateColumns: `repeat(${COLS + 2}, 1fr)`,
+                                gridTemplateRows: `repeat(${ROWS + 4}, 1fr)`,
+                            }}
+                        >
+                            {/* Extra top border row */}
+                            {Array.from({ length: COLS + 2 }, (_, c) => <div key={`extra-top-${c}`} />)}
+                            
+                            {board.map((row, r) =>
+                                row.map((id, c) => (
+                                    <div
+                                        key={`cell-${r}-${c}`}
+                                        ref={(el) => { if (el) cellRefs.current[`${r}-${c}`] = el; }}
+                                        onClick={() => handleTileClick(r, c)}
+                                        style={{ width: '100%', height: '100%', cursor: id !== 0 ? 'pointer' : 'default' }}
+                                    >
+                                        {id !== 0 && (
+                                            <img
+                                                src={getIconSrc(id)}
+                                                alt={`Tile ${id}`}
+                                                style={{
+                                                    width: '100%', height: '100%', objectFit: 'fill', display: 'block',
+                                                    ...getTileStyle(r, c, id),
+                                                }}
+                                                draggable="false"
+                                            />
+                                        )}
+                                    </div>
+                                ))
+                            )}
+                            
+                            {/* Extra bottom border row */}
+                            {Array.from({ length: COLS + 2 }, (_, c) => <div key={`extra-bot-${c}`} />)}
+
+                            {/* SVG Lines */}
+                            {connectedPath && linePoints && (
+                                <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 100, overflow: 'visible' }}>
+                                    <polyline
+                                        points={linePoints} fill="none" stroke="#ef4444" strokeWidth="5"
+                                        strokeLinecap="round" strokeLinejoin="round"
+                                        style={{ filter: 'drop-shadow(0 0 6px rgba(239,68,68,1))' }}
+                                    />
+                                </svg>
+                            )}
+                        </div>
+
+                        {/* Overlays */}
                         {isPaused && (
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.75)', zIndex: 60, backdropFilter: 'blur(8px)' }}>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
@@ -254,14 +241,13 @@ export default function PikachuGame() {
                                         <Play size={36} fill="#fff" />
                                     </button>
                                     <div style={{ color: '#fff', fontSize: '1.1rem', fontWeight: 600 }}>{t('pikachu.continue')}</div>
-                                    <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>{t('pikachu.playToContinue')}</div>
                                 </div>
                             </div>
                         )}
 
                         {status === 'won' && (
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', zIndex: 50, backdropFilter: 'blur(8px)' }}>
-                                <div style={{ background: 'rgba(20,20,30,0.95)', borderRadius: '24px', padding: '40px 50px', border: '1px solid rgba(74,222,128,0.3)', boxShadow: '0 0 40px rgba(74,222,128,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                                <div style={{ background: 'rgba(20,20,30,0.95)', borderRadius: '24px', padding: '40px 50px', border: '1px solid rgba(74,222,128,0.3)', boxShadow: '0 0 40px rgba(74,222,128,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', animation: 'wonBounce 0.5s ease' }}>
                                     <div style={{ fontSize: '4rem' }}>🏆</div>
                                     <h2 style={{ fontSize: '1.8rem', color: '#4ade80', margin: 0, fontWeight: 900 }}>{t('pikachu.won')}</h2>
                                     <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1rem', margin: 0 }}>{t('pikachu.levelComplete')} {level}</p>
@@ -271,6 +257,7 @@ export default function PikachuGame() {
                                 </div>
                             </div>
                         )}
+
                         {status === 'finished' && (
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', zIndex: 50, backdropFilter: 'blur(12px)' }}>
                                 <div style={{ background: 'rgba(20,20,30,0.95)', borderRadius: '24px', padding: '40px 50px', border: '1px solid rgba(234,179,8,0.3)', boxShadow: '0 0 40px rgba(234,179,8,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
@@ -286,6 +273,7 @@ export default function PikachuGame() {
                                 </div>
                             </div>
                         )}
+
                         {status === 'gameover' && (
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.9)', zIndex: 50, backdropFilter: 'blur(8px)' }}>
                                 <div style={{ background: 'rgba(20,20,30,0.95)', borderRadius: '24px', padding: '40px 50px', border: '1px solid rgba(239,68,68,0.3)', boxShadow: '0 0 40px rgba(239,68,68,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
@@ -304,72 +292,57 @@ export default function PikachuGame() {
                             </div>
                         )}
                     </div>
+                </div>
 
-                    {/* Right Panel Controls */}
-                    <div style={{ width: '185px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                            <button className="btn-secondary" onClick={useHint} disabled={hints <= 0 || status !== 'playing'} style={{
-                                padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
-                                background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.3)', color: '#d8b4fe', borderRadius: '10px'
-                            }}>
-                                <HelpCircle size={22} />
-                                <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t('pikachu.hintBtn')} ({hints})</div>
-                            </button>
+                {/* RIGHT PANEL - CONTROLS */}
+                <div className="sudoku-right-panel" style={{
+                    flex: '0 0 220px', display: 'flex', flexDirection: 'column', gap: '12px',
+                    padding: '1.5rem', overflowY: 'auto', borderLeft: '1px solid rgba(255,255,255,0.06)',
+                    background: 'rgba(15,23,42,0.6)',
+                }}>
+                    <button onClick={useHint} disabled={hints <= 0 || status !== 'playing'} style={{
+                        width: '100%', padding: '18px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+                        background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.3)', color: '#d8b4fe', borderRadius: '12px',
+                        cursor: hints <= 0 || status !== 'playing' ? 'not-allowed' : 'pointer', transition: 'all 0.2s', opacity: hints <= 0 || status !== 'playing' ? 0.5 : 1
+                    }}>
+                        <HelpCircle size={26} />
+                        <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t('pikachu.hintBtn')} ({hints})</div>
+                    </button>
 
-                            <button className="btn-secondary" onClick={handleShuffle} disabled={shuffles <= 0 || status !== 'playing'} style={{
-                                padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
-                                background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.3)', color: '#bae6fd', borderRadius: '10px'
-                            }}>
-                                <Shuffle size={22} />
-                                <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t('pikachu.shuffleBtn')} ({shuffles})</div>
-                            </button>
-                        </div>
+                    <button onClick={handleShuffle} disabled={shuffles <= 0 || status !== 'playing'} style={{
+                        width: '100%', padding: '18px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+                        background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.3)', color: '#bae6fd', borderRadius: '12px',
+                        cursor: shuffles <= 0 || status !== 'playing' ? 'not-allowed' : 'pointer', transition: 'all 0.2s', opacity: shuffles <= 0 || status !== 'playing' ? 0.5 : 1
+                    }}>
+                        <Shuffle size={26} />
+                        <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t('pikachu.shuffleBtn')} ({shuffles})</div>
+                    </button>
 
-                        <div style={{ padding: '16px', borderRadius: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div style={{ color: '#94a3b8', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <Clock size={14} /> {timeLimitEnabled ? t('pikachu.time') + ' (' + t('pikachu.limit') + ')' : t('pikachu.time') + ' (' + t('pikachu.relax') + ')'}
-                            </div>
-                            <div style={{ fontSize: '0.85rem', color: timeLimitEnabled ? '#38bdf8' : '#a855f7', fontWeight: 600 }}>
-                                {timeLimitEnabled ? t('pikachu.penalty') : t('pikachu.relax')}
-                            </div>
-                        </div>
-
-                        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <button onClick={togglePause} style={{
-                                width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                                fontSize: '0.92rem', fontWeight: 800, textTransform: 'uppercase',
-                                background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)',
-                                border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '8px', color: isPaused ? '#38bdf8' : '#fff', cursor: 'pointer'
-                            }}>
-                                {isPaused ? <Play size={20} fill="#38bdf8" /> : <Pause size={20} fill="#fff" />}
-                                {t('pikachu.pause')}
-                            </button>
-                            <button onClick={toggleMute} style={{
-                                width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                                fontSize: '0.92rem', fontWeight: 800, textTransform: 'uppercase',
-                                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px',
-                                color: muted ? '#ef4444' : '#4ade80', cursor: 'pointer'
-                            }}>
-                                {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                                {muted ? t('pikachu.musicOn') : t('pikachu.musicOff')}
-                            </button>
-                            <button className="btn-secondary" onClick={() => initGame()} style={{
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px',
-                                fontSize: '0.92rem', fontWeight: 800, textTransform: 'uppercase'
-                            }}>
-                                <RotateCcw size={18} /> {t('pikachu.newGame')}
-                            </button>
-                            <button className="btn-secondary" onClick={() => navigate('/pikachu')} style={{
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px',
-                                fontSize: '0.92rem', fontWeight: 800, textTransform: 'uppercase'
-                            }}>
-                                <ArrowLeft size={18} /> {t('common.exit')}
-                            </button>
-                        </div>
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 'auto', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <button onClick={togglePause} style={{
+                            width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                            fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase',
+                            background: isPaused ? 'rgba(56,189,248,0.2)' : 'transparent',
+                            border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '10px', color: isPaused ? '#38bdf8' : '#fff', cursor: 'pointer', transition: 'background 0.2s'
+                        }} onMouseEnter={(e) => !isPaused && (e.currentTarget.style.background='rgba(255,255,255,0.05)')} onMouseLeave={(e) => !isPaused && (e.currentTarget.style.background='transparent')}>
+                            {isPaused ? <Play size={18} fill="#38bdf8" /> : <Pause size={18} fill="#fff" />}
+                            {t('pikachu.pause')}
+                        </button>
+                        
+                        <button onClick={toggleMute} style={{
+                            width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                            fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase',
+                            background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px',
+                            color: muted ? '#ef4444' : '#4ade80', cursor: 'pointer', transition: 'background 0.2s'
+                        }} onMouseEnter={(e) => e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.background='transparent'}>
+                            {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                            {muted ? t('pikachu.musicOn') : t('pikachu.musicOff')}
+                        </button>
                     </div>
                 </div>
             </div>
+
             <style>{`
                 @keyframes hintPulse {
                     0% { box-shadow: 0 0 5px #ff2020; outline-color: rgba(255,32,32,0.5); }
