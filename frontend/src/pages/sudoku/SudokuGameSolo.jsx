@@ -132,7 +132,7 @@ export default function SudokuGameSolo() {
                                 <RotateCcw size={16} /> Bắt đầu ván mới
                             </button>
                             <button onClick={() => navigate('/sudoku')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
-                                <ArrowLeft size={16} /> {t('common.returnToMenu', 'Về sảnh')}
+                                <ArrowLeft size={16} /> Thoát khỏi phòng
                             </button>
                         </div>
                     </div>

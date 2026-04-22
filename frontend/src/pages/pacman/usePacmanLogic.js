@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAudio } from '../../utils/useAudio';
 import { ALL_MAPS, CLASSIC, DIRS, GHOST_STARTS, chooseDirectionClassic, getGlobalMode, getRandomDir, manhattan, parseMap } from './pacmanAI';
 
-export function usePacmanLogic(mapType, difficulty, isPaused) {
+export function usePacmanLogic(mapType, difficulty, isPaused, muted = false) {
     const { playWinSound, playLoseSound, playPacmanStartSound, playPacmanWakaSound, playPacmanPowerPillSound, playPacmanEatGhostSound, playPacmanDieSound } = useAudio();
 
     const [mapGrid, setMapGrid] = useState([]);
@@ -19,16 +19,25 @@ export function usePacmanLogic(mapType, difficulty, isPaused) {
 
     const ref = useRef({});
     useEffect(() => {
-        ref.current = { pacman, ghosts, dots, pills, score, lives, phase, frightenedTimer, protectedTimer, mapGrid, tickCount, isPaused };
+        ref.current = { pacman, ghosts, dots, pills, score, lives, phase, frightenedTimer, protectedTimer, mapGrid, tickCount, isPaused, muted };
     });
 
     const snd = useRef({});
     useEffect(() => {
-        snd.current = { playWinSound, playLoseSound, playPacmanWakaSound, playPacmanPowerPillSound, playPacmanEatGhostSound, playPacmanDieSound };
-    }, [playWinSound, playLoseSound, playPacmanWakaSound, playPacmanPowerPillSound, playPacmanEatGhostSound, playPacmanDieSound]);
+        snd.current = { 
+            playWinSound: () => { if (!muted) playWinSound() }, 
+            playLoseSound: () => { if (!muted) playLoseSound() }, 
+            playPacmanWakaSound: () => { if (!muted) playPacmanWakaSound() }, 
+            playPacmanPowerPillSound: () => { if (!muted) playPacmanPowerPillSound() }, 
+            playPacmanEatGhostSound: () => { if (!muted) playPacmanEatGhostSound() }, 
+            playPacmanDieSound: () => { if (!muted) playPacmanDieSound() } 
+        };
+    }, [playWinSound, playLoseSound, playPacmanWakaSound, playPacmanPowerPillSound, playPacmanEatGhostSound, playPacmanDieSound, muted]);
 
     const nextDir = useRef({ x: -1, y: 0 });
     const totalDotsRef = useRef(0);
+    const startAudioRef = useRef(null);
+    const startTimeoutRef = useRef(null);
 
     const initGame = useCallback(() => {
         const raw = ALL_MAPS[mapType] ?? CLASSIC;
@@ -56,10 +65,35 @@ export function usePacmanLogic(mapType, difficulty, isPaused) {
 
         setScore(0); setLives(3); setFrightenedTimer(0); setProtectedTimer(0); setTickCount(0);
         nextDir.current = { x: -1, y: 0 };
+        
+        if (startTimeoutRef.current) clearTimeout(startTimeoutRef.current);
+        if (startAudioRef.current) {
+            try { startAudioRef.current.pause(); startAudioRef.current.src = ""; } catch(e){}
+        }
+
         setPhase('ready');
-        try { playPacmanStartSound(); } catch (e) { }
-        setTimeout(() => setPhase('playing'), 4300);
+        try { 
+            if (!ref.current.muted) {
+                startAudioRef.current = playPacmanStartSound();
+            }
+        } catch (e) { }
+
+        startTimeoutRef.current = setTimeout(() => {
+            setPhase('playing');
+            startAudioRef.current = null;
+        }, 4300);
     }, [mapType, difficulty, playPacmanStartSound]);
+
+    useEffect(() => {
+        if (!startAudioRef.current) return;
+        if (isPaused || muted) {
+            try { startAudioRef.current.pause(); } catch(e){}
+        } else {
+            if (phase === 'ready') {
+                try { startAudioRef.current.play().catch(()=>{}); } catch(e){}
+            }
+        }
+    }, [isPaused, muted, phase]);
 
     useEffect(() => { initGame(); }, [initGame]); 
 
@@ -244,9 +278,22 @@ export function usePacmanLogic(mapType, difficulty, isPaused) {
                                 state: g.dotThreshold === 0 ? (g.id === 'PINKY' ? 'exiting' : 'chase') : 'house'
                             };
                         }));
+                        if (startTimeoutRef.current) clearTimeout(startTimeoutRef.current);
+                        if (startAudioRef.current) {
+                            try { startAudioRef.current.pause(); startAudioRef.current.src = ""; } catch(e){}
+                        }
+                        
                         setFrightenedTimer(0); setProtectedTimer(12); setPhase('ready');
-                        try { playPacmanStartSound(); } catch (e) { }
-                        setTimeout(() => setPhase('playing'), 4300);
+                        try { 
+                            if (!ref.current.muted) {
+                                startAudioRef.current = playPacmanStartSound();
+                            }
+                        } catch (e) { }
+                        
+                        startTimeoutRef.current = setTimeout(() => {
+                            setPhase('playing');
+                            startAudioRef.current = null;
+                        }, 4300);
                     }
                 }, 1200);
                 setGhosts(finalGhosts);

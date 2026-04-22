@@ -322,7 +322,9 @@
     "resume": "Tiếp tục",
     "pause": "Tạm dừng",
     "victory": "VICTORY!",
-    "gameOver": "GAME OVER!"
+    "gameOver": "GAME OVER!",
+    "musicOn": "BẬT NHẠC",
+    "musicOff": "TẮT NHẠC"
   },
   "jungle": {
     "title": "Cờ Thú",

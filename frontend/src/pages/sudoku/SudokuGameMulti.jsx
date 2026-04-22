@@ -355,8 +355,8 @@ export default function MultiplayerGame() {
                                 completedNumbers={completedNumbers}
                             />
 
-                            <button className="btn-secondary" style={{ marginTop: '20px' }} onClick={handleQuit}>
-                                {isGameOver ? 'Back to Menu' : 'Quit Game'}
+                            <button onClick={handleQuit} style={{ marginTop: '20px', width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
+                                {isGameOver ? '← Thoát khỏi phòng' : '← Thoát khỏi phòng'}
                             </button>
                         </div>
 

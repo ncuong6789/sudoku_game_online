@@ -322,7 +322,9 @@
     "resume": "Resume",
     "pause": "Pause",
     "victory": "VICTORY!",
-    "gameOver": "GAME OVER!"
+    "gameOver": "GAME OVER!",
+    "musicOn": "MUSIC ON",
+    "musicOff": "MUSIC OFF"
   },
   "jungle": {
     "title": "Jungle",

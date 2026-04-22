@@ -358,13 +358,6 @@ export default function TankGame() {
                         <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 900, color: '#fff', letterSpacing: '2px' }}>{t('tank.title')}</h1>
                         <div style={{ color: '#ffd700', fontSize: '0.8rem', fontWeight: 800 }}>{t('tank.subtitle')}</div>
                     </div>
-                    
-                    <button className="btn-secondary" onClick={() => navigate('/tank')} style={{
-                        padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)'
-                    }}>
-                        <ArrowLeft size={18} /> {t('tank.exit')}
-                    </button>
 
                     <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: '16px', padding: '15px', border: '1px solid rgba(255,255,255,0.05)' }}>
                         <div style={{ fontSize: '0.75rem', color: '#888', fontWeight: 800, marginBottom: '12px', letterSpacing: '1px' }}>🕹 {t('tank.controls')}</div>
@@ -384,6 +377,12 @@ export default function TankGame() {
                                 </div>
                             ))}
                         </div>
+                    </div>
+
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 'auto', paddingTop: '14px' }}>
+                        <button onClick={() => navigate('/tank')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
+                            <ArrowLeft size={16} /> Thoát khỏi phòng
+                        </button>
                     </div>
                 </div>
 
