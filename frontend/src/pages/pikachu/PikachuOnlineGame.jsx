@@ -196,11 +196,29 @@ export default function PikachuOnlineGame() {
                 </div>
 
                 {/* CENTER - BOARD */}
-                <div className="sudoku-board-area" style={{ flex: '1 1 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', overflowY: 'auto' }}>
+                <div className="sudoku-board-area" style={{ flex: '1 1 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', overflow: 'auto', position: 'relative' }}>
+                    
+                    {/* Zoom Controls */}
+                    <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(15,23,42,0.8)', padding: '6px 12px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', zIndex: 110, backdropFilter: 'blur(8px)' }}>
+                        <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                            <ZoomOut size={18} />
+                        </button>
+                        <span style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600, minWidth: '45px', textAlign: 'center', userSelect: 'none' }}>
+                            {zoomLevel}%
+                        </span>
+                        <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                            <ZoomIn size={18} />
+                        </button>
+                    </div>
+
                     <div style={{ 
-                        position: 'relative', width: '100%', height: '100%', maxHeight: '880px', maxWidth: '1200px',
+                        position: 'relative', width: `${zoomLevel}%`, height: `${zoomLevel}%`, 
+                        maxHeight: zoomLevel > 100 ? 'none' : '880px', maxWidth: zoomLevel > 100 ? 'none' : '1200px',
+                        minHeight: zoomLevel > 100 ? `${8.8 * zoomLevel}px` : 'auto',
+                        minWidth: zoomLevel > 100 ? `${12.0 * zoomLevel}px` : 'auto',
                         background: 'rgba(5, 10, 20, 0.45)', borderRadius: '12px', border: '2px solid rgba(255,255,255,0.07)', 
-                        overflow: 'hidden', display: 'flex', padding: '10px', boxShadow: '0 10px 40px -5px rgba(0, 0, 0, 0.6)'
+                        overflow: 'hidden', display: 'flex', padding: '10px', boxShadow: '0 10px 40px -5px rgba(0, 0, 0, 0.6)',
+                        transition: 'width 0.2s, height 0.2s, min-width 0.2s, min-height 0.2s'
                     }}>
                         <div
                             ref={boardRef}
@@ -267,7 +285,7 @@ export default function PikachuOnlineGame() {
                 {/* RIGHT PANEL - CONTROLS */}
                 <div className="sudoku-right-panel" style={{
                     flex: '0 0 220px', display: 'flex', flexDirection: 'column', gap: '12px',
-                    padding: '1.5rem', overflowY: 'auto', borderLeft: '1px solid rgba(255,255,255,0.06)',
+                    padding: '60px 1.5rem 1.5rem 1.5rem', overflowY: 'auto', borderLeft: '1px solid rgba(255,255,255,0.06)',
                     background: 'rgba(15,23,42,0.6)',
                 }}>
                     <button

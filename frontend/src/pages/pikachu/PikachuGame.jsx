@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Shuffle, HelpCircle, Target, Clock, Volume2, VolumeX, Pause, Play, ShieldAlert, Award } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Shuffle, HelpCircle, Target, Clock, Volume2, VolumeX, Pause, Play, ShieldAlert, Award, Bell, BellOff, ZoomIn, ZoomOut } from 'lucide-react';
 import { usePikachuLogic } from './usePikachuLogic';
 import { useBgMusic } from '../../hooks/useBgMusic';
 import { useTranslation } from 'react-i18next';
@@ -17,12 +17,17 @@ export default function PikachuGame() {
     const {
         board, ROWS, COLS, level, score, timeLeft, status, selected, connectedPath,
         hints, shuffles, hintPair, penaltyFlash, isPaused, togglePause,
+        sfxMuted, toggleSfx,
         handleTileClick, useHint, handleShuffle, initGame
     } = usePikachuLogic(gameMode, timeLimitEnabled, resume);
 
     const { muted, toggleMute } = useBgMusic('/pikachu_audio/backgroundMusic.mp3', status === 'playing', 0.12);
 
     const getIconSrc = (id) => `/pikachu_sprites/${id - 1}.png`;
+
+    const [zoomLevel, setZoomLevel] = React.useState(100);
+    const handleZoomIn = () => setZoomLevel(z => Math.min(200, z + 20));
+    const handleZoomOut = () => setZoomLevel(z => Math.max(60, z - 20));
 
     const boardRef = React.useRef(null);
     const cellRefs = React.useRef({});
@@ -174,11 +179,29 @@ export default function PikachuGame() {
                 </div>
 
                 {/* CENTER - BOARD */}
-                <div className="sudoku-board-area" style={{ flex: '1 1 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', overflowY: 'auto' }}>
+                <div className="sudoku-board-area" style={{ flex: '1 1 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', overflow: 'auto', position: 'relative' }}>
+                    
+                    {/* Zoom Controls */}
+                    <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(15,23,42,0.8)', padding: '6px 12px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', zIndex: 110, backdropFilter: 'blur(8px)' }}>
+                        <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                            <ZoomOut size={18} />
+                        </button>
+                        <span style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600, minWidth: '45px', textAlign: 'center', userSelect: 'none' }}>
+                            {zoomLevel}%
+                        </span>
+                        <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                            <ZoomIn size={18} />
+                        </button>
+                    </div>
+
                     <div style={{ 
-                        position: 'relative', width: '100%', height: '100%', maxHeight: '860px', maxWidth: '1150px',
+                        position: 'relative', width: `${zoomLevel}%`, height: `${zoomLevel}%`, 
+                        maxHeight: zoomLevel > 100 ? 'none' : '860px', maxWidth: zoomLevel > 100 ? 'none' : '1150px',
+                        minHeight: zoomLevel > 100 ? `${8.6 * zoomLevel}px` : 'auto',
+                        minWidth: zoomLevel > 100 ? `${11.5 * zoomLevel}px` : 'auto',
                         background: 'rgba(5, 10, 20, 0.45)', borderRadius: '12px', border: '2px solid rgba(255,255,255,0.07)', 
-                        overflow: 'hidden', display: 'flex', padding: '10px', boxShadow: '0 10px 40px -5px rgba(0, 0, 0, 0.6)'
+                        overflow: 'hidden', display: 'flex', padding: '10px', boxShadow: '0 10px 40px -5px rgba(0, 0, 0, 0.6)',
+                        transition: 'width 0.2s, height 0.2s, min-width 0.2s, min-height 0.2s'
                     }}>
                         
                         {/* Board Grid */}
@@ -297,7 +320,7 @@ export default function PikachuGame() {
                 {/* RIGHT PANEL - CONTROLS */}
                 <div className="sudoku-right-panel" style={{
                     flex: '0 0 220px', display: 'flex', flexDirection: 'column', gap: '12px',
-                    padding: '1.5rem', overflowY: 'auto', borderLeft: '1px solid rgba(255,255,255,0.06)',
+                    padding: '60px 1.5rem 1.5rem 1.5rem', overflowY: 'auto', borderLeft: '1px solid rgba(255,255,255,0.06)',
                     background: 'rgba(15,23,42,0.6)',
                 }}>
                     <button onClick={useHint} disabled={hints <= 0 || status !== 'playing'} style={{
@@ -330,15 +353,27 @@ export default function PikachuGame() {
                             {t('pikachu.pause')}
                         </button>
                         
-                        <button onClick={toggleMute} style={{
-                            width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                            fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase',
-                            background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px',
-                            color: muted ? '#ef4444' : '#4ade80', cursor: 'pointer', transition: 'background 0.2s'
-                        }} onMouseEnter={(e) => e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.background='transparent'}>
-                            {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                            {muted ? t('pikachu.musicOn') : t('pikachu.musicOff')}
-                        </button>
+                        <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+                            <button onClick={toggleMute} style={{
+                                flex: 1, padding: '12px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase',
+                                background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px',
+                                color: muted ? '#ef4444' : '#4ade80', cursor: 'pointer', transition: 'background 0.2s'
+                            }} onMouseEnter={(e) => e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.background='transparent'}>
+                                {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                                Nhạc Nền
+                            </button>
+
+                            <button onClick={toggleSfx} style={{
+                                flex: 1, padding: '12px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase',
+                                background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px',
+                                color: sfxMuted ? '#ef4444' : '#4ade80', cursor: 'pointer', transition: 'background 0.2s'
+                            }} onMouseEnter={(e) => e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.background='transparent'}>
+                                {sfxMuted ? <BellOff size={18} /> : <Bell size={18} />}
+                                Âm Hiệu
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

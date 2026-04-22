@@ -8,7 +8,8 @@ const finishSound = new window.Audio('/pikachu_audio/finish.mp3');
 const noMoveSound = new window.Audio('/pikachu_audio/no_move.mp3');
 const errorSound = new window.Audio('/pikachu_audio/oho.mp3');
 
-const playSound = (audioObj) => {
+const playSound = (audioObj, muted = false) => {
+    if (muted) return;
     try {
         audioObj.currentTime = 0;
         audioObj.play().catch(() => {});
@@ -240,10 +241,19 @@ export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true, r
     const [isPaused, setIsPaused] = useState(false);
     const timerRef = useRef(null);
 
+    const sfxMutedRef = useRef(false);
+    const [sfxMuted, setSfxMuted] = useState(false);
+    const toggleSfx = useCallback(() => {
+        setSfxMuted(prev => {
+            sfxMutedRef.current = !prev;
+            return !prev;
+        });
+    }, []);
+
     // Trigger the red-flash animation on the timer bar
     const triggerPenalty = useCallback((amount) => {
         if (!timeLimitEnabled || status !== 'playing' || isPaused) return;
-        playSound(errorSound);
+        playSound(errorSound, sfxMutedRef.current);
         setTimeLeft(prev => Math.max(0, prev - amount));
         setPenaltyFlash(true);
         setTimeout(() => setPenaltyFlash(false), 600);
@@ -262,7 +272,7 @@ export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true, r
             maxTries--;
             if (maxTries === 0 && !pair) {
                 // Completely deadlocked
-                playSound(noMoveSound);
+                playSound(noMoveSound, sfxMutedRef.current);
             }
         }
         return { board: b, isWin: false };
@@ -304,7 +314,7 @@ export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true, r
         
         if (targetLevel > 11) {
             setStatus('finished');
-            playSound(finishSound);
+            playSound(finishSound, sfxMutedRef.current);
             return;
         }
 
@@ -362,7 +372,7 @@ export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true, r
                 setTimeLeft(prev => {
                     if (prev <= 0) {
                         setStatus('gameover');
-                        playSound(noMoveSound);
+                        playSound(noMoveSound, sfxMutedRef.current);
                         clearInterval(timerRef.current);
                         return 0;
                     }
@@ -376,7 +386,7 @@ export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true, r
     const handleTileClick = useCallback((r, c) => {
         if (status !== 'playing' || isPaused || board[r][c] === 0 || connectedPath) return;
 
-        playSound(tapSound);
+        playSound(tapSound, sfxMutedRef.current);
 
         if (!selected) {
             setSelected({ r, c });
@@ -390,7 +400,7 @@ export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true, r
             const path = findPath(board, selected, { r, c });
             if (path) {
                 setConnectedPath(path);
-                playSound(leadSound);
+                playSound(leadSound, sfxMutedRef.current);
                 // Draw path, then remove
                 setTimeout(() => {
                     let newBoard = applyLevelMovement(board, selected, { r, c }, level);
@@ -399,7 +409,7 @@ export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true, r
                     
                     if (fixState.isWin) {
                         setStatus('won');
-                        playSound(bgWinsound);
+                        playSound(bgWinsound, sfxMutedRef.current);
                     }
                     
                     // Calculate active rows - shrink only when 2 adjacent rows are empty
@@ -460,6 +470,7 @@ export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true, r
     return {
         board, ROWS, COLS, activeRows, level, score, timeLeft, status, selected, connectedPath,
         hints, shuffles, hintPair, penaltyFlash, isPaused, togglePause,
+        sfxMuted, toggleSfx,
         handleTileClick, useHint, handleShuffle, initGame, checkAndFixDeadlock
     };
 }
