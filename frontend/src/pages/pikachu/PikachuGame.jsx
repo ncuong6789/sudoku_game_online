@@ -167,33 +167,37 @@ export default function PikachuGame() {
                             )}
                         </div>
                         
-                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '10px', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <button onClick={() => initGame()} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.background='transparent'}>
+                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '10px', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <button onClick={() => initGame()} style={{ width: '100%', padding: '11px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.background='transparent'}>
                                 <RotateCcw size={16} /> Bắt đầu ván mới
                             </button>
-                            <button onClick={() => navigate('/pikachu')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
-                                <ArrowLeft size={16} /> Thoát khỏi phòng
+                            <button onClick={togglePause} style={{ width: '100%', padding: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 700, background: isPaused ? 'rgba(56,189,248,0.2)' : 'transparent', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: isPaused ? '#38bdf8' : '#fff', cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={(e) => !isPaused && (e.currentTarget.style.background='rgba(255,255,255,0.05)')} onMouseLeave={(e) => !isPaused && (e.currentTarget.style.background='transparent')}>
+                                {isPaused ? <Play size={16} fill="#38bdf8" /> : <Pause size={16} fill="#fff" />}
+                                {t('pikachu.pause')}
                             </button>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <button onClick={toggleMute} style={{ flex: 1, padding: '10px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', fontSize: '0.72rem', fontWeight: 700, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: muted ? '#ef4444' : '#4ade80', cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.background='transparent'}>
+                                    {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                                    Nhạc Nền
+                                </button>
+                                <button onClick={toggleSfx} style={{ flex: 1, padding: '10px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', fontSize: '0.72rem', fontWeight: 700, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: sfxMuted ? '#ef4444' : '#4ade80', cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.background='transparent'}>
+                                    {sfxMuted ? <BellOff size={16} /> : <Bell size={16} />}
+                                    Âm Hiệu
+                                </button>
+                            </div>
                         </div>
+                    </div>
+
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 'auto', paddingTop: '14px' }}>
+                        <button onClick={() => navigate('/pikachu')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
+                            <ArrowLeft size={16} /> Thoát khỏi phòng
+                        </button>
                     </div>
                 </div>
 
                 {/* CENTER - BOARD */}
                 <div className="sudoku-board-area" style={{ flex: '1 1 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', overflow: 'auto', position: 'relative' }}>
                     
-                    {/* Zoom Controls */}
-                    <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(15,23,42,0.8)', padding: '6px 12px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', zIndex: 110, backdropFilter: 'blur(8px)' }}>
-                        <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
-                            <ZoomOut size={18} />
-                        </button>
-                        <span style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600, minWidth: '45px', textAlign: 'center', userSelect: 'none' }}>
-                            {zoomLevel}%
-                        </span>
-                        <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
-                            <ZoomIn size={18} />
-                        </button>
-                    </div>
-
                     <div style={{ 
                         position: 'relative', width: `${zoomLevel}%`, height: `${zoomLevel}%`, 
                         maxHeight: zoomLevel > 100 ? 'none' : '860px', maxWidth: zoomLevel > 100 ? 'none' : '1150px',
@@ -317,63 +321,44 @@ export default function PikachuGame() {
                     </div>
                 </div>
 
-                {/* RIGHT PANEL - CONTROLS */}
+                {/* RIGHT PANEL - Hint, Shuffle centered + Zoom at bottom */}
                 <div className="sudoku-right-panel" style={{
-                    flex: '0 0 220px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '12px',
-                    padding: '1.5rem', overflowY: 'auto', borderLeft: '1px solid rgba(255,255,255,0.06)',
+                    flex: '0 0 190px', display: 'flex', flexDirection: 'column', gap: '12px',
+                    padding: '1.5rem 1rem', borderLeft: '1px solid rgba(255,255,255,0.06)',
                     background: 'rgba(15,23,42,0.6)',
                 }}>
-                    <button onClick={useHint} disabled={hints <= 0 || status !== 'playing'} style={{
-                        width: '100%', padding: '18px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-                        background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.3)', color: '#d8b4fe', borderRadius: '12px',
-                        cursor: hints <= 0 || status !== 'playing' ? 'not-allowed' : 'pointer', transition: 'all 0.2s', opacity: hints <= 0 || status !== 'playing' ? 0.5 : 1
-                    }}>
-                        <HelpCircle size={26} />
-                        <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t('pikachu.hintBtn')} ({hints})</div>
-                    </button>
-
-                    <button onClick={handleShuffle} disabled={shuffles <= 0 || status !== 'playing'} style={{
-                        width: '100%', padding: '18px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-                        background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.3)', color: '#bae6fd', borderRadius: '12px',
-                        cursor: shuffles <= 0 || status !== 'playing' ? 'not-allowed' : 'pointer', transition: 'all 0.2s', opacity: shuffles <= 0 || status !== 'playing' ? 0.5 : 1
-                    }}>
-                        <Shuffle size={26} />
-                        <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t('pikachu.shuffleBtn')} ({shuffles})</div>
-                    </button>
-
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 'auto', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <button onClick={togglePause} style={{
-                            width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                            fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase',
-                            background: isPaused ? 'rgba(56,189,248,0.2)' : 'transparent',
-                            border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '10px', color: isPaused ? '#38bdf8' : '#fff', cursor: 'pointer', transition: 'background 0.2s'
-                        }} onMouseEnter={(e) => !isPaused && (e.currentTarget.style.background='rgba(255,255,255,0.05)')} onMouseLeave={(e) => !isPaused && (e.currentTarget.style.background='transparent')}>
-                            {isPaused ? <Play size={18} fill="#38bdf8" /> : <Pause size={18} fill="#fff" />}
-                            {t('pikachu.pause')}
+                    {/* Hint + Shuffle centered */}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '14px' }}>
+                        <button onClick={useHint} disabled={hints <= 0 || status !== 'playing'} style={{
+                            width: '100%', padding: '20px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+                            background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.3)', color: '#d8b4fe', borderRadius: '14px',
+                            cursor: hints <= 0 || status !== 'playing' ? 'not-allowed' : 'pointer', transition: 'all 0.2s', opacity: hints <= 0 || status !== 'playing' ? 0.5 : 1
+                        }}>
+                            <HelpCircle size={28} />
+                            <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{t('pikachu.hintBtn')} ({hints})</div>
                         </button>
-                        
-                        <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-                            <button onClick={toggleMute} style={{
-                                flex: 1, padding: '12px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                                fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase',
-                                background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px',
-                                color: muted ? '#ef4444' : '#4ade80', cursor: 'pointer', transition: 'background 0.2s'
-                            }} onMouseEnter={(e) => e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.background='transparent'}>
-                                {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                                Nhạc Nền
-                            </button>
 
-                            <button onClick={toggleSfx} style={{
-                                flex: 1, padding: '12px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                                fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase',
-                                background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px',
-                                color: sfxMuted ? '#ef4444' : '#4ade80', cursor: 'pointer', transition: 'background 0.2s'
-                            }} onMouseEnter={(e) => e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.background='transparent'}>
-                                {sfxMuted ? <BellOff size={18} /> : <Bell size={18} />}
-                                Âm Hiệu
-                            </button>
-                        </div>
+                        <button onClick={handleShuffle} disabled={shuffles <= 0 || status !== 'playing'} style={{
+                            width: '100%', padding: '20px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+                            background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.3)', color: '#bae6fd', borderRadius: '14px',
+                            cursor: shuffles <= 0 || status !== 'playing' ? 'not-allowed' : 'pointer', transition: 'all 0.2s', opacity: shuffles <= 0 || status !== 'playing' ? 0.5 : 1
+                        }}>
+                            <Shuffle size={28} />
+                            <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{t('pikachu.shuffleBtn')} ({shuffles})</div>
+                        </button>
+                    </div>
+
+                    {/* Zoom Controls — bottom of right panel */}
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.04)', padding: '8px 10px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                            <ZoomOut size={16} />
+                        </button>
+                        <span style={{ color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 600, minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
+                            {zoomLevel}%
+                        </span>
+                        <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                            <ZoomIn size={16} />
+                        </button>
                     </div>
                 </div>
             </div>

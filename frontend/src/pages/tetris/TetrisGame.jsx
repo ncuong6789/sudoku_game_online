@@ -285,7 +285,7 @@ export default function TetrisGame() {
                 {/* LEFT PANEL */}
                 <div className="tetris-left-panel" style={{
                     flex: '0 0 240px', display: 'flex', flexDirection: 'column',
-                    justifyContent: 'center', gap: '1rem', overflowY: 'auto', padding: '1.5rem',
+                    gap: '1rem', overflowY: 'auto', padding: '1.5rem',
                     borderRight: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)'
                 }}>
                     <div className="nav-item active" style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', fontSize: '1.2rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px' }}>
@@ -311,6 +311,26 @@ export default function TetrisGame() {
                         <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t('tetris.cleared')}</span>
                         <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#4ade80' }}>{rows}</span>
                     </div>
+
+                    {/* Controls in Left Panel */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        {mode === 'solo' && (
+                            <>
+                                <button className="btn-primary" onClick={() => { startGame(); }} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.95rem' }}>
+                                    <RefreshCw size={18} /> Chơi mới
+                                </button>
+                                <button onClick={togglePause} disabled={!isStarted || gameOver} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%', background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: isPaused ? '#38bdf8' : '#fff', cursor: !isStarted || gameOver ? 'default' : 'pointer', opacity: !isStarted || gameOver ? 0.5 : 1, fontSize: '0.95rem', fontWeight: 600 }}>
+                                    {isPaused ? '▶ Tiếp tục (Enter)' : '⏸ Tạm dừng (Enter)'}
+                                </button>
+                            </>
+                        )}
+                    </div>
+
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 'auto', paddingTop: '14px' }}>
+                        <button onClick={() => navigate(mode === 'multiplayer' ? '/tetris/multiplayer' : '/tetris')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
+                            <ArrowLeft size={16} /> Thoát khỏi phòng
+                        </button>
+                    </div>
                 </div>
 
                 {/* CENTER BOARD AREA */}
@@ -319,18 +339,6 @@ export default function TetrisGame() {
                     minWidth: 0, minHeight: 0, gap: '12px', padding: '1rem',
                     overflow: 'hidden', alignItems: 'center', position: 'relative'
                 }}>
-                    <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(15,23,42,0.8)', padding: '6px 12px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', zIndex: 110, backdropFilter: 'blur(8px)' }}>
-                        <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
-                            <ZoomOut size={18} />
-                        </button>
-                        <span style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600, minWidth: '45px', textAlign: 'center', userSelect: 'none' }}>
-                            {zoomLevel}%
-                        </span>
-                        <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
-                            <ZoomIn size={18} />
-                        </button>
-                    </div>
-
                     <div style={{ display: 'flex', gap: '20px', alignItems: 'center', transform: `scale(${zoomLevel/100})`, transition: 'transform 0.2s', transformOrigin: 'center center' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
                             <h3 style={{ margin: 0, color: '#4ade80', fontSize: '1.1rem' }}>{t('tetris.you')} ({score})</h3>
@@ -348,35 +356,31 @@ export default function TetrisGame() {
 
                 {/* RIGHT PANEL */}
                 <div className="tetris-right-panel" style={{
-                    flex: '0 0 240px', display: 'flex', flexDirection: 'column',
-                    justifyContent: 'center', gap: '1rem', overflowY: 'auto', padding: '1.5rem',
+                    flex: '0 0 200px', display: 'flex', flexDirection: 'column',
+                    gap: '0.75rem', padding: '1.5rem 1rem',
                     borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)'
                 }}>
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.05)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '1.5rem', letterSpacing: '2px', fontWeight: 700 }}>KHỐI TIẾP THEO</div>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-evenly', flex: 1, gap: '1rem' }}>
+                    {/* Next Pieces — centered */}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.05)', padding: '1rem 0.8rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', minHeight: 0 }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '1rem', letterSpacing: '2px', fontWeight: 700 }}>KHỐI TIẾP THEO</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: '1.2rem' }}>
                             {nextPieces.map((type, idx) => (
                                 <NextPiece key={idx} type={type} />
                             ))}
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        {mode === 'solo' && (
-                            <>
-                                <button className="btn-primary" onClick={() => { startGame(); }} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.95rem' }}>
-                                    <RefreshCw size={18} /> Chơi mới
-                                </button>
-                                <button onClick={togglePause} disabled={!isStarted || gameOver} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%', background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: isPaused ? '#38bdf8' : '#fff', cursor: !isStarted || gameOver ? 'default' : 'pointer', opacity: !isStarted || gameOver ? 0.5 : 1, fontSize: '0.95rem', fontWeight: 600 }}>
-                                    {isPaused ? '▶ Tiếp tục (Enter)' : '⏸ Tạm dừng (Enter)'}
-                                </button>
-                            </>
-                        )}
-                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '4px', paddingTop: '12px' }}>
-                            <button onClick={() => navigate(mode === 'multiplayer' ? '/tetris/multiplayer' : '/tetris')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
-                                <ArrowLeft size={16} /> Thoát khỏi phòng
-                            </button>
-                        </div>
+                    {/* Zoom Controls — pinned at bottom-right, safe from theme toggle */}
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.04)', padding: '8px 10px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                            <ZoomOut size={16} />
+                        </button>
+                        <span style={{ color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 600, minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
+                            {zoomLevel}%
+                        </span>
+                        <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                            <ZoomIn size={16} />
+                        </button>
                     </div>
                 </div>
 
