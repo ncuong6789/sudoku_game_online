@@ -77,25 +77,6 @@ export default function SudokuGameSolo() {
             display: 'flex', flexDirection: 'column', overflow: 'hidden',
             background: 'radial-gradient(circle at center, #0f172a 0%, #020617 100%)',
         }}>
-            {/* Top bar area */}
-            <div className="sudoku-top-bar" style={{
-                flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '10px 1rem', borderBottom: '1px solid rgba(255,255,255,0.08)',
-                background: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(10px)',
-            }}>
-                <button onClick={() => navigate('/sudoku')} style={{
-                    display: 'flex', alignItems: 'center', gap: '6px',
-                    padding: '8px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.08)', color: '#fff',
-                    fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s'
-                }}>
-                    <ArrowLeft size={14} /> {t('common.returnToMenu', 'Về sảnh')}
-                </button>
-                <h1 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 900, color: '#f8fafc', letterSpacing: '2px' }}>
-                    SUDOKU <span style={{ color: '#3b82f6' }}>PREMIUM</span>
-                </h1>
-                <div style={{ width: '100px' }} /> {/* Spacer */}
-            </div>
 
             {/* Main content */}
             <div className="sudoku-layout-wrapper" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
@@ -146,9 +127,12 @@ export default function SudokuGameSolo() {
                             <span style={{ fontSize: '0.8rem', color: '#f8fafc', fontWeight: 700 }}>{hintsUsed}</span>
                         </div>
                         
-                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '10px', paddingTop: '20px' }}>
+                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '10px', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             <button onClick={() => startNewGame()} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.background='transparent'}>
                                 <RotateCcw size={16} /> Bắt đầu ván mới
+                            </button>
+                            <button onClick={() => navigate('/sudoku')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
+                                <ArrowLeft size={16} /> {t('common.returnToMenu', 'Về sảnh')}
                             </button>
                         </div>
                     </div>
