@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { socket } from '../../utils/socket';
-
+import { PawPrint } from 'lucide-react';
 export default function JungleLobby() {
     const navigate = useNavigate();
     const location = useLocation();
@@ -66,31 +66,39 @@ export default function JungleLobby() {
 
     if (inRoom) {
         return (
-            <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
-                <h2 style={{ userSelect: 'text', cursor: 'text' }}>Phòng: {myRoom}</h2>
-                <p>Chế độ: {difficulty.toUpperCase()}</p>
-                <p>Người chơi: {playerCount}/2</p>
-                {playerCount < 2 ? (
-                    <p style={{ color: 'var(--accent-color)', fontWeight: 600 }}>Đang chờ đối thủ...</p>
-                ) : (
-                    <p style={{ color: 'var(--success-color)', fontWeight: 600 }}>Bắt đầu trận đấu!</p>
-                )}
-                <button className="btn-secondary" style={{ marginTop: '20px', width: 'auto' }} onClick={() => {
-                    setInRoom(false);
-                    setMyRoom('');
-                    socket.emit('leaveRoom', myRoom);
-                    navigate('/jungle');
-                }}>Rời phòng</button>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '1rem', background: 'radial-gradient(ellipse at 50% 0%, rgba(16,185,129,0.08) 0%, transparent 70%)' }}>
+                <div className="glass-panel" style={{ maxWidth: '400px', width: '100%', padding: '2rem', borderRadius: '24px', textAlign: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '1.5rem' }}>
+                        <PawPrint size={28} color="#10b981" />
+                        <h2 style={{ margin: 0, color: '#10b981' }}>Jungle Online</h2>
+                    </div>
+                    <div style={{ background: 'rgba(16,185,129,0.06)', border: '1.5px solid rgba(16,185,129,0.25)', borderRadius: '16px', padding: '20px', marginBottom: '1.5rem' }}>
+                        <p style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 10px 0' }}>Mã phòng ({difficulty})</p>
+                        <h1 style={{ letterSpacing: '4px', color: '#10b981', margin: 0, fontSize: '2.5rem', fontFamily: 'monospace', userSelect: 'text', cursor: 'text' }}>{myRoom}</h1>
+                        <p style={{ color: playerCount < 2 ? '#eab308' : '#4ade80', fontWeight: 600, fontSize: '0.9rem', marginTop: '15px' }}>
+                            {playerCount < 2 ? `Đang chờ đối thủ (${playerCount}/2)...` : 'Bắt đầu trận đấu!'}
+                        </p>
+                    </div>
+                    <button className="btn-secondary" style={{ width: '100%', padding: '12px', color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)' }} onClick={() => {
+                        setInRoom(false);
+                        setMyRoom('');
+                        socket.emit('leaveRoom', myRoom);
+                        navigate('/jungle');
+                    }}>Hủy phòng</button>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
-            <h2>Đang tạo phòng...</h2>
-            <div className="loader" style={{ margin: '20px auto' }}></div>
-            {!isConnected && <p style={{ color: 'var(--error-color)' }}>⚠️ Mất kết nối server...</p>}
-            <button className="btn-secondary" style={{ marginTop: '1rem', width: 'auto' }} onClick={() => navigate('/jungle')}>Hủy</button>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '1rem' }}>
+            <div className="glass-panel" style={{ maxWidth: '400px', width: '100%', padding: '2rem', borderRadius: '24px', textAlign: 'center' }}>
+                <h2 style={{ margin: '0 0 1.5rem 0' }}>Đang khởi tạo...</h2>
+                <div style={{ width: '40px', height: '40px', border: '4px solid rgba(16,185,129,0.2)', borderTopColor: '#10b981', borderRadius: '50%', margin: '0 auto', animation: 'spin 1s linear infinite' }} />
+                {!isConnected && <p style={{ color: '#ef4444', marginTop: '1rem' }}>⚠️ Đang kết nối server...</p>}
+                <button className="btn-secondary" style={{ marginTop: '2rem', width: '100%', padding: '12px' }} onClick={() => navigate('/jungle')}>Hủy</button>
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            </div>
         </div>
     );
 }

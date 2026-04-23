@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { socket } from '../../utils/socket';
-import { User } from 'lucide-react';
+import { User, Crown } from 'lucide-react';
 
 export default function ChessLobby() {
     const navigate = useNavigate();
@@ -101,82 +101,94 @@ export default function ChessLobby() {
 
     if (inRoom) {
         return (
-            <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
-                <h2 style={{ textAlign: 'center', margin: '0 0 1rem 0' }}>Trạng thái Bàn cờ</h2>
-
-                <div style={{ textAlign: 'center', marginBottom: '0.8rem' }}>
-                    <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Mã phòng:</p>
-                    <h1 style={{ letterSpacing: '4px', color: 'var(--primary-color)', margin: '0.3rem 0', userSelect: 'text', cursor: 'text' }}>{myRoom}</h1>
-                </div>
-
-                {/* Opponent Selection */}
-                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.8rem', borderRadius: '12px', marginBottom: '0.8rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}><User size={16}/> Đối thủ</span>
-                        <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '12px', background: isOpponentReady ? 'var(--success-color)' : 'rgba(255,255,255,0.2)' }}>
-                            {isOpponentReady ? 'SẴN SÀNG' : 'CHỜ...'}
-                        </span>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '1rem', background: 'radial-gradient(ellipse at 50% 0%, rgba(168,85,247,0.08) 0%, transparent 70%)' }}>
+                <div className="glass-panel" style={{ maxWidth: '400px', width: '100%', padding: '2rem', borderRadius: '24px', textAlign: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '1.5rem' }}>
+                        <Crown size={28} color="#a855f7" />
+                        <h2 style={{ margin: 0, color: '#a855f7' }}>Chess Online</h2>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        {['w', 'b', 'random'].map(c => (
-                            <div key={c} style={{ flex: 1, padding: '6px', textAlign: 'center', borderRadius: '8px', fontSize: '0.8rem',
-                                background: opponentColor === c ? 'rgba(79, 172, 254, 0.3)' : 'rgba(255,255,255,0.05)',
-                                border: opponentColor === c ? '1px solid var(--primary-color)' : '1px solid transparent',
-                                opacity: 0.8
-                            }}>
-                                {c === 'w' ? 'Trắng' : c === 'b' ? 'Đen' : 'Random'}
-                            </div>
-                        ))}
+
+                    <div style={{ background: 'rgba(168,85,247,0.06)', border: '1.5px solid rgba(168,85,247,0.25)', borderRadius: '16px', padding: '15px', marginBottom: '1.5rem' }}>
+                        <p style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 5px 0' }}>Mã phòng của bạn</p>
+                        <h1 style={{ letterSpacing: '4px', color: '#a855f7', margin: 0, fontSize: '2rem', fontFamily: 'monospace', userSelect: 'text', cursor: 'text' }}>{myRoom}</h1>
+                    </div>
+
+                    {/* Opponent Selection */}
+                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.8rem', borderRadius: '12px', marginBottom: '0.8rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', color: '#cbd5e1' }}><User size={16}/> Đối thủ</span>
+                            <span style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '12px', background: isOpponentReady ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.08)', color: isOpponentReady ? '#4ade80' : '#94a3b8', fontWeight: 600 }}>
+                                {isOpponentReady ? 'SẴN SÀNG' : 'CHỜ...'}
+                            </span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            {['w', 'b', 'random'].map(c => (
+                                <div key={c} style={{ flex: 1, padding: '8px', textAlign: 'center', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600,
+                                    background: opponentColor === c ? 'rgba(168,85,247,0.2)' : 'rgba(255,255,255,0.03)',
+                                    border: opponentColor === c ? '1px solid #a855f7' : '1px solid transparent',
+                                    color: opponentColor === c ? '#d8b4fe' : '#64748b',
+                                    transition: 'all 0.2s'
+                                }}>
+                                    {c === 'w' ? 'Trắng' : c === 'b' ? 'Đen' : 'Random'}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* VS divider */}
+                    <div style={{ textAlign: 'center', color: '#475569', fontWeight: 900, margin: '0.8rem 0', position: 'relative' }}>
+                        <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', background: 'rgba(255,255,255,0.06)' }}></div>
+                        <span style={{ background: '#0f172a', padding: '0 12px', position: 'relative', fontSize: '0.85rem', letterSpacing: '2px' }}>VS</span>
+                    </div>
+
+                    {/* My Selection */}
+                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.8rem', borderRadius: '12px', marginBottom: '1.2rem', border: hasConflict ? '1px solid rgba(239,68,68,0.5)' : '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', fontSize: '0.9rem', color: '#cbd5e1' }}>
+                            <span>👉 Bạn chọn phe:</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            {['w', 'b', 'random'].map(c => (
+                                <button key={c} onClick={() => updateMyColor(c)} style={{ flex: 1, padding: '8px', textAlign: 'center', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600,
+                                    background: myColor === c ? '#a855f7' : 'rgba(255,255,255,0.05)',
+                                    border: 'none', color: myColor === c ? '#fff' : '#94a3b8', cursor: 'pointer', transition: 'all 0.2s',
+                                    boxShadow: myColor === c ? '0 0 15px rgba(168,85,247,0.4)' : 'none'
+                                }}>
+                                    {c === 'w' ? 'Trắng' : c === 'b' ? 'Đen' : 'Random'}
+                                </button>
+                            ))}
+                        </div>
+                        {hasConflict && <p style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '10px', textAlign: 'center', marginBottom: 0, fontWeight: 600 }}>Cả 2 không thể chọn cùng màu!</p>}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <button className="btn-secondary" style={{ flex: 1, padding: '12px', color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)' }} onClick={() => {
+                            setInRoom(false); setMyRoom(''); navigate('/chess');
+                        }}>Rời phòng</button>
+                        <button 
+                            style={{ flex: 2, padding: '12px', borderRadius: '12px', fontWeight: 800, border: 'none', cursor: canReady ? 'pointer' : 'not-allowed', color: '#000',
+                                background: isMyReady ? '#4ade80' : (canReady ? '#a855f7' : '#475569'),
+                                opacity: canReady ? 1 : 0.5, transition: 'all 0.2s'
+                            }}
+                            disabled={!canReady}
+                            onClick={toggleReady}
+                        >
+                            {isMyReady ? 'HỦY SẴN SÀNG' : 'SẴN SÀNG'}
+                        </button>
                     </div>
                 </div>
-
-                {/* VS divider */}
-                <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontWeight: 'bold', margin: '0.5rem 0', position: 'relative' }}>
-                    <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
-                    <span style={{ background: 'var(--bg-color)', padding: '0 10px', position: 'relative', fontSize: '0.9rem' }}>V S</span>
-                </div>
-
-                {/* My Selection */}
-                <div style={{ background: 'rgba(255,255,255,0.08)', padding: '0.8rem', borderRadius: '12px', marginBottom: '1rem', border: hasConflict ? '1px solid var(--error-color)' : '1px solid transparent' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', fontSize: '0.9rem' }}>
-                        <span>👉 Bạn chọn phe:</span>
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        {['w', 'b', 'random'].map(c => (
-                            <button key={c} onClick={() => updateMyColor(c)} style={{ flex: 1, padding: '6px', textAlign: 'center', borderRadius: '8px', fontSize: '0.8rem',
-                                background: myColor === c ? 'var(--primary-color)' : 'rgba(255,255,255,0.05)',
-                                border: 'none', color: 'white', cursor: 'pointer', transition: 'all 0.2s',
-                                boxShadow: myColor === c ? '0 0 10px rgba(79, 172, 254, 0.5)' : 'none'
-                            }}>
-                                {c === 'w' ? 'Trắng' : c === 'b' ? 'Đen' : 'Random'}
-                            </button>
-                        ))}
-                    </div>
-                    {hasConflict && <p style={{ color: 'var(--error-color)', fontSize: '0.8rem', marginTop: '10px', textAlign: 'center', marginBottom: 0 }}>Cả 2 không thể chọn cùng màu!</p>}
-                </div>
-
-                {/* Ready Button */}
-                <button 
-                    className={isMyReady ? "btn-secondary" : "btn-primary"} 
-                    style={{ width: '100%', padding: '14px', background: isMyReady ? 'var(--success-color)' : undefined, borderColor: isMyReady ? 'transparent' : undefined }}
-                    disabled={!canReady}
-                    onClick={toggleReady}
-                >
-                    {isMyReady ? 'HỦY SẴN SÀNG' : 'SẴN SÀNG'}
-                </button>
-                <button className="btn-secondary" style={{ width: 'auto', marginTop: '10px', opacity: 0.7 }} onClick={() => {
-                    setInRoom(false); setMyRoom(''); navigate('/chess');
-                }}>Rời phòng</button>
             </div>
         );
     }
 
     return (
-        <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
-            <h2>Đang tạo phòng...</h2>
-            <div className="loader" style={{ margin: '20px auto' }}></div>
-            {!isConnected && <p style={{ color: 'var(--error-color)' }}>⚠️ Mất kết nối server...</p>}
-            <button className="btn-secondary" style={{ marginTop: '1rem', width: 'auto' }} onClick={() => navigate('/chess')}>Hủy</button>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '1rem' }}>
+            <div className="glass-panel" style={{ maxWidth: '400px', width: '100%', padding: '2rem', borderRadius: '24px', textAlign: 'center' }}>
+                <h2 style={{ margin: '0 0 1.5rem 0' }}>Đang khởi tạo...</h2>
+                <div style={{ width: '40px', height: '40px', border: '4px solid rgba(168,85,247,0.2)', borderTopColor: '#a855f7', borderRadius: '50%', margin: '0 auto', animation: 'spin 1s linear infinite' }} />
+                {!isConnected && <p style={{ color: '#ef4444', marginTop: '1rem' }}>⚠️ Đang kết nối server...</p>}
+                <button className="btn-secondary" style={{ marginTop: '2rem', width: '100%', padding: '12px' }} onClick={() => navigate('/chess')}>Hủy</button>
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            </div>
         </div>
     );
 }

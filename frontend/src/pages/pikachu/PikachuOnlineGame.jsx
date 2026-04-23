@@ -222,7 +222,7 @@ export default function PikachuOnlineGame() {
                         <div
                             ref={boardRef}
                             style={{
-                                position: 'relative', width: '100%',
+                                position: 'relative', width: '100%', height: '100%',
                                 aspectRatio: `${COLS + 2} / ${ROWS + 4}`,
                                 margin: 'auto', display: 'grid',
                                 gridTemplateColumns: `repeat(${COLS + 2}, 1fr)`,

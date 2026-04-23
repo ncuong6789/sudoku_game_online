@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Loader2, Users } from 'lucide-react';
+import { ArrowLeft, Loader2, Users, Activity } from 'lucide-react';
 import { socket } from '../../utils/socket';
 
 const sizes = [
@@ -117,32 +117,33 @@ export default function SnakeLobby() {
 
     if (lobbyState !== 'idle') {
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 1rem' }}>
-                <div className="glass-panel" style={{ width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column', padding: '2rem', textAlign: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '1rem', background: 'radial-gradient(ellipse at 50% 0%, rgba(34,197,94,0.08) 0%, transparent 70%)' }}>
+                <div className="glass-panel" style={{ maxWidth: '400px', width: '100%', padding: '2rem', borderRadius: '24px', textAlign: 'center', position: 'relative' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '1.5rem' }}>
+                        <Activity size={28} color="#22c55e" />
+                        <h2 style={{ margin: 0, color: '#22c55e' }}>Snake Online</h2>
+                    </div>
+
+                    {lobbyState === 'hosting' && (
+                        <div style={{ background: 'rgba(34,197,94,0.06)', border: '1.5px solid rgba(34,197,94,0.25)', borderRadius: '16px', padding: '20px', marginBottom: '1.5rem' }}>
+                            <p style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 10px 0' }}>Mã phòng (Map {mapSize}x{mapSize})</p>
+                            <h1 style={{ letterSpacing: '4px', color: '#22c55e', margin: 0, fontSize: '2.5rem', fontFamily: 'monospace', userSelect: 'text', cursor: 'text' }}>{myRoom}</h1>
+                            <p style={{ color: '#4ade80', fontWeight: 600, fontSize: '0.9rem', marginTop: '15px' }}>Đang chờ đối thủ...</p>
+                        </div>
+                    )}
+
+                    {lobbyState === 'finding_match' && (
+                        <div style={{ background: 'rgba(34,197,94,0.06)', border: '1.5px solid rgba(34,197,94,0.25)', borderRadius: '16px', padding: '30px 20px', marginBottom: '1.5rem' }}>
+                            <Loader2 size={48} className="spin-animation" style={{ color: '#22c55e', margin: '0 auto 15px' }} />
+                            <h3 style={{ margin: 0, color: '#22c55e' }}>{status}</h3>
+                            <p style={{ color: '#64748b', fontSize: '0.85rem', marginTop: '10px' }}>Hệ thống đang dò tìm cao thủ...</p>
+                        </div>
+                    )}
+
+                    <button className="btn-secondary" style={{ width: '100%', padding: '12px', color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }} onClick={handleCancel}>
+                        <ArrowLeft size={18} /> Hủy tìm / Rời phòng
+                    </button>
                     
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                        <h2 style={{ margin: 0, fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px', whiteSpace: 'nowrap', userSelect: 'none' }}>
-                            <Users size={24} /> {lobbyState === 'finding_match' ? 'Tìm trận' : 'Phòng Riêng'}
-                        </h2>
-                        <button className="btn-secondary" onClick={handleCancel} style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '5px', width: 'auto', flexShrink: 0 }}>
-                            <ArrowLeft size={16} /> Thoát
-                        </button>
-                    </div>
-
-                    <div style={{ padding: '2rem 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
-                        {lobbyState === 'hosting' && (
-                            <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Mã phòng (Map {mapSize}x{mapSize}):</p>
-                                <h1 style={{ letterSpacing: '4px', color: 'var(--primary-color)', margin: '0.5rem 0', fontSize: '3rem', userSelect: 'text', cursor: 'text' }}>{myRoom}</h1>
-                                <p style={{ color: 'var(--accent-color)', fontWeight: 600 }}>Gửi mã này cho bạn bè...</p>
-                            </div>
-                        )}
-
-                        <Loader2 size={48} className="spin-animation" style={{ color: 'var(--primary-color, #4facfe)' }} />
-                        <h3 style={{ margin: 0 }}>{status}</h3>
-                        {lobbyState === 'finding_match' && <p style={{ color: 'var(--text-secondary)' }}>Hệ thống đang dò tìm cao thủ...</p>}
-                    </div>
-
                     <style dangerouslySetInnerHTML={{__html: `
                         @keyframes spin { 100% { transform: rotate(360deg); } }
                         .spin-animation { animation: spin 2s linear infinite; }
@@ -153,11 +154,14 @@ export default function SnakeLobby() {
     }
 
     return (
-        <div className="glass-panel menu-container" style={{ maxWidth: '400px' }}>
-            <h2>Đang tạo phòng...</h2>
-            <div className="loader" style={{ margin: '20px auto' }}></div>
-            {!isConnected && <p style={{ color: 'var(--error-color)' }}>⚠️ Mất kết nối server...</p>}
-            <button className="btn-secondary" style={{ marginTop: '1rem', width: 'auto' }} onClick={() => navigate('/snake')}>Hủy</button>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '1rem' }}>
+            <div className="glass-panel" style={{ maxWidth: '400px', width: '100%', padding: '2rem', borderRadius: '24px', textAlign: 'center' }}>
+                <h2 style={{ margin: '0 0 1.5rem 0' }}>Đang khởi tạo...</h2>
+                <div style={{ width: '40px', height: '40px', border: '4px solid rgba(34,197,94,0.2)', borderTopColor: '#22c55e', borderRadius: '50%', margin: '0 auto', animation: 'spin 1s linear infinite' }} />
+                {!isConnected && <p style={{ color: '#ef4444', marginTop: '1rem' }}>⚠️ Đang kết nối server...</p>}
+                <button className="btn-secondary" style={{ marginTop: '2rem', width: '100%', padding: '12px' }} onClick={() => navigate('/snake')}>Hủy</button>
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            </div>
         </div>
     );
 }

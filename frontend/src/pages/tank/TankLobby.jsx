@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { socket } from '../../utils/socket';
 import { EVENTS } from '../../utils/constants';
+import { ShieldAlert } from 'lucide-react';
 
 export default function TankLobby() {
     const navigate = useNavigate();
@@ -50,21 +51,18 @@ export default function TankLobby() {
     }, [myRoom, difficulty, navigate]);
 
     return (
-        <div style={{
-            display: 'flex', justifyContent: 'center', alignItems: 'center',
-            width: '100vw', height: '100vh', background: 'radial-gradient(circle at center, #1a1a2e 0%, #05050a 100%)'
-        }}>
-            <div className="glass-panel" style={{
-                padding: '2rem', borderRadius: '20px', display: 'flex', flexDirection: 'column',
-                alignItems: 'center', gap: '1rem', maxWidth: '400px', textAlign: 'center'
-            }}>
-                <h2 style={{ color: '#ffd700', margin: 0 }}>TANK WARS</h2>
-                <p style={{ color: '#888' }}>Đang kết nối...</p>
-                <div className="loader" style={{ width: '30px', height: '30px', border: '3px solid #333', borderTopColor: '#ffd700', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-                {!isConnected && <p style={{ color: '#ef4444' }}>⚠️ Mất kết nối server</p>}
-                <button className="btn-secondary" onClick={() => navigate('/tank')}>Hủy</button>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '1rem', background: 'radial-gradient(ellipse at 50% 0%, rgba(100,116,139,0.08) 0%, transparent 70%)' }}>
+            <div className="glass-panel" style={{ maxWidth: '400px', width: '100%', padding: '2rem', borderRadius: '24px', textAlign: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '1.5rem' }}>
+                    <ShieldAlert size={28} color="#64748b" />
+                    <h2 style={{ margin: 0, color: '#64748b' }}>Tank Wars</h2>
+                </div>
+                <h3 style={{ margin: '0 0 1.5rem 0', color: '#cbd5e1' }}>Đang khởi tạo...</h3>
+                <div style={{ width: '40px', height: '40px', border: '4px solid rgba(100,116,139,0.2)', borderTopColor: '#64748b', borderRadius: '50%', margin: '0 auto', animation: 'spin 1s linear infinite' }} />
+                {!isConnected && <p style={{ color: '#ef4444', marginTop: '1rem' }}>⚠️ Mất kết nối server...</p>}
+                <button className="btn-secondary" style={{ marginTop: '2rem', width: '100%', padding: '12px' }} onClick={() => navigate('/tank')}>Hủy</button>
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
             </div>
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
     );
 }
