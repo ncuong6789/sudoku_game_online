@@ -79,5 +79,13 @@ export const EVENTS = {
     JUNGLE_GAME_OVER: 'jungleGameOver',
     JUNGLE_GAME_STATE: 'jungleGameState',
     JUNGLE_GET_HINT: 'jungleGetHint',
-    JUNGLE_HINT_RECEIVED: 'jungleHintReceived'
+    JUNGLE_HINT_RECEIVED: 'jungleHintReceived',
+
+    // Xiangqi Online
+    XIANGQI_COLOR_SELECT: 'xiangqiColorSelect',
+    XIANGQI_COLOR_UPDATE: 'xiangqiColorUpdate',
+    START_XIANGQI_GAME: 'startXiangqiGame',
+    XIANGQI_GAME_STARTED: 'xiangqiGameStarted',
+    XIANGQI_MOVE: 'xiangqiMove',
+    XIANGQI_MOVED: 'xiangqiMoved',
 };

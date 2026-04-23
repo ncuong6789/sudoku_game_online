@@ -33,11 +33,31 @@ export default function PikachuLobby() {
             }
         }
 
+        // Handle joining from Home.jsx
+        if (location.state?.joinedRoom && !inRoom) {
+            const rid = location.state.joinedRoom;
+            socket.emit('joinRoom', { roomId: rid }, (res) => {
+                if (res.success) {
+                    setMyRoom(rid);
+                    setInRoom(true);
+                } else {
+                    alert(res.message || 'Không thể tham gia phòng');
+                    navigate('/pikachu');
+                }
+            });
+        }
+
+        // Handle matched from Matchmaking
+        if (location.state?.matchedRoom && !inRoom) {
+            setMyRoom(location.state.matchedRoom);
+            setInRoom(true);
+        }
+
         return () => {
             socket.off('connect', onConnect);
             socket.off('disconnect', onDisconnect);
         };
-    }, [location.state, inRoom, myRoom, handleCreateRoom]);
+    }, [location.state, inRoom, myRoom, handleCreateRoom, navigate]);
 
     useEffect(() => {
         const handlePlayerJoined = ({ players }) => {

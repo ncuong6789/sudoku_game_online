@@ -98,6 +98,14 @@ const EVENTS = {
     PIKACHU_SHUFFLE_REJECTED: 'pikachu:shuffleRejected',
     PIKACHU_BOARD_SHUFFLED: 'pikachu:boardShuffled',
     PIKACHU_GAME_OVER: 'pikachu:gameOver',
+
+    // Xiangqi Online
+    XIANGQI_COLOR_SELECT: 'xiangqiColorSelect',
+    XIANGQI_COLOR_UPDATE: 'xiangqiColorUpdate',
+    START_XIANGQI_GAME: 'startXiangqiGame',
+    XIANGQI_GAME_STARTED: 'xiangqiGameStarted',
+    XIANGQI_MOVE: 'xiangqiMove',
+    XIANGQI_MOVED: 'xiangqiMoved',
 };
 
 module.exports = { EVENTS };

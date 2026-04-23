@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { getBestMoveAsync, getEvalScore } from './xiangqiAI';
+import { socket } from '../../utils/socket';
 
 const INITIAL_BOARD = [
     ['b_r', 'b_n', 'b_b', 'b_a', 'b_k', 'b_a', 'b_b', 'b_n', 'b_r'],
@@ -178,7 +179,7 @@ function formatMoveNotation(piece, fromR, fromC, toR, toC, captured) {
     return `${pName} ${from}${cap}${to}`;
 }
 
-export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}) => {
+export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}, mode = 'solo', roomId = null) => {
     const [board, setBoard] = useState(INITIAL_BOARD);
     const [turn, setTurn] = useState(initialTurn);
     const [history, setHistory] = useState([]);
@@ -190,6 +191,45 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}) => {
     const [moveList, setMoveList] = useState([]);
     const [evalScore, setEvalScore] = useState(0);
     const [hintMove, setHintMove] = useState(null);
+
+    // Multiplayer socket sync
+    useEffect(() => {
+        if (mode === 'multiplayer' && roomId) {
+            const handleOpponentMove = ({ from, to, board: newBoard }) => {
+                setBoard(newBoard);
+                const piece = newBoard[to.r][to.c];
+                const nextTurn = turn === 'r' ? 'b' : 'r';
+                // Determine if capture happened (we use the received board)
+                if (callbacks.onMove) callbacks.onMove();
+                setTurn(prevTurn => prevTurn === 'r' ? 'b' : 'r');
+                setSelectedPos(null);
+                setValidMoves([]);
+                setHintMove(null);
+                // Check game state after opponent move
+                setTimeout(() => {
+                    setBoard(b => {
+                        checkWinCondition(b, nextTurn);
+                        updateEval(b, nextTurn);
+                        return b;
+                    });
+                }, 50);
+            };
+
+            const handleOpponentDisconnect = () => {
+                if (!isGameOver) {
+                    setIsGameOver(true);
+                    setWinner(callbacks.myColor || 'r');
+                }
+            };
+
+            socket.on('xiangqiMoved', handleOpponentMove);
+            socket.on('opponentDisconnected', handleOpponentDisconnect);
+            return () => {
+                socket.off('xiangqiMoved', handleOpponentMove);
+                socket.off('opponentDisconnected', handleOpponentDisconnect);
+            };
+        }
+    }, [mode, roomId, turn, isGameOver, callbacks, checkWinCondition, updateEval]);
 
     const checkWinCondition = useCallback((customBoard, currentTurn) => {
         if (!hasAnyLegalMove(customBoard, currentTurn)) {
@@ -263,6 +303,15 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}) => {
         setSelectedPos(null);
         setValidMoves([]);
         setHintMove(null);
+
+        // Emit move to server in multiplayer
+        if (mode === 'multiplayer' && roomId) {
+            const newBoard = cloneBoard(board);
+            newBoard[toR][toC] = board[fromR][fromC];
+            newBoard[fromR][fromC] = null;
+            socket.emit('xiangqiMove', { roomId, from: { r: fromR, c: fromC }, to: { r: toR, c: toC }, board: newBoard });
+        }
+
         return true;
     };
 

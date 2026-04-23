@@ -119,6 +119,7 @@ const registerTetrisHandler = require('./handlers/tetrisHandler');
 const registerTankHandler = require('./handlers/tankHandler');
 const registerJungleHandler = require('./handlers/jungleHandler');
 const registerPikachuHandler = require('./handlers/pikachuHandler');
+const registerXiangqiHandler = require('./handlers/xiangqiHandler');
 
 const roomManager = new RoomManager(io);
 
@@ -135,6 +136,7 @@ io.on('connection', (socket) => {
     registerTankHandler(io, socket, roomManager);
     registerJungleHandler(io, socket, roomManager);
     registerPikachuHandler(io, socket, roomManager);
+    registerXiangqiHandler(io, socket, roomManager);
 
     socket.on('disconnect', () => {
         delete rateLimitMap[socket.id];

@@ -34,11 +34,33 @@ export default function JungleLobby() {
             }
         }
 
+        // Handle joining from Home.jsx
+        if (location.state?.joinedRoom && !inRoom) {
+            const rid = location.state.joinedRoom;
+            socket.emit('joinRoom', { roomId: rid }, (res) => {
+                if (res.success) {
+                    setMyRoom(rid);
+                    setInRoom(true);
+                    setPlayerCount(2);
+                } else {
+                    alert(res.message || 'Không thể tham gia phòng');
+                    navigate('/jungle');
+                }
+            });
+        }
+
+        // Handle matched from Matchmaking
+        if (location.state?.matchedRoom && !inRoom) {
+            setMyRoom(location.state.matchedRoom);
+            setInRoom(true);
+            setPlayerCount(2);
+        }
+
         return () => {
             socket.off('connect', onConnect);
             socket.off('disconnect', onDisconnect);
         };
-    }, [location.state, inRoom, myRoom, handleCreateRoom]);
+    }, [location.state, inRoom, myRoom, handleCreateRoom, navigate]);
 
     useEffect(() => {
         const handlePlayerJoined = ({ players }) => {

@@ -43,11 +43,33 @@ export default function SnakeLobby() {
             }
         }
 
+        // Handle joining from Home.jsx
+        if (location.state?.joinedRoom && lobbyState === 'idle') {
+            const rid = location.state.joinedRoom;
+            socket.emit('joinRoom', { roomId: rid }, (res) => {
+                if (res.success) {
+                    setMyRoom(rid);
+                    setLobbyState('guest');
+                    setStatus('Đã tham gia phòng! Đang chờ chủ phòng bắt đầu...');
+                } else {
+                    alert(res.message || 'Không thể tham gia phòng');
+                    navigate('/snake');
+                }
+            });
+        }
+
+        // Handle matched from Matchmaking
+        if (location.state?.matchedRoom && lobbyState === 'idle') {
+            setMyRoom(location.state.matchedRoom);
+            setLobbyState('guest');
+            setStatus('Đã tìm thấy đối thủ! Trận đấu sắp bắt đầu...');
+        }
+
         return () => {
             socket.off('connect', onConnect);
             socket.off('disconnect', onDisconnect);
         };
-    }, [location.state, lobbyState, myRoom, handleCreateRoom]);
+    }, [location.state, lobbyState, myRoom, handleCreateRoom, navigate]);
 
     useEffect(() => {
         // MATCH FINDING LOGIC

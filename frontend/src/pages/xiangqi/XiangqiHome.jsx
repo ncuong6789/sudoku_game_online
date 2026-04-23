@@ -195,13 +195,13 @@ export default function XiangqiHome() {
                     }}>
                         <Gamepad size={20} /> Chơi Luyện Tập
                     </button>
-                    <button className="btn-secondary" onClick={() => alert('Cờ Tướng Multiplayer đang phát triển!')} disabled={isFlipping} style={{
+                    <button className="btn-secondary" onClick={() => navigate('/xiangqi/multiplayer', { state: { autoCreate: true } })} disabled={isFlipping} style={{
                         padding: '13px', fontSize: '1.05rem', display: 'flex', alignItems: 'center',
                         justifyContent: 'center', gap: '10px', fontWeight: 600,
                         background: 'rgba(255,255,255,0.06)', color: '#ccc',
                         border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px', cursor: 'pointer'
                     }}>
-                        <Users size={18} /> Tìm Phòng Online
+                        <Users size={18} /> Tạo Phòng Online
                     </button>
                     <button className="btn-secondary" onClick={() => navigate('/')} disabled={isFlipping} style={{
                         padding: '13px', fontSize: '1.05rem', display: 'flex', alignItems: 'center',

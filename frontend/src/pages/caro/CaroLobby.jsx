@@ -30,8 +30,28 @@ export default function CaroLobby() {
         socket.on('connect', onConnect);
         socket.on('disconnect', onDisconnect);
 
-        // Auto create if requested
-        if (location.state?.autoCreate && !inRoom && !myRoom) {
+        // Player 2 joined via room code — join the room on server, then show lobby UI
+        if (location.state?.joinedRoom && !inRoom && !myRoom) {
+            const code = location.state.joinedRoom;
+            if (socket.connected) {
+                socket.emit('joinRoom', { roomId: code, gameType: 'caro' }, (res) => {
+                    if (res.success) {
+                        setMyRoom(code);
+                        setInRoom(true);
+                    } else {
+                        alert(res.message || 'Phòng đã đầy!');
+                        navigate('/caro');
+                    }
+                });
+            }
+        }
+        // From matchmaking — already joined by server, just show lobby UI
+        else if (location.state?.matchedRoom && !inRoom && !myRoom) {
+            setMyRoom(location.state.matchedRoom);
+            setInRoom(true);
+        }
+        // Host auto-create
+        else if (location.state?.autoCreate && !inRoom && !myRoom) {
             if (socket.connected) {
                 handleCreateRoom();
             }

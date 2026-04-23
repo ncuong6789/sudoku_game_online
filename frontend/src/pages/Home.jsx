@@ -191,9 +191,25 @@ export default function Home() {
 
         socket.on('matchFound', ({ roomId, gameType, mapSize, color }) => {
             setIsSearching(false);
-            let path = `/${gameType === 'tic-tac-toe' ? 'caro' : gameType}/game`; // Mapping logic
-            if (gameType === 'pikachu') path = '/pikachu/online-game';
-            navigate(path, { state: { roomId, mode: 'multiplayer', mapSize, playerColor: color, isHost: true } });
+            const gt = gameType === 'tic-tac-toe' ? 'caro' : gameType;
+            
+            const lobbyRoutes = {
+                'chess': '/chess/multiplayer',
+                'xiangqi': '/xiangqi/multiplayer',
+                'caro': '/caro/multiplayer',
+                'snake': '/snake/multiplayer',
+                'tetris': '/tetris/multiplayer',
+                'tank': '/tank/multiplayer',
+                'jungle': '/jungle/multiplayer',
+                'pikachu': '/pikachu/lobby',
+                'sudoku': '/sudoku/multiplayer'
+            };
+
+            if (lobbyRoutes[gt]) {
+                navigate(lobbyRoutes[gt], { state: { matchedRoom: roomId, mapSize, color } });
+            } else {
+                navigate(`/${gt}/game`, { state: { roomId, mode: 'multiplayer', mapSize, playerColor: color, isHost: true } });
+            }
         });
 
         socket.on('waitingForMatch', () => {
@@ -215,11 +231,30 @@ export default function Home() {
     const handleJoinByCode = () => {
         if (!roomCode || roomCode.length < 4) return alert('Vui lòng nhập mã phòng hợp lệ!');
 
-        socket.emit('joinRoom', { roomId: roomCode }, (res) => {
+        // First, look up room to check type
+        socket.emit('lookupRoom', { roomId: roomCode }, (res) => {
             if (res.success) {
-                let path = `/${res.gameType}/game`;
-                if (res.gameType === 'pikachu') path = '/pikachu/online-game';
-                navigate(path, { state: { roomId: roomCode, mode: 'multiplayer', gridSize: res.gridSize, difficulty: res.difficulty, isHost: false } });
+                const gt = res.gameType;
+                // Games that need lobby negotiation — don't joinRoom here,
+                // let the lobby handle it to avoid race conditions
+                if (gt === 'chess') {
+                    navigate('/chess/multiplayer', { state: { joinedRoom: roomCode } });
+                } else if (gt === 'xiangqi') {
+                    navigate('/xiangqi/multiplayer', { state: { joinedRoom: roomCode } });
+                } else if (gt === 'caro') {
+                    navigate('/caro/multiplayer', { state: { joinedRoom: roomCode } });
+                } else {
+                    // For other games, join immediately then navigate
+                    socket.emit('joinRoom', { roomId: roomCode }, (joinRes) => {
+                        if (joinRes.success) {
+                            let path = `/${gt}/game`;
+                            if (gt === 'pikachu') path = '/pikachu/online-game';
+                            navigate(path, { state: { roomId: roomCode, mode: 'multiplayer', gridSize: joinRes.gridSize, difficulty: joinRes.difficulty, isHost: false } });
+                        } else {
+                            alert(joinRes.message || 'Phòng đã đầy!');
+                        }
+                    });
+                }
             } else {
                 alert(res.message || 'Không tìm thấy phòng hoặc phòng đã đầy!');
             }

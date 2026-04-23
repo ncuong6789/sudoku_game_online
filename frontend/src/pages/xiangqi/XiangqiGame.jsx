@@ -49,7 +49,7 @@ export default function XiangqiGame() {
     const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
-    const { mode, difficulty, playerColor } = location.state || { mode: 'solo', difficulty: 'Medium', playerColor: 'w' };
+    const { mode, roomId, difficulty, playerColor } = location.state || { mode: 'solo', difficulty: 'Medium', playerColor: 'w' };
 
     const {
         playXiangqiClickSound, playXiangqiMoveSound, playXiangqiCaptureSound,
@@ -80,7 +80,7 @@ export default function XiangqiGame() {
         onCheck: playXiangqiCheckSound,
         onIllegal: playXiangqiIllegalSound,
         myColor,
-    });
+    }, mode, roomId);
 
     const [showHistory, setShowHistory] = useState(false);
     const isThinking = mode === 'solo' && !isGameOver && turn !== myColor;
@@ -163,7 +163,7 @@ export default function XiangqiGame() {
                             <div className="xiangqi-avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', color: '#fff', fontWeight: 'bold' }}>帥</div>
                             <div>
                                 <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('xiangqi.redSide')}</div>
-                                <div style={{ fontWeight: 700, color: '#fca5a5', fontSize: '0.8rem' }}>{myColor === 'r' ? t('xiangqi.redPlayer') : t('xiangqi.blackPlayer')}</div>
+                                <div style={{ fontWeight: 700, color: '#fca5a5', fontSize: '0.8rem' }}>{myColor === 'r' ? t('xiangqi.redPlayer') : (mode === 'multiplayer' ? 'Đối thủ' : t('xiangqi.blackPlayer'))}</div>
                             </div>
                         </div>
 
@@ -171,7 +171,7 @@ export default function XiangqiGame() {
                             <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#1e293b', border: '2px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', color: '#f8fafc', fontWeight: 'bold' }}>將</div>
                             <div>
                                 <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('xiangqi.blackSide')}</div>
-                                <div style={{ fontWeight: 700, color: '#94a3b8', fontSize: '0.8rem' }}>{myColor === 'b' ? t('xiangqi.redPlayer') : t('xiangqi.blackPlayer')}</div>
+                                <div style={{ fontWeight: 700, color: '#94a3b8', fontSize: '0.8rem' }}>{myColor === 'b' ? t('xiangqi.redPlayer') : (mode === 'multiplayer' ? 'Đối thủ' : t('xiangqi.blackPlayer'))}</div>
                             </div>
                         </div>
                     </div>
@@ -404,7 +404,7 @@ export default function XiangqiGame() {
                             </div>
                             <div style={{ fontSize: '0.75rem', color: isThinking ? '#fbbf24' : '#666', marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                                 {isThinking && <Activity size={12} className="spin" style={{ animation: 'spin 1s linear infinite' }} />}
-                                {turn === myColor ? t('xiangqi.redPlayer') : t('xiangqi.thinking')}
+                                {turn === myColor ? t('xiangqi.redPlayer') : (mode === 'multiplayer' ? 'Đối thủ...' : t('xiangqi.thinking'))}
                             </div>
                         </div>
                         {inCheckColor && (

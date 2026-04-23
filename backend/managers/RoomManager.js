@@ -12,6 +12,9 @@ class RoomManager {
             snake: [],
             tetris: [],
             pikachu: [],
+            tank: [],
+            jungle: [],
+            xiangqi: [],
             random: []
         };
         this.statsUpdateTimeout = null;
@@ -47,7 +50,11 @@ class RoomManager {
                 caro: { online: 0, rooms: 0 },
                 chess: { online: 0, rooms: 0 },
                 snake: { online: 0, rooms: 0 },
-                tetris: { online: 0, rooms: 0 }
+                tetris: { online: 0, rooms: 0 },
+                pikachu: { online: 0, rooms: 0 },
+                tank: { online: 0, rooms: 0 },
+                jungle: { online: 0, rooms: 0 },
+                xiangqi: { online: 0, rooms: 0 }
             };
             for (const roomId in this.rooms) {
                 const room = this.rooms[roomId];

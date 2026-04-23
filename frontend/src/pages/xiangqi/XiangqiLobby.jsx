@@ -1,24 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { socket } from '../../utils/socket';
-import { User, Crown } from 'lucide-react';
+import { User, Hexagon } from 'lucide-react';
 
-export default function ChessLobby() {
+export default function XiangqiLobby() {
     const navigate = useNavigate();
     const location = useLocation();
     const [inRoom, setInRoom] = useState(false);
     const [myRoom, setMyRoom] = useState('');
     const [isConnected, setIsConnected] = useState(socket.connected);
-    
-    // Negotiation state
-    const [myColor, setMyColor] = useState('random'); // w, b, random
+
+    // Negotiation state — 'r' = Đỏ (Tiên), 'b' = Đen (Hậu), 'random'
+    const [myColor, setMyColor] = useState('random');
     const [opponentColor, setOpponentColor] = useState('random');
     const [isOpponentReady, setIsOpponentReady] = useState(false);
     const [isMyReady, setIsMyReady] = useState(false);
 
     const handleCreateRoom = useCallback(() => {
         if (!socket.connected) return;
-        socket.emit('createRoom', { difficulty: 'Medium', gameType: 'chess' }, (res) => {
+        socket.emit('createRoom', { difficulty: 'Medium', gameType: 'xiangqi' }, (res) => {
             setMyRoom(res.roomId);
             setInRoom(true);
         });
@@ -34,13 +34,13 @@ export default function ChessLobby() {
         if (location.state?.joinedRoom && !inRoom && !myRoom) {
             const code = location.state.joinedRoom;
             if (socket.connected) {
-                socket.emit('joinRoom', { roomId: code, gameType: 'chess' }, (res) => {
+                socket.emit('joinRoom', { roomId: code, gameType: 'xiangqi' }, (res) => {
                     if (res.success) {
                         setMyRoom(code);
                         setInRoom(true);
                     } else {
                         alert(res.message || 'Phòng đã đầy!');
-                        navigate('/chess');
+                        navigate('/xiangqi');
                     }
                 });
             }
@@ -63,17 +63,15 @@ export default function ChessLobby() {
         };
     }, [location.state, inRoom, myRoom, handleCreateRoom]);
 
-    // Setup Room socket listeners
+    // Room socket listeners
     useEffect(() => {
         if (!myRoom) return;
 
         const handlePlayerJoined = ({ players }) => {
             if (players === 2) {
-                // New opponent joined, reset ready states
                 setIsOpponentReady(false);
                 setOpponentColor('random');
-                // Auto send our current preference
-                socket.emit('chessColorSelect', { roomId: myRoom, color: myColor, ready: isMyReady });
+                socket.emit('xiangqiColorSelect', { roomId: myRoom, color: myColor, ready: isMyReady });
             }
         };
 
@@ -83,54 +81,54 @@ export default function ChessLobby() {
         };
 
         const handleGameStarted = (data) => {
-            navigate('/chess/game', { state: { mode: 'multiplayer', roomId: myRoom, playerColor: data.playerColors[socket.id] } });
+            const assignedColor = data.playerColors[socket.id]; // 'r' or 'b'
+            // Map to playerColor convention used by XiangqiGame: 'w' = red, 'b' = black
+            const playerColor = assignedColor === 'r' ? 'w' : 'b';
+            navigate('/xiangqi/game', { state: { mode: 'multiplayer', roomId: myRoom, playerColor } });
         };
 
         socket.on('playerJoined', handlePlayerJoined);
-        socket.on('chessColorUpdate', handleColorUpdate);
-        socket.on('chessGameStarted', handleGameStarted);
+        socket.on('xiangqiColorUpdate', handleColorUpdate);
+        socket.on('xiangqiGameStarted', handleGameStarted);
 
         return () => {
             socket.off('playerJoined', handlePlayerJoined);
-            socket.off('chessColorUpdate', handleColorUpdate);
-            socket.off('chessGameStarted', handleGameStarted);
+            socket.off('xiangqiColorUpdate', handleColorUpdate);
+            socket.off('xiangqiGameStarted', handleGameStarted);
         };
     }, [myRoom, myColor, isMyReady, navigate]);
 
-    // Update our preference to others
     const updateMyColor = (c) => {
         setMyColor(c);
-        setIsMyReady(false); // unready when changing color
-        socket.emit('chessColorSelect', { roomId: myRoom, color: c, ready: false });
+        setIsMyReady(false);
+        socket.emit('xiangqiColorSelect', { roomId: myRoom, color: c, ready: false });
     };
 
     const toggleReady = () => {
         const newReady = !isMyReady;
         setIsMyReady(newReady);
-        socket.emit('chessColorSelect', { roomId: myRoom, color: myColor, ready: newReady });
-        
-        // If both are ready, the server will trigger the game start. 
+        socket.emit('xiangqiColorSelect', { roomId: myRoom, color: myColor, ready: newReady });
+
         if (newReady && isOpponentReady) {
-            socket.emit('startChessGame', { roomId: myRoom });
+            socket.emit('startXiangqiGame', { roomId: myRoom });
         }
     };
-
 
     const hasConflict = myColor !== 'random' && opponentColor !== 'random' && myColor === opponentColor;
     const canReady = !hasConflict;
 
     if (inRoom) {
         return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '1rem', background: 'radial-gradient(ellipse at 50% 0%, rgba(168,85,247,0.08) 0%, transparent 70%)' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '1rem', background: 'radial-gradient(ellipse at 50% 0%, rgba(239,68,68,0.08) 0%, transparent 70%)' }}>
                 <div className="glass-panel" style={{ maxWidth: '400px', width: '100%', padding: '2rem', borderRadius: '24px', textAlign: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '1.5rem' }}>
-                        <Crown size={28} color="#a855f7" />
-                        <h2 style={{ margin: 0, color: '#a855f7' }}>Chess Online</h2>
+                        <Hexagon size={28} color="#ef4444" />
+                        <h2 style={{ margin: 0, color: '#ef4444' }}>Cờ Tướng Online</h2>
                     </div>
 
-                    <div style={{ background: 'rgba(168,85,247,0.06)', border: '1.5px solid rgba(168,85,247,0.25)', borderRadius: '16px', padding: '15px', marginBottom: '1.5rem' }}>
+                    <div style={{ background: 'rgba(239,68,68,0.06)', border: '1.5px solid rgba(239,68,68,0.25)', borderRadius: '16px', padding: '15px', marginBottom: '1.5rem' }}>
                         <p style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 5px 0' }}>Mã phòng của bạn</p>
-                        <h1 style={{ letterSpacing: '4px', color: '#a855f7', margin: 0, fontSize: '2rem', fontFamily: 'monospace', userSelect: 'text', cursor: 'text' }}>{myRoom}</h1>
+                        <h1 style={{ letterSpacing: '4px', color: '#ef4444', margin: 0, fontSize: '2rem', fontFamily: 'monospace', userSelect: 'text', cursor: 'text' }}>{myRoom}</h1>
                     </div>
 
                     {/* Opponent Selection */}
@@ -142,14 +140,14 @@ export default function ChessLobby() {
                             </span>
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
-                            {['w', 'b', 'random'].map(c => (
+                            {['r', 'b', 'random'].map(c => (
                                 <div key={c} style={{ flex: 1, padding: '8px', textAlign: 'center', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600,
-                                    background: opponentColor === c ? 'rgba(168,85,247,0.2)' : 'rgba(255,255,255,0.03)',
-                                    border: opponentColor === c ? '1px solid #a855f7' : '1px solid transparent',
-                                    color: opponentColor === c ? '#d8b4fe' : '#64748b',
+                                    background: opponentColor === c ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.03)',
+                                    border: opponentColor === c ? '1px solid #ef4444' : '1px solid transparent',
+                                    color: opponentColor === c ? '#fca5a5' : '#64748b',
                                     transition: 'all 0.2s'
                                 }}>
-                                    {c === 'w' ? 'Trắng' : c === 'b' ? 'Đen' : 'Random'}
+                                    {c === 'r' ? '帥 Đỏ' : c === 'b' ? '將 Đen' : 'Random'}
                                 </div>
                             ))}
                         </div>
@@ -167,26 +165,26 @@ export default function ChessLobby() {
                             <span>👉 Bạn chọn phe:</span>
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
-                            {['w', 'b', 'random'].map(c => (
+                            {['r', 'b', 'random'].map(c => (
                                 <button key={c} onClick={() => updateMyColor(c)} style={{ flex: 1, padding: '8px', textAlign: 'center', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600,
-                                    background: myColor === c ? '#a855f7' : 'rgba(255,255,255,0.05)',
+                                    background: myColor === c ? '#ef4444' : 'rgba(255,255,255,0.05)',
                                     border: 'none', color: myColor === c ? '#fff' : '#94a3b8', cursor: 'pointer', transition: 'all 0.2s',
-                                    boxShadow: myColor === c ? '0 0 15px rgba(168,85,247,0.4)' : 'none'
+                                    boxShadow: myColor === c ? '0 0 15px rgba(239,68,68,0.4)' : 'none'
                                 }}>
-                                    {c === 'w' ? 'Trắng' : c === 'b' ? 'Đen' : 'Random'}
+                                    {c === 'r' ? '帥 Đỏ' : c === 'b' ? '將 Đen' : 'Random'}
                                 </button>
                             ))}
                         </div>
-                        {hasConflict && <p style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '10px', textAlign: 'center', marginBottom: 0, fontWeight: 600 }}>Cả 2 không thể chọn cùng màu!</p>}
+                        {hasConflict && <p style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '10px', textAlign: 'center', marginBottom: 0, fontWeight: 600 }}>Cả 2 không thể chọn cùng phe!</p>}
                     </div>
 
                     <div style={{ display: 'flex', gap: '10px' }}>
                         <button className="btn-secondary" style={{ flex: 1, padding: '12px', color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)' }} onClick={() => {
-                            setInRoom(false); setMyRoom(''); navigate('/chess');
+                            setInRoom(false); setMyRoom(''); navigate('/xiangqi');
                         }}>Rời phòng</button>
-                        <button 
+                        <button
                             style={{ flex: 2, padding: '12px', borderRadius: '12px', fontWeight: 800, border: 'none', cursor: canReady ? 'pointer' : 'not-allowed', color: '#000',
-                                background: isMyReady ? '#4ade80' : (canReady ? '#a855f7' : '#475569'),
+                                background: isMyReady ? '#4ade80' : (canReady ? '#ef4444' : '#475569'),
                                 opacity: canReady ? 1 : 0.5, transition: 'all 0.2s'
                             }}
                             disabled={!canReady}
@@ -204,9 +202,9 @@ export default function ChessLobby() {
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '1rem' }}>
             <div className="glass-panel" style={{ maxWidth: '400px', width: '100%', padding: '2rem', borderRadius: '24px', textAlign: 'center' }}>
                 <h2 style={{ margin: '0 0 1.5rem 0' }}>Đang khởi tạo...</h2>
-                <div style={{ width: '40px', height: '40px', border: '4px solid rgba(168,85,247,0.2)', borderTopColor: '#a855f7', borderRadius: '50%', margin: '0 auto', animation: 'spin 1s linear infinite' }} />
+                <div style={{ width: '40px', height: '40px', border: '4px solid rgba(239,68,68,0.2)', borderTopColor: '#ef4444', borderRadius: '50%', margin: '0 auto', animation: 'spin 1s linear infinite' }} />
                 {!isConnected && <p style={{ color: '#ef4444', marginTop: '1rem' }}>⚠️ Đang kết nối server...</p>}
-                <button className="btn-secondary" style={{ marginTop: '2rem', width: '100%', padding: '12px' }} onClick={() => navigate('/chess')}>Hủy</button>
+                <button className="btn-secondary" style={{ marginTop: '2rem', width: '100%', padding: '12px' }} onClick={() => navigate('/xiangqi')}>Hủy</button>
                 <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
             </div>
         </div>
