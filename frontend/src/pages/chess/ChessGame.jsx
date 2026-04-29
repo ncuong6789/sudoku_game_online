@@ -66,8 +66,8 @@ export default function ChessGame() {
         onMove: () => playChessMoveSound(),
         onCapture: () => playChessCaptureSound(),
         onCheck: () => playChessCheckSound(),
-        onIllegal: () => {},
-        onClick: () => {}
+        onIllegal: () => { },
+        onClick: () => { }
     }), [myColor, playChessMoveSound, playChessCaptureSound, playChessCheckSound]);
 
     const {
@@ -219,20 +219,20 @@ export default function ChessGame() {
                         display: 'grid', gridTemplateColumns: 'repeat(8, minmax(0, 1fr))', gridTemplateRows: 'repeat(8, minmax(0, 1fr))',
                         border: '8px solid rgba(15, 15, 25, 0.95)', borderRadius: '6px', boxShadow: '0 0 30px rgba(0,0,0,0.6)'
                     }}>
-                        {displayRanks.map((r, i) => 
+                        {displayRanks.map((r, i) =>
                             displayFiles.map((f, j) => {
                                 const sq = f + r;
                                 const isLight = (i + j) % 2 === 0;
                                 const piece = game.get(sq);
-                                
+
                                 const isSelected = selectedSquare === sq;
                                 const isValidMove = validMoves.includes(sq);
                                 const isHint = hintMove?.from === sq || hintMove?.to === sq;
-                                
+
                                 let bg = isLight ? '#f0d9b5' : '#b58863';
                                 if (isSelected) bg = 'rgba(79, 172, 254, 0.6)';
                                 else if (isHint) bg = 'rgba(251, 191, 36, 0.5)';
-                                
+
                                 return (
                                     <div key={sq} onClick={() => handleSquareClick(sq)} style={{
                                         background: bg, position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center',
@@ -265,9 +265,9 @@ export default function ChessGame() {
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1rem' }}>
                         <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '16px 12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                             <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '16px', fontWeight: 800, letterSpacing: '1px', textAlign: 'center' }}>THÔNG TIN TRẬN ĐẤU</div>
-                            
+
                             {/* White Player */}
-                            <div style={{ 
+                            <div style={{
                                 display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', borderRadius: '8px',
                                 background: turn === 'w' ? 'rgba(74,222,128,0.1)' : 'transparent',
                                 border: turn === 'w' ? '1px solid rgba(74,222,128,0.3)' : '1px solid transparent',
@@ -276,7 +276,7 @@ export default function ChessGame() {
                                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', color: '#000', fontWeight: 'bold' }}>♔</div>
                                 <div style={{ flex: 1 }}>
                                     <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('chess.white')}</div>
-                                    <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.8rem' }}>{myColor === 'w' ? t('chess.you') : t('chess.cpu')}</div>
+                                    <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.8rem' }}>{myColor === 'w' ? t('You') : t('Cpu')}</div>
                                 </div>
                                 {turn === 'w' && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80' }} />}
                             </div>
@@ -284,7 +284,7 @@ export default function ChessGame() {
                             <div style={{ width: '2px', height: '16px', background: 'rgba(255,255,255,0.1)', margin: '4px auto' }} />
 
                             {/* Black Player */}
-                            <div style={{ 
+                            <div style={{
                                 display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', borderRadius: '8px',
                                 background: turn === 'b' ? 'rgba(74,222,128,0.1)' : 'transparent',
                                 border: turn === 'b' ? '1px solid rgba(74,222,128,0.3)' : '1px solid transparent',
@@ -293,11 +293,11 @@ export default function ChessGame() {
                                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#0f172a', border: '2px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', color: '#fff', fontWeight: 'bold' }}>♚</div>
                                 <div style={{ flex: 1 }}>
                                     <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('chess.black')}</div>
-                                    <div style={{ fontWeight: 700, color: '#94a3b8', fontSize: '0.8rem' }}>{myColor === 'b' ? t('chess.you') : t('chess.cpu')}</div>
+                                    <div style={{ fontWeight: 700, color: '#94a3b8', fontSize: '0.8rem' }}>{myColor === 'b' ? t('You') : t('Cpu')}</div>
                                 </div>
                                 {turn === 'b' && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80' }} />}
                             </div>
-                            
+
                             <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.75rem', color: '#fbbf24', fontWeight: 600 }}>
                                 {turn === myColor ? 'Tới lượt của bạn' : 'CPU đang suy nghĩ...'}
                             </div>
@@ -339,7 +339,7 @@ export default function ChessGame() {
                             </button>
                         </div>
                         <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)' }} />
-                        <button onClick={() => navigate('/chess')} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.1)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#94a3b8'; }}>
+                        <button onClick={() => navigate('/chess')} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#94a3b8'; }}>
                             <ArrowLeft size={16} /> {t('common.exit', 'Thoát')}
                         </button>
                     </div>
