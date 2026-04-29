@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Chess } from 'chess.js';
 import { ArrowLeft, RotateCcw, Undo2, Lightbulb, History, ChevronRight, ChevronDown, Activity, Crown, ZoomIn, ZoomOut, Settings } from 'lucide-react';
+import { useChessLogic } from './useChessLogic';
 import { socket } from '../../utils/socket';
 import { EVENTS } from '../../utils/constants';
 import { useTranslation } from 'react-i18next';

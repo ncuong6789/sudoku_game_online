@@ -192,6 +192,26 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}, mode = 'solo'
     const [evalScore, setEvalScore] = useState(0);
     const [hintMove, setHintMove] = useState(null);
 
+    // Multiplayer socket sync will be moved below.
+
+    const checkWinCondition = useCallback((customBoard, currentTurn) => {
+        if (!hasAnyLegalMove(customBoard, currentTurn)) {
+            setIsGameOver(true);
+            setWinner(currentTurn === 'r' ? 'b' : 'r');
+            setInCheckColor(null);
+        } else if (isCheck(customBoard, currentTurn)) {
+            setInCheckColor(currentTurn);
+            if (callbacks.onCheck) callbacks.onCheck();
+        } else {
+            setInCheckColor(null);
+        }
+    }, [callbacks]);
+
+    const updateEval = useCallback((currentBoard, currentTurn) => {
+        const score = getEvalScore(currentBoard, currentTurn);
+        setEvalScore(score);
+    }, []);
+
     // Multiplayer socket sync
     useEffect(() => {
         if (mode === 'multiplayer' && roomId) {
@@ -230,24 +250,6 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}, mode = 'solo'
             };
         }
     }, [mode, roomId, turn, isGameOver, callbacks, checkWinCondition, updateEval]);
-
-    const checkWinCondition = useCallback((customBoard, currentTurn) => {
-        if (!hasAnyLegalMove(customBoard, currentTurn)) {
-            setIsGameOver(true);
-            setWinner(currentTurn === 'r' ? 'b' : 'r');
-            setInCheckColor(null);
-        } else if (isCheck(customBoard, currentTurn)) {
-            setInCheckColor(currentTurn);
-            if (callbacks.onCheck) callbacks.onCheck();
-        } else {
-            setInCheckColor(null);
-        }
-    }, [callbacks]);
-
-    const updateEval = useCallback((currentBoard, currentTurn) => {
-        const score = getEvalScore(currentBoard, currentTurn);
-        setEvalScore(score);
-    }, []);
 
     const selectPiece = (r, c) => {
         if (isGameOver) return;
