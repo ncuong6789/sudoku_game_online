@@ -59,7 +59,7 @@ export default function ChessGame() {
     const [zoomLevel, setZoomLevel] = useState(100);
     const [showHistory, setShowHistory] = useState(false);
 
-    const { playChessMoveSound, playChessCaptureSound, playChessCheckSound, playWinSound, playLoseSound } = useAudio();
+    const { playChessMoveSound, playChessCaptureSound, playChessCheckSound, playChessWinSound, playChessLossSound } = useAudio();
 
     const callbacks = useMemo(() => ({
         myColor,
@@ -85,10 +85,10 @@ export default function ChessGame() {
 
     useEffect(() => {
         if (isGameOver && winner) {
-            if (winner === myColor) playWinSound();
-            else if (winner !== 'draw') playLoseSound();
+            if (winner === myColor) playChessWinSound();
+            else if (winner !== 'draw') playChessLossSound();
         }
-    }, [isGameOver, winner, myColor, playWinSound, playLoseSound]);
+    }, [isGameOver, winner, myColor, playChessWinSound, playChessLossSound]);
 
     const handleZoomIn = () => setZoomLevel(z => Math.min(200, z + 20));
     const handleZoomOut = () => setZoomLevel(z => Math.max(60, z - 20));

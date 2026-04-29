@@ -330,6 +330,15 @@ export default function XiangqiGame() {
                                                     {isValidMove && <div style={{ width: '30%', height: '30%', borderRadius: '50%', backgroundColor: 'rgba(0,0,0,0.3)' }} />}
                                                 </div>
                                             )}
+                                            {piece && piece === `${inCheckColor}_k` && (
+                                                <div style={{
+                                                    position: 'absolute', left: `${leftPct}%`, top: `${topPct}%`,
+                                                    width: '12%', aspectRatio: '1', transform: 'translate(-50%, -50%)',
+                                                    background: 'radial-gradient(circle, rgba(239,68,68,0.9) 0%, transparent 70%)',
+                                                    borderRadius: '50%', pointerEvents: 'none', zIndex: 20,
+                                                    animation: 'pulse-glow-xiangqi 1.5s infinite'
+                                                }} />
+                                            )}
                                             {piece && (
                                                 <div
                                                     style={{
@@ -438,6 +447,10 @@ export default function XiangqiGame() {
                     0% { transform: translate(-50%, -50%) scale(1); }
                     50% { transform: translate(-50%, -50%) scale(1.3); }
                     100% { transform: translate(-50%, -50%) scale(1); }
+                }
+                @keyframes pulse-glow-xiangqi {
+                    0%, 100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+                    50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.2); }
                 }
             `}</style>
         </div>

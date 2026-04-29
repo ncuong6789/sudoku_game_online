@@ -94,62 +94,11 @@ export const useAudio = () => {
         osc.stop(now + 0.1);
     }, []);
 
-    const playChessMoveSound = useCallback(() => {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.type = 'triangle';
-        const now = audioCtx.currentTime;
-        osc.frequency.setValueAtTime(800, now);
-        osc.frequency.exponentialRampToValueAtTime(400, now + 0.05);
-        gain.gain.setValueAtTime(0.05, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.05);
-        osc.start(now);
-        osc.stop(now + 0.05);
-    }, []);
-
-    const playChessCaptureSound = useCallback(() => {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.type = 'sawtooth';
-        const now = audioCtx.currentTime;
-        osc.frequency.setValueAtTime(400, now);
-        osc.frequency.exponentialRampToValueAtTime(200, now + 0.1);
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.1);
-        osc.start(now);
-        osc.stop(now + 0.1);
-    }, []);
-
-    const playChessCheckSound = useCallback(() => {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        
-        // Tạo tiếng bíp kép kịch tính
-        const playBip = (startTime, freq) => {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(freq, startTime);
-            gain.gain.setValueAtTime(0.1, startTime);
-            gain.gain.linearRampToValueAtTime(0, startTime + 0.1);
-            osc.start(startTime);
-            osc.stop(startTime + 0.1);
-        };
-
-        const now = audioCtx.currentTime;
-        playBip(now, 1000);
-        playBip(now + 0.15, 1200);
-    }, []);
+    const playChessMoveSound = useCallback(() => playHTMLAudio('/chess_audio/move.mp3', 0.8), [playHTMLAudio]);
+    const playChessCaptureSound = useCallback(() => playHTMLAudio('/chess_audio/capture.mp3', 0.8), [playHTMLAudio]);
+    const playChessCheckSound = useCallback(() => playHTMLAudio('/chess_audio/check.mp3', 0.8), [playHTMLAudio]);
+    const playChessWinSound = useCallback(() => playHTMLAudio('/chess_audio/victory.mp3', 0.8), [playHTMLAudio]);
+    const playChessLossSound = useCallback(() => playHTMLAudio('/chess_audio/defeat.mp3', 0.8), [playHTMLAudio]);
 
     const playTetrisMoveSound = useCallback(() => {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -404,7 +353,7 @@ export const useAudio = () => {
 
     return { 
         playWinSound, playLoseSound, playClearLineSound, 
-        playChessMoveSound, playChessCaptureSound, playChessCheckSound,
+        playChessMoveSound, playChessCaptureSound, playChessCheckSound, playChessWinSound, playChessLossSound,
         playTetrisMoveSound, playTetrisRotateSound, playTetrisDropSound,
         playPacmanStartSound, playPacmanWakaSound, playPacmanPowerPillSound, playPacmanEatGhostSound, playPacmanDieSound,
         playJungleMoveSound, playJungleCaptureSound, playJungleJumpSound, playJungleSelectSound, playJungleWinSound, playJungleLoseSound,
