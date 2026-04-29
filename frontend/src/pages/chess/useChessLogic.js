@@ -29,6 +29,8 @@ export function useChessLogic(mode, roomId, difficulty, initialColor, callbacks)
     const [isThinkingHint, setIsThinkingHint] = useState(false);
     const [hintSuggestions, setHintSuggestions] = useState(null);
 
+    const engineTask = useRef('idle');
+
     // Sync game state to derived states natively
     useEffect(() => {
         const history = game.history({ verbose: true });
@@ -114,24 +116,27 @@ export function useChessLogic(mode, roomId, difficulty, initialColor, callbacks)
                     if (scoreMatch) setEvalScore(parseInt(scoreMatch[1]));
                     else if (mateMatch) setEvalScore(parseInt(mateMatch[1]) > 0 ? 10000 : -10000);
                 } else if (line.startsWith('bestmove')) {
-                    const moveMatch = line.match(/bestmove\s([a-h][1-8][a-h][1-8])(n|b|r|q)?/);
-                    if (moveMatch && mode === 'solo') {
-                        const from = moveMatch[1].substring(0, 2);
-                        const to   = moveMatch[1].substring(2, 4);
-                        const promotion = moveMatch[2] || 'q';
-                        setGame((g) => {
-                            const newGame = new Chess();
-                            newGame.loadPgn(g.pgn());
-                            try {
-                                const result = newGame.move({ from, to, promotion });
-                                if (result) {
-                                    if (result.flags.includes('c')) onCapture?.();
-                                    else onMove?.();
-                                    if (newGame.isCheck()) onCheck?.();
-                                }
-                                return newGame;
-                            } catch (err) { return g; }
-                        });
+                    if (engineTask.current === 'move') {
+                        engineTask.current = 'idle';
+                        const moveMatch = line.match(/bestmove\s([a-h][1-8][a-h][1-8])(n|b|r|q)?/);
+                        if (moveMatch && mode === 'solo') {
+                            const from = moveMatch[1].substring(0, 2);
+                            const to   = moveMatch[1].substring(2, 4);
+                            const promotion = moveMatch[2] || 'q';
+                            setGame((g) => {
+                                const newGame = new Chess();
+                                newGame.loadPgn(g.pgn());
+                                try {
+                                    const result = newGame.move({ from, to, promotion });
+                                    if (result) {
+                                        if (result.flags.includes('c')) onCapture?.();
+                                        else onMove?.();
+                                        if (newGame.isCheck()) onCheck?.();
+                                    }
+                                    return newGame;
+                                } catch (err) { return g; }
+                            });
+                        }
                     }
                 }
             };
@@ -181,10 +186,13 @@ export function useChessLogic(mode, roomId, difficulty, initialColor, callbacks)
     // Keep evaluating position when someone moves to update EvalBar
     useEffect(() => {
         if (engine.current && isEngineReady && !gameOver) {
-            engine.current.postMessage(`position fen ${game.fen()}`);
-            engine.current.postMessage(`go depth 12`); // continuous eval
+            if (game.turn() === myColor) {
+                engineTask.current = 'eval';
+                engine.current.postMessage(`position fen ${game.fen()}`);
+                engine.current.postMessage(`go depth 12`); // continuous eval
+            }
         }
-    }, [game.fen(), isEngineReady, gameOver]);
+    }, [game.fen(), isEngineReady, gameOver, myColor]);
 
     const selectSquare = useCallback((sq) => {
         if (gameOver || game.turn() !== myColor) return;
@@ -247,6 +255,7 @@ export function useChessLogic(mode, roomId, difficulty, initialColor, callbacks)
         if (engine.current && isEngineReady) {
             // Try Stockfish first
             try {
+                engineTask.current = 'move';
                 const depth = difficulty === 'Easy' ? 1 : difficulty === 'Medium' ? 8 : 15;
                 engine.current.postMessage(`position fen ${game.fen()}`);
                 engine.current.postMessage(`go depth ${depth}`);
@@ -265,6 +274,7 @@ export function useChessLogic(mode, roomId, difficulty, initialColor, callbacks)
             setHintMove(null);
             setHintSuggestions(null);
             
+            engineTask.current = 'hint';
             const suggestions = [];
             let handler = null;
             

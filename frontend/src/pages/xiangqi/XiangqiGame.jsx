@@ -1,7 +1,7 @@
 // Force Vite HMR
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Hexagon, Undo2, Lightbulb, History, ChevronRight, ChevronDown, ZoomIn, ZoomOut, ArrowLeft, RotateCcw } from 'lucide-react';
+import { Hexagon, Undo2, Lightbulb, History, ChevronRight, ChevronDown, ZoomIn, ZoomOut, ArrowLeft, RotateCcw, Settings } from 'lucide-react';
 import { useXiangqiLogic } from './useXiangqiLogic';
 import { useAudio } from '../../utils/useAudio';
 import { useTranslation } from 'react-i18next';

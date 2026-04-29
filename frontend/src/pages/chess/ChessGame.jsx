@@ -260,7 +260,7 @@ export default function ChessGame() {
                     <div style={{
                         transform: `scale(${zoomLevel / 100})`, transition: 'transform 0.3s',
                         width: 'min(75vh, 75vw)', height: 'min(75vh, 75vw)',
-                        display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gridTemplateRows: 'repeat(8, 1fr)',
+                        display: 'grid', gridTemplateColumns: 'repeat(8, minmax(0, 1fr))', gridTemplateRows: 'repeat(8, minmax(0, 1fr))',
                         border: '8px solid rgba(15, 15, 25, 0.95)', borderRadius: '6px', boxShadow: '0 0 30px rgba(0,0,0,0.6)'
                     }}>
                         {displayRanks.map((r, i) => 
