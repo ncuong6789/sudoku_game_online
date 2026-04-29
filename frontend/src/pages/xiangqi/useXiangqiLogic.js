@@ -317,35 +317,26 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}, mode = 'solo'
         return true;
     };
 
-    const makeAIMove = (color, difficulty = 'Medium') => {
+    const makeAIMove = useCallback((color, difficulty = 'Medium') => {
         if (isGameOver) return;
         getBestMoveAsync(board, color, getLegalMoves, cloneBoard, isCheck, isKingsFacing, difficulty).then(chosenMove => {
             if (!chosenMove) return;
-
             const fromR = chosenMove.from.r;
             const fromC = chosenMove.from.c;
             const toR = chosenMove.to.r;
             const toC = chosenMove.to.c;
-            const piece = board[fromR][fromC];
-            const target = board[toR][toC];
-
-            if (target && callbacks.onCapture) callbacks.onCapture();
-            else if (!target && callbacks.onMove) callbacks.onMove();
-
             setBoard(prevBoard => {
+                const piece = prevBoard[fromR][fromC];
+                if (!piece) return prevBoard;
+                const target = prevBoard[toR][toC];
                 const newBoard = cloneBoard(prevBoard);
                 newBoard[toR][toC] = piece;
                 newBoard[fromR][fromC] = null;
-
-                setHistory(prev => [...prev, {
-                    board: cloneBoard(prevBoard),
-                    turn,
-                    inCheckColor,
-                }]);
-
+                if (target && callbacks.onCapture) callbacks.onCapture();
+                else if (callbacks.onMove) callbacks.onMove();
+                setHistory(prev => [...prev, { board: cloneBoard(prevBoard), turn, inCheckColor }]);
                 const notation = formatMoveNotation(piece, fromR, fromC, toR, toC, target);
                 setMoveList(prev => [...prev, { notation, color: piece[0], captured: target }]);
-
                 const nextTurn = turn === 'r' ? 'b' : 'r';
                 setTurn(nextTurn);
                 checkWinCondition(newBoard, nextTurn);
@@ -353,7 +344,8 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}, mode = 'solo'
                 return newBoard;
             });
         });
-    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [board, isGameOver, turn, inCheckColor, callbacks, checkWinCondition, updateEval]);
 
     const undoMove = (count = 2) => {
         if (history.length < count) return false;

@@ -1,7 +1,7 @@
 // Force Vite HMR
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Hexagon, ShieldCheck, Undo2, Lightbulb, History, ChevronRight, ChevronDown, Activity, ZoomIn, ZoomOut, ArrowLeft, Settings } from 'lucide-react';
+import { Hexagon, Undo2, Lightbulb, History, ChevronRight, ChevronDown, ZoomIn, ZoomOut, ArrowLeft, RotateCcw } from 'lucide-react';
 import { useXiangqiLogic } from './useXiangqiLogic';
 import { useAudio } from '../../utils/useAudio';
 import { useTranslation } from 'react-i18next';
@@ -55,17 +55,17 @@ export default function XiangqiGame() {
     const [zoomLevel, setZoomLevel] = useState(100);
     const [showHistory, setShowHistory] = useState(false);
 
-    const callbacks = {
+    const callbacks = useMemo(() => ({
         myColor,
         onMove: () => {},
         onCapture: () => {},
         onCheck: () => {},
         onIllegal: () => {}
-    };
+    }), [myColor]);
 
     const {
         board, turn, selectedPos, validMoves, isGameOver, winner, inCheckColor, moveList, evalScore, hintMove, selectPiece, movePiece, makeAIMove, undoMove, getHint
-    } = useXiangqiLogic(mode, roomId, difficulty, myColor, callbacks);
+    } = useXiangqiLogic('r', callbacks, mode, roomId);
 
     useEffect(() => {
         if (mode === 'solo' && !isGameOver && turn !== myColor) {
@@ -198,18 +198,22 @@ export default function XiangqiGame() {
                                 {moveList.length === 0 ? (
                                     <p style={{ fontSize: '0.7rem', color: '#555', textAlign: 'center', margin: '6px 0' }}>{t('xiangqi.noMoves')}</p>
                                 ) : (
-                                    moveList.map((m, i) => (
-                                        <div key={i} style={{
-                                            display: 'flex', alignItems: 'center', gap: '4px',
-                                            padding: '3px 4px', borderRadius: '4px',
-                                            background: i === moveList.length - 1 ? 'rgba(255,255,255,0.04)' : 'transparent',
-                                            fontSize: '0.7rem', color: m.piece[0] === 'r' ? '#fca5a5' : '#94a3b8',
-                                            fontFamily: 'monospace'
-                                        }}>
-                                            <span style={{ color: '#555', minWidth: '14px', fontSize: '0.65rem' }}>{i + 1}.</span>
-                                            <span>{m.from} → {m.to}</span>
-                                        </div>
-                                    ))
+                                    moveList.map((m, i) => {
+                                        const fStr = typeof m.from === 'object' ? `(${m.from.r},${m.from.c})` : String(m.from);
+                                        const tStr = typeof m.to   === 'object' ? `(${m.to.r},${m.to.c})`   : String(m.to);
+                                        return (
+                                            <div key={i} style={{
+                                                display: 'flex', alignItems: 'center', gap: '4px',
+                                                padding: '3px 4px', borderRadius: '4px',
+                                                background: i === moveList.length - 1 ? 'rgba(255,255,255,0.04)' : 'transparent',
+                                                fontSize: '0.7rem', color: m.piece && m.piece[0] === 'r' ? '#fca5a5' : '#94a3b8',
+                                                fontFamily: 'monospace'
+                                            }}>
+                                                <span style={{ color: '#555', minWidth: '14px', fontSize: '0.65rem' }}>{i + 1}.</span>
+                                                <span>{fStr} → {tStr}</span>
+                                            </div>
+                                        );
+                                    })
                                 )}
                             </div>
                         )}
@@ -353,81 +357,45 @@ export default function XiangqiGame() {
 
                     {/* Hint marker */}
                     {hintMove && (() => {
-                        const [fromR, fromC] = hintMove.from.split(',').map(Number);
-                        const [toR, toC] = hintMove.to.split(',').map(Number);
+                        const fromR = typeof hintMove.from === 'object' ? hintMove.from.r : Number(String(hintMove.from).split(',')[0]);
+                        const fromC = typeof hintMove.from === 'object' ? hintMove.from.c : Number(String(hintMove.from).split(',')[1]);
+                        const toR   = typeof hintMove.to   === 'object' ? hintMove.to.r   : Number(String(hintMove.to).split(',')[0]);
+                        const toC   = typeof hintMove.to   === 'object' ? hintMove.to.c   : Number(String(hintMove.to).split(',')[1]);
                         const displayFromR = myColor === 'b' ? 9 - fromR : fromR;
                         const displayFromC = myColor === 'b' ? 8 - fromC : fromC;
-                        const displayToR = myColor === 'b' ? 9 - toR : toR;
-                        const displayToC = myColor === 'b' ? 8 - toC : toC;
+                        const displayToR   = myColor === 'b' ? 9 - toR   : toR;
+                        const displayToC   = myColor === 'b' ? 8 - toC   : toC;
                         const leftPctFrom = ((50 + displayFromC * 100) / 900) * 100;
-                        const topPctFrom = ((50 + displayFromR * 100) / 1000) * 100;
-                        const leftPctTo = ((50 + displayToC * 100) / 900) * 100;
-                        const topPctTo = ((50 + displayToR * 100) / 1000) * 100;
+                        const topPctFrom  = ((50 + displayFromR * 100) / 1000) * 100;
+                        const leftPctTo   = ((50 + displayToC   * 100) / 900) * 100;
+                        const topPctTo    = ((50 + displayToR   * 100) / 1000) * 100;
                         return (
                             <>
-                                <div style={{
-                                    position: 'absolute', left: `${leftPctFrom}%`, top: `${topPctFrom}%`,
-                                    width: '10%', aspectRatio: '1', transform: 'translate(-50%, -50%)',
-                                    border: '3px solid #fbbf24', borderRadius: '50%',
-                                    pointerEvents: 'none', zIndex: 40, boxShadow: '0 0 12px #fbbf24'
-                                }} />
-                                <div style={{
-                                    position: 'absolute', left: `${leftPctTo}%`, top: `${topPctTo}%`,
-                                    width: '10%', aspectRatio: '1', transform: 'translate(-50%, -50%)',
-                                    border: '3px solid #4ade80', borderRadius: '50%',
-                                    pointerEvents: 'none', zIndex: 40, boxShadow: '0 0 12px #4ade80'
-                                }} />
+                                <div style={{ position: 'absolute', left: `${leftPctFrom}%`, top: `${topPctFrom}%`, width: '10%', aspectRatio: '1', transform: 'translate(-50%, -50%)', border: '3px solid #fbbf24', borderRadius: '50%', pointerEvents: 'none', zIndex: 40, boxShadow: '0 0 12px #fbbf24' }} />
+                                <div style={{ position: 'absolute', left: `${leftPctTo}%`,   top: `${topPctTo}%`,   width: '10%', aspectRatio: '1', transform: 'translate(-50%, -50%)', border: '3px solid #4ade80', borderRadius: '50%', pointerEvents: 'none', zIndex: 40, boxShadow: '0 0 12px #4ade80' }} />
                             </>
                         );
                     })()}
                 </div>
 
-                {/* RIGHT PANEL - Status */}
-                <div style={{ flex: '0 0 240px', display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.5rem', borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(23,23,33,0.6)' }}>
+                {/* RIGHT PANEL - Status only */}
+                <div style={{ flex: '0 0 200px', display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.5rem', borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(23,23,33,0.6)' }}>
                     <div style={{ background: 'linear-gradient(180deg, rgba(234,179,8,0.08), transparent)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(234,179,8,0.15)' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 800, marginBottom: '8px', letterSpacing: '1px' }}>
-                            TRẠNG THÁI
-                        </div>
+                        <div style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 800, marginBottom: '8px', letterSpacing: '1px' }}>TRẠNG THÁI</div>
                         <div style={{ padding: '10px', background: 'rgba(0,0,0,0.25)', borderRadius: '8px', textAlign: 'center' }}>
                             <div style={{ fontSize: '0.7rem', color: '#aaa', marginBottom: '4px' }}>Lượt:</div>
-                            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: turn === 'r' ? '#ef4444' : '#94a3b8' }}>
-                                {turn === 'r' ? 'ĐỎ' : 'ĐEN'}
-                            </div>
-                            <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                                {turn === myColor ? 'Bạn' : 'CPU...'}
-                            </div>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: turn === 'r' ? '#ef4444' : '#94a3b8' }}>{turn === 'r' ? 'ĐỎ' : 'ĐEN'}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '4px' }}>{turn === myColor ? 'Bạn đánh' : 'CPU đang nghĩ...'}</div>
                         </div>
                         {inCheckColor && (
-                            <div style={{ marginTop: '6px', padding: '6px', background: 'rgba(239,68,68,0.15)', borderRadius: '6px', textAlign: 'center', fontSize: '0.75rem', color: '#ef4444', fontWeight: 700 }}>
-                                CHIẾU!
-                            </div>
+                            <div style={{ marginTop: '6px', padding: '6px', background: 'rgba(239,68,68,0.15)', borderRadius: '6px', textAlign: 'center', fontSize: '0.75rem', color: '#ef4444', fontWeight: 700 }}>⚠ CHIẾU!</div>
                         )}
                     </div>
-
-                    <button onClick={undoMove} disabled={isGameOver || moveList.length === 0} style={{
-                        padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px', color: '#fff', cursor: moveList.length > 0 ? 'pointer' : 'not-allowed', display: 'flex', justifyContent: 'center', gap: '8px'
-                    }}>
-                        <Undo2 size={16} /> HOÀN TÁC
-                    </button>
-
-                    <button onClick={getHint} disabled={isGameOver || turn !== myColor} style={{
-                        padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px', color: '#fff', cursor: (turn === myColor && !isGameOver) ? 'pointer' : 'not-allowed', display: 'flex', justifyContent: 'center', gap: '8px'
-                    }}>
-                        <Lightbulb size={16} /> GỢI Ý
-                    </button>
-
-                    <button onClick={() => {}} style={{
-                        padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px', color: '#fff', cursor: 'pointer', display: 'flex', justifyContent: 'center', gap: '8px'
-                    }}>
-                        <Settings size={16} /> Settings
-                    </button>
-
-                    <button onClick={() => navigate('/xiangqi')} style={{ padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#94a3b8', display: 'flex', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}>
-                        <ArrowLeft size={16} /> Thoát khỏi phòng
-                    </button>
+                    <div style={{ marginTop: 'auto' }}>
+                        <button onClick={() => navigate('/xiangqi')} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#94a3b8', display: 'flex', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}>
+                            <ArrowLeft size={16} /> Thoát
+                        </button>
+                    </div>
                 </div>
             </div>
 

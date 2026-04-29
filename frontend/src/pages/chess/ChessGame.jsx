@@ -1,5 +1,5 @@
 // Force Vite HMR
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Chess } from 'chess.js';
 import { ArrowLeft, RotateCcw, Undo2, Lightbulb, History, ChevronRight, ChevronDown, Activity, Crown, ZoomIn, ZoomOut, Settings } from 'lucide-react';
@@ -58,14 +58,14 @@ export default function ChessGame() {
     const [zoomLevel, setZoomLevel] = useState(100);
     const [showHistory, setShowHistory] = useState(false);
 
-    const callbacks = {
+    const callbacks = useMemo(() => ({
         myColor,
         onMove: () => {},
         onCapture: () => {},
         onCheck: () => {},
         onIllegal: () => {},
         onClick: () => {}
-    };
+    }), [myColor]);
 
     const {
         game, turn, isGameOver, winner, selectedSquare, validMoves, moveHistory, evalScore, hintMove, hintSuggestions, isThinkingHint, selectSquare, movePiece, makeAIMove, undoMove, getHint, resetGame
@@ -304,20 +304,23 @@ export default function ChessGame() {
                     </div>
                 </div>
 
-                {/* RIGHT PANEL - Turn Hint Info */}
-                <div style={{ flex: '0 0 240px', display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.5rem', borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)' }}>
+                {/* RIGHT PANEL - Status only */}
+                <div style={{ flex: '0 0 200px', display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.5rem', borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)' }}>
                     <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '12px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '8px' }}>Lượt đi hiện tại</div>
-                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: turn === 'w' ? '#f8fafc' : '#94a3b8' }}>
-                            {turn === 'w' ? 'TRẮNG (White)' : 'ĐEN (Black)'}
+                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 700, letterSpacing: '1px' }}>TRẠNG THÁI</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: turn === 'w' ? '#f8fafc' : '#94a3b8' }}>
+                            {turn === 'w' ? 'TRẮNG' : 'ĐEN'}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '6px' }}>
+                            {turn === myColor ? 'Bạn đánh' : 'CPU đang nghĩ...'}
                         </div>
                     </div>
 
                     {hintSuggestions && hintSuggestions.length > 0 && (
                         <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '8px' }}>
-                            <div style={{ fontSize: '0.75rem', color: '#fbbf24', fontWeight: 700, marginBottom: '8px' }}>Gợi ý nước đi:</div>
+                            <div style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 700, marginBottom: '6px' }}>GỢI Ý NƯỚC ĐI:</div>
                             {hintSuggestions.map((h, i) => (
-                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', padding: '4px', background: 'rgba(255,255,255,0.05)', marginBottom: '4px', borderRadius: '4px' }}>
+                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', padding: '4px', background: 'rgba(255,255,255,0.05)', marginBottom: '4px', borderRadius: '4px' }}>
                                     <span style={{ color: h.color }}>{h.from} → {h.to}</span>
                                     <span style={{ color: '#fff' }}>{h.evalDisplay}</span>
                                 </div>
@@ -325,26 +328,11 @@ export default function ChessGame() {
                         </div>
                     )}
 
-                    <button onClick={undoMove} disabled={isGameOver} style={{
-                        padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px', color: '#fff', cursor: isGameOver ? 'not-allowed' : 'pointer', display: 'flex', justifyContent: 'center', gap: '8px'
-                    }}>
-                        <RotateCcw size={16} /> Đi Lại
-                    </button>
-
-                    <button onClick={getHint} disabled={isGameOver || turn !== myColor} style={{
-                        padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px', color: '#fff', cursor: isGameOver || turn !== myColor ? 'not-allowed' : 'pointer', display: 'flex', justifyContent: 'center', gap: '8px'
-                    }}>
-                        <Lightbulb size={16} /> Gợi ý
-                    </button>
-
-                    <button onClick={() => {}} style={{
-                        padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px', color: '#fff', cursor: 'pointer', display: 'flex', justifyContent: 'center', gap: '8px'
-                    }}>
-                        <Settings size={16} /> Settings
-                    </button>
+                    <div style={{ marginTop: 'auto' }}>
+                        <button onClick={() => navigate('/chess')} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#94a3b8', display: 'flex', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}>
+                            Thoát
+                        </button>
+                    </div>
                 </div>
             </div>
 

@@ -80,70 +80,103 @@ export function useChessLogic(mode, roomId, difficulty, initialColor, callbacks)
         }
     }, [mode, roomId, gameOver, myColor, onMove]);
 
-    // Stockfish Init
+    // Stockfish Init (run once on mount)
     useEffect(() => {
-        const stockfishWorker = new Worker(
-            URL.createObjectURL(
-                new Blob([`importScripts('https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js');`], { type: 'application/javascript' })
-            )
-        );
-
-        stockfishWorker.onmessage = (e) => {
-            const line = e.data;
-            if (line === 'readyok') {
-                setIsEngineReady(true);
-            } 
-            // Continuously read centipawn eval for the EvalBar
-            else if (line.startsWith('info depth')) {
-                const scoreMatch = line.match(/score cp (-?\d+)/);
-                const mateMatch = line.match(/score mate (-?\d+)/);
-                let score = 0;
-                
-                if (scoreMatch) {
-                    score = parseInt(scoreMatch[1]);
-                } else if (mateMatch) {
-                    score = parseInt(mateMatch[1]) > 0 ? 10000 : -10000;
-                }
-                
-                // Score is from engine's perspective
-                const turnModifier = game.turn() === 'w' ? 1 : -1;
-                setEvalScore(score * turnModifier);
-            }
-            
-            else if (line.startsWith('bestmove')) {
-                const moveMatch = line.match(/bestmove\s([a-h][1-8][a-h][1-8])(n|b|r|q)?/);
-                if (moveMatch && mode === 'solo' && game.turn() !== myColor) {
-                    const from = moveMatch[1].substring(0, 2);
-                    const to = moveMatch[1].substring(2, 4);
-                    const promotion = moveMatch[2] || 'q';
-                    
-                    setGame((g) => {
-                        const newGame = new Chess();
-                        newGame.loadPgn(g.pgn());
-                        try {
-                            const result = newGame.move({ from, to, promotion });
-                            if (result) {
-                                if (result.flags.includes('c')) onCapture?.();
-                                else onMove?.();
-                                if (newGame.isCheck()) onCheck?.();
-                            }
-                            return newGame;
-                        } catch (err) { return g; }
-                    });
-                }
-            }
-        };
-
-        stockfishWorker.postMessage('uci');
-        stockfishWorker.postMessage('isready');
+        let terminated = false;
         const skillLevel = difficulty === 'Easy' ? 0 : difficulty === 'Medium' ? 10 : 20;
-        stockfishWorker.postMessage(`setoption name Skill Level value ${skillLevel}`);
-        engine.current = stockfishWorker;
+
+        try {
+            const stockfishWorker = new Worker(
+                URL.createObjectURL(
+                    new Blob(
+                        [`importScripts('https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js');`],
+                        { type: 'application/javascript' }
+                    )
+                )
+            );
+
+            // Timeout: if engine not ready in 4s, use fallback random AI
+            const readyTimeout = setTimeout(() => {
+                if (!terminated) {
+                    console.warn('Stockfish timeout, using random AI fallback');
+                    setIsEngineReady(true); // unblock makeAIMove gate
+                }
+            }, 4000);
+
+            stockfishWorker.onmessage = (e) => {
+                const line = e.data;
+                if (line === 'readyok') {
+                    clearTimeout(readyTimeout);
+                    setIsEngineReady(true);
+                } else if (line.startsWith('info depth')) {
+                    const scoreMatch = line.match(/score cp (-?\d+)/);
+                    const mateMatch  = line.match(/score mate (-?\d+)/);
+                    if (scoreMatch) setEvalScore(parseInt(scoreMatch[1]));
+                    else if (mateMatch) setEvalScore(parseInt(mateMatch[1]) > 0 ? 10000 : -10000);
+                } else if (line.startsWith('bestmove')) {
+                    const moveMatch = line.match(/bestmove\s([a-h][1-8][a-h][1-8])(n|b|r|q)?/);
+                    if (moveMatch && mode === 'solo') {
+                        const from = moveMatch[1].substring(0, 2);
+                        const to   = moveMatch[1].substring(2, 4);
+                        const promotion = moveMatch[2] || 'q';
+                        setGame((g) => {
+                            const newGame = new Chess();
+                            newGame.loadPgn(g.pgn());
+                            try {
+                                const result = newGame.move({ from, to, promotion });
+                                if (result) {
+                                    if (result.flags.includes('c')) onCapture?.();
+                                    else onMove?.();
+                                    if (newGame.isCheck()) onCheck?.();
+                                }
+                                return newGame;
+                            } catch (err) { return g; }
+                        });
+                    }
+                }
+            };
+
+            stockfishWorker.onerror = () => {
+                console.warn('Stockfish load error, using random AI fallback');
+                clearTimeout(readyTimeout);
+                setIsEngineReady(true);
+            };
+
+            stockfishWorker.postMessage('uci');
+            stockfishWorker.postMessage('isready');
+            stockfishWorker.postMessage(`setoption name Skill Level value ${skillLevel}`);
+            engine.current = stockfishWorker;
+        } catch (err) {
+            console.warn('Worker creation failed, using random AI fallback', err);
+            setIsEngineReady(true);
+        }
 
         return () => {
-            stockfishWorker.terminate();
+            terminated = true;
+            engine.current?.terminate();
         };
-    }, [difficulty, mode, myColor, game, onMove, onCapture, onCheck]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Fallback random-move AI (when Stockfish unavailable)
+    const makeRandomMove = useCallback((currentGame) => {
+        const moves = currentGame.moves({ verbose: true });
+        if (moves.length === 0) return;
+        const randomMove = moves[Math.floor(Math.random() * moves.length)];
+        setGame((g) => {
+            const newGame = new Chess();
+            newGame.loadPgn(g.pgn());
+            try {
+                const result = newGame.move({ from: randomMove.from, to: randomMove.to, promotion: 'q' });
+                if (result) {
+                    if (result.flags.includes('c')) onCapture?.();
+                    else onMove?.();
+                    if (newGame.isCheck()) onCheck?.();
+                }
+                return newGame;
+            } catch { return g; }
+        });
+    }, [onCapture, onMove, onCheck]);
 
     // Keep evaluating position when someone moves to update EvalBar
     useEffect(() => {
@@ -210,12 +243,21 @@ export function useChessLogic(mode, roomId, difficulty, initialColor, callbacks)
     }, [game, selectedSquare, gameOver, myColor, mode, roomId, onMove, onCapture, onCheck, onIllegal]);
 
     const makeAIMove = useCallback(() => {
-        if (engine.current && isEngineReady && !gameOver) {
-            const depth = difficulty === 'Easy' ? 1 : difficulty === 'Medium' ? 8 : 15;
-            engine.current.postMessage(`position fen ${game.fen()}`);
-            engine.current.postMessage(`go depth ${depth}`);
+        if (gameOver) return;
+        if (engine.current && isEngineReady) {
+            // Try Stockfish first
+            try {
+                const depth = difficulty === 'Easy' ? 1 : difficulty === 'Medium' ? 8 : 15;
+                engine.current.postMessage(`position fen ${game.fen()}`);
+                engine.current.postMessage(`go depth ${depth}`);
+                return;
+            } catch (e) {
+                console.warn('Stockfish postMessage failed, using fallback');
+            }
         }
-    }, [game, isEngineReady, difficulty, gameOver]);
+        // Fallback: random legal move
+        makeRandomMove(game);
+    }, [game, isEngineReady, difficulty, gameOver, makeRandomMove]);
 
     const getHint = useCallback(() => {
         if (engine.current && isEngineReady && !gameOver && game.turn() === myColor) {
