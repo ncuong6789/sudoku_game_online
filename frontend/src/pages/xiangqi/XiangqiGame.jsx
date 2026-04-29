@@ -140,57 +140,6 @@ export default function XiangqiGame() {
                         <div style={{ color: '#ef4444', fontSize: '0.7rem', fontWeight: 700 }}>XIANGQI</div>
                     </div>
 
-                    {/* Player Info */}
-                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, marginBottom: '10px', letterSpacing: '1px' }}>{t('xiangqi.info')}</div>
-                        <div className="xiangqi-player-avatars" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                            <div className="xiangqi-avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', color: '#fff', fontWeight: 'bold' }}>帥</div>
-                            <div>
-                                <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('xiangqi.redSide')}</div>
-                                <div style={{ fontWeight: 700, color: '#fca5a5', fontSize: '0.8rem' }}>{myColor === 'r' ? t('xiangqi.redPlayer') : (mode === 'multiplayer' ? 'Đối thủ' : t('xiangqi.blackPlayer'))}</div>
-                            </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#1e293b', border: '2px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', color: '#f8fafc', fontWeight: 'bold' }}>將</div>
-                            <div>
-                                <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('xiangqi.blackSide')}</div>
-                                <div style={{ fontWeight: 700, color: '#94a3b8', fontSize: '0.8rem' }}>{myColor === 'b' ? t('xiangqi.redPlayer') : (mode === 'multiplayer' ? 'Đối thủ' : t('xiangqi.blackPlayer'))}</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <button onClick={undoMove} disabled={isGameOver || moveList.length === 0} style={{
-                            padding: '8px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                            color: moveList.length > 0 ? '#fbbf24' : '#555', border: '1px solid rgba(255,255,255,0.08)',
-                            cursor: moveList.length > 0 ? 'pointer' : 'default', fontSize: '0.75rem',
-                            transition: 'all 0.2s'
-                        }}>
-                            <Undo2 size={14} /> {t('xiangqi.undo')}
-                        </button>
-                        <button onClick={getHint} disabled={isGameOver || turn !== myColor} style={{
-                            padding: '8px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                            color: (turn === myColor && !isGameOver) ? '#4ade80' : '#555',
-                            border: '1px solid rgba(255,255,255,0.08)',
-                            cursor: (turn === myColor && !isGameOver) ? 'pointer' : 'default', fontSize: '0.75rem',
-                            transition: 'all 0.2s'
-                        }}>
-                            <Lightbulb size={14} /> {t('xiangqi.hint')}
-                        </button>
-                        {/* Settings button */}
-                        <button onClick={() => {}} style={{
-                            padding: '8px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                            color: '#94a3b8', border: '1px solid rgba(255,255,255,0.08)',
-                            cursor: 'pointer', fontSize: '0.75rem', transition: 'all 0.2s'
-                        }}>
-                            <Settings size={14} /> Settings
-                        </button>
-                    </div>
-
                     {/* Move History */}
                     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
                         <div
@@ -229,7 +178,7 @@ export default function XiangqiGame() {
                         )}
                     </div>
 
-                    {/* Bottom: Zoom + Exit */}
+                    {/* Bottom: Zoom */}
                     <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.04)', padding: '8px 10px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
                             <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
@@ -242,9 +191,6 @@ export default function XiangqiGame() {
                                 <ZoomIn size={16} />
                             </button>
                         </div>
-                        <button onClick={() => navigate('/xiangqi')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
-                            <ArrowLeft size={16} /> {t('common.exit')}
-                        </button>
                     </div>
                 </div>
 
@@ -397,22 +343,78 @@ export default function XiangqiGame() {
                     })()}
                 </div>
 
-                {/* RIGHT PANEL - Status only */}
-                <div style={{ flex: '0 0 200px', display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.5rem', borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(23,23,33,0.6)' }}>
-                    <div style={{ background: 'linear-gradient(180deg, rgba(234,179,8,0.08), transparent)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(234,179,8,0.15)' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 800, marginBottom: '8px', letterSpacing: '1px' }}>TRẠNG THÁI</div>
-                        <div style={{ padding: '10px', background: 'rgba(0,0,0,0.25)', borderRadius: '8px', textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.7rem', color: '#aaa', marginBottom: '4px' }}>Lượt:</div>
-                            <div style={{ fontSize: '1.2rem', fontWeight: 900, color: turn === 'r' ? '#ef4444' : '#94a3b8' }}>{turn === 'r' ? 'ĐỎ' : 'ĐEN'}</div>
-                            <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '4px' }}>{turn === myColor ? 'Bạn đánh' : 'CPU đang nghĩ...'}</div>
+                {/* RIGHT PANEL - Status and Actions */}
+                <div style={{ flex: '0 0 220px', display: 'flex', flexDirection: 'column', padding: '1.5rem', borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(23,23,33,0.6)' }}>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1rem' }}>
+                        <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '16px 12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '16px', fontWeight: 800, letterSpacing: '1px', textAlign: 'center' }}>THÔNG TIN TRẬN ĐẤU</div>
+                            
+                            {/* Red Player */}
+                            <div style={{ 
+                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', borderRadius: '8px',
+                                background: turn === 'r' ? 'rgba(239,68,68,0.1)' : 'transparent',
+                                border: turn === 'r' ? '1px solid rgba(239,68,68,0.3)' : '1px solid transparent',
+                                transition: 'all 0.3s'
+                            }}>
+                                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', color: '#fff', fontWeight: 'bold' }}>帥</div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('xiangqi.redSide')}</div>
+                                    <div style={{ fontWeight: 700, color: '#fca5a5', fontSize: '0.8rem' }}>{myColor === 'r' ? t('xiangqi.redPlayer') : (mode === 'multiplayer' ? 'Đối thủ' : t('xiangqi.blackPlayer'))}</div>
+                                </div>
+                                {turn === 'r' && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444', boxShadow: '0 0 8px #ef4444' }} />}
+                            </div>
+
+                            <div style={{ width: '2px', height: '16px', background: 'rgba(255,255,255,0.1)', margin: '4px auto' }} />
+
+                            {/* Black Player */}
+                            <div style={{ 
+                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', borderRadius: '8px',
+                                background: turn === 'b' ? 'rgba(74,222,128,0.1)' : 'transparent',
+                                border: turn === 'b' ? '1px solid rgba(74,222,128,0.3)' : '1px solid transparent',
+                                transition: 'all 0.3s'
+                            }}>
+                                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#1e293b', border: '2px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', color: '#f8fafc', fontWeight: 'bold' }}>將</div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('xiangqi.blackSide')}</div>
+                                    <div style={{ fontWeight: 700, color: '#94a3b8', fontSize: '0.8rem' }}>{myColor === 'b' ? t('xiangqi.redPlayer') : (mode === 'multiplayer' ? 'Đối thủ' : t('xiangqi.blackPlayer'))}</div>
+                                </div>
+                                {turn === 'b' && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80' }} />}
+                            </div>
+                            
+                            {inCheckColor ? (
+                                <div style={{ marginTop: '16px', padding: '6px', background: 'rgba(239,68,68,0.15)', borderRadius: '6px', textAlign: 'center', fontSize: '0.75rem', color: '#ef4444', fontWeight: 700, animation: 'pulse-glow-xiangqi 1.5s infinite' }}>⚠ ĐANG BỊ CHIẾU!</div>
+                            ) : (
+                                <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.75rem', color: '#fbbf24', fontWeight: 600 }}>
+                                    {turn === myColor ? 'Tới lượt của bạn' : 'CPU đang suy nghĩ...'}
+                                </div>
+                            )}
                         </div>
-                        {inCheckColor && (
-                            <div style={{ marginTop: '6px', padding: '6px', background: 'rgba(239,68,68,0.15)', borderRadius: '6px', textAlign: 'center', fontSize: '0.75rem', color: '#ef4444', fontWeight: 700 }}>⚠ CHIẾU!</div>
-                        )}
                     </div>
-                    <div style={{ marginTop: 'auto' }}>
-                        <button onClick={() => navigate('/xiangqi')} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#94a3b8', display: 'flex', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}>
-                            <ArrowLeft size={16} /> Thoát
+                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <button onClick={undoMove} disabled={isGameOver || moveList.length === 0} style={{
+                                width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                color: moveList.length > 0 ? '#fbbf24' : '#555', border: '1px solid rgba(255,255,255,0.08)',
+                                cursor: moveList.length > 0 ? 'pointer' : 'default', fontSize: '0.8rem',
+                                transition: 'all 0.2s', fontWeight: 600
+                            }}>
+                                <Undo2 size={16} /> {t('xiangqi.undo')}
+                            </button>
+                            <button onClick={getHint} disabled={isGameOver || turn !== myColor} style={{
+                                width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                color: (turn === myColor && !isGameOver) ? '#4ade80' : '#555',
+                                border: '1px solid rgba(255,255,255,0.08)',
+                                cursor: (turn === myColor && !isGameOver) ? 'pointer' : 'default', fontSize: '0.8rem',
+                                transition: 'all 0.2s', fontWeight: 600
+                            }}>
+                                <Lightbulb size={16} /> {t('xiangqi.hint')}
+                            </button>
+                        </div>
+                        <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)' }} />
+                        <button onClick={() => navigate('/xiangqi')} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.1)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#94a3b8'; }}>
+                            <ArrowLeft size={16} /> {t('common.exit', 'Thoát')}
                         </button>
                     </div>
                 </div>

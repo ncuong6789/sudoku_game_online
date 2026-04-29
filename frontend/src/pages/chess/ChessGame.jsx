@@ -142,57 +142,6 @@ export default function ChessGame() {
                         <div style={{ color: '#94a3b8', fontSize: '0.7rem', fontWeight: 700 }}>STANDARD</div>
                     </div>
 
-                    {/* Player Info */}
-                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, marginBottom: '10px', letterSpacing: '1px' }}>{t('chess.info')}</div>
-                        <div className="chess-player-avatars" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                            <div className="chess-avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', color: '#000', fontWeight: 'bold' }}>♔</div>
-                            <div>
-                                <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('chess.white')}</div>
-                                <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.8rem' }}>{myColor === 'w' ? t('chess.you') : t('chess.cpu')}</div>
-                            </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#0f172a', border: '2px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', color: '#fff', fontWeight: 'bold' }}>♚</div>
-                            <div>
-                                <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('chess.black')}</div>
-                                <div style={{ fontWeight: 700, color: '#94a3b8', fontSize: '0.8rem' }}>{myColor === 'b' ? t('chess.you') : t('chess.cpu')}</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <button onClick={undoMove} disabled={isGameOver || moveHistory.length === 0} style={{
-                            padding: '8px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                            color: moveHistory.length > 0 ? '#fbbf24' : '#555', border: '1px solid rgba(255,255,255,0.08)',
-                            cursor: moveHistory.length > 0 ? 'pointer' : 'default', fontSize: '0.75rem',
-                            transition: 'all 0.2s'
-                        }}>
-                            <Undo2 size={14} /> {t('chess.redo')}
-                        </button>
-                        <button onClick={getHint} disabled={isGameOver || turn !== myColor || isThinkingHint} style={{
-                            padding: '8px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                            color: (turn === myColor && !isGameOver) ? '#4ade80' : '#555',
-                            border: '1px solid rgba(255,255,255,0.08)',
-                            cursor: (turn === myColor && !isGameOver) ? 'pointer' : 'default', fontSize: '0.75rem',
-                            transition: 'all 0.2s'
-                        }}>
-                            <Lightbulb size={14} /> {isThinkingHint ? t('chess.thinking') : t('chess.hint')}
-                        </button>
-                        {/* Settings button */}
-                        <button onClick={() => {}} style={{
-                            padding: '8px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                            color: '#94a3b8', border: '1px solid rgba(255,255,255,0.08)',
-                            cursor: 'pointer', fontSize: '0.75rem', transition: 'all 0.2s'
-                        }}>
-                            <Settings size={14} /> Settings
-                        </button>
-                    </div>
-
                     {/* Move History */}
                     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
                         <div
@@ -227,7 +176,7 @@ export default function ChessGame() {
                         )}
                     </div>
 
-                    {/* Bottom: Zoom + Exit */}
+                    {/* Bottom: Zoom */}
                     <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.04)', padding: '8px 10px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
                             <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
@@ -240,9 +189,6 @@ export default function ChessGame() {
                                 <ZoomIn size={16} />
                             </button>
                         </div>
-                        <button onClick={() => navigate('/chess')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
-                            <ArrowLeft size={16} /> {t('common.exit')}
-                        </button>
                     </div>
                 </div>
 
@@ -314,33 +260,87 @@ export default function ChessGame() {
                     </div>
                 </div>
 
-                {/* RIGHT PANEL - Status only */}
-                <div style={{ flex: '0 0 200px', display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.5rem', borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)' }}>
-                    <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '12px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 700, letterSpacing: '1px' }}>TRẠNG THÁI</div>
-                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: turn === 'w' ? '#f8fafc' : '#94a3b8' }}>
-                            {turn === 'w' ? 'TRẮNG' : 'ĐEN'}
+                {/* RIGHT PANEL - Status and Actions */}
+                <div style={{ flex: '0 0 220px', display: 'flex', flexDirection: 'column', padding: '1.5rem', borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)' }}>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1rem' }}>
+                        <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '16px 12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '16px', fontWeight: 800, letterSpacing: '1px', textAlign: 'center' }}>THÔNG TIN TRẬN ĐẤU</div>
+                            
+                            {/* White Player */}
+                            <div style={{ 
+                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', borderRadius: '8px',
+                                background: turn === 'w' ? 'rgba(74,222,128,0.1)' : 'transparent',
+                                border: turn === 'w' ? '1px solid rgba(74,222,128,0.3)' : '1px solid transparent',
+                                transition: 'all 0.3s'
+                            }}>
+                                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', color: '#000', fontWeight: 'bold' }}>♔</div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('chess.white')}</div>
+                                    <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.8rem' }}>{myColor === 'w' ? t('chess.you') : t('chess.cpu')}</div>
+                                </div>
+                                {turn === 'w' && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80' }} />}
+                            </div>
+
+                            <div style={{ width: '2px', height: '16px', background: 'rgba(255,255,255,0.1)', margin: '4px auto' }} />
+
+                            {/* Black Player */}
+                            <div style={{ 
+                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', borderRadius: '8px',
+                                background: turn === 'b' ? 'rgba(74,222,128,0.1)' : 'transparent',
+                                border: turn === 'b' ? '1px solid rgba(74,222,128,0.3)' : '1px solid transparent',
+                                transition: 'all 0.3s'
+                            }}>
+                                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#0f172a', border: '2px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', color: '#fff', fontWeight: 'bold' }}>♚</div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('chess.black')}</div>
+                                    <div style={{ fontWeight: 700, color: '#94a3b8', fontSize: '0.8rem' }}>{myColor === 'b' ? t('chess.you') : t('chess.cpu')}</div>
+                                </div>
+                                {turn === 'b' && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80' }} />}
+                            </div>
+                            
+                            <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.75rem', color: '#fbbf24', fontWeight: 600 }}>
+                                {turn === myColor ? 'Tới lượt của bạn' : 'CPU đang suy nghĩ...'}
+                            </div>
                         </div>
-                        <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '6px' }}>
-                            {turn === myColor ? 'Bạn đánh' : 'CPU đang nghĩ...'}
-                        </div>
+
+                        {hintSuggestions && hintSuggestions.length > 0 && (
+                            <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '8px' }}>
+                                <div style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 700, marginBottom: '6px' }}>GỢI Ý NƯỚC ĐI:</div>
+                                {hintSuggestions.map((h, i) => (
+                                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', padding: '4px', background: 'rgba(255,255,255,0.05)', marginBottom: '4px', borderRadius: '4px' }}>
+                                        <span style={{ color: h.color }}>{h.from} → {h.to}</span>
+                                        <span style={{ color: '#fff' }}>{h.evalDisplay}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
-                    {hintSuggestions && hintSuggestions.length > 0 && (
-                        <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '8px' }}>
-                            <div style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 700, marginBottom: '6px' }}>GỢI Ý NƯỚC ĐI:</div>
-                            {hintSuggestions.map((h, i) => (
-                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', padding: '4px', background: 'rgba(255,255,255,0.05)', marginBottom: '4px', borderRadius: '4px' }}>
-                                    <span style={{ color: h.color }}>{h.from} → {h.to}</span>
-                                    <span style={{ color: '#fff' }}>{h.evalDisplay}</span>
-                                </div>
-                            ))}
+                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <button onClick={undoMove} disabled={isGameOver || moveHistory.length === 0} style={{
+                                width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                color: moveHistory.length > 0 ? '#fbbf24' : '#555', border: '1px solid rgba(255,255,255,0.08)',
+                                cursor: moveHistory.length > 0 ? 'pointer' : 'default', fontSize: '0.8rem',
+                                transition: 'all 0.2s', fontWeight: 600
+                            }}>
+                                <Undo2 size={16} /> {t('chess.redo')}
+                            </button>
+                            <button onClick={getHint} disabled={isGameOver || turn !== myColor || isThinkingHint} style={{
+                                width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                color: (turn === myColor && !isGameOver) ? '#4ade80' : '#555',
+                                border: '1px solid rgba(255,255,255,0.08)',
+                                cursor: (turn === myColor && !isGameOver) ? 'pointer' : 'default', fontSize: '0.8rem',
+                                transition: 'all 0.2s', fontWeight: 600
+                            }}>
+                                <Lightbulb size={16} /> {isThinkingHint ? t('chess.thinking') : t('chess.hint')}
+                            </button>
                         </div>
-                    )}
-
-                    <div style={{ marginTop: 'auto' }}>
-                        <button onClick={() => navigate('/chess')} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#94a3b8', display: 'flex', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}>
-                            Thoát
+                        <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)' }} />
+                        <button onClick={() => navigate('/chess')} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.1)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#94a3b8'; }}>
+                            <ArrowLeft size={16} /> {t('common.exit', 'Thoát')}
                         </button>
                     </div>
                 </div>
