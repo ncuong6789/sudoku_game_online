@@ -55,13 +55,16 @@ export default function XiangqiGame() {
     const [zoomLevel, setZoomLevel] = useState(100);
     const [showHistory, setShowHistory] = useState(false);
 
+    const { playXiangqiClickSound, playXiangqiMoveSound, playXiangqiCaptureSound, playXiangqiCheckSound, playXiangqiIllegalSound, playXiangqiWinSound, playXiangqiLossSound } = useAudio();
+
     const callbacks = useMemo(() => ({
         myColor,
-        onMove: () => {},
-        onCapture: () => {},
-        onCheck: () => {},
-        onIllegal: () => {}
-    }), [myColor]);
+        onMove: playXiangqiMoveSound,
+        onCapture: playXiangqiCaptureSound,
+        onCheck: playXiangqiCheckSound,
+        onIllegal: playXiangqiIllegalSound,
+        onClick: playXiangqiClickSound
+    }), [myColor, playXiangqiMoveSound, playXiangqiCaptureSound, playXiangqiCheckSound, playXiangqiIllegalSound, playXiangqiClickSound]);
 
     const {
         board, turn, selectedPos, validMoves, isGameOver, winner, inCheckColor, moveList, evalScore, hintMove, selectPiece, movePiece, makeAIMove, undoMove, getHint
@@ -75,6 +78,13 @@ export default function XiangqiGame() {
             return () => clearTimeout(timer);
         }
     }, [turn, mode, isGameOver, myColor, difficulty, makeAIMove]);
+
+    useEffect(() => {
+        if (isGameOver && winner) {
+            if (winner === myColor) playXiangqiWinSound();
+            else playXiangqiLossSound();
+        }
+    }, [isGameOver, winner, myColor, playXiangqiWinSound, playXiangqiLossSound]);
 
     const handleZoomIn = () => setZoomLevel(z => Math.min(200, z + 20));
     const handleZoomOut = () => setZoomLevel(z => Math.max(60, z - 20));
@@ -261,7 +271,7 @@ export default function XiangqiGame() {
                 <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'auto' }}>
                     <div style={{
                         transform: `scale(${zoomLevel / 100})`, transition: 'transform 0.3s',
-                        width: 'min(75vh, 75vw)', height: 'min(75vh, 75vw)',
+                        height: 'min(75vh, 80vw)',
                         position: 'relative',
                         aspectRatio: '9/10',
                         boxSizing: 'border-box',

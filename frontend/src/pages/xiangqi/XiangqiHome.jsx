@@ -25,13 +25,13 @@ export default function XiangqiHome() {
         if (soloColor === 'random') {
             let flips = 0;
             const interval = setInterval(() => {
-                setAssignedColor(flips % 2 === 0 ? 'w' : 'b');
+                setAssignedColor(flips % 2 === 0 ? 'r' : 'b');
                 flips++;
             }, 150);
 
             setTimeout(() => {
                 clearInterval(interval);
-                const finalColor = Math.random() < 0.5 ? 'w' : 'b';
+                const finalColor = Math.random() < 0.5 ? 'r' : 'b';
                 setAssignedColor(finalColor);
                 setTimeout(() => {
                     navigate('/xiangqi/game', { state: { mode: 'solo', difficulty, playerColor: finalColor } });
@@ -133,16 +133,16 @@ export default function XiangqiHome() {
                     </p>
                     <div style={{ display: 'flex', gap: '8px' }}>
                         <button
-                            onClick={() => setSoloColor('w')}
+                            onClick={() => setSoloColor('r')}
                             disabled={isFlipping}
                             style={{
                                 flex: 1, padding: '10px 8px', fontSize: '0.85rem', fontWeight: 'bold',
                                 background: '#fef2f2', color: '#dc2626',
-                                border: soloColor === 'w' ? '2px solid #ef4444' : '2px solid transparent',
+                                border: soloColor === 'r' ? '2px solid #ef4444' : '2px solid transparent',
                                 outline: 'none', borderRadius: '12px', cursor: 'pointer',
-                                transition: 'all 0.2s', opacity: soloColor === 'w' ? 1 : 0.45,
+                                transition: 'all 0.2s', opacity: soloColor === 'r' ? 1 : 0.45,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                                boxShadow: soloColor === 'w' ? '0 0 12px rgba(239,68,68,0.3)' : 'none'
+                                boxShadow: soloColor === 'r' ? '0 0 12px rgba(239,68,68,0.3)' : 'none'
                             }}
                         >
                             <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>帥</span>
@@ -225,24 +225,24 @@ export default function XiangqiHome() {
                         </h3>
                         <div style={{
                             width: '90px', height: '90px', borderRadius: '50%',
-                            background: assignedColor === 'w' ? '#fef2f2' : '#111827',
-                            border: `4px solid ${assignedColor === 'w' ? '#ef4444' : '#6b7280'}`,
-                            boxShadow: `0 0 30px ${assignedColor === 'w' ? 'rgba(239,68,68,0.6)' : 'rgba(107,114,128,0.5)'}`,
+                            background: assignedColor === 'r' ? '#fef2f2' : '#111827',
+                            border: `4px solid ${assignedColor === 'r' ? '#ef4444' : '#6b7280'}`,
+                            boxShadow: `0 0 30px ${assignedColor === 'r' ? 'rgba(239,68,68,0.6)' : 'rgba(107,114,128,0.5)'}`,
                             transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             animation: assignedColor ? 'pulse-pop 0.4s ease-out' : 'pulse-glow 1.5s ease-in-out infinite'
                         }}>
-                            <span style={{ fontSize: '3rem', color: assignedColor === 'w' ? '#ef4444' : '#9ca3af' }}>
-                                {assignedColor === 'w' ? '帥' : '將'}
+                            <span style={{ fontSize: '3rem', color: assignedColor === 'r' ? '#ef4444' : '#9ca3af' }}>
+                                {assignedColor === 'r' ? '帥' : '將'}
                             </span>
                         </div>
                         {assignedColor && (
                             <p style={{
                                 marginTop: '1.1rem', fontWeight: 800, fontSize: '1rem',
-                                color: assignedColor === 'w' ? '#ef4444' : '#9ca3af',
+                                color: assignedColor === 'r' ? '#ef4444' : '#9ca3af',
                                 animation: 'fadeIn 0.5s ease-out'
                             }}>
-                                Bạn chơi phe {assignedColor === 'w' ? 'ĐỎ (Tiên)' : 'ĐEN (Hậu)'}
+                                Bạn chơi phe {assignedColor === 'r' ? 'ĐỎ (Tiên)' : 'ĐEN (Hậu)'}
                             </p>
                         )}
                     </div>

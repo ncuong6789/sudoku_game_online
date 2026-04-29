@@ -7,6 +7,7 @@ import { useChessLogic } from './useChessLogic';
 import { socket } from '../../utils/socket';
 import { EVENTS } from '../../utils/constants';
 import { useTranslation } from 'react-i18next';
+import { useAudio } from '../../utils/useAudio';
 
 const PIECE_SYMBOLS = {
     w: { p: '♙', n: '♘', b: '♗', r: '♖', q: '♕', k: '♔' },
@@ -58,14 +59,16 @@ export default function ChessGame() {
     const [zoomLevel, setZoomLevel] = useState(100);
     const [showHistory, setShowHistory] = useState(false);
 
+    const { playChessMoveSound, playChessCaptureSound, playChessCheckSound, playWinSound, playLoseSound } = useAudio();
+
     const callbacks = useMemo(() => ({
         myColor,
-        onMove: () => {},
-        onCapture: () => {},
-        onCheck: () => {},
+        onMove: () => playChessMoveSound(),
+        onCapture: () => playChessCaptureSound(),
+        onCheck: () => playChessCheckSound(),
         onIllegal: () => {},
         onClick: () => {}
-    }), [myColor]);
+    }), [myColor, playChessMoveSound, playChessCaptureSound, playChessCheckSound]);
 
     const {
         game, turn, isGameOver, winner, selectedSquare, validMoves, moveHistory, evalScore, hintMove, hintSuggestions, isThinkingHint, selectSquare, movePiece, makeAIMove, undoMove, getHint, resetGame
@@ -79,6 +82,13 @@ export default function ChessGame() {
             return () => clearTimeout(timer);
         }
     }, [turn, mode, isGameOver, myColor, makeAIMove]);
+
+    useEffect(() => {
+        if (isGameOver && winner) {
+            if (winner === myColor) playWinSound();
+            else if (winner !== 'draw') playLoseSound();
+        }
+    }, [isGameOver, winner, myColor, playWinSound, playLoseSound]);
 
     const handleZoomIn = () => setZoomLevel(z => Math.min(200, z + 20));
     const handleZoomOut = () => setZoomLevel(z => Math.max(60, z - 20));
