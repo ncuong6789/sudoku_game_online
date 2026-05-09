@@ -69,7 +69,6 @@ export default function JungleGame() {
     const navigate = useNavigate();
     const { roomId, mode, difficulty } = location.state || { roomId: 'local', mode: 'solo', difficulty: 'medium' };
     
-    const canvasRef = useRef(null);
     const [hintMoves, setHintMoves] = useState(null);
     
     const { playSelect, playMove, playCapture, playWin, playLose } = useJungleSounds();
@@ -107,256 +106,7 @@ export default function JungleGame() {
     const getRenderX = (x) => myId === 1 ? 6 - x : x;
     const getRenderY = (y) => myId === 1 ? y : 8 - y;
     
-    // Drawing Loop
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        let frameId;
-
-        const render = (ts) => {
-            // 1. Clear & Background with gradient
-            const bgGrad = ctx.createLinearGradient(0, 0, MAP_SIZE_W, MAP_SIZE_H);
-            bgGrad.addColorStop(0, '#0f172a');
-            bgGrad.addColorStop(0.5, '#1e293b');
-            bgGrad.addColorStop(1, '#0f172a');
-            ctx.fillStyle = bgGrad;
-            ctx.fillRect(0, 0, MAP_SIZE_W, MAP_SIZE_H);
-
-            // 2. Draw Grid & Special Tiles
-            for (let y = 0; y < MAP_HEIGHT; y++) {
-                for (let x = 0; x < MAP_WIDTH; x++) {
-                    const tx = getRenderX(x) * TILE_SIZE;
-                    const ty = getRenderY(y) * TILE_SIZE;
-
-                    // Base Tile - subtle grid
-                    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-                    ctx.lineWidth = 1;
-                    ctx.strokeRect(tx, ty, TILE_SIZE, TILE_SIZE);
-
-                    // Grass pattern for land tiles
-                    if (!RIVERS.some(r => r.x === x && r.y === y)) {
-                        ctx.fillStyle = 'rgba(34, 197, 94, 0.03)';
-                        ctx.fillRect(tx + 1, ty + 1, TILE_SIZE - 2, TILE_SIZE - 2);
-                    }
-
-                    // Rivers - enhanced water effect
-                    if (RIVERS.some(r => r.x === x && r.y === y)) {
-                        const waveOffset = Math.sin(ts / 400 + x * 0.5 + y * 0.3) * 0.15;
-                        const waterGrad = ctx.createLinearGradient(tx, ty, tx + TILE_SIZE, ty + TILE_SIZE);
-                        waterGrad.addColorStop(0, `rgba(59, 130, 246, ${0.4 + waveOffset})`);
-                        waterGrad.addColorStop(0.5, `rgba(37, 99, 235, ${0.5 + waveOffset})`);
-                        waterGrad.addColorStop(1, `rgba(59, 130, 246, ${0.4 + waveOffset})`);
-                        ctx.fillStyle = waterGrad;
-                        ctx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
-                        
-                        // Water wave lines
-                        ctx.strokeStyle = 'rgba(147, 197, 253, 0.3)';
-                        ctx.lineWidth = 1;
-                        for (let w = 0; w < 3; w++) {
-                            const wy = ty + 15 + w * 20 + Math.sin(ts / 300 + w) * 3;
-                            ctx.beginPath();
-                            ctx.moveTo(tx + 5, wy);
-                            ctx.lineTo(tx + TILE_SIZE - 5, wy);
-                            ctx.stroke();
-                        }
-                    }
-
-                    // Traps - enhanced trap visualization
-                    if (TRAPS.some(t => t.x === x && t.y === y)) {
-                        ctx.fillStyle = 'rgba(220, 38, 38, 0.15)';
-                        ctx.fillRect(tx + 2, ty + 2, TILE_SIZE - 4, TILE_SIZE - 4);
-                        
-                        ctx.font = '20px sans-serif';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillStyle = 'rgba(248, 113, 113, 0.6)';
-                        ctx.fillText('💀', tx + TILE_SIZE/2, ty + TILE_SIZE/2);
-                        
-                        const trapPulse = 0.4 + 0.2 * Math.sin(ts / 300);
-                        ctx.strokeStyle = `rgba(248, 113, 113, ${trapPulse})`;
-                        ctx.lineWidth = 2;
-                        ctx.setLineDash([4, 4]);
-                        ctx.strokeRect(tx + 6, ty + 6, TILE_SIZE - 12, TILE_SIZE - 12);
-                        ctx.setLineDash([]);
-                    }
-
-                    // Dens - enhanced den visualization
-                    if (DENS.some(d => d.x === x && d.y === y)) {
-                        const den = DENS.find(d => d.x === x && d.y === y);
-                        const isWinDen = den.owner !== 0;
-                        const denGrad = ctx.createRadialGradient(
-                            tx + TILE_SIZE/2, ty + TILE_SIZE/2, 0,
-                            tx + TILE_SIZE/2, ty + TILE_SIZE/2, TILE_SIZE/2
-                        );
-                        if (isWinDen) {
-                            denGrad.addColorStop(0, 'rgba(74, 222, 128, 0.3)');
-                            denGrad.addColorStop(1, 'rgba(74, 222, 128, 0.1)');
-                        } else {
-                            denGrad.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
-                            denGrad.addColorStop(1, 'rgba(255, 255, 255, 0.05)');
-                        }
-                        ctx.fillStyle = denGrad;
-                        ctx.fillRect(tx, ty, TILE_SIZE, TILE_SIZE);
-                        
-                        ctx.font = '24px sans-serif';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillStyle = isWinDen ? '#4ade80' : '#94a3b8';
-                        ctx.fillText('🏠', tx + TILE_SIZE/2, ty + TILE_SIZE/2);
-                        
-                        ctx.strokeStyle = isWinDen ? '#4ade80' : '#fff';
-                        ctx.lineWidth = 2;
-                        ctx.beginPath();
-                        ctx.arc(tx + TILE_SIZE/2, ty + TILE_SIZE/2, TILE_SIZE/3, 0, Math.PI * 2);
-                        ctx.stroke();
-                    }
-                }
-            }
-
-            // 3. Draw Valid Move Indicators - enhanced
-            validMoves.forEach(m => {
-                const tx = getRenderX(m.x) * TILE_SIZE;
-                const ty = getRenderY(m.y) * TILE_SIZE;
-                
-                // Pulsing dot
-                const pulse = 0.3 + 0.15 * Math.sin(ts / 200);
-                ctx.fillStyle = `rgba(74, 222, 128, ${pulse})`;
-                ctx.beginPath();
-                ctx.arc(tx + TILE_SIZE/2, ty + TILE_SIZE/2, 10, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Inner dot
-                ctx.fillStyle = 'rgba(74, 222, 128, 0.8)';
-                ctx.beginPath();
-                ctx.arc(tx + TILE_SIZE/2, ty + TILE_SIZE/2, 5, 0, Math.PI * 2);
-                ctx.fill();
-            });
-
-            // 4. Draw Pieces with enhanced visuals
-            pieces.forEach(p => {
-                const tx = getRenderX(p.x) * TILE_SIZE;
-                const ty = getRenderY(p.y) * TILE_SIZE;
-                const isSelected = selectedPiece && selectedPiece.x === p.x && selectedPiece.y === p.y;
-                const isMyPiece = p.ownerId === myId;
-
-                ctx.save();
-                ctx.translate(tx + TILE_SIZE/2, ty + TILE_SIZE/2);
-
-                // Animated selection ring
-                if (isSelected) {
-                    const ringPulse = 1 + Math.sin(ts / 150) * 0.15;
-                    ctx.shadowBlur = 25;
-                    ctx.shadowColor = isMyPiece ? '#4ade80' : '#60a5fa';
-                    
-                    ctx.strokeStyle = isMyPiece ? 'rgba(74, 222, 128, 0.5)' : 'rgba(96, 165, 250, 0.5)';
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.arc(0, 0, (TILE_SIZE/2 - 2) * ringPulse, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
-
-                // Piece base with 3D gradient
-                const pieceGrad = ctx.createRadialGradient(-5, -5, 0, 0, 0, TILE_SIZE/2 - 4);
-                if (isMyPiece) {
-                    pieceGrad.addColorStop(0, '#22c55e');
-                    pieceGrad.addColorStop(0.7, '#166534');
-                    pieceGrad.addColorStop(1, '#052e16');
-                } else {
-                    pieceGrad.addColorStop(0, '#3b82f6');
-                    pieceGrad.addColorStop(0.7, '#1e3a8a');
-                    pieceGrad.addColorStop(1, '#172554');
-                }
-                
-                ctx.fillStyle = pieceGrad;
-                ctx.beginPath();
-                ctx.arc(0, 0, TILE_SIZE/2 - 4, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Border
-                ctx.strokeStyle = isSelected ? '#fff' : (isMyPiece ? '#4ade80' : '#60a5fa');
-                ctx.lineWidth = isSelected ? 3 : 2;
-                ctx.stroke();
-
-                // Inner glow ring
-                ctx.strokeStyle = isMyPiece ? 'rgba(74, 222, 128, 0.3)' : 'rgba(96, 165, 250, 0.3)';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.arc(0, 0, TILE_SIZE/2 - 10, 0, Math.PI * 2);
-                ctx.stroke();
-
-                // Animal symbol with modern emoji style
-                ctx.shadowBlur = 6;
-                ctx.shadowColor = 'rgba(0,0,0,0.6)';
-                ctx.font = `normal ${TILE_SIZE/1.8}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                
-                // Draw emoji in badge
-                const symbol = ANIMAL_SYMBOLS[p.type];
-                ctx.fillText(symbol?.char || p.type, 0, 3);
-
-                // Rank badge with animation
-                const badgePulse = isSelected ? 1 + Math.sin(ts / 200) * 0.1 : 1;
-                ctx.fillStyle = 'rgba(0,0,0,0.7)';
-                ctx.beginPath();
-                ctx.arc(TILE_SIZE/4 * badgePulse, -TILE_SIZE/4 * badgePulse, 10, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#fff';
-                ctx.font = 'bold 11px Inter, sans-serif';
-                ctx.fillText(p.type, TILE_SIZE/4, -TILE_SIZE/4 + 1);
-
-                ctx.restore();
-            });
-
-            // 5. Draw Hints with animation (show best move)
-            if (hintMoves && hintMoves.length > 0) {
-                const bestMove = hintMoves[0];
-                const { from, to } = bestMove;
-                const fx = getRenderX(from.x) * TILE_SIZE + TILE_SIZE/2;
-                const fy = getRenderY(from.y) * TILE_SIZE + TILE_SIZE/2;
-                const tx = getRenderX(to.x) * TILE_SIZE + TILE_SIZE/2;
-                const ty = getRenderY(to.y) * TILE_SIZE + TILE_SIZE/2;
-
-                // Animated dashed line
-                const dashOffset = (ts / 50) % 20;
-                ctx.strokeStyle = '#fbbf24';
-                ctx.lineWidth = 4;
-                ctx.setLineDash([10, 5]);
-                ctx.lineDashOffset = -dashOffset;
-                ctx.beginPath();
-                ctx.moveTo(fx, fy);
-                ctx.lineTo(tx, ty);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                
-                // Arrow head
-                const angle = Math.atan2(ty - fy, tx - fx);
-                ctx.fillStyle = '#fbbf24';
-                ctx.beginPath();
-                ctx.moveTo(tx, ty);
-                ctx.lineTo(tx - 15 * Math.cos(angle - Math.PI/6), ty - 15 * Math.sin(angle - Math.PI/6));
-                ctx.lineTo(tx - 15 * Math.cos(angle + Math.PI/6), ty - 15 * Math.sin(angle + Math.PI/6));
-                ctx.closePath();
-                ctx.fill();
-            }
-
-            frameId = requestAnimationFrame(render);
-        };
-
-        render(0);
-        return () => cancelAnimationFrame(frameId);
-    }, [pieces, selectedPiece, validMoves, turn, myId, hintMoves]);
-
-    const handleCanvasClick = (e) => {
-        const rect = canvasRef.current.getBoundingClientRect();
-        const scaleX = canvasRef.current.width / rect.width;
-        const scaleY = canvasRef.current.height / rect.height;
-        const rawX = Math.floor(((e.clientX - rect.left) * scaleX) / TILE_SIZE);
-        const rawY = Math.floor(((e.clientY - rect.top) * scaleY) / TILE_SIZE);
-        const x = myId === 1 ? 6 - rawX : rawX;
-        const y = myId === 1 ? rawY : 8 - rawY;
-        
+    const handleSquareClick = (x, y) => {
         const piece = pieces.find(p => p.x === x && p.y === y);
         if (piece && piece.ownerId === myId) {
             handleSelect(x, y, playSelect);
@@ -364,6 +114,7 @@ export default function JungleGame() {
             handleSelect(x, y);
         }
     };
+
 
     const isMyTurn = turn === myId;
 
@@ -434,129 +185,210 @@ export default function JungleGame() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Bottom: Zoom */}
+                    <div style={{ marginTop: 'auto', paddingTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div className="gp-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', padding: '8px 10px' }}>
+                            <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                                <ZoomOut size={16} />
+                            </button>
+                            <span className="gp-ui" style={{ minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
+                                {zoomLevel}%
+                            </span>
+                            <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
+                                <ZoomIn size={16} />
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 {/* CENTER: BOARD */}
                 <div className="jungle-board-area" style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '320px', padding: '1rem', overflow: 'auto', position: 'relative' }}>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', width: '100%', justifyContent: 'center', marginBottom: '10px' }}>
-                        <div className="gp-player-row" style={{ padding: '4px 10px', opacity: turn === myId ? 1 : 0.5, border: turn === myId ? '1px solid rgba(74,222,128,0.3)' : '1px solid transparent', background: turn === myId ? 'rgba(74,222,128,0.1)' : 'transparent' }}>
-                            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#4ade80' }} />
-                            <span className="gp-ui" style={{ color: turn === myId ? '#4ade80' : '#fff' }}>{t('jungle.you')}</span>
-                        </div>
-                        <span className="gp-label" style={{ color: '#fbbf24' }}>{difficulty.toUpperCase()}</span>
-                        <div className="gp-player-row" style={{ padding: '4px 10px', opacity: turn !== myId ? 1 : 0.5, border: turn !== myId ? '1px solid rgba(96,165,250,0.3)' : '1px solid transparent', background: turn !== myId ? 'rgba(96,165,250,0.1)' : 'transparent' }}>
-                            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#60b5fa' }} />
-                            <span className="gp-ui" style={{ color: turn !== myId ? '#60b5fa' : '#fff' }}>{t('jungle.opponent')}</span>
-                        </div>
-                    </div>
 
                     <div style={{
                         position: 'relative',
-                        border: '6px solid rgba(15, 15, 25, 0.95)',
+                        border: '8px solid rgba(15, 15, 25, 0.95)',
                         borderRadius: '12px',
                         boxShadow: '0 30px 60px rgba(0, 0, 0, 0.6)',
                         overflow: 'hidden',
                         background: '#0f172a',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: zoomLevel > 100 ? `${630 * (zoomLevel/100)}px` : 'min(85vh - 60px, 630px)',
+                        display: 'grid',
+                        gridTemplateColumns: `repeat(${MAP_WIDTH}, 1fr)`,
+                        gridTemplateRows: `repeat(${MAP_HEIGHT}, 1fr)`,
+                        width: zoomLevel > 100 ? `${520 * (zoomLevel/100)}px` : 'min(75vw, 520px)',
                         aspectRatio: '7 / 9'
                     }}>
                         {isLoading && (
-                            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 10, background: 'rgba(15, 23, 42, 0.9)' }}>
+                            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100, background: 'rgba(15, 23, 42, 0.9)' }}>
                                 <RefreshCw className="animate-spin" size={48} color="#4ade80" style={{ marginBottom: '15px' }} />
                                 <span className="gp-ui" style={{ color: '#94a3b8' }}>{t('jungle.connecting')}</span>
                             </div>
                         )}
                         
-                        <canvas 
-                            ref={canvasRef} 
-                            width={MAP_SIZE_W} 
-                            height={MAP_SIZE_H} 
-                            onClick={handleCanvasClick}
-                            style={{ 
-                                display: 'block', 
-                                cursor: isMyTurn ? 'pointer' : 'default',
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'contain'
-                            }} 
-                        />
+                        {/* Board Tiles */}
+                        {Array.from({ length: MAP_HEIGHT }).map((_, renderY) => 
+                            Array.from({ length: MAP_WIDTH }).map((_, renderX) => {
+                                const x = myId === 1 ? 6 - renderX : renderX;
+                                const y = myId === 1 ? renderY : 8 - renderY;
+                                
+                                const isRiver = RIVERS.some(r => r.x === x && r.y === y);
+                                const trap = TRAPS.find(t => t.x === x && t.y === y);
+                                const den = DENS.find(d => d.x === x && d.y === y);
+                                const isValidMove = validMoves.some(m => m.x === x && m.y === y);
+                                
+                                let bg = 'rgba(34, 197, 94, 0.03)';
+                                if (isRiver) bg = 'linear-gradient(135deg, rgba(59,130,246,0.3) 0%, rgba(37,99,235,0.4) 100%)';
+                                if (trap) bg = 'rgba(220, 38, 38, 0.08)';
+                                if (den) bg = den.owner === 0 ? 'rgba(74, 222, 128, 0.15)' : 'rgba(255, 255, 255, 0.1)';
+                                
+                                return (
+                                    <div key={`${x}-${y}`} onClick={() => handleSquareClick(x, y)} style={{
+                                        position: 'relative', border: '1px solid rgba(255,255,255,0.03)', background: bg,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: isMyTurn ? 'pointer' : 'default'
+                                    }}>
+                                        {isRiver && <div className="jungle-river-wave" />}
+                                        {trap && (
+                                            <div style={{ position: 'absolute', inset: '4px', border: '2px dashed rgba(248, 113, 113, 0.5)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'min(3vh, 3vw)', color: 'rgba(248, 113, 113, 0.7)' }}>💀</div>
+                                        )}
+                                        {den && (
+                                            <div style={{ position: 'absolute', inset: '6px', border: `2px solid ${den.owner !== 0 ? '#4ade80' : '#fff'}`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'min(3vh, 3vw)', color: den.owner !== 0 ? '#4ade80' : '#fff' }}>🏠</div>
+                                        )}
+                                        {isValidMove && <div style={{ width: '25%', height: '25%', borderRadius: '50%', background: 'rgba(74, 222, 128, 0.8)', boxShadow: '0 0 10px #4ade80', zIndex: 10, animation: 'pulse 1.5s infinite' }} />}
+                                    </div>
+                                );
+                            })
+                        )}
+
+                        {/* Pieces Overlay */}
+                        {pieces.map(p => {
+                            const renderX = myId === 1 ? 6 - p.x : p.x;
+                            const renderY = myId === 1 ? p.y : 8 - p.y;
+                            const isSelected = selectedPiece && selectedPiece.x === p.x && selectedPiece.y === p.y;
+                            const isMyPiece = p.ownerId === myId;
+                            
+                            return (
+                                <div key={p.id} onClick={(e) => { e.stopPropagation(); handleSquareClick(p.x, p.y); }} style={{
+                                    position: 'absolute', left: `${(renderX / MAP_WIDTH) * 100}%`, top: `${(renderY / MAP_HEIGHT) * 100}%`, width: `${100 / MAP_WIDTH}%`, height: `${100 / MAP_HEIGHT}%`,
+                                    transition: 'left 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), top 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 20, cursor: isMyPiece && isMyTurn ? 'pointer' : 'default',
+                                    pointerEvents: 'auto'
+                                }}>
+                                    <div style={{
+                                        width: '85%', height: '85%', borderRadius: '50%',
+                                        background: isMyPiece ? 'linear-gradient(135deg, #22c55e 0%, #166534 100%)' : 'linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%)',
+                                        border: `2px solid ${isSelected ? '#fff' : (isMyPiece ? '#4ade80' : '#60a5fa')}`,
+                                        boxShadow: isSelected ? `0 0 20px ${isMyPiece ? '#4ade80' : '#60a5fa'}, inset 0 0 10px rgba(255,255,255,0.3)` : '0 4px 10px rgba(0,0,0,0.6), inset 0 0 5px rgba(255,255,255,0.2)',
+                                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                        position: 'relative', transform: isSelected ? 'scale(1.1)' : 'scale(1)', transition: 'transform 0.2s', backdropFilter: 'blur(4px)'
+                                    }}>
+                                        <span style={{ fontSize: 'min(4vh, 4.5vw)', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))', marginTop: '-2px' }}>{ANIMAL_SYMBOLS[p.type]?.char}</span>
+                                        <div style={{ position: 'absolute', bottom: '-4px', right: '-4px', background: 'rgba(15,23,42,0.9)', color: '#fff', borderRadius: '50%', width: '22px', height: '22px', fontSize: '11px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${isMyPiece ? '#4ade80' : '#60a5fa'}`, boxShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>{p.type}</div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+
+                        {/* Hint SVG Overlay */}
+                        {hintMoves && hintMoves.length > 0 && (() => {
+                            const bestMove = hintMoves[0];
+                            const fromR_X = myId === 1 ? 6 - bestMove.from.x : bestMove.from.x;
+                            const fromR_Y = myId === 1 ? bestMove.from.y : 8 - bestMove.from.y;
+                            const toR_X = myId === 1 ? 6 - bestMove.to.x : bestMove.to.x;
+                            const toR_Y = myId === 1 ? bestMove.to.y : 8 - bestMove.to.y;
+                            
+                            const fx = (fromR_X + 0.5) * (100 / MAP_WIDTH);
+                            const fy = (fromR_Y + 0.5) * (100 / MAP_HEIGHT);
+                            const tx = (toR_X + 0.5) * (100 / MAP_WIDTH);
+                            const ty = (toR_Y + 0.5) * (100 / MAP_HEIGHT);
+
+                            return (
+                                <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 30 }}>
+                                    <defs>
+                                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                            <polygon points="0 0, 10 3.5, 0 7" fill="#fbbf24" />
+                                        </marker>
+                                    </defs>
+                                    <line x1={`${fx}%`} y1={`${fy}%`} x2={`${tx}%`} y2={`${ty}%`} stroke="#fbbf24" strokeWidth="4" strokeDasharray="10 5" markerEnd="url(#arrowhead)" style={{ animation: 'dash 1s linear infinite' }} />
+                                </svg>
+                            );
+                        })()}
                     </div>
                 </div>
 
                 {/* RIGHT: CONTROLS */}
                 <div className="jungle-right-panel" style={{ flex: '0 0 240px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.8rem', overflowY: 'auto', padding: '1.5rem', borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)' }}>
-                    <div className="gp-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1.2rem' }}>
-                        <div className="gp-title" style={{ textAlign: 'center', color: '#fff' }}>♟ CỜ THÚ</div>
-                        
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <button className="gp-btn gp-btn-primary" onClick={handleReset} style={{ padding: '10px' }}>
-                                <RotateCcw size={16} /> {t('jungle.restart')}
-                            </button>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1rem' }}>
+                        <div className="gp-card" style={{ padding: '16px 12px' }}>
+                            <div className="gp-label" style={{ textAlign: 'center', marginBottom: '16px' }}>THÔNG TIN TRẬN ĐẤU</div>
                             
-                            <button className="gp-btn" onClick={getHint} disabled={turn !== myId || isLoading} style={{ border: '1px solid #fbbf24', color: '#fbbf24', padding: '10px' }}>
-                                <HelpCircle size={16} /> {t('jungle.hint')}
-                            </button>
+                            {/* Blue/Green Player (My Side) */}
+                            <div className="gp-player-row" style={{ 
+                                background: turn === myId ? 'rgba(74,222,128,0.1)' : 'transparent',
+                                border: turn === myId ? '1px solid rgba(74,222,128,0.3)' : '1px solid transparent'
+                            }}>
+                                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>🦁</div>
+                                <div style={{ flex: 1 }}>
+                                    <div className="role">{t('jungle.greenSide', 'Phe Xanh')}</div>
+                                    <div className="name" style={{ color: '#4ade80' }}>{t('jungle.you', 'Bạn')}</div>
+                                </div>
+                                {turn === myId && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80' }} />}
+                            </div>
 
-                            {hintMoves && hintMoves.length > 0 && (
-                                <div style={{ 
-                                    padding: '10px', 
-                                    background: 'rgba(251,191,36,0.1)', 
-                                    borderRadius: '8px', 
-                                    border: '1px solid rgba(251,191,36,0.3)',
-                                    animation: 'fadeIn 0.3s ease'
-                                }}>
-                                    <div className="gp-label" style={{ color: '#fbbf24', marginBottom: '6px' }}>💡 {t('jungle.hintTitle')}</div>
-                                    {hintMoves.slice(0, 3).map((move, idx) => {
-                                        const pct = move.percentage || 0;
-                                        let color;
-                                        if (pct >= 80) color = '#4ade80';
-                                        else if (pct >= 50) color = '#60b5fa';
-                                        else if (pct >= 20) color = '#fbbf24';
-                                        else color = '#ef4444';
-                                        
-                                        return (
-                                        <div key={idx} style={{ 
-                                            display: 'flex', alignItems: 'center', gap: '6px',
-                                            padding: '6px', marginBottom: '4px',
-                                            background: idx === 0 ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.05)',
-                                            borderRadius: '6px'
-                                        }}>
-                                            <span style={{ 
-                                                width: '16px', height: '16px', borderRadius: '50%', 
-                                                background: color, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                fontSize: '0.6rem', fontWeight: 700, color: '#000'
-                                            }}>{idx+1}</span>
-                                            <span className="gp-caption" style={{ color: '#fff' }}>
-                                                {ANIMAL_SYMBOLS[pieces.find(p => p.x === move.from.x && p.y === move.from.y)?.type]?.char || '?'}
-                                                {String.fromCharCode(65 + move.from.x)}{9 - move.from.y}→{String.fromCharCode(65 + move.to.x)}{9 - move.to.y}
-                                            </span>
-                                        </div>
-                                    )})}
-                                    <button className="gp-btn" onClick={() => setHintMoves(null)} style={{ width: '100%', padding: '4px', color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem' }}>✕ Ẩn</button>
+                            <div style={{ width: '2px', height: '16px', background: 'rgba(255,255,255,0.1)', margin: '4px auto' }} />
+
+                            {/* Opponent Player */}
+                            <div className="gp-player-row" style={{ 
+                                background: turn !== myId ? 'rgba(96,165,250,0.1)' : 'transparent',
+                                border: turn !== myId ? '1px solid rgba(96,165,250,0.3)' : '1px solid transparent'
+                            }}>
+                                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#3b82f6', border: '2px solid #1e3a8a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>🐯</div>
+                                <div style={{ flex: 1 }}>
+                                    <div className="role">{t('jungle.blueSide', 'Phe Đỏ')}</div>
+                                    <div className="name" style={{ color: '#94a3b8' }}>{mode === 'multiplayer' ? 'Đối thủ' : 'CPU'}</div>
                                 </div>
-                            )}
+                                {turn !== myId && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#60a5fa', boxShadow: '0 0 8px #60a5fa' }} />}
+                            </div>
                             
-                            <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '4px', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                <div className="gp-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', padding: '8px 10px' }}>
-                                    <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
-                                        <ZoomOut size={16} />
-                                    </button>
-                                    <span className="gp-ui" style={{ minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
-                                        {zoomLevel}%
-                                    </span>
-                                    <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
-                                        <ZoomIn size={16} />
-                                    </button>
-                                </div>
-                                <button className="gp-btn" onClick={() => navigate('/jungle')} style={{ padding: '12px' }}>
-                                    <ArrowLeft size={16} /> Thoát khỏi phòng
-                                </button>
+                            <div className="gp-caption" style={{ textAlign: 'center', marginTop: '16px', color: '#fbbf24', fontWeight: 600 }}>
+                                {turn === myId ? 'Tới lượt của bạn' : 'Đang suy nghĩ...'}
                             </div>
                         </div>
+
+                        {hintMoves && hintMoves.length > 0 && (
+                            <div className="gp-card" style={{ padding: '8px' }}>
+                                <div className="gp-label" style={{ color: '#fbbf24' }}>GỢI Ý NƯỚC ĐI:</div>
+                                {hintMoves.slice(0, 3).map((move, idx) => {
+                                    const pct = move.percentage || 0;
+                                    let color;
+                                    if (pct >= 80) color = '#4ade80';
+                                    else if (pct >= 50) color = '#60b5fa';
+                                    else if (pct >= 20) color = '#fbbf24';
+                                    else color = '#ef4444';
+                                    return (
+                                        <div key={idx} className="gp-caption" style={{ display: 'flex', justifyContent: 'space-between', padding: '4px', background: 'rgba(255,255,255,0.05)', marginBottom: '4px', borderRadius: '4px' }}>
+                                            <span style={{ color }}>{ANIMAL_SYMBOLS[pieces.find(p => p.x === move.from.x && p.y === move.from.y)?.type]?.char || '?'} {String.fromCharCode(65 + move.from.x)}{9 - move.from.y} → {String.fromCharCode(65 + move.to.x)}{9 - move.to.y}</span>
+                                        </div>
+                                    )
+                                })}
+                                <button className="gp-btn" onClick={() => setHintMoves(null)} style={{ width: '100%', padding: '4px', color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem' }}>✕ Ẩn</button>
+                            </div>
+                        )}
+                    </div>
+                    
+                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <button className="gp-btn gp-btn-primary" onClick={handleReset} style={{ color: '#000' }}>
+                                <RotateCcw size={16} /> {t('jungle.restart', 'Chơi lại')}
+                            </button>
+                            <button className="gp-btn" onClick={getHint} disabled={turn !== myId || isLoading} style={{ color: (turn === myId && !isLoading) ? '#4ade80' : '' }}>
+                                <HelpCircle size={16} /> {t('jungle.hint', 'Gợi ý')}
+                            </button>
+                        </div>
+                        <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)' }} />
+                        <button className="gp-btn" onClick={() => navigate('/jungle')} style={{ padding: '12px' }}>
+                            <ArrowLeft size={16} /> {t('common.exit', 'Thoát')}
+                        </button>
                     </div>
                 </div>
 
@@ -605,6 +437,21 @@ export default function JungleGame() {
                         border-top: 1px solid rgba(255,255,255,0.06) !important;
                         padding: 0.5rem !important;
                     }
+                }
+                @keyframes dash {
+                    to { stroke-dashoffset: -30; }
+                }
+                .jungle-river-wave {
+                    position: absolute;
+                    inset: 0;
+                    background: linear-gradient(0deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+                    background-size: 100% 200%;
+                    animation: waveflow 3s linear infinite;
+                    pointer-events: none;
+                }
+                @keyframes waveflow {
+                    0% { background-position: 0% 100%; }
+                    100% { background-position: 0% 0%; }
                 }
             `}</style>
         </div>

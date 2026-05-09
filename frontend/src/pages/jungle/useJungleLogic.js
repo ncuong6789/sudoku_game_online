@@ -81,10 +81,13 @@ export function useJungleLogic(roomId, mode = 'multiplayer', difficulty = 'mediu
                 const attackerPiece = newPieces.find(np => 
                     prevPieces.find(pp => pp.id === np.id && (pp.x !== np.x || pp.y !== np.y))
                 );
+                const movedPieceOld = attackerPiece ? prevPieces.find(pp => pp.id === attackerPiece.id) : null;
+
                 if (capturedPiece) {
                     if (onPieceCaptured) onPieceCaptured(capturedPiece, attackerPiece);
-                } else {
-                    if (onMoveMade) onMoveMade(false);
+                } else if (attackerPiece && movedPieceOld) {
+                    const isJump = Math.abs(attackerPiece.x - movedPieceOld.x) > 1 || Math.abs(attackerPiece.y - movedPieceOld.y) > 1;
+                    if (onMoveMade) onMoveMade(isJump);
                 }
             }
             

@@ -191,6 +191,8 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}, mode = 'solo'
     const [moveList, setMoveList] = useState([]);
     const [evalScore, setEvalScore] = useState(0);
     const [hintMove, setHintMove] = useState(null);
+    const [hintSuggestions, setHintSuggestions] = useState(null);
+    const [isThinkingHint, setIsThinkingHint] = useState(false);
 
     // Multiplayer socket sync will be moved below.
 
@@ -319,8 +321,9 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}, mode = 'solo'
 
     const makeAIMove = useCallback((color, difficulty = 'Medium') => {
         if (isGameOver) return;
-        getBestMoveAsync(board, color, getLegalMoves, cloneBoard, isCheck, isKingsFacing, difficulty).then(chosenMove => {
-            if (!chosenMove) return;
+        getBestMoveAsync(board, color, getLegalMoves, cloneBoard, isCheck, isKingsFacing, difficulty).then(result => {
+            if (!result || !result.bestMove) return;
+            const chosenMove = result.bestMove;
             const fromR = chosenMove.from.r;
             const fromC = chosenMove.from.c;
             const toR = chosenMove.to.r;
@@ -376,10 +379,42 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}, mode = 'solo'
 
     const getHint = useCallback(() => {
         if (isGameOver || turn !== (callbacks.myColor || 'r')) return;
-        getBestMoveAsync(board, turn, getLegalMoves, cloneBoard, isCheck, isKingsFacing, difficulty).then(chosenMove => {
-            if (chosenMove) {
-                setHintMove({ from: chosenMove.from, to: chosenMove.to });
-                setTimeout(() => setHintMove(null), 5000);
+        setIsThinkingHint(true);
+        setHintMove(null);
+        setHintSuggestions(null);
+
+        getBestMoveAsync(board, turn, getLegalMoves, cloneBoard, isCheck, isKingsFacing, difficulty).then(result => {
+            setIsThinkingHint(false);
+            if (result && result.bestMove) {
+                setHintMove({ from: result.bestMove.from, to: result.bestMove.to });
+                
+                if (result.suggestions && result.suggestions.length > 0) {
+                    const best = result.suggestions[0].score;
+                    const worst = result.suggestions[result.suggestions.length - 1].score;
+                    const range = best - worst || 1;
+
+                    const labeled = result.suggestions.map((s) => {
+                        const pct = Math.round(((s.score - worst) / range) * 100);
+                        let label, color;
+                        if (pct >= 80) { label = '✅ Tuyệt vời!'; color = '#4ade80'; }
+                        else if (pct >= 50) { label = '✓ Tốt'; color = '#60b5fa'; }
+                        else if (pct >= 20) { label = '⚠️ Bình thường'; color = '#fbbf24'; }
+                        else { label = '❌ Yếu'; color = '#ef4444'; }
+                        
+                        return {
+                            ...s, label, color, percentage: pct,
+                            fromStr: `(${s.from.r},${s.from.c})`,
+                            toStr: `(${s.to.r},${s.to.c})`,
+                            evalDisplay: (s.score > 0 ? '+' : '') + (s.score / 100).toFixed(1)
+                        };
+                    });
+                    setHintSuggestions(labeled);
+                }
+
+                setTimeout(() => {
+                    setHintMove(null);
+                    setHintSuggestions(null);
+                }, 5000);
             }
         });
     }, [board, turn, isGameOver, callbacks, difficulty]);
@@ -395,6 +430,8 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}, mode = 'solo'
         moveList,
         evalScore,
         hintMove,
+        hintSuggestions,
+        isThinkingHint,
         selectPiece,
         movePiece,
         makeAIMove,

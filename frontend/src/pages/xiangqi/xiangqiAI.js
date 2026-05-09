@@ -165,6 +165,8 @@ export function getBestMove(board, color, getLegalMoves, cloneBoard, isCheck, is
     let bestScore = -Infinity;
     let alpha = -Infinity;
     let beta = Infinity;
+    
+    const scoredMoves = [];
 
     const allMoves = generateAllMoves(board, color, getLegalMoves);
     if (allMoves.length === 0) return null;
@@ -175,6 +177,8 @@ export function getBestMove(board, color, getLegalMoves, cloneBoard, isCheck, is
         nextBoard[move.from.r][move.from.c] = null;
 
         const score = -minimax(nextBoard, depth - 1, -beta, -alpha, oppColor, getLegalMoves, cloneBoard, isCheck, isKingsFacing);
+        
+        scoredMoves.push({ ...move, score });
 
         if (score > bestScore) {
             bestScore = score;
@@ -182,8 +186,11 @@ export function getBestMove(board, color, getLegalMoves, cloneBoard, isCheck, is
         }
         alpha = Math.max(alpha, score);
     }
+    
+    scoredMoves.sort((a, b) => b.score - a.score);
+    const suggestions = scoredMoves.slice(0, 3);
 
-    return bestMove || allMoves[Math.floor(Math.random() * allMoves.length)];
+    return { bestMove: bestMove || allMoves[Math.floor(Math.random() * allMoves.length)], suggestions };
 }
 
 function minimax(board, depth, alpha, beta, color, getLegalMoves, cloneBoard, isCheck, isKingsFacing) {

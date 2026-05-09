@@ -67,7 +67,8 @@ export default function XiangqiGame() {
     }), [myColor, playXiangqiMoveSound, playXiangqiCaptureSound, playXiangqiCheckSound, playXiangqiIllegalSound, playXiangqiClickSound]);
 
     const {
-        board, turn, selectedPos, validMoves, isGameOver, winner, inCheckColor, moveList, evalScore, hintMove, selectPiece, movePiece, makeAIMove, undoMove, getHint
+        board, turn, selectedPos, validMoves, isGameOver, winner, inCheckColor, moveList,
+        evalScore, hintMove, hintSuggestions, isThinkingHint, selectPiece, movePiece, makeAIMove, undoMove, getHint
     } = useXiangqiLogic('r', callbacks, mode, roomId, difficulty);
 
     useEffect(() => {
@@ -382,14 +383,26 @@ export default function XiangqiGame() {
                                 </div>
                             )}
                         </div>
+
+                        {hintSuggestions && hintSuggestions.length > 0 && (
+                            <div className="gp-card" style={{ padding: '8px' }}>
+                                <div className="gp-label" style={{ color: '#fbbf24' }}>GỢI Ý NƯỚC ĐI:</div>
+                                {hintSuggestions.map((h, i) => (
+                                    <div key={i} className="gp-caption" style={{ display: 'flex', justifyContent: 'space-between', padding: '4px', background: 'rgba(255,255,255,0.05)', marginBottom: '4px', borderRadius: '4px' }}>
+                                        <span style={{ color: h.color }}>{h.fromStr} → {h.toStr}</span>
+                                        <span style={{ color: '#fff' }}>{h.evalDisplay}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                     <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             <button className="gp-btn" onClick={undoMove} disabled={isGameOver || moveList.length === 0} style={{ color: moveList.length > 0 ? '#fbbf24' : '' }}>
                                 <Undo2 size={16} /> {t('xiangqi.undo')}
                             </button>
-                            <button className="gp-btn" onClick={getHint} disabled={isGameOver || turn !== myColor} style={{ color: (turn === myColor && !isGameOver) ? '#4ade80' : '' }}>
-                                <Lightbulb size={16} /> {t('xiangqi.hint')}
+                            <button className="gp-btn" onClick={getHint} disabled={isGameOver || turn !== myColor || isThinkingHint} style={{ color: (turn === myColor && !isGameOver) ? '#4ade80' : '' }}>
+                                <Lightbulb size={16} /> {isThinkingHint ? t('chess.thinking', 'Đang tính...') : t('xiangqi.hint')}
                             </button>
                         </div>
                         <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)' }} />
