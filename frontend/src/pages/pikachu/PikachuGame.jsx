@@ -115,32 +115,32 @@ export default function PikachuGame() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         
                         {/* Level Card */}
-                        <div style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', padding: '15px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div className="gp-card" style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', padding: '15px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div style={{ background: 'rgba(59,130,246,0.2)', padding: '8px', borderRadius: '8px' }}>
                                 <Target size={20} color="#60a5fa" />
                             </div>
                             <div>
-                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Cấp độ</div>
-                                <div style={{ fontSize: '1.1rem', color: '#f8fafc', fontWeight: 800 }}>{level}</div>
+                                <div className="gp-micro" style={{ color: '#94a3b8', textTransform: 'uppercase' }}>Cấp độ</div>
+                                <div className="gp-score" style={{ color: '#f8fafc', fontSize: '1.1rem' }}>{level}</div>
                             </div>
                         </div>
 
                         {/* Score Card */}
-                        <div style={{ background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.2)', padding: '15px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div className="gp-card" style={{ background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.2)', padding: '15px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div style={{ background: 'rgba(234,179,8,0.2)', padding: '8px', borderRadius: '8px' }}>
                                 <Award size={20} color="#fcd34d" />
                             </div>
                             <div>
-                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Điểm số</div>
-                                <div style={{ fontSize: '1.1rem', color: '#fcd34d', fontWeight: 800 }}>{score}</div>
+                                <div className="gp-micro" style={{ color: '#94a3b8', textTransform: 'uppercase' }}>Điểm số</div>
+                                <div className="gp-score" style={{ color: '#fcd34d', fontSize: '1.1rem' }}>{score}</div>
                             </div>
                         </div>
 
                         {/* Time Card with integrated Progress */}
-                        <div style={{ 
+                        <div className="gp-card" style={{ 
                             background: penaltyFlash ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.03)', 
                             border: `1px solid ${penaltyFlash ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.05)'}`, 
-                            padding: '15px', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '10px',
+                            padding: '15px', display: 'flex', flexDirection: 'column', gap: '10px',
                             transition: penaltyFlash ? 'none' : 'all 0.3s'
                         }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -148,10 +148,10 @@ export default function PikachuGame() {
                                     <Clock size={20} color={timeLimitEnabled ? (timeLeft < 20 ? "#ef4444" : "#38bdf8") : "#a855f7"} />
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>
+                                    <div className="gp-micro" style={{ color: '#94a3b8', textTransform: 'uppercase' }}>
                                         {timeLimitEnabled ? t('pikachu.time') : t('pikachu.relax')}
                                     </div>
-                                    <div style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>
+                                    <div className="gp-ui" style={{ color: '#94a3b8' }}>
                                         {timeLimitEnabled ? t('pikachu.limit') : ''}
                                     </div>
                                 </div>
@@ -168,28 +168,28 @@ export default function PikachuGame() {
                         </div>
                         
                         <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '10px', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <button onClick={() => initGame()} style={{ width: '100%', padding: '11px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.background='transparent'}>
+                            <button className="gp-btn" onClick={() => initGame()} style={{ padding: '11px', color: '#fff' }}>
                                 <RotateCcw size={16} /> Bắt đầu ván mới
                             </button>
-                            <button onClick={togglePause} style={{ width: '100%', padding: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 700, background: isPaused ? 'rgba(56,189,248,0.2)' : 'transparent', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: isPaused ? '#38bdf8' : '#fff', cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={(e) => !isPaused && (e.currentTarget.style.background='rgba(255,255,255,0.05)')} onMouseLeave={(e) => !isPaused && (e.currentTarget.style.background='transparent')}>
+                            <button className="gp-btn" onClick={togglePause} style={{ padding: '11px', background: isPaused ? 'rgba(56,189,248,0.2)' : 'transparent', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', color: isPaused ? '#38bdf8' : '#fff' }}>
                                 {isPaused ? <Play size={16} fill="#38bdf8" /> : <Pause size={16} fill="#fff" />}
                                 {t('pikachu.pause')}
                             </button>
                             <div style={{ display: 'flex', gap: '8px' }}>
-                                <button onClick={toggleMute} style={{ flex: 1, padding: '10px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', fontSize: '0.72rem', fontWeight: 700, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: muted ? '#ef4444' : '#4ade80', cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.background='transparent'}>
+                                <button className="gp-btn" onClick={toggleMute} style={{ flex: 1, padding: '10px 4px', flexDirection: 'column', gap: '4px', color: muted ? '#ef4444' : '#4ade80' }}>
                                     {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-                                    Nhạc Nền
+                                    <span className="gp-micro">Nhạc Nền</span>
                                 </button>
-                                <button onClick={toggleSfx} style={{ flex: 1, padding: '10px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', fontSize: '0.72rem', fontWeight: 700, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: sfxMuted ? '#ef4444' : '#4ade80', cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.background='transparent'}>
+                                <button className="gp-btn" onClick={toggleSfx} style={{ flex: 1, padding: '10px 4px', flexDirection: 'column', gap: '4px', color: sfxMuted ? '#ef4444' : '#4ade80' }}>
                                     {sfxMuted ? <BellOff size={16} /> : <Bell size={16} />}
-                                    Âm Hiệu
+                                    <span className="gp-micro">Âm Hiệu</span>
                                 </button>
                             </div>
                         </div>
                     </div>
 
                     <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 'auto', paddingTop: '14px' }}>
-                        <button onClick={() => navigate('/pikachu')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
+                        <button className="gp-btn" onClick={() => navigate('/pikachu')} style={{ padding: '12px' }}>
                             <ArrowLeft size={16} /> Thoát khỏi phòng
                         </button>
                     </div>
@@ -267,18 +267,18 @@ export default function PikachuGame() {
                                     <button onClick={togglePause} style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, #38bdf8, #0ea5e9)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 0 30px rgba(56,189,248,0.5)', transition: 'transform 0.2s' }}>
                                         <Play size={36} fill="#fff" />
                                     </button>
-                                    <div style={{ color: '#fff', fontSize: '1.1rem', fontWeight: 600 }}>{t('pikachu.continue')}</div>
+                                    <div className="gp-title" style={{ color: '#fff' }}>{t('pikachu.continue')}</div>
                                 </div>
                             </div>
                         )}
 
                         {status === 'won' && (
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', zIndex: 50, backdropFilter: 'blur(8px)' }}>
-                                <div style={{ background: 'rgba(20,20,30,0.95)', borderRadius: '24px', padding: '40px 50px', border: '1px solid rgba(74,222,128,0.3)', boxShadow: '0 0 40px rgba(74,222,128,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', animation: 'wonBounce 0.5s ease' }}>
+                                <div className="gp-card" style={{ background: 'rgba(20,20,30,0.95)', padding: '40px 50px', border: '1px solid rgba(74,222,128,0.3)', boxShadow: '0 0 40px rgba(74,222,128,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', animation: 'wonBounce 0.5s ease' }}>
                                     <div style={{ fontSize: '4rem' }}>🏆</div>
-                                    <h2 style={{ fontSize: '1.8rem', color: '#4ade80', margin: 0, fontWeight: 900 }}>{t('pikachu.won')}</h2>
-                                    <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1rem', margin: 0 }}>{t('pikachu.levelComplete')} {level}</p>
-                                    <button onClick={() => initGame(true)} style={{ marginTop: '8px', padding: '12px 32px', fontSize: '1rem', fontWeight: 700, background: '#4ade80', color: '#000', border: 'none', borderRadius: '12px', cursor: 'pointer', boxShadow: '0 0 20px rgba(74,222,128,0.4)' }}>
+                                    <div style={{ fontSize: '1.8rem', color: '#4ade80', margin: 0, fontWeight: 900 }}>{t('pikachu.won')}</div>
+                                    <div className="gp-body" style={{ margin: 0 }}>{t('pikachu.levelComplete')} {level}</div>
+                                    <button className="gp-btn" onClick={() => initGame(true)} style={{ marginTop: '8px', padding: '12px 32px', background: '#4ade80', color: '#000', border: 'none', boxShadow: '0 0 20px rgba(74,222,128,0.4)' }}>
                                         {t('pikachu.continue').toUpperCase()}
                                     </button>
                                 </div>
@@ -287,14 +287,14 @@ export default function PikachuGame() {
 
                         {status === 'finished' && (
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', zIndex: 50, backdropFilter: 'blur(12px)' }}>
-                                <div style={{ background: 'rgba(20,20,30,0.95)', borderRadius: '24px', padding: '40px 50px', border: '1px solid rgba(234,179,8,0.3)', boxShadow: '0 0 40px rgba(234,179,8,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                                <div className="gp-card" style={{ background: 'rgba(20,20,30,0.95)', padding: '40px 50px', border: '1px solid rgba(234,179,8,0.3)', boxShadow: '0 0 40px rgba(234,179,8,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                                     <div style={{ fontSize: '4rem' }}>👑</div>
-                                    <h2 style={{ fontSize: '1.8rem', color: '#eab308', margin: 0, fontWeight: 900 }}>{t('pikachu.finished')}</h2>
-                                    <div style={{ background: 'rgba(255,255,255,0.05)', padding: '16px 32px', borderRadius: '12px' }}>
-                                        <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem' }}>{t('pikachu.totalScore')}</div>
+                                    <div style={{ fontSize: '1.8rem', color: '#eab308', margin: 0, fontWeight: 900 }}>{t('pikachu.finished')}</div>
+                                    <div style={{ background: 'rgba(255,255,255,0.05)', padding: '16px 32px', borderRadius: '12px', textAlign: 'center' }}>
+                                        <div className="gp-micro">{t('pikachu.totalScore')}</div>
                                         <div style={{ color: '#eab308', fontSize: '2rem', fontWeight: 900 }}>{score}</div>
                                     </div>
-                                    <button onClick={() => navigate('/pikachu')} style={{ marginTop: '8px', padding: '12px 32px', fontSize: '1rem', fontWeight: 700, background: '#eab308', color: '#000', border: 'none', borderRadius: '12px', cursor: 'pointer' }}>
+                                    <button className="gp-btn" onClick={() => navigate('/pikachu')} style={{ marginTop: '8px', padding: '12px 32px', background: '#eab308', color: '#000', border: 'none' }}>
                                         {t('common.returnToMenu').toUpperCase()}
                                     </button>
                                 </div>
@@ -303,15 +303,15 @@ export default function PikachuGame() {
 
                         {status === 'gameover' && (
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.9)', zIndex: 50, backdropFilter: 'blur(8px)' }}>
-                                <div style={{ background: 'rgba(20,20,30,0.95)', borderRadius: '24px', padding: '40px 50px', border: '1px solid rgba(239,68,68,0.3)', boxShadow: '0 0 40px rgba(239,68,68,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                                <div className="gp-card" style={{ background: 'rgba(20,20,30,0.95)', padding: '40px 50px', border: '1px solid rgba(239,68,68,0.3)', boxShadow: '0 0 40px rgba(239,68,68,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                                     <div style={{ fontSize: '4rem' }}>💀</div>
-                                    <h2 style={{ fontSize: '1.8rem', color: '#ef4444', margin: 0, fontWeight: 900 }}>{t('pikachu.gameover')}</h2>
-                                    <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem' }}>{t('pikachu.score')}: <span style={{ color: '#fff', fontWeight: 700 }}>{score}</span></div>
+                                    <div style={{ fontSize: '1.8rem', color: '#ef4444', margin: 0, fontWeight: 900 }}>{t('pikachu.gameover')}</div>
+                                    <div className="gp-body">{t('pikachu.score')}: <span style={{ color: '#fff', fontWeight: 700 }}>{score}</span></div>
                                     <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                                        <button onClick={() => initGame()} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: '#ef4444', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <button className="gp-btn" onClick={() => initGame()} style={{ padding: '10px 24px', background: '#ef4444', color: '#fff', border: 'none' }}>
                                             <RotateCcw size={16} /> {t('pikachu.retry').toUpperCase()}
                                         </button>
-                                        <button onClick={() => navigate('/pikachu')} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', cursor: 'pointer' }}>
+                                        <button className="gp-btn" onClick={() => navigate('/pikachu')} style={{ padding: '10px 24px' }}>
                                             {t('common.exit').toUpperCase()}
                                         </button>
                                     </div>
@@ -329,33 +329,31 @@ export default function PikachuGame() {
                 }}>
                     {/* Hint + Shuffle centered */}
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '14px' }}>
-                        <button onClick={useHint} disabled={hints <= 0 || status !== 'playing'} style={{
-                            width: '100%', padding: '20px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-                            background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.3)', color: '#d8b4fe', borderRadius: '14px',
-                            cursor: hints <= 0 || status !== 'playing' ? 'not-allowed' : 'pointer', transition: 'all 0.2s', opacity: hints <= 0 || status !== 'playing' ? 0.5 : 1
+                        <button className="gp-btn" onClick={useHint} disabled={hints <= 0 || status !== 'playing'} style={{
+                            padding: '20px 10px', flexDirection: 'column', background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.3)', color: '#d8b4fe',
+                            opacity: hints <= 0 || status !== 'playing' ? 0.5 : 1
                         }}>
                             <HelpCircle size={28} />
-                            <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{t('pikachu.hintBtn')} ({hints})</div>
+                            <div className="gp-ui" style={{ fontWeight: 700 }}>{t('pikachu.hintBtn')} ({hints})</div>
                         </button>
 
-                        <button onClick={handleShuffle} disabled={shuffles <= 0 || status !== 'playing'} style={{
-                            width: '100%', padding: '20px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-                            background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.3)', color: '#bae6fd', borderRadius: '14px',
-                            cursor: shuffles <= 0 || status !== 'playing' ? 'not-allowed' : 'pointer', transition: 'all 0.2s', opacity: shuffles <= 0 || status !== 'playing' ? 0.5 : 1
+                        <button className="gp-btn" onClick={handleShuffle} disabled={shuffles <= 0 || status !== 'playing'} style={{
+                            padding: '20px 10px', flexDirection: 'column', background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.3)', color: '#bae6fd',
+                            opacity: shuffles <= 0 || status !== 'playing' ? 0.5 : 1
                         }}>
                             <Shuffle size={28} />
-                            <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{t('pikachu.shuffleBtn')} ({shuffles})</div>
+                            <div className="gp-ui" style={{ fontWeight: 700 }}>{t('pikachu.shuffleBtn')} ({shuffles})</div>
                         </button>
                     </div>
 
                     {/* Zoom Controls — bottom of right panel */}
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', paddingTop: '1rem' }}>
                         <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '14px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.04)', padding: '8px 10px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                            <div className="gp-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', padding: '8px 10px' }}>
                                 <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
                                     <ZoomOut size={16} />
                                 </button>
-                                <span style={{ color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 600, minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
+                                <span className="gp-ui" style={{ minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
                                     {zoomLevel}%
                                 </span>
                                 <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>

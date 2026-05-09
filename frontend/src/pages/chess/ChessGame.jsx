@@ -138,37 +138,34 @@ export default function ChessGame() {
                         }}>
                             <Crown size={28} color="#fff" />
                         </div>
-                        <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#f8fafc', letterSpacing: '1px' }}>{t('chess.title')}</h2>
-                        <div style={{ color: '#94a3b8', fontSize: '0.7rem', fontWeight: 700 }}>STANDARD</div>
+                        <div className="gp-title" style={{ color: '#f8fafc' }}>{t('chess.title')}</div>
+                        <div className="gp-label" style={{ color: '#94a3b8', marginTop: '4px' }}>STANDARD</div>
                     </div>
 
                     {/* Move History */}
-                    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+                    <div className="gp-card" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
                         <div
                             onClick={() => setShowHistory(!showHistory)}
                             style={{ padding: '10px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
                         >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <History size={12} color="#888" />
-                                <span style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, letterSpacing: '1px' }}>NƯỚC ({moveHistory.length})</span>
+                                <span className="gp-label" style={{ margin: 0, color: '#888' }}>NƯỚC ({moveHistory.length})</span>
                             </div>
                             {showHistory ? <ChevronDown size={12} color="#888" /> : <ChevronRight size={12} color="#888" />}
                         </div>
                         {showHistory && (
                             <div style={{ flex: 1, overflowY: 'auto', padding: '6px 8px', minHeight: '0', display: 'flex', flexDirection: 'column' }}>
                                 {moveHistory.length === 0 ? (
-                                    <p style={{ fontSize: '0.7rem', color: '#555', textAlign: 'center', margin: 'auto' }}>Chưa có nước</p>
+                                    <p className="gp-caption" style={{ textAlign: 'center', margin: 'auto' }}>Chưa có nước</p>
                                 ) : (
                                     Array.from({ length: Math.ceil(moveHistory.length / 2) }).map((_, i) => (
-                                        <div key={i} style={{
-                                            display: 'grid', gridTemplateColumns: 'min-content 1fr 1fr', gap: '8px',
-                                            padding: '4px 6px', borderRadius: '4px',
-                                            background: i === Math.floor((moveHistory.length - 1) / 2) ? 'rgba(255,255,255,0.04)' : 'transparent',
-                                            fontSize: '0.75rem', alignItems: 'center'
+                                        <div key={i} className={`gp-move-item ${i === Math.floor((moveHistory.length - 1) / 2) ? 'active' : ''}`} style={{
+                                            display: 'grid', gridTemplateColumns: 'min-content 1fr 1fr', gap: '8px', alignItems: 'center'
                                         }}>
-                                            <span style={{ color: '#555', fontSize: '0.65rem' }}>{i + 1}.</span>
+                                            <span className="gp-micro">{i + 1}.</span>
                                             <span style={{ color: '#f8fafc', fontFamily: 'monospace' }}>{moveHistory[i * 2]?.san}</span>
-                                            <span style={{ color: '#94a3b8', fontFamily: 'monospace' }}>{moveHistory[i * 2 + 1]?.san || ''}</span>
+                                            <span style={{ fontFamily: 'monospace' }}>{moveHistory[i * 2 + 1]?.san || ''}</span>
                                         </div>
                                     ))
                                 )}
@@ -178,11 +175,11 @@ export default function ChessGame() {
 
                     {/* Bottom: Zoom */}
                     <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.04)', padding: '8px 10px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <div className="gp-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', padding: '8px 10px' }}>
                             <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
                                 <ZoomOut size={16} />
                             </button>
-                            <span style={{ color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 600, minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
+                            <span className="gp-ui" style={{ minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
                                 {zoomLevel}%
                             </span>
                             <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
@@ -263,20 +260,18 @@ export default function ChessGame() {
                 {/* RIGHT PANEL - Status and Actions */}
                 <div style={{ flex: '0 0 220px', display: 'flex', flexDirection: 'column', padding: '1.5rem', borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)' }}>
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1rem' }}>
-                        <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '16px 12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '16px', fontWeight: 800, letterSpacing: '1px', textAlign: 'center' }}>THÔNG TIN TRẬN ĐẤU</div>
+                        <div className="gp-card" style={{ padding: '16px 12px' }}>
+                            <div className="gp-label" style={{ textAlign: 'center', marginBottom: '16px' }}>THÔNG TIN TRẬN ĐẤU</div>
 
                             {/* White Player */}
-                            <div style={{
-                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', borderRadius: '8px',
+                            <div className="gp-player-row" style={{
                                 background: turn === 'w' ? 'rgba(74,222,128,0.1)' : 'transparent',
-                                border: turn === 'w' ? '1px solid rgba(74,222,128,0.3)' : '1px solid transparent',
-                                transition: 'all 0.3s'
+                                border: turn === 'w' ? '1px solid rgba(74,222,128,0.3)' : '1px solid transparent'
                             }}>
                                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', color: '#000', fontWeight: 'bold' }}>♔</div>
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('chess.white')}</div>
-                                    <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.8rem' }}>{myColor === 'w' ? t('You') : t('Cpu')}</div>
+                                    <div className="role">{t('chess.white')}</div>
+                                    <div className="name" style={{ color: '#f8fafc' }}>{myColor === 'w' ? t('You') : t('Cpu')}</div>
                                 </div>
                                 {turn === 'w' && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80' }} />}
                             </div>
@@ -284,30 +279,28 @@ export default function ChessGame() {
                             <div style={{ width: '2px', height: '16px', background: 'rgba(255,255,255,0.1)', margin: '4px auto' }} />
 
                             {/* Black Player */}
-                            <div style={{
-                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', borderRadius: '8px',
+                            <div className="gp-player-row" style={{
                                 background: turn === 'b' ? 'rgba(74,222,128,0.1)' : 'transparent',
-                                border: turn === 'b' ? '1px solid rgba(74,222,128,0.3)' : '1px solid transparent',
-                                transition: 'all 0.3s'
+                                border: turn === 'b' ? '1px solid rgba(74,222,128,0.3)' : '1px solid transparent'
                             }}>
                                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#0f172a', border: '2px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', color: '#fff', fontWeight: 'bold' }}>♚</div>
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('chess.black')}</div>
-                                    <div style={{ fontWeight: 700, color: '#94a3b8', fontSize: '0.8rem' }}>{myColor === 'b' ? t('You') : t('Cpu')}</div>
+                                    <div className="role">{t('chess.black')}</div>
+                                    <div className="name" style={{ color: '#94a3b8' }}>{myColor === 'b' ? t('You') : t('Cpu')}</div>
                                 </div>
                                 {turn === 'b' && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80' }} />}
                             </div>
 
-                            <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.75rem', color: '#fbbf24', fontWeight: 600 }}>
+                            <div className="gp-caption" style={{ textAlign: 'center', marginTop: '16px', color: '#fbbf24', fontWeight: 600 }}>
                                 {turn === myColor ? 'Tới lượt của bạn' : 'CPU đang suy nghĩ...'}
                             </div>
                         </div>
 
                         {hintSuggestions && hintSuggestions.length > 0 && (
-                            <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '8px' }}>
-                                <div style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 700, marginBottom: '6px' }}>GỢI Ý NƯỚC ĐI:</div>
+                            <div className="gp-card" style={{ padding: '8px' }}>
+                                <div className="gp-label" style={{ color: '#fbbf24' }}>GỢI Ý NƯỚC ĐI:</div>
                                 {hintSuggestions.map((h, i) => (
-                                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', padding: '4px', background: 'rgba(255,255,255,0.05)', marginBottom: '4px', borderRadius: '4px' }}>
+                                    <div key={i} className="gp-caption" style={{ display: 'flex', justifyContent: 'space-between', padding: '4px', background: 'rgba(255,255,255,0.05)', marginBottom: '4px', borderRadius: '4px' }}>
                                         <span style={{ color: h.color }}>{h.from} → {h.to}</span>
                                         <span style={{ color: '#fff' }}>{h.evalDisplay}</span>
                                     </div>
@@ -318,28 +311,15 @@ export default function ChessGame() {
 
                     <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <button onClick={undoMove} disabled={isGameOver || moveHistory.length === 0} style={{
-                                width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                                color: moveHistory.length > 0 ? '#fbbf24' : '#555', border: '1px solid rgba(255,255,255,0.08)',
-                                cursor: moveHistory.length > 0 ? 'pointer' : 'default', fontSize: '0.8rem',
-                                transition: 'all 0.2s', fontWeight: 600
-                            }}>
+                            <button className="gp-btn" onClick={undoMove} disabled={isGameOver || moveHistory.length === 0} style={{ color: moveHistory.length > 0 ? '#fbbf24' : '' }}>
                                 <Undo2 size={16} /> {t('chess.redo')}
                             </button>
-                            <button onClick={getHint} disabled={isGameOver || turn !== myColor || isThinkingHint} style={{
-                                width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                                color: (turn === myColor && !isGameOver) ? '#4ade80' : '#555',
-                                border: '1px solid rgba(255,255,255,0.08)',
-                                cursor: (turn === myColor && !isGameOver) ? 'pointer' : 'default', fontSize: '0.8rem',
-                                transition: 'all 0.2s', fontWeight: 600
-                            }}>
+                            <button className="gp-btn" onClick={getHint} disabled={isGameOver || turn !== myColor || isThinkingHint} style={{ color: (turn === myColor && !isGameOver) ? '#4ade80' : '' }}>
                                 <Lightbulb size={16} /> {isThinkingHint ? t('chess.thinking') : t('chess.hint')}
                             </button>
                         </div>
                         <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)' }} />
-                        <button onClick={() => navigate('/chess')} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#94a3b8'; }}>
+                        <button className="gp-btn" onClick={() => navigate('/chess')} style={{ padding: '12px' }}>
                             <ArrowLeft size={16} /> {t('common.exit', 'Thoát')}
                         </button>
                     </div>
@@ -349,16 +329,16 @@ export default function ChessGame() {
             {/* GAME OVER MODAL */}
             {isGameOver && (
                 <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-                    <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: `1px solid ${winner === myColor ? 'rgba(74,222,128,0.4)' : winner === 'draw' ? 'rgba(156,163,175,0.4)' : 'rgba(239,68,68,0.4)'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                        <h2 style={{ fontSize: '2.5rem', color: winner === myColor ? '#4ade80' : winner === 'draw' ? '#9ca3af' : '#ef4444', margin: 0, fontWeight: 900 }}>
+                    <div className="gp-card" style={{ padding: '40px 50px', background: 'rgba(30,30,40,0.95)', border: `1px solid ${winner === myColor ? 'rgba(74,222,128,0.4)' : winner === 'draw' ? 'rgba(156,163,175,0.4)' : 'rgba(239,68,68,0.4)'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                        <div className="gp-title" style={{ fontSize: '2.5rem', color: winner === myColor ? '#4ade80' : winner === 'draw' ? '#9ca3af' : '#ef4444', margin: 0, fontWeight: 900 }}>
                             {winner === myColor ? 'CHIẾN THẮNG!' : winner === 'draw' ? 'HÒA CỜ' : 'THẤT BẠI'}
-                        </h2>
-                        <p style={{ color: '#aaa' }}>{winner === 'w' ? 'Bên Trắng thắng!' : winner === 'b' ? 'Bên Đen thắng!' : 'Ván cờ kết thúc với kết quả Hòa'}</p>
+                        </div>
+                        <div className="gp-body">{winner === 'w' ? 'Bên Trắng thắng!' : winner === 'b' ? 'Bên Đen thắng!' : 'Ván cờ kết thúc với kết quả Hòa'}</div>
                         <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-                            <button onClick={resetGame} style={{ padding: '12px 24px', fontSize: '1rem', fontWeight: 700, background: '#fbbf24', color: '#000', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>
-                                <RotateCcw size={16} style={{ display: 'inline', verticalAlign: 'text-bottom' }} /> {t('common.playAgain', 'CHƠI LẠI').toUpperCase()}
+                            <button className="gp-btn gp-btn-primary" onClick={resetGame} style={{ background: '#fbbf24', color: '#000', padding: '12px 24px', width: 'auto' }}>
+                                <RotateCcw size={16} /> {t('common.playAgain', 'CHƠI LẠI').toUpperCase()}
                             </button>
-                            <button onClick={() => navigate('/chess')} style={{ padding: '12px 24px', fontSize: '1rem', fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', cursor: 'pointer' }}>
+                            <button className="gp-btn" onClick={() => navigate('/chess')} style={{ padding: '12px 24px', width: 'auto' }}>
                                 {t('common.exit', 'THOÁT').toUpperCase()}
                             </button>
                         </div>

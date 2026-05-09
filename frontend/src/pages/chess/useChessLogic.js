@@ -30,6 +30,7 @@ export function useChessLogic(mode, roomId, difficulty, initialColor, callbacks)
     const [hintSuggestions, setHintSuggestions] = useState(null);
 
     const engineTask = useRef('idle');
+    const pendingHintHandler = useRef(null);
 
     // Sync game state to derived states natively
     useEffect(() => {
@@ -111,11 +112,18 @@ export function useChessLogic(mode, roomId, difficulty, initialColor, callbacks)
                     clearTimeout(readyTimeout);
                     setIsEngineReady(true);
                 } else if (line.startsWith('info depth')) {
-                    const scoreMatch = line.match(/score cp (-?\d+)/);
-                    const mateMatch  = line.match(/score mate (-?\d+)/);
-                    if (scoreMatch) setEvalScore(parseInt(scoreMatch[1]));
-                    else if (mateMatch) setEvalScore(parseInt(mateMatch[1]) > 0 ? 10000 : -10000);
+                    // Only update eval score when NOT doing a hint (hint uses its own handler)
+                    if (engineTask.current !== 'hint') {
+                        const scoreMatch = line.match(/score cp (-?\d+)/);
+                        const mateMatch  = line.match(/score mate (-?\d+)/);
+                        if (scoreMatch) setEvalScore(parseInt(scoreMatch[1]));
+                        else if (mateMatch) setEvalScore(parseInt(mateMatch[1]) > 0 ? 10000 : -10000);
+                    }
                 } else if (line.startsWith('bestmove')) {
+                    if (engineTask.current === 'hint') {
+                        // Hint handler will process this, skip here
+                        return;
+                    }
                     if (engineTask.current === 'move') {
                         engineTask.current = 'idle';
                         const moveMatch = line.match(/bestmove\s([a-h][1-8][a-h][1-8])(n|b|r|q)?/);
@@ -269,71 +277,86 @@ export function useChessLogic(mode, roomId, difficulty, initialColor, callbacks)
     }, [game, isEngineReady, difficulty, gameOver, makeRandomMove]);
 
     const getHint = useCallback(() => {
-        if (engine.current && isEngineReady && !gameOver && game.turn() === myColor) {
-            setIsThinkingHint(true);
-            setHintMove(null);
-            setHintSuggestions(null);
-            
-            engineTask.current = 'hint';
-            const suggestions = [];
-            let handler = null;
-            
-            handler = (e) => {
-                const line = e.data;
-                
-                if (line.startsWith('info depth')) {
-                    const scoreMatch = line.match(/score cp (-?\d+)/);
-                    const pvMatch = line.match(/pv\s+([a-h][1-8][a-h][1-8])/);
-                    
-                    if (scoreMatch && pvMatch && suggestions.length < 5) {
-                        const score = parseInt(scoreMatch[1]);
-                        const moveStr = pvMatch[1];
-                        const move = { from: moveStr.substring(0, 2), to: moveStr.substring(2, 4) };
-                        if (!suggestions.find(s => s.from === move.from && s.to === move.to)) {
-                            suggestions.push({ ...move, score });
-                        }
-                    }
-                }
-                
-                if (line.startsWith('bestmove')) {
-                    const moveMatch = line.match(/bestmove\s([a-h][1-8][a-h][1-8])(n|b|r|q)?/);
-                    if (moveMatch) {
-                        const moveStr = moveMatch[1];
-                        const bestMove = { from: moveStr.substring(0, 2), to: moveStr.substring(2, 4) };
-                        setHintMove(bestMove);
-                        
-                        if (suggestions.length > 0) {
-                            suggestions.sort((a, b) => b.score - a.score);
-                            const best = suggestions[0].score;
-                            const worst = suggestions[suggestions.length - 1].score;
-                            const range = best - worst || 1;
-                            
-                            const labeled = suggestions.slice(0, 3).map((s, i) => {
-                                const pct = Math.round(((s.score - worst) / range) * 100);
-                                let label, color;
-                                if (pct >= 80) { label = '✅ Tuyệt vời!'; color = '#4ade80'; }
-                                else if (pct >= 50) { label = '✓ Tốt'; color = '#60b5fa'; }
-                                else if (pct >= 20) { label = '⚠️ Bình thường'; color = '#fbbf24'; }
-                                else { label = '❌ Yếu'; color = '#ef4444'; }
-                                
-                                return { 
-                                    ...s, label, color, percentage: pct,
-                                    evalDisplay: (s.score > 0 ? '+' : '') + (s.score / 100).toFixed(1)
-                                };
-                            });
-                            setHintSuggestions(labeled);
-                        }
-                    }
-                    setIsThinkingHint(false);
-                    onClick?.();
-                    engine.current.removeEventListener('message', handler);
-                }
-            };
-            
-            engine.current.addEventListener('message', handler);
-            engine.current.postMessage(`position fen ${game.fen()}`);
-            engine.current.postMessage(`go depth 15`);
+        if (!engine.current || !isEngineReady || gameOver || game.turn() !== myColor) return;
+
+        // Remove any leftover hint handler
+        if (pendingHintHandler.current) {
+            engine.current.removeEventListener('message', pendingHintHandler.current);
+            pendingHintHandler.current = null;
         }
+
+        setIsThinkingHint(true);
+        setHintMove(null);
+        setHintSuggestions(null);
+
+        engineTask.current = 'hint';
+        const suggestions = [];
+
+        const handler = (e) => {
+            const line = e.data;
+
+            if (line.startsWith('info depth')) {
+                const scoreMatch = line.match(/score cp (-?\d+)/);
+                const pvMatch = line.match(/pv\s+([a-h][1-8][a-h][1-8])/);
+
+                if (scoreMatch && pvMatch && suggestions.length < 5) {
+                    const score = parseInt(scoreMatch[1]);
+                    const moveStr = pvMatch[1];
+                    const move = { from: moveStr.substring(0, 2), to: moveStr.substring(2, 4) };
+                    if (!suggestions.find(s => s.from === move.from && s.to === move.to)) {
+                        suggestions.push({ ...move, score });
+                    }
+                }
+            }
+
+            if (line.startsWith('bestmove')) {
+                engineTask.current = 'idle';
+                pendingHintHandler.current = null;
+                engine.current?.removeEventListener('message', handler);
+
+                const moveMatch = line.match(/bestmove\s([a-h][1-8][a-h][1-8])(n|b|r|q)?/);
+                if (moveMatch) {
+                    const moveStr = moveMatch[1];
+                    const bestMove = { from: moveStr.substring(0, 2), to: moveStr.substring(2, 4) };
+                    setHintMove(bestMove);
+
+                    // Auto-clear hint after 5 seconds
+                    setTimeout(() => {
+                        setHintMove(null);
+                        setHintSuggestions(null);
+                    }, 5000);
+
+                    if (suggestions.length > 0) {
+                        suggestions.sort((a, b) => b.score - a.score);
+                        const best = suggestions[0].score;
+                        const worst = suggestions[suggestions.length - 1].score;
+                        const range = best - worst || 1;
+
+                        const labeled = suggestions.slice(0, 3).map((s) => {
+                            const pct = Math.round(((s.score - worst) / range) * 100);
+                            let label, color;
+                            if (pct >= 80) { label = '✅ Tuyệt vời!'; color = '#4ade80'; }
+                            else if (pct >= 50) { label = '✓ Tốt'; color = '#60b5fa'; }
+                            else if (pct >= 20) { label = '⚠️ Bình thường'; color = '#fbbf24'; }
+                            else { label = '❌ Yếu'; color = '#ef4444'; }
+                            return {
+                                ...s, label, color, percentage: pct,
+                                evalDisplay: (s.score > 0 ? '+' : '') + (s.score / 100).toFixed(1)
+                            };
+                        });
+                        setHintSuggestions(labeled);
+                    }
+                }
+                setIsThinkingHint(false);
+                onClick?.();
+            }
+        };
+
+        pendingHintHandler.current = handler;
+        engine.current.addEventListener('message', handler);
+        engine.current.postMessage('stop'); // Stop any ongoing analysis first
+        engine.current.postMessage(`position fen ${game.fen()}`);
+        engine.current.postMessage(`go depth 15`);
     }, [game, isEngineReady, gameOver, myColor, onClick]);
 
     const undoMove = useCallback(() => {
@@ -342,12 +365,22 @@ export function useChessLogic(mode, roomId, difficulty, initialColor, callbacks)
         setGame((g) => {
             const newGame = new Chess();
             newGame.loadPgn(g.pgn());
-            if (newGame.history().length === 0) return g;
-            if (newGame.turn() === myColor) {
-                newGame.undo();
+            const histLen = newGame.history().length;
+            if (histLen === 0) return g;
+
+            // If it's player's turn: CPU already moved last, undo both player + CPU moves
+            // If it's CPU's turn: player just moved, undo just the player's move
+            if (newGame.turn() !== myColor) {
+                // It's CPU's turn → player just moved → undo player's move only
                 newGame.undo();
             } else {
-                newGame.undo();
+                // It's player's turn → CPU moved last → undo CPU + player moves
+                if (histLen >= 2) {
+                    newGame.undo(); // undo CPU
+                    newGame.undo(); // undo player
+                } else if (histLen === 1) {
+                    newGame.undo(); // undo the only move
+                }
             }
             return newGame;
         });

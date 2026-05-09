@@ -353,41 +353,47 @@ export default function TankGame() {
                 boxSizing: 'border-box'
             }}>
                 {/* LEFT: Info/Controls */}
-                <div style={{ flex: '0 0 240px', display: 'flex', flexDirection: 'column', gap: '1.2rem', overflowY: 'auto' }}>
+                <div className="tank-left-panel" style={{ flex: '0 0 240px', display: 'flex', flexDirection: 'column', gap: '1.2rem', overflowY: 'auto' }}>
                     <div style={{ textAlign: 'center' }}>
-                        <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 900, color: '#fff', letterSpacing: '2px' }}>{t('tank.title')}</h1>
-                        <div style={{ color: '#ffd700', fontSize: '0.8rem', fontWeight: 800 }}>{t('tank.subtitle')}</div>
+                        <h1 className="gp-title" style={{ margin: 0, fontWeight: 900, color: '#fff', letterSpacing: '2px' }}>{t('tank.title')}</h1>
+                        <div className="gp-label" style={{ color: '#ffd700', marginTop: '4px' }}>{t('tank.subtitle')}</div>
                     </div>
 
-                    <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: '16px', padding: '15px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#888', fontWeight: 800, marginBottom: '12px', letterSpacing: '1px' }}>🕹 {t('tank.controls')}</div>
-                        <div style={{ fontSize: '0.85rem', color: '#ddd', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span style={{ color: '#888' }}>{t('tank.move')}:</span> <span style={{background: 'rgba(255,255,255,0.1)', padding:'2px 6px', borderRadius:'4px'}}>WASD</span></div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span style={{ color: '#888' }}>{t('tank.fire')}:</span> <span style={{background: 'rgba(255,255,255,0.1)', padding:'2px 6px', borderRadius:'4px'}}>SPACE</span></div>
+                    <div className="gp-card" style={{ padding: '15px' }}>
+                        <div className="gp-label" style={{ marginBottom: '12px' }}>🕹 {t('tank.controls')}</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span className="gp-caption">{t('tank.move')}:</span>
+                                <span className="gp-kbd">WASD</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span className="gp-caption">{t('tank.fire')}:</span>
+                                <span className="gp-kbd">SPACE</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: '16px', padding: '15px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ fontSize: '0.75rem', color: '#888', fontWeight: 800, marginBottom: '12px', letterSpacing: '1px' }}>🗺 {t('tank.map')}</div>
+                    <div className="gp-card" style={{ padding: '15px' }}>
+                        <div className="gp-label" style={{ marginBottom: '12px' }}>🗺 {t('tank.map')}</div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                             {[['#b03a14', t('tank.brick')], ['#6080a0', t('tank.steel')], ['#1060a0', t('tank.water')], ['#1a6020', t('tank.bush')]].map(([c, l]) => (
                                 <div key={l} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.05)', padding: '6px 10px', borderRadius: '8px' }}>
                                     <div style={{ width: 12, height: 12, background: c, borderRadius: '2px', boxShadow: '0 2px 4px rgba(0,0,0,0.5)' }} />
-                                    <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>{l}</span>
+                                    <span className="gp-ui">{l}</span>
                                 </div>
                             ))}
                         </div>
                     </div>
 
                     <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 'auto', paddingTop: '14px' }}>
-                        <button onClick={() => navigate('/tank')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
+                        <button className="gp-btn" onClick={() => navigate('/tank')} style={{ padding: '12px' }}>
                             <ArrowLeft size={16} /> Thoát khỏi phòng
                         </button>
                     </div>
                 </div>
 
                 {/* CENTER: Canvas */}
-                <div style={{ flex: '1 1 auto', display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: 0, minHeight: 0 }}>
+                <div className="tank-board-area" style={{ flex: '1 1 auto', display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: 0, minHeight: 0 }}>
                     <div style={{
                         position: 'relative', border: '4px solid rgba(255,215,0,0.15)', borderRadius: '12px',
                         overflow: 'hidden', boxShadow: '0 0 50px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.5)', 
@@ -400,16 +406,16 @@ export default function TankGame() {
                         )}
                         {(gameState === 'finished' || gameState === 'win') && (
                             <div style={{ position: 'absolute', inset: 0, zIndex: 100, background: 'rgba(10,10,15,0.9)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <div style={{ background: 'rgba(20,20,30,0.95)', borderRadius: '24px', padding: '40px 50px', border: `1px solid ${gameState === 'win' ? 'rgba(255,215,0,0.4)' : 'rgba(239,68,68,0.4)'}`, boxShadow: gameState === 'win' ? '0 0 60px rgba(255,215,0,0.2)' : '0 0 60px rgba(239,68,68,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                                <div className="gp-card" style={{ padding: '40px 50px', border: `1px solid ${gameState === 'win' ? 'rgba(255,215,0,0.4)' : 'rgba(239,68,68,0.4)'}`, boxShadow: gameState === 'win' ? '0 0 60px rgba(255,215,0,0.2)' : '0 0 60px rgba(239,68,68,0.2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                                     <div style={{fontSize: '4rem'}}>{gameState === 'win' ? '🏆' : '💀'}</div>
-                                    <h1 style={{ color: gameState === 'win' ? '#ffd700' : '#ff4444', fontSize: '2.5rem', margin: 0, fontWeight: 900 }}>{gameState === 'win' ? t('tank.victory') : t('tank.defeat')}</h1>
+                                    <div className="gp-title" style={{ color: gameState === 'win' ? '#ffd700' : '#ff4444', fontSize: '2.5rem', margin: 0, fontWeight: 900 }}>{gameState === 'win' ? t('tank.victory') : t('tank.defeat')}</div>
                                     {gameState === 'win' && currentLevel >= maxLevel && (
-                                        <p style={{ color: '#fbbf24', fontSize: '1.1rem', marginTop: '4px', background: 'rgba(255,215,0,0.1)', padding: '5px 15px', borderRadius: '20px' }}>{t('tank.allLevels')} {maxLevel}!</p>
+                                        <p className="gp-body" style={{ color: '#fbbf24', marginTop: '4px', background: 'rgba(255,215,0,0.1)', padding: '5px 15px', borderRadius: '20px' }}>{t('tank.allLevels')} {maxLevel}!</p>
                                     )}
                                     {gameState === 'win' && currentLevel < maxLevel && (
-                                        <p style={{ color: '#60a5fa', fontSize: '1.1rem', marginTop: '4px', background: 'rgba(96,165,250,0.1)', padding: '5px 15px', borderRadius: '20px' }}>{t('tank.level')} {currentLevel}</p>
+                                        <p className="gp-body" style={{ color: '#60a5fa', marginTop: '4px', background: 'rgba(96,165,250,0.1)', padding: '5px 15px', borderRadius: '20px' }}>{t('tank.level')} {currentLevel}</p>
                                     )}
-                                    <button onClick={() => navigate('/tank')} style={{ marginTop: '10px', padding: '14px 40px', fontSize: '1.1rem', fontWeight: 800, background: gameState === 'win' ? '#ffd700' : '#ef4444', color: '#000', border: 'none', borderRadius: '12px', cursor: 'pointer', transition: 'transform 0.2s' }} onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}>
+                                    <button className="gp-btn gp-btn-primary" onClick={() => navigate('/tank')} style={{ marginTop: '10px', padding: '14px 40px', background: gameState === 'win' ? '#ffd700' : '#ef4444', color: '#000', width: 'auto' }}>
                                         {t('tank.return')}
                                     </button>
                                 </div>
@@ -420,25 +426,25 @@ export default function TankGame() {
                 </div>
 
                 {/* RIGHT: Status */}
-                <div style={{ flex: '0 0 240px', display: 'flex', flexDirection: 'column', gap: '1.2rem', overflowY: 'auto', justifyContent: 'center' }}>
-                    <div style={{ background: 'linear-gradient(180deg, rgba(74,222,128,0.1), transparent)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(74,222,128,0.2)' }}>
-                        <div style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '1px' }}>
+                <div className="tank-right-panel" style={{ flex: '0 0 240px', display: 'flex', flexDirection: 'column', gap: '1.2rem', overflowY: 'auto', justifyContent: 'center' }}>
+                    <div className="gp-card" style={{ background: 'linear-gradient(180deg, rgba(74,222,128,0.1), transparent)', border: '1px solid rgba(74,222,128,0.2)' }}>
+                        <div className="gp-label" style={{ color: '#4ade80', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <Target size={18} /> {t('tank.status')}
                         </div>
                         <div style={{ marginBottom: '16px', background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '12px' }}>
-<div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }}>{t('tank.currentLevel')}</div>
-                            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }}>{t('tank.lives')}</div>
-                            <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '5px', textTransform: 'uppercase' }}>{t('tank.enemies')}</div>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ff4444' }}>{enemiesLeft}</div>
+                            <div className="gp-micro" style={{ marginBottom: '5px' }}>{t('tank.currentLevel')}</div>
+                            <div className="gp-micro" style={{ marginBottom: '5px' }}>{t('tank.lives')}</div>
+                            <div className="gp-micro" style={{ marginBottom: '5px' }}>{t('tank.enemies')}</div>
+                            <div className="gp-score" style={{ color: '#ff4444' }}>{enemiesLeft}</div>
                         </div>
                     </div>
 
-                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '20px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-<div style={{ fontSize: '0.75rem', color: '#666', fontWeight: 800, letterSpacing: '1px' }}>📡 {t('tank.system')}</div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px' }}>
-                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 10px #4ade80', animation: 'pulse 2s infinite' }} />
-                                <span style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 600 }}>{t('tank.stable')}</span>
-                            </div>
+                    <div className="gp-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div className="gp-label">📡 {t('tank.system')}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px' }}>
+                            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 10px #4ade80', animation: 'pulse 2s infinite' }} />
+                            <span className="gp-ui" style={{ color: '#4ade80' }}>{t('tank.stable')}</span>
+                        </div>
                     </div>
                 </div>
             </div>

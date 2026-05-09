@@ -75,6 +75,13 @@ export function useCaroLogic(mode, roomId, difficulty, boardSize, initSymbol) {
         if (mode === 'multiplayer') {
             socket.on(EVENTS.CARO_GAME_STARTED, ({ playerSymbol: sym }) => {
                 if (sym) setRealPlayerSymbol(sym);
+                // Reset local state for new game
+                setBoard(Array(boardSize).fill(null).map(() => Array(boardSize).fill(0)));
+                setIsXNext(true);
+                setWinner(null);
+                setWinningLine(null);
+                setIsGameOver(false);
+                setIsProcessing(false);
             });
 
             socket.on(EVENTS.CARO_MOVED, ({ r, c, grid }) => {
@@ -88,6 +95,11 @@ export function useCaroLogic(mode, roomId, difficulty, boardSize, initSymbol) {
                     setIsGameOver(true);
                     const mySymbolNum = realPlayerSymbol === 'X' ? 1 : 2;
                     playSound(grid[r][c] === mySymbolNum ? 'win' : 'lose');
+                } else {
+                    if (filledCells >= boardSize * boardSize) {
+                        setWinner(-1);
+                        setIsGameOver(true);
+                    }
                 }
             });
 
@@ -134,12 +146,18 @@ export function useCaroLogic(mode, roomId, difficulty, boardSize, initSymbol) {
             setIsGameOver(true);
             setIsProcessing(false);
             playSound(currentTurnNum === humanNum ? 'win' : 'lose');
+            if (mode === 'multiplayer') {
+                socket.emit(EVENTS.CARO_MOVE, { r, c, roomId, grid: newBoard });
+            }
         } else {
             const filled = getFilledCellsCount(newBoard, boardSize);
             if (filled >= boardSize * boardSize) {
                 setWinner(-1);
                 setIsGameOver(true);
                 setIsProcessing(false);
+                if (mode === 'multiplayer') {
+                    socket.emit(EVENTS.CARO_MOVE, { r, c, roomId, grid: newBoard });
+                }
                 return;
             }
             setIsXNext(!isXNext);
@@ -153,14 +171,18 @@ export function useCaroLogic(mode, roomId, difficulty, boardSize, initSymbol) {
     }, [board, isGameOver, isProcessing, mode, humanNum, isXNext, roomId, boardSize, playSound]);
 
     const resetGame = useCallback(() => {
-        setBoard(Array(boardSize).fill(null).map(() => Array(boardSize).fill(0)));
-        setIsXNext(true);
-        setWinner(null);
-        setWinningLine(null);
-        setIsGameOver(false);
-        setIsProcessing(false);
-        if (mode === 'solo') setSoloGameCount(prev => prev + 1);
-    }, [boardSize, mode]);
+        if (mode === 'multiplayer') {
+            socket.emit(EVENTS.START_CARO_GAME, { roomId });
+        } else {
+            setBoard(Array(boardSize).fill(null).map(() => Array(boardSize).fill(0)));
+            setIsXNext(true);
+            setWinner(null);
+            setWinningLine(null);
+            setIsGameOver(false);
+            setIsProcessing(false);
+            setSoloGameCount(prev => prev + 1);
+        }
+    }, [boardSize, mode, roomId]);
 
     const sendMessage = (inputMessage) => {
         if (!inputMessage.trim()) return;

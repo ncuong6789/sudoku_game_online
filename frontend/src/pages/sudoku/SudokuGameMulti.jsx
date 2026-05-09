@@ -309,19 +309,19 @@ export default function MultiplayerGame() {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
                     <div style={{ flex: 1, textAlign: 'left', paddingRight: '10px' }}>
-                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '5px' }}>You</div>
+                        <div className="gp-micro" style={{ marginBottom: '5px' }}>You</div>
                         <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
                             <div style={{ width: `${myProgress}%`, height: '100%', background: 'var(--accent-color)', transition: 'width 0.3s' }} />
                         </div>
-                        <div style={{ fontSize: '0.8rem', marginTop: '2px' }}>{myProgress}%</div>
+                        <div className="gp-caption" style={{ marginTop: '4px' }}>{myProgress}%</div>
                     </div>
 
                     <div style={{ flex: 1, textAlign: 'right', paddingLeft: '10px' }}>
-                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '5px' }}>Opponent</div>
+                        <div className="gp-micro" style={{ marginBottom: '5px' }}>Opponent</div>
                         <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
                             <div style={{ width: `${opponentProgress}%`, height: '100%', background: '#a371f7', transition: 'width 0.3s' }} />
                         </div>
-                        <div style={{ fontSize: '0.8rem', marginTop: '2px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                        <div className="gp-caption" style={{ marginTop: '4px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                             <span>{opponentProgress}%</span>
                             <span style={{ color: opponentErrors >= 2 ? 'var(--error-color)' : 'inherit' }}>Errors: {opponentErrors}/3</span>
                             <span>Hints: {opponentHints}/3</span>
@@ -329,11 +329,11 @@ export default function MultiplayerGame() {
                     </div>
                 </div>
 
-                <div className="header-info" style={{ marginBottom: '10px', width: '100%', maxWidth: 'none', justifyContent: 'space-around' }}>
-                    <span>Room ID: {roomId}</span>
-                    <span>Difficulty: {difficulty}</span>
-                    <span>My Mistakes: {errorCount}/3</span>
-                    <span>My Hints: {hintsUsed}/3</span>
+                <div className="gp-card" style={{ marginBottom: '10px', width: '100%', display: 'flex', justifyContent: 'space-around', padding: '10px' }}>
+                    <span className="gp-ui">Room ID: {roomId}</span>
+                    <span className="gp-ui">Difficulty: {difficulty}</span>
+                    <span className="gp-ui" style={{ color: errorCount >= 2 ? 'var(--error-color)' : '' }}>My Mistakes: {errorCount}/3</span>
+                    <span className="gp-ui">My Hints: {hintsUsed}/3</span>
                 </div>
 
                 <div className="main-play-area">
@@ -355,17 +355,17 @@ export default function MultiplayerGame() {
                                 completedNumbers={completedNumbers}
                             />
 
-                            <button onClick={handleQuit} style={{ marginTop: '20px', width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
-                                {isGameOver ? '← Thoát khỏi phòng' : '← Thoát khỏi phòng'}
+                            <button className="gp-btn" onClick={handleQuit} style={{ marginTop: '20px' }}>
+                                ← Thoát khỏi phòng
                             </button>
                         </div>
 
                         {/* Chat Box */}
-                        <div className="glass-panel chat-box" style={{ padding: '15px', display: 'flex', flexDirection: 'column' }}>
-                            <div className="chat-messages" style={{ flex: 1, minHeight: '150px', maxHeight: '300px', overflowY: 'auto', marginBottom: '10px', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                                {chatMessages.length === 0 && <span style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No messages yet...</span>}
+                        <div className="gp-card" style={{ padding: '15px', display: 'flex', flexDirection: 'column' }}>
+                            <div className="chat-messages" style={{ flex: 1, minHeight: '150px', maxHeight: '300px', overflowY: 'auto', marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                                {chatMessages.length === 0 && <span className="gp-caption" style={{ fontStyle: 'italic', textAlign: 'center' }}>No messages yet...</span>}
                                 {chatMessages.map((m, i) => (
-                                    <div key={i} style={{ alignSelf: m.sender === 'me' ? 'flex-end' : 'flex-start', background: m.sender === 'me' ? 'var(--accent-color)' : '#334155', padding: '4px 10px', borderRadius: '12px', maxWidth: '80%' }}>
+                                    <div key={i} className="gp-body" style={{ alignSelf: m.sender === 'me' ? 'flex-end' : 'flex-start', background: m.sender === 'me' ? 'var(--accent-color)' : '#334155', padding: '6px 12px', borderRadius: '12px', maxWidth: '80%' }}>
                                         {m.text}
                                     </div>
                                 ))}
@@ -376,33 +376,33 @@ export default function MultiplayerGame() {
                                     value={msgInput} 
                                     onChange={e => setMsgInput(e.target.value)}
                                     placeholder="Chat..."
-                                    style={{ flex: 1, padding: '8px', borderRadius: '6px', background: '#2d3748', border: '1px solid #4a5568', color: '#fff', fontSize: '0.85rem' }}
+                                    style={{ flex: 1, padding: '8px', borderRadius: '6px', background: '#2d3748', border: '1px solid #4a5568', color: '#fff', fontSize: 'var(--fs-body)' }}
                                 />
-                                <button type="submit" className="btn-primary" style={{ padding: '8px 12px', width: 'auto', fontSize: '0.85rem' }}>Send</button>
+                                <button type="submit" className="gp-btn gp-btn-primary" style={{ width: 'auto' }}>Send</button>
                             </form>
                         </div>
                     </div>
 
                     {isGameOver && (
-                        <div style={{
+                        <div className="gp-card" style={{
                             position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
                             background: 'rgba(13, 17, 23, 0.9)', backdropFilter: 'blur(4px)',
                             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                            borderRadius: '16px', zIndex: 10, gap: '12px'
+                            zIndex: 10, gap: '12px'
                         }}>
                             <div style={{ fontSize: '4rem' }}>{won ? '🏆' : '💀'}</div>
-                            <h2 style={{ color: won ? 'var(--success-color)' : 'var(--error-color)', fontSize: '2.5rem', margin: 0 }}>
+                            <div className="gp-title" style={{ color: won ? 'var(--success-color)' : 'var(--error-color)', fontSize: '2.5rem', fontWeight: 900 }}>
                                 {won ? 'Bạn Thắng!' : 'Bạn Thua!'}
-                            </h2>
-                            <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', margin: 0 }}>
+                            </div>
+                            <div className="gp-body">
                                 {opponentDisconnected && won ? 'Đối thủ đã thoát khỏi phòng.' : (won ? 'Xuất sắc! Bạn giải nhanh hơn đối thủ.' : 'Chúc may mắn lần sau!')}
-                            </p>
+                            </div>
                             <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                                <button className="btn-primary" style={{ padding: '12px 24px', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                <button className="gp-btn gp-btn-primary" style={{ width: 'auto' }}
                                     onClick={() => navigate('/sudoku/multiplayer')}>
                                     🔄 Thử lại
                                 </button>
-                                <button className="btn-secondary" style={{ padding: '12px 24px', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}
+                                <button className="gp-btn" style={{ width: 'auto' }}
                                     onClick={() => navigate('/')}>
                                     🏠 Trang chủ
                                 </button>

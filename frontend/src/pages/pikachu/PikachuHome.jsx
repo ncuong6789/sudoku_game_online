@@ -15,6 +15,8 @@ export default function PikachuHome() {
                 const s = JSON.parse(savedStr);
                 if (s.status === 'playing') {
                     setHasSave(true);
+                    setGameMode(s.gameMode || 'classic');
+                    setTimeLimitEnabled(s.timeLimitEnabled !== undefined ? s.timeLimitEnabled : true);
                 }
             }
         } catch(e) {}
@@ -119,7 +121,7 @@ export default function PikachuHome() {
 
                 {/* Actions */}
                 {hasSave && (
-                    <button className="btn-primary" onClick={() => navigate('/pikachu/game', { state: { resume: true } })} style={{
+                    <button className="btn-primary" onClick={() => navigate('/pikachu/game', { state: { resume: true, gameMode, timeLimitEnabled } })} style={{
                         width: '100%', padding: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                         gap: '10px', fontSize: '1.1rem', fontWeight: 800,
                         background: '#10b981', color: '#fff',

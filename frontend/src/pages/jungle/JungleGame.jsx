@@ -386,13 +386,12 @@ export default function JungleGame() {
                     padding: '1.5rem',
                     boxSizing: 'border-box'
                 }}>
-                    <h3 style={{ margin: '0 0 12px 0', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
+                    <h3 className="gp-title" style={{ margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
                         <span>📊</span> {t('jungle.rankSkill')}
                     </h3>
 
-                    <div style={{
-                        flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)',
-                        borderRadius: '10px', padding: '10px', border: '1px solid rgba(255,255,255,0.05)',
+                    <div className="gp-card" style={{
+                        flex: 1, overflowY: 'auto', background: 'rgba(0,0,0,0.2)', padding: '10px',
                         display: 'flex', flexDirection: 'column', gap: '6px'
                     }}>
                         {[8,7,6,5,4,3,2,1].map(v => (
@@ -410,17 +409,17 @@ export default function JungleGame() {
                                 </div>
                                 <div style={{ flex: 1 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span style={{ color: '#fff', fontWeight: 600, fontSize: '0.85rem' }}>{PIECE_NAMES[v]}</span>
-                                        {v === 8 && <span style={{ fontSize: '0.65rem', color: '#ef4444', background: 'rgba(239,68,68,0.2)', padding: '2px 6px', borderRadius: '4px' }}>Yếu với 🐭</span>}
-                                        {v === 1 && <span style={{ fontSize: '0.65rem', color: '#4ade80', background: 'rgba(74,222,128,0.2)', padding: '2px 6px', borderRadius: '4px' }}>Ăn được 🐘</span>}
+                                        <span className="gp-ui" style={{ color: '#fff', fontWeight: 600 }}>{PIECE_NAMES[v]}</span>
+                                        {v === 8 && <span className="gp-micro" style={{ color: '#ef4444', background: 'rgba(239,68,68,0.2)', padding: '2px 6px', borderRadius: '4px' }}>Yếu với 🐭</span>}
+                                        {v === 1 && <span className="gp-micro" style={{ color: '#4ade80', background: 'rgba(74,222,128,0.2)', padding: '2px 6px', borderRadius: '4px' }}>Ăn được 🐘</span>}
                                     </div>
                                 </div>
                             </div>
                         ))}
                         
                         <div style={{ marginTop: '8px', padding: '10px', background: 'rgba(251,191,36,0.1)', borderRadius: '8px', border: '1px solid rgba(251,191,36,0.2)' }}>
-                            <div style={{ fontSize: '0.75rem', color: '#fbbf24', fontWeight: 600, marginBottom: '6px' }}>🎯 {t('jungle.rules')}</div>
-                            <ul style={{ margin: 0, paddingLeft: '14px', fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)', lineHeight: '1.5' }}>
+                            <div className="gp-label" style={{ color: '#fbbf24', marginBottom: '6px' }}>🎯 {t('jungle.rules')}</div>
+                            <ul className="gp-caption" style={{ margin: 0, paddingLeft: '14px', color: 'rgba(255,255,255,0.7)', lineHeight: '1.5' }}>
                                 <li>{t('jungle.bigEatSmall')} (8 vs 1)</li>
                                 <li>Lion/Tiger <span style={{color:'#4ade80'}}>{t('jungle.jumpRiver')}</span></li>
                                 <li>Rat <span style={{color:'#4ade80'}}>{t('jungle.swim')}</span> & eat Elephant</li>
@@ -429,8 +428,8 @@ export default function JungleGame() {
                         </div>
                         
                         <div style={{ padding: '8px', background: 'rgba(96,165,250,0.1)', borderRadius: '6px', border: '1px solid rgba(96,165,250,0.2)' }}>
-                            <div style={{ fontSize: '0.7rem', color: '#60b5ff', fontWeight: 600 }}>{t('jungle.terrain')}</div>
-                            <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>
+                            <div className="gp-label" style={{ color: '#60b5ff' }}>{t('jungle.terrain')}</div>
+                            <div className="gp-micro" style={{ color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>
                                 🌊 River | ⬜ Trap | 🏠 Den
                             </div>
                         </div>
@@ -440,16 +439,15 @@ export default function JungleGame() {
                 {/* CENTER: BOARD */}
                 <div className="jungle-board-area" style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: '320px', padding: '1rem', overflow: 'auto', position: 'relative' }}>
 
-
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px', width: '100%', justifyContent: 'center', marginBottom: '10px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: turn === myId ? 1 : 0.5 }}>
+                        <div className="gp-player-row" style={{ padding: '4px 10px', opacity: turn === myId ? 1 : 0.5, border: turn === myId ? '1px solid rgba(74,222,128,0.3)' : '1px solid transparent', background: turn === myId ? 'rgba(74,222,128,0.1)' : 'transparent' }}>
                             <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#4ade80' }} />
-                            <span style={{ fontWeight: 700, fontSize: '0.85rem', color: turn === myId ? '#4ade80' : '#fff' }}>{t('jungle.you')}</span>
+                            <span className="gp-ui" style={{ color: turn === myId ? '#4ade80' : '#fff' }}>{t('jungle.you')}</span>
                         </div>
-                        <span style={{ color: '#fbbf24', fontSize: '0.75rem', fontWeight: 600 }}>{difficulty.toUpperCase()}</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: turn !== myId ? 1 : 0.5 }}>
+                        <span className="gp-label" style={{ color: '#fbbf24' }}>{difficulty.toUpperCase()}</span>
+                        <div className="gp-player-row" style={{ padding: '4px 10px', opacity: turn !== myId ? 1 : 0.5, border: turn !== myId ? '1px solid rgba(96,165,250,0.3)' : '1px solid transparent', background: turn !== myId ? 'rgba(96,165,250,0.1)' : 'transparent' }}>
                             <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#60b5fa' }} />
-                            <span style={{ fontWeight: 700, fontSize: '0.85rem', color: turn !== myId ? '#60b5fa' : '#fff' }}>{t('jungle.opponent')}</span>
+                            <span className="gp-ui" style={{ color: turn !== myId ? '#60b5fa' : '#fff' }}>{t('jungle.opponent')}</span>
                         </div>
                     </div>
 
@@ -469,7 +467,7 @@ export default function JungleGame() {
                         {isLoading && (
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 10, background: 'rgba(15, 23, 42, 0.9)' }}>
                                 <RefreshCw className="animate-spin" size={48} color="#4ade80" style={{ marginBottom: '15px' }} />
-                                <span style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 600 }}>{t('jungle.connecting')}</span>
+                                <span className="gp-ui" style={{ color: '#94a3b8' }}>{t('jungle.connecting')}</span>
                             </div>
                         )}
                         
@@ -491,15 +489,15 @@ export default function JungleGame() {
 
                 {/* RIGHT: CONTROLS */}
                 <div className="jungle-right-panel" style={{ flex: '0 0 240px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.8rem', overflowY: 'auto', padding: '1.5rem', borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.1rem', color: '#fff' }}>♟ CỜ THÚ</div>
+                    <div className="gp-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1.2rem' }}>
+                        <div className="gp-title" style={{ textAlign: 'center', color: '#fff' }}>♟ CỜ THÚ</div>
                         
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <button className="btn-primary" onClick={handleReset} style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+                            <button className="gp-btn gp-btn-primary" onClick={handleReset} style={{ padding: '10px' }}>
                                 <RotateCcw size={16} /> {t('jungle.restart')}
                             </button>
                             
-                            <button className="btn-secondary" onClick={getHint} disabled={turn !== myId || isLoading} style={{ borderColor: '#fbbf24', color: '#fbbf24', padding: '10px', fontSize: '0.85rem' }}>
+                            <button className="gp-btn" onClick={getHint} disabled={turn !== myId || isLoading} style={{ border: '1px solid #fbbf24', color: '#fbbf24', padding: '10px' }}>
                                 <HelpCircle size={16} /> {t('jungle.hint')}
                             </button>
 
@@ -511,7 +509,7 @@ export default function JungleGame() {
                                     border: '1px solid rgba(251,191,36,0.3)',
                                     animation: 'fadeIn 0.3s ease'
                                 }}>
-                                    <div style={{ fontSize: '0.7rem', color: '#fbbf24', fontWeight: 600, marginBottom: '6px' }}>💡 {t('jungle.hintTitle')}</div>
+                                    <div className="gp-label" style={{ color: '#fbbf24', marginBottom: '6px' }}>💡 {t('jungle.hintTitle')}</div>
                                     {hintMoves.slice(0, 3).map((move, idx) => {
                                         const pct = move.percentage || 0;
                                         let color;
@@ -525,36 +523,36 @@ export default function JungleGame() {
                                             display: 'flex', alignItems: 'center', gap: '6px',
                                             padding: '6px', marginBottom: '4px',
                                             background: idx === 0 ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.05)',
-                                            borderRadius: '6px', fontSize: '0.75rem'
+                                            borderRadius: '6px'
                                         }}>
                                             <span style={{ 
                                                 width: '16px', height: '16px', borderRadius: '50%', 
                                                 background: color, display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                 fontSize: '0.6rem', fontWeight: 700, color: '#000'
                                             }}>{idx+1}</span>
-                                            <span style={{ color: '#fff' }}>
+                                            <span className="gp-caption" style={{ color: '#fff' }}>
                                                 {ANIMAL_SYMBOLS[pieces.find(p => p.x === move.from.x && p.y === move.from.y)?.type]?.char || '?'}
                                                 {String.fromCharCode(65 + move.from.x)}{9 - move.from.y}→{String.fromCharCode(65 + move.to.x)}{9 - move.to.y}
                                             </span>
                                         </div>
                                     )})}
-                                    <button onClick={() => setHintMoves(null)} style={{ width: '100%', padding: '4px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem' }}>✕ Ẩn</button>
+                                    <button className="gp-btn" onClick={() => setHintMoves(null)} style={{ width: '100%', padding: '4px', color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem' }}>✕ Ẩn</button>
                                 </div>
                             )}
                             
                             <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '4px', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.04)', padding: '8px 10px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                <div className="gp-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', padding: '8px 10px' }}>
                                     <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
                                         <ZoomOut size={16} />
                                     </button>
-                                    <span style={{ color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 600, minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
+                                    <span className="gp-ui" style={{ minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
                                         {zoomLevel}%
                                     </span>
                                     <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
                                         <ZoomIn size={16} />
                                     </button>
                                 </div>
-                                <button onClick={() => navigate('/jungle')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
+                                <button className="gp-btn" onClick={() => navigate('/jungle')} style={{ padding: '12px' }}>
                                     <ArrowLeft size={16} /> Thoát khỏi phòng
                                 </button>
                             </div>
@@ -565,16 +563,16 @@ export default function JungleGame() {
                 {/* GAME OVER OVERLAY */}
                 {gameOver !== null && (
                     <div style={{ position: 'fixed', inset: 0, background: 'rgba(13, 17, 23, 0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}>
-                        <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: `1px solid ${gameOver === myId ? 'rgba(251,191,36,0.4)' : 'rgba(255,255,255,0.1)'}`, boxShadow: gameOver === myId ? '0 0 40px rgba(251,191,36,0.3)' : 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                        <div className="gp-card" style={{ padding: '40px 50px', border: `1px solid ${gameOver === myId ? 'rgba(251,191,36,0.4)' : 'rgba(255,255,255,0.1)'}`, boxShadow: gameOver === myId ? '0 0 40px rgba(251,191,36,0.3)' : 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                             <Trophy size={60} color={gameOver === myId ? '#fbbf24' : '#94a3b8'} />
-                            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: gameOver === myId ? '#fbbf24' : '#fff', margin: 0 }}>
+                            <div className="gp-title" style={{ fontSize: '1.8rem', fontWeight: 900, color: gameOver === myId ? '#fbbf24' : '#fff', margin: 0 }}>
                                 {gameOver === myId ? t('jungle.victory') : t('jungle.defeat')}
-                            </h2>
+                            </div>
                             <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                                <button onClick={handleReset} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: gameOver === myId ? '#fbbf24' : '#ef4444', color: '#000', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>
+                                <button className="gp-btn gp-btn-primary" onClick={handleReset} style={{ background: gameOver === myId ? '#fbbf24' : '#ef4444', color: '#000', padding: '10px 24px', width: 'auto' }}>
                                     CHƠI LẠI
                                 </button>
-                                <button onClick={() => navigate('/jungle')} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', cursor: 'pointer' }}>
+                                <button className="gp-btn" onClick={() => navigate('/jungle')} style={{ padding: '10px 24px', width: 'auto' }}>
                                     THOÁT
                                 </button>
                             </div>

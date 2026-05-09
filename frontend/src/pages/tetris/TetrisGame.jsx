@@ -288,38 +288,39 @@ export default function TetrisGame() {
                     gap: '1rem', overflowY: 'auto', padding: '1.5rem',
                     borderRight: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)'
                 }}>
-                    <div className="nav-item active" style={{ padding: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', fontSize: '1.2rem', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px' }}>
-                        <span style={{fontSize: '1.4rem'}}>🧱</span> {t('tetris.title')}
+                    <div className="gp-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
+                        <span style={{fontSize: '1.4rem'}}>🧱</span>
+                        <span className="gp-title">{t('tetris.title')}</span>
                     </div>
 
-                    <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                    <div className="gp-caption" style={{ textAlign: 'center' }}>
                         {mode === 'solo' ? difficulty : `${t('tetris.room')}: ${roomId}`}
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                        <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 10px', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '4px', letterSpacing: '1px' }}>{t('tetris.points')}</div>
-                            <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--primary-color)' }}>{score}</div>
+                        <div className="gp-card" style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 10px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            <div className="gp-label" style={{ marginBottom: '4px' }}>{t('tetris.points')}</div>
+                            <div className="gp-score" style={{ color: 'var(--primary-color)' }}>{score}</div>
                         </div>
-                        <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 10px', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '4px', letterSpacing: '1px' }}>{t('tetris.level')}</div>
-                            <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#a371f7' }}>{level}</div>
+                        <div className="gp-card" style={{ background: 'rgba(0,0,0,0.3)', padding: '12px 10px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            <div className="gp-label" style={{ marginBottom: '4px' }}>{t('tetris.level')}</div>
+                            <div className="gp-score" style={{ color: '#a371f7' }}>{level}</div>
                         </div>
                     </div>
                     
-                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t('tetris.cleared')}</span>
-                        <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#4ade80' }}>{rows}</span>
+                    <div className="gp-card" style={{ background: 'rgba(0,0,0,0.3)', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span className="gp-ui" style={{ color: 'var(--text-secondary)' }}>{t('tetris.cleared')}</span>
+                        <span className="gp-score" style={{ color: '#4ade80' }}>{rows}</span>
                     </div>
 
                     {/* Controls in Left Panel */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div className="gp-card" style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '1rem', background: 'rgba(255,255,255,0.03)' }}>
                         {mode === 'solo' && (
                             <>
-                                <button className="btn-primary" onClick={() => { startGame(); }} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.95rem' }}>
+                                <button className="gp-btn gp-btn-primary" onClick={() => { startGame(); }} style={{ padding: '12px' }}>
                                     <RefreshCw size={18} /> Chơi mới
                                 </button>
-                                <button onClick={togglePause} disabled={!isStarted || gameOver} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%', background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: isPaused ? '#38bdf8' : '#fff', cursor: !isStarted || gameOver ? 'default' : 'pointer', opacity: !isStarted || gameOver ? 0.5 : 1, fontSize: '0.95rem', fontWeight: 600 }}>
+                                <button className="gp-btn" onClick={togglePause} disabled={!isStarted || gameOver} style={{ padding: '12px', background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', color: isPaused ? '#38bdf8' : '#fff' }}>
                                     {isPaused ? '▶ Tiếp tục (Enter)' : '⏸ Tạm dừng (Enter)'}
                                 </button>
                             </>
@@ -327,7 +328,7 @@ export default function TetrisGame() {
                     </div>
 
                     <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 'auto', paddingTop: '14px' }}>
-                        <button onClick={() => navigate(mode === 'multiplayer' ? '/tetris/multiplayer' : '/tetris')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
+                        <button className="gp-btn" onClick={() => navigate(mode === 'multiplayer' ? '/tetris/multiplayer' : '/tetris')} style={{ padding: '12px', background: 'transparent' }}>
                             <ArrowLeft size={16} /> Thoát khỏi phòng
                         </button>
                     </div>
@@ -341,13 +342,13 @@ export default function TetrisGame() {
                 }}>
                     <div style={{ display: 'flex', gap: '20px', alignItems: 'center', transform: `scale(${zoomLevel/100})`, transition: 'transform 0.2s', transformOrigin: 'center center' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                            <h3 style={{ margin: 0, color: '#4ade80', fontSize: '1.1rem' }}>{t('tetris.you')} ({score})</h3>
+                            <div className="gp-title" style={{ margin: 0, color: '#4ade80' }}>{t('tetris.you')} ({score})</div>
                             <Stage stage={stage} />
                         </div>
                         
                         {mode === 'multiplayer' && (
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                                <h3 style={{ margin: 0, color: '#f87171', fontSize: '1.1rem' }}>{t('tetris.opponent')} ({opponentScore})</h3>
+                                <div className="gp-title" style={{ margin: 0, color: '#f87171' }}>{t('tetris.opponent')} ({opponentScore})</div>
                                 <Stage stage={opponentStage} isOpponent={true} />
                             </div>
                         )}
@@ -362,8 +363,8 @@ export default function TetrisGame() {
                     <div style={{ flex: 1 }} />
 
                     {/* Next Pieces — centered vertically */}
-                    <div style={{ display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.05)', padding: '1.2rem 0.8rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '1.2rem', letterSpacing: '2px', fontWeight: 700 }}>KHỐI TIẾP THEO</div>
+                    <div className="gp-card" style={{ display: 'flex', flexDirection: 'column', padding: '1.2rem 0.8rem' }}>
+                        <div className="gp-label" style={{ textAlign: 'center', marginBottom: '1.2rem' }}>KHỐI TIẾP THEO</div>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.2rem' }}>
                             {nextPieces.map((type, idx) => (
                                 <NextPiece key={idx} type={type} />
@@ -378,7 +379,7 @@ export default function TetrisGame() {
                                 <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
                                     <ZoomOut size={16} />
                                 </button>
-                                <span style={{ color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 600, minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
+                                <span className="gp-ui" style={{ minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
                                     {zoomLevel}%
                                 </span>
                                 <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
@@ -392,19 +393,19 @@ export default function TetrisGame() {
                 {/* GAME OVER BANNER OVERLAY FULL PANEL */}
                 {gameOver && gameResult && (
                     <div style={{ position: 'absolute', inset: 0, background: 'rgba(13, 17, 23, 0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-                        <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: `1px solid ${gameResult === 'Win' ? 'rgba(74,222,128,0.4)' : gameResult === 'Draw' ? 'rgba(251,191,36,0.4)' : 'rgba(239,68,68,0.4)'}`, boxShadow: `0 0 40px ${gameResult === 'Win' ? 'rgba(74,222,128,0.3)' : gameResult === 'Draw' ? 'rgba(251,191,36,0.3)' : 'rgba(239,68,68,0.3)'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                        <div className="gp-card" style={{ padding: '40px 50px', background: 'rgba(30,30,40,0.95)', border: `1px solid ${gameResult === 'Win' ? 'rgba(74,222,128,0.4)' : gameResult === 'Draw' ? 'rgba(251,191,36,0.4)' : 'rgba(239,68,68,0.4)'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                             <div style={{ fontSize: '3.5rem' }}>{gameResult === 'Win' ? '🏆' : gameResult === 'Draw' ? '🤝' : '💀'}</div>
-                            <h2 style={{ margin: 0, fontSize: '1.8rem', color: gameResult === 'Win' ? '#4ade80' : gameResult === 'Draw' ? '#fbbf24' : '#ef4444', fontWeight: 900 }}>
+                            <div className="gp-title" style={{ color: gameResult === 'Win' ? '#4ade80' : gameResult === 'Draw' ? '#fbbf24' : '#ef4444', fontWeight: 900 }}>
                                 {gameResult === 'Win' ? 'THẮNG' : gameResult === 'Draw' ? 'HÒA' : 'THUA'}
-                            </h2>
-                            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem', marginTop: '4px' }}>Điểm: <span style={{ color: '#4ade80', fontWeight: 700 }}>{score}</span></div>
+                            </div>
+                            <div className="gp-ui" style={{ color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>Điểm: <span style={{ color: '#4ade80', fontWeight: 700 }}>{score}</span></div>
                             <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
                                 {mode === 'solo' && (
-                                    <button onClick={startGame} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: '#4ade80', color: '#000', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>
+                                    <button className="gp-btn gp-btn-primary" onClick={startGame} style={{ background: '#4ade80', color: '#000', padding: '10px 24px', width: 'auto' }}>
                                         CHƠI LẠI
                                     </button>
                                 )}
-                                <button onClick={() => navigate('/tetris')} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', cursor: 'pointer' }}>
+                                <button className="gp-btn" onClick={() => navigate('/tetris')} style={{ padding: '10px 24px', width: 'auto' }}>
                                     THOÁT
                                 </button>
                             </div>
@@ -414,15 +415,15 @@ export default function TetrisGame() {
 
                 {gameOver && !gameResult && mode === 'solo' && (
                     <div style={{ position: 'absolute', inset: 0, background: 'rgba(13, 17, 23, 0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-                        <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: '1px solid rgba(239,68,68,0.4)', boxShadow: '0 0 40px rgba(239,68,68,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                        <div className="gp-card" style={{ padding: '40px 50px', background: 'rgba(30,30,40,0.95)', border: '1px solid rgba(239,68,68,0.4)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                             <div style={{ fontSize: '3.5rem' }}>💀</div>
-                            <h2 style={{ margin: 0, fontSize: '1.8rem', color: '#ef4444', fontWeight: 900 }}>THUA</h2>
-                            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem', marginTop: '4px' }}>Điểm: <span style={{ color: '#4ade80', fontWeight: 700 }}>{score}</span></div>
+                            <div className="gp-title" style={{ color: '#ef4444', fontWeight: 900 }}>THUA</div>
+                            <div className="gp-ui" style={{ color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>Điểm: <span style={{ color: '#4ade80', fontWeight: 700 }}>{score}</span></div>
                             <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                                <button onClick={() => startGame()} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: '#ef4444', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>
+                                <button className="gp-btn gp-btn-primary" onClick={() => startGame()} style={{ background: '#ef4444', padding: '10px 24px', width: 'auto' }}>
                                     CHƠI LẠI
                                 </button>
-                                <button onClick={() => navigate('/tetris')} style={{ padding: '10px 24px', fontSize: '0.95rem', fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', cursor: 'pointer' }}>
+                                <button className="gp-btn" onClick={() => navigate('/tetris')} style={{ padding: '10px 24px', width: 'auto' }}>
                                     THOÁT
                                 </button>
                             </div>

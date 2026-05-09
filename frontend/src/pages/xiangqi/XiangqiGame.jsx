@@ -68,7 +68,7 @@ export default function XiangqiGame() {
 
     const {
         board, turn, selectedPos, validMoves, isGameOver, winner, inCheckColor, moveList, evalScore, hintMove, selectPiece, movePiece, makeAIMove, undoMove, getHint
-    } = useXiangqiLogic('r', callbacks, mode, roomId);
+    } = useXiangqiLogic('r', callbacks, mode, roomId, difficulty);
 
     useEffect(() => {
         if (mode === 'solo' && !isGameOver && turn !== myColor) {
@@ -136,39 +136,36 @@ export default function XiangqiGame() {
                         }}>
                             <Hexagon size={28} color="#fff" />
                         </div>
-                        <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#fca5a5', letterSpacing: '1px' }}>{t('xiangqi.title')}</h2>
-                        <div style={{ color: '#ef4444', fontSize: '0.7rem', fontWeight: 700 }}>XIANGQI</div>
+                        <div className="gp-title" style={{ color: '#fca5a5' }}>{t('xiangqi.title')}</div>
+                        <div className="gp-label" style={{ color: '#ef4444', marginTop: '4px' }}>XIANGQI</div>
                     </div>
 
                     {/* Move History */}
-                    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+                    <div className="gp-card" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
                         <div
                             onClick={() => setShowHistory(!showHistory)}
                             style={{ padding: '10px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
                         >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <History size={12} color="#888" />
-                                <span style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, letterSpacing: '1px' }}>{t('xiangqi.moves')} ({moveList.length})</span>
+                                <span className="gp-label" style={{ margin: 0, color: '#888' }}>{t('xiangqi.moves')} ({moveList.length})</span>
                             </div>
                             {showHistory ? <ChevronDown size={12} color="#888" /> : <ChevronRight size={12} color="#888" />}
                         </div>
                         {showHistory && (
                             <div style={{ flex: 1, overflowY: 'auto', padding: '6px 8px', minHeight: '0' }}>
                                 {moveList.length === 0 ? (
-                                    <p style={{ fontSize: '0.7rem', color: '#555', textAlign: 'center', margin: '6px 0' }}>{t('xiangqi.noMoves')}</p>
+                                    <p className="gp-caption" style={{ textAlign: 'center', margin: '6px 0' }}>{t('xiangqi.noMoves')}</p>
                                 ) : (
                                     moveList.map((m, i) => {
                                         const fStr = typeof m.from === 'object' ? `(${m.from.r},${m.from.c})` : String(m.from);
                                         const tStr = typeof m.to   === 'object' ? `(${m.to.r},${m.to.c})`   : String(m.to);
                                         return (
-                                            <div key={i} style={{
+                                            <div key={i} className={`gp-move-item ${i === moveList.length - 1 ? 'active' : ''}`} style={{
                                                 display: 'flex', alignItems: 'center', gap: '4px',
-                                                padding: '3px 4px', borderRadius: '4px',
-                                                background: i === moveList.length - 1 ? 'rgba(255,255,255,0.04)' : 'transparent',
-                                                fontSize: '0.7rem', color: m.piece && m.piece[0] === 'r' ? '#fca5a5' : '#94a3b8',
-                                                fontFamily: 'monospace'
+                                                fontFamily: 'monospace', color: m.piece && m.piece[0] === 'r' ? '#fca5a5' : '#94a3b8'
                                             }}>
-                                                <span style={{ color: '#555', minWidth: '14px', fontSize: '0.65rem' }}>{i + 1}.</span>
+                                                <span className="gp-micro" style={{ minWidth: '14px' }}>{i + 1}.</span>
                                                 <span>{fStr} → {tStr}</span>
                                             </div>
                                         );
@@ -180,11 +177,11 @@ export default function XiangqiGame() {
 
                     {/* Bottom: Zoom */}
                     <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.04)', padding: '8px 10px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <div className="gp-card" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', padding: '8px 10px' }}>
                             <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
                                 <ZoomOut size={16} />
                             </button>
-                            <span style={{ color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 600, minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
+                            <span className="gp-ui" style={{ minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
                                 {zoomLevel}%
                             </span>
                             <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
@@ -317,49 +314,47 @@ export default function XiangqiGame() {
                                     );
                                 })
                             )}
-                        </div>
-                    </div>
+                        </div>{/* end pieces layer */}
 
-                    {/* Hint marker */}
-                    {hintMove && (() => {
-                        const fromR = typeof hintMove.from === 'object' ? hintMove.from.r : Number(String(hintMove.from).split(',')[0]);
-                        const fromC = typeof hintMove.from === 'object' ? hintMove.from.c : Number(String(hintMove.from).split(',')[1]);
-                        const toR   = typeof hintMove.to   === 'object' ? hintMove.to.r   : Number(String(hintMove.to).split(',')[0]);
-                        const toC   = typeof hintMove.to   === 'object' ? hintMove.to.c   : Number(String(hintMove.to).split(',')[1]);
-                        const displayFromR = myColor === 'b' ? 9 - fromR : fromR;
-                        const displayFromC = myColor === 'b' ? 8 - fromC : fromC;
-                        const displayToR   = myColor === 'b' ? 9 - toR   : toR;
-                        const displayToC   = myColor === 'b' ? 8 - toC   : toC;
-                        const leftPctFrom = ((50 + displayFromC * 100) / 900) * 100;
-                        const topPctFrom  = ((50 + displayFromR * 100) / 1000) * 100;
-                        const leftPctTo   = ((50 + displayToC   * 100) / 900) * 100;
-                        const topPctTo    = ((50 + displayToR   * 100) / 1000) * 100;
-                        return (
-                            <>
-                                <div style={{ position: 'absolute', left: `${leftPctFrom}%`, top: `${topPctFrom}%`, width: '10%', aspectRatio: '1', transform: 'translate(-50%, -50%)', border: '3px solid #fbbf24', borderRadius: '50%', pointerEvents: 'none', zIndex: 40, boxShadow: '0 0 12px #fbbf24' }} />
-                                <div style={{ position: 'absolute', left: `${leftPctTo}%`,   top: `${topPctTo}%`,   width: '10%', aspectRatio: '1', transform: 'translate(-50%, -50%)', border: '3px solid #4ade80', borderRadius: '50%', pointerEvents: 'none', zIndex: 40, boxShadow: '0 0 12px #4ade80' }} />
-                            </>
-                        );
-                    })()}
-                </div>
+                        {/* Hint markers - direct children of board container (position:relative), so % are relative to board */}
+                        {hintMove && (() => {
+                            const fromR = typeof hintMove.from === 'object' ? hintMove.from.r : Number(String(hintMove.from).split(',')[0]);
+                            const fromC = typeof hintMove.from === 'object' ? hintMove.from.c : Number(String(hintMove.from).split(',')[1]);
+                            const toR   = typeof hintMove.to   === 'object' ? hintMove.to.r   : Number(String(hintMove.to).split(',')[0]);
+                            const toC   = typeof hintMove.to   === 'object' ? hintMove.to.c   : Number(String(hintMove.to).split(',')[1]);
+                            const displayFromR = myColor === 'b' ? 9 - fromR : fromR;
+                            const displayFromC = myColor === 'b' ? 8 - fromC : fromC;
+                            const displayToR   = myColor === 'b' ? 9 - toR   : toR;
+                            const displayToC   = myColor === 'b' ? 8 - toC   : toC;
+                            const leftPctFrom = ((50 + displayFromC * 100) / 900) * 100;
+                            const topPctFrom  = ((50 + displayFromR * 100) / 1000) * 100;
+                            const leftPctTo   = ((50 + displayToC   * 100) / 900) * 100;
+                            const topPctTo    = ((50 + displayToR   * 100) / 1000) * 100;
+                            return (
+                                <>
+                                    <div style={{ position: 'absolute', left: `${leftPctFrom}%`, top: `${topPctFrom}%`, width: '10%', aspectRatio: '1', transform: 'translate(-50%, -50%)', border: '3px solid #fbbf24', borderRadius: '50%', pointerEvents: 'none', zIndex: 40, boxShadow: '0 0 12px #fbbf24' }} />
+                                    <div style={{ position: 'absolute', left: `${leftPctTo}%`,   top: `${topPctTo}%`,   width: '10%', aspectRatio: '1', transform: 'translate(-50%, -50%)', border: '3px solid #4ade80', borderRadius: '50%', pointerEvents: 'none', zIndex: 40, boxShadow: '0 0 12px #4ade80' }} />
+                                </>
+                            );
+                        })()}
+                    </div>{/* end board container */}
+                </div>{/* end CENTER BOARD */}
 
                 {/* RIGHT PANEL - Status and Actions */}
                 <div style={{ flex: '0 0 220px', display: 'flex', flexDirection: 'column', padding: '1.5rem', borderLeft: '1px solid rgba(255,255,255,0.06)', background: 'rgba(23,23,33,0.6)' }}>
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1rem' }}>
-                        <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '16px 12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '16px', fontWeight: 800, letterSpacing: '1px', textAlign: 'center' }}>THÔNG TIN TRẬN ĐẤU</div>
+                        <div className="gp-card" style={{ padding: '16px 12px' }}>
+                            <div className="gp-label" style={{ textAlign: 'center', marginBottom: '16px' }}>THÔNG TIN TRẬN ĐẤU</div>
                             
                             {/* Red Player */}
-                            <div style={{ 
-                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', borderRadius: '8px',
+                            <div className="gp-player-row" style={{ 
                                 background: turn === 'r' ? 'rgba(239,68,68,0.1)' : 'transparent',
-                                border: turn === 'r' ? '1px solid rgba(239,68,68,0.3)' : '1px solid transparent',
-                                transition: 'all 0.3s'
+                                border: turn === 'r' ? '1px solid rgba(239,68,68,0.3)' : '1px solid transparent'
                             }}>
                                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', color: '#fff', fontWeight: 'bold' }}>帥</div>
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('xiangqi.redSide')}</div>
-                                    <div style={{ fontWeight: 700, color: '#fca5a5', fontSize: '0.8rem' }}>{myColor === 'r' ? t('xiangqi.redPlayer') : (mode === 'multiplayer' ? 'Đối thủ' : t('xiangqi.blackPlayer'))}</div>
+                                    <div className="role">{t('xiangqi.redSide')}</div>
+                                    <div className="name" style={{ color: '#fca5a5' }}>{myColor === 'r' ? t('xiangqi.redPlayer') : (mode === 'multiplayer' ? 'Đối thủ' : t('xiangqi.blackPlayer'))}</div>
                                 </div>
                                 {turn === 'r' && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444', boxShadow: '0 0 8px #ef4444' }} />}
                             </div>
@@ -367,24 +362,22 @@ export default function XiangqiGame() {
                             <div style={{ width: '2px', height: '16px', background: 'rgba(255,255,255,0.1)', margin: '4px auto' }} />
 
                             {/* Black Player */}
-                            <div style={{ 
-                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', borderRadius: '8px',
+                            <div className="gp-player-row" style={{ 
                                 background: turn === 'b' ? 'rgba(74,222,128,0.1)' : 'transparent',
-                                border: turn === 'b' ? '1px solid rgba(74,222,128,0.3)' : '1px solid transparent',
-                                transition: 'all 0.3s'
+                                border: turn === 'b' ? '1px solid rgba(74,222,128,0.3)' : '1px solid transparent'
                             }}>
                                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#1e293b', border: '2px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', color: '#f8fafc', fontWeight: 'bold' }}>將</div>
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.65rem', color: '#888' }}>{t('xiangqi.blackSide')}</div>
-                                    <div style={{ fontWeight: 700, color: '#94a3b8', fontSize: '0.8rem' }}>{myColor === 'b' ? t('xiangqi.redPlayer') : (mode === 'multiplayer' ? 'Đối thủ' : t('xiangqi.blackPlayer'))}</div>
+                                    <div className="role">{t('xiangqi.blackSide')}</div>
+                                    <div className="name" style={{ color: '#94a3b8' }}>{myColor === 'b' ? t('xiangqi.redPlayer') : (mode === 'multiplayer' ? 'Đối thủ' : t('xiangqi.blackPlayer'))}</div>
                                 </div>
                                 {turn === 'b' && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80' }} />}
                             </div>
                             
                             {inCheckColor ? (
-                                <div style={{ marginTop: '16px', padding: '6px', background: 'rgba(239,68,68,0.15)', borderRadius: '6px', textAlign: 'center', fontSize: '0.75rem', color: '#ef4444', fontWeight: 700, animation: 'pulse-glow-xiangqi 1.5s infinite' }}>⚠ ĐANG BỊ CHIẾU!</div>
+                                <div className="gp-ui" style={{ marginTop: '16px', padding: '6px', background: 'rgba(239,68,68,0.15)', borderRadius: '6px', textAlign: 'center', color: '#ef4444', animation: 'pulse-glow-xiangqi 1.5s infinite' }}>⚠ ĐANG BỊ CHIẾU!</div>
                             ) : (
-                                <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.75rem', color: '#fbbf24', fontWeight: 600 }}>
+                                <div className="gp-caption" style={{ textAlign: 'center', marginTop: '16px', color: '#fbbf24', fontWeight: 600 }}>
                                     {turn === myColor ? 'Tới lượt của bạn' : 'CPU đang suy nghĩ...'}
                                 </div>
                             )}
@@ -392,28 +385,15 @@ export default function XiangqiGame() {
                     </div>
                     <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <button onClick={undoMove} disabled={isGameOver || moveList.length === 0} style={{
-                                width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                                color: moveList.length > 0 ? '#fbbf24' : '#555', border: '1px solid rgba(255,255,255,0.08)',
-                                cursor: moveList.length > 0 ? 'pointer' : 'default', fontSize: '0.8rem',
-                                transition: 'all 0.2s', fontWeight: 600
-                            }}>
+                            <button className="gp-btn" onClick={undoMove} disabled={isGameOver || moveList.length === 0} style={{ color: moveList.length > 0 ? '#fbbf24' : '' }}>
                                 <Undo2 size={16} /> {t('xiangqi.undo')}
                             </button>
-                            <button onClick={getHint} disabled={isGameOver || turn !== myColor} style={{
-                                width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                                color: (turn === myColor && !isGameOver) ? '#4ade80' : '#555',
-                                border: '1px solid rgba(255,255,255,0.08)',
-                                cursor: (turn === myColor && !isGameOver) ? 'pointer' : 'default', fontSize: '0.8rem',
-                                transition: 'all 0.2s', fontWeight: 600
-                            }}>
+                            <button className="gp-btn" onClick={getHint} disabled={isGameOver || turn !== myColor} style={{ color: (turn === myColor && !isGameOver) ? '#4ade80' : '' }}>
                                 <Lightbulb size={16} /> {t('xiangqi.hint')}
                             </button>
                         </div>
                         <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)' }} />
-                        <button onClick={() => navigate('/xiangqi')} style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.1)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#94a3b8'; }}>
+                        <button className="gp-btn" onClick={() => navigate('/xiangqi')} style={{ padding: '12px' }}>
                             <ArrowLeft size={16} /> {t('common.exit', 'Thoát')}
                         </button>
                     </div>
@@ -423,16 +403,16 @@ export default function XiangqiGame() {
             {/* GAME OVER MODAL */}
             {isGameOver && (
                 <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-                    <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: `1px solid ${winner === myColor ? 'rgba(74,222,128,0.4)' : 'rgba(239,68,68,0.4)'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-                        <h2 style={{ fontSize: '2.5rem', color: winner === myColor ? '#4ade80' : '#ef4444', margin: 0, fontWeight: 900 }}>
+                    <div className="gp-card" style={{ padding: '40px 50px', background: 'rgba(30,30,40,0.95)', border: `1px solid ${winner === myColor ? 'rgba(74,222,128,0.4)' : 'rgba(239,68,68,0.4)'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                        <div className="gp-title" style={{ fontSize: '2.5rem', color: winner === myColor ? '#4ade80' : '#ef4444', margin: 0, fontWeight: 900 }}>
                             {winner === myColor ? t('xiangqi.victory') : t('xiangqi.defeat')}
-                        </h2>
-                        <p style={{ color: '#aaa' }}>{winner === 'r' ? t('xiangqi.redWins') : t('xiangqi.blackWins')}</p>
+                        </div>
+                        <div className="gp-body">{winner === 'r' ? t('xiangqi.redWins') : t('xiangqi.blackWins')}</div>
                         <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-                            <button onClick={() => window.location.reload()} style={{ padding: '12px 24px', fontSize: '1rem', fontWeight: 700, background: '#fbbf24', color: '#000', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>
-                                <RotateCcw size={16} style={{ display: 'inline', verticalAlign: 'text-bottom' }} /> {t('common.playAgain', 'CHƠI LẠI').toUpperCase()}
+                            <button className="gp-btn gp-btn-primary" onClick={() => window.location.reload()} style={{ background: '#fbbf24', color: '#000', padding: '12px 24px', width: 'auto' }}>
+                                <RotateCcw size={16} /> {t('common.playAgain', 'CHƠI LẠI').toUpperCase()}
                             </button>
-                            <button onClick={() => navigate('/xiangqi')} style={{ padding: '12px 24px', fontSize: '1rem', fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '10px', cursor: 'pointer' }}>
+                            <button className="gp-btn" onClick={() => navigate('/xiangqi')} style={{ padding: '12px 24px', width: 'auto' }}>
                                 {t('common.exit', 'THOÁT').toUpperCase()}
                             </button>
                         </div>

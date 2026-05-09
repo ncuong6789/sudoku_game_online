@@ -179,7 +179,7 @@ function formatMoveNotation(piece, fromR, fromC, toR, toC, captured) {
     return `${pName} ${from}${cap}${to}`;
 }
 
-export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}, mode = 'solo', roomId = null) => {
+export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}, mode = 'solo', roomId = null, difficulty = 'Medium') => {
     const [board, setBoard] = useState(INITIAL_BOARD);
     const [turn, setTurn] = useState(initialTurn);
     const [history, setHistory] = useState([]);
@@ -251,7 +251,7 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}, mode = 'solo'
         }
     }, [mode, roomId, turn, isGameOver, callbacks, checkWinCondition, updateEval]);
 
-    const selectPiece = (r, c) => {
+    const selectPiece = useCallback((r, c) => {
         if (isGameOver) return;
         const piece = board[r][c];
         if (piece && piece[0] === turn) {
@@ -263,9 +263,9 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}, mode = 'solo'
             setValidMoves([]);
             if (piece) { if (callbacks.onIllegal) callbacks.onIllegal(); }
         }
-    };
+    }, [board, turn, isGameOver, callbacks]);
 
-    const movePiece = (toR, toC) => {
+    const movePiece = useCallback((toR, toC) => {
         if (!selectedPos || isGameOver) return false;
         const move = validMoves.find(m => m.r === toR && m.c === toC);
         if (!move) {
@@ -315,7 +315,7 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}, mode = 'solo'
         }
 
         return true;
-    };
+    }, [selectedPos, isGameOver, validMoves, board, turn, inCheckColor, mode, roomId, callbacks, checkWinCondition, updateEval]);
 
     const makeAIMove = useCallback((color, difficulty = 'Medium') => {
         if (isGameOver) return;
@@ -347,32 +347,42 @@ export const useXiangqiLogic = (initialTurn = 'r', callbacks = {}, mode = 'solo'
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [board, isGameOver, turn, inCheckColor, callbacks, checkWinCondition, updateEval]);
 
-    const undoMove = (count = 2) => {
-        if (history.length < count) return false;
-        const targetState = history[history.length - count];
-        setBoard(targetState.board);
-        setTurn(targetState.turn);
-        setInCheckColor(targetState.inCheckColor);
-        setHistory(prev => prev.slice(0, -count));
-        setMoveList(prev => prev.slice(0, -count));
-        setIsGameOver(false);
-        setWinner(null);
-        setSelectedPos(null);
-        setValidMoves([]);
-        setHintMove(null);
-        updateEval(targetState.board, targetState.turn);
-        return true;
-    };
+    const undoMove = useCallback((count) => {
+        // In solo mode, undo 2 moves (player + AI). If only 1 move exists, undo 1.
+        // In multiplayer, undo is disabled.
+        if (mode !== 'solo') return false;
 
-    const getHint = () => {
+        setHistory(prev => {
+            // Determine how many moves to pop
+            const undoCount = prev.length >= 2 ? 2 : prev.length >= 1 ? 1 : 0;
+            if (undoCount === 0) return prev;
+
+            const targetState = prev[prev.length - undoCount];
+            setBoard(targetState.board);
+            setTurn(targetState.turn);
+            setInCheckColor(targetState.inCheckColor);
+            setMoveList(ml => ml.slice(0, -undoCount));
+            setIsGameOver(false);
+            setWinner(null);
+            setSelectedPos(null);
+            setValidMoves([]);
+            setHintMove(null);
+            updateEval(targetState.board, targetState.turn);
+
+            return prev.slice(0, -undoCount);
+        });
+        return true;
+    }, [mode, updateEval]);
+
+    const getHint = useCallback(() => {
         if (isGameOver || turn !== (callbacks.myColor || 'r')) return;
-        getBestMoveAsync(board, turn, getLegalMoves, cloneBoard, isCheck, isKingsFacing, 3).then(chosenMove => {
+        getBestMoveAsync(board, turn, getLegalMoves, cloneBoard, isCheck, isKingsFacing, difficulty).then(chosenMove => {
             if (chosenMove) {
                 setHintMove({ from: chosenMove.from, to: chosenMove.to });
                 setTimeout(() => setHintMove(null), 5000);
             }
         });
-    };
+    }, [board, turn, isGameOver, callbacks, difficulty]);
 
     return {
         board,

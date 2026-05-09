@@ -154,15 +154,15 @@ export default function PacmanGame() {
                     borderRight: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)'
                 }}>
                     <div style={{ flex: 1 }} />
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', padding: '1rem', boxSizing: 'border-box' }}>
-                        <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.1rem', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '8px' }}>
+                    <div className="gp-card" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div className="gp-title" style={{ textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '8px' }}>
                             <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#fbbf24', boxShadow: '0 0 10px #fbbf24' }} />
                             {t('pacman.title')}
                         </div>
                         
                         <div style={{ padding: '12px', background: 'rgba(251,191,36,0.1)', borderRadius: '10px', border: '1px solid rgba(251,191,36,0.2)', textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>{t('pacman.score')}</div>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#fbbf24' }}>{score}</div>
+                            <div className="gp-label">{t('pacman.score')}</div>
+                            <div className="gp-score" style={{ color: '#fbbf24' }}>{score}</div>
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', margin: '8px 0' }}>
@@ -172,13 +172,13 @@ export default function PacmanGame() {
                         </div>
 
                         <div style={{ padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '4px' }}>
-                                <span style={{ color: 'var(--text-secondary)' }}>{t('pacman.map')}</span>
-                                <span style={{ color: '#fff', fontWeight: 600 }}>{mapType}</span>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                <span className="gp-caption">{t('pacman.map')}</span>
+                                <span className="gp-ui" style={{ color: '#fff' }}>{mapType}</span>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                                <span style={{ color: 'var(--text-secondary)' }}>{t('pacman.difficulty')}</span>
-                                <span style={{ fontWeight: 700, color: difficulty === 'hard' ? '#ef4444' : '#f59e0b' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span className="gp-caption">{t('pacman.difficulty')}</span>
+                                <span className="gp-ui" style={{ color: difficulty === 'hard' ? '#ef4444' : '#f59e0b' }}>
                                     {difficulty === 'hard' ? t('pacman.hard') : t('pacman.easy')}
                                 </span>
                             </div>
@@ -186,13 +186,13 @@ export default function PacmanGame() {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '1rem' }}>
-                        <button onClick={togglePause} disabled={phase === 'gameover' || phase === 'won'} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%', fontSize: '0.9rem', background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: isPaused ? '#38bdf8' : '#fff', cursor: (phase === 'gameover' || phase === 'won') ? 'default' : 'pointer', opacity: (phase === 'gameover' || phase === 'won') ? 0.5 : 1, transition: 'all 0.2s' }} onMouseEnter={(e) => { if (!isPaused && phase !== 'gameover' && phase !== 'won') e.currentTarget.style.background='rgba(255,255,255,0.1)'; }} onMouseLeave={(e) => { if (!isPaused) e.currentTarget.style.background='rgba(255,255,255,0.06)'; }}>
+                        <button className="gp-btn" onClick={togglePause} disabled={phase === 'gameover' || phase === 'won'} style={{ background: isPaused ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)', border: isPaused ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.1)', color: isPaused ? '#38bdf8' : '#fff' }}>
                             {isPaused ? t('pacman.resume') : t('pacman.pause')}
                         </button>
-                        <button className="btn-primary" onClick={handleRestart} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.9rem', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s' }}>
+                        <button className="gp-btn gp-btn-primary" onClick={handleRestart} style={{ background: '#ef4444' }}>
                             <RotateCcw size={18} /> {t('pacman.restart')}
                         </button>
-                        <button className="btn-secondary" onClick={toggleMute} style={{ padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.9rem', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.1)'; }} onMouseLeave={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.06)'; }}>
+                        <button className="gp-btn" onClick={toggleMute}>
                             {muted ? <VolumeX size={18} /> : <Volume2 size={18} />} {muted ? t('pacman.musicOn') : t('pacman.musicOff')}
                         </button>
                     </div>
@@ -200,7 +200,7 @@ export default function PacmanGame() {
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', paddingTop: '1rem' }}>
                         {/* EXIT BUTTON (Pinned to bottom) */}
                         <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '14px' }}>
-                            <button onClick={() => navigate('/pacman')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
+                            <button className="gp-btn" onClick={() => navigate('/pacman')} style={{ background: 'transparent' }}>
                                 <ArrowLeft size={16} /> Thoát khỏi phòng
                             </button>
                         </div>
@@ -213,7 +213,7 @@ export default function PacmanGame() {
                     minWidth: 0, minHeight: 0, padding: '1rem',
                     overflow: 'hidden', alignItems: 'center', position: 'relative'
                 }}>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: phase === 'playing' ? '#4ade80' : '#94a3b8', marginBottom: '10px', background: 'rgba(0,0,0,0.5)', padding: '4px 12px', borderRadius: '12px' }}>
+                    <div className="gp-badge" style={{ color: phase === 'playing' ? '#4ade80' : '#94a3b8', marginBottom: '10px', background: 'rgba(0,0,0,0.5)', padding: '4px 12px' }}>
                         {phase === 'playing' ? t('pacman.playing') : phase === 'ready' ? t('pacman.ready') : phase === 'paused' ? t('pacman.paused') : t('pacman.ended')}
                     </div>
 
@@ -359,18 +359,18 @@ export default function PacmanGame() {
                                 zIndex: 100, gap: '16px'
                             }}>
                                 <div style={{ fontSize: '5rem', marginBottom: '0.5rem', animation: phase === 'won' ? 'wonBounce 1s infinite' : 'none' }}>{phase === 'won' ? '🏆' : '💀'}</div>
-                                <h2 style={{ fontSize: '3.5rem', margin: 0, color: phase === 'won' ? '#4ade80' : '#ef4444', fontWeight: 900, textShadow: phase === 'won' ? '0 0 20px rgba(74,222,128,0.5)' : '0 0 20px rgba(239,68,68,0.5)' }}>
+                                <div className="gp-title" style={{ fontSize: '3.5rem', color: phase === 'won' ? '#4ade80' : '#ef4444', fontWeight: 900, textShadow: phase === 'won' ? '0 0 20px rgba(74,222,128,0.5)' : '0 0 20px rgba(239,68,68,0.5)' }}>
                                     {phase === 'won' ? t('pacman.victory') : t('pacman.gameOver')}
-                                </h2>
-                                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px 30px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textTransform: 'uppercase' }}>{t('pacman.finalScore')}: </span>
-                                    <b style={{ fontSize: '1.8rem', color: '#fbbf24' }}>{score}</b>
+                                </div>
+                                <div className="gp-card" style={{ padding: '12px 30px' }}>
+                                    <span className="gp-label" style={{ color: 'var(--text-secondary)' }}>{t('pacman.finalScore')}: </span>
+                                    <b className="gp-score" style={{ color: '#fbbf24' }}>{score}</b>
                                 </div>
                                 <div style={{ display: 'flex', gap: '14px', marginTop: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                                    <button className="btn-primary" style={{ padding: '14px 40px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px', background: phase === 'won' ? '#4ade80' : '#ef4444', color: phase === 'won' ? '#000' : '#fff' }} onClick={handleRestart}>
+                                    <button className="gp-btn gp-btn-primary" style={{ padding: '14px 40px', background: phase === 'won' ? '#4ade80' : '#ef4444', color: phase === 'won' ? '#000' : '#fff', width: 'auto' }} onClick={handleRestart}>
                                         <RotateCcw size={22} /> {t('pacman.restart').toUpperCase()}
                                     </button>
-                                    <button className="btn-secondary" onClick={() => navigate('/pacman')} style={{ padding: '14px 40px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <button className="gp-btn" onClick={() => navigate('/pacman')} style={{ padding: '14px 40px', width: 'auto' }}>
                                         <ArrowLeft size={22} /> {t('pacman.exit').toUpperCase()}
                                     </button>
                                 </div>
@@ -380,10 +380,10 @@ export default function PacmanGame() {
                         {/* Pause Overlay moved here to only cover the board area */}
                         {showPauseMenu && (
                             <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, borderRadius: '12px' }}>
-                                <div style={{ background: 'rgba(30,30,40,0.95)', borderRadius: '24px', padding: '40px 50px', border: '1px solid rgba(56,189,248,0.4)', boxShadow: '0 0 40px rgba(56,189,248,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                                <div className="gp-card" style={{ padding: '40px 50px', background: 'rgba(30,30,40,0.95)', border: '1px solid rgba(56,189,248,0.4)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                                     <div style={{ fontSize: '3rem' }}>⏸️</div>
-                                    <h2 style={{ margin: 0, fontSize: '1.8rem', color: '#38bdf8', fontWeight: 900 }}>TẠM DỪNG</h2>
-                                    <button onClick={togglePause} style={{ padding: '12px 32px', fontSize: '1rem', fontWeight: 700, background: '#38bdf8', color: '#000', border: 'none', borderRadius: '12px', cursor: 'pointer' }}>
+                                    <div className="gp-title" style={{ color: '#38bdf8', fontWeight: 900 }}>TẠM DỪNG</div>
+                                    <button className="gp-btn gp-btn-primary" onClick={togglePause} style={{ background: '#38bdf8', color: '#000', width: 'auto' }}>
                                         TIẾP TỤC (Space)
                                     </button>
                                 </div>
@@ -401,59 +401,59 @@ export default function PacmanGame() {
                     <div style={{ flex: 1 }} />
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingRight: '4px' }}>
                         {frightenedTimer > 0 && (
-                            <div style={{ padding: '12px', textAlign: 'center', borderRadius: '12px', border: '1px solid rgba(29,78,216,0.5)', background: 'rgba(29,78,216,0.1)', flexShrink: 0 }}>
-                                <div style={{ fontSize: '0.75rem', color: '#93c5fd', textTransform: 'uppercase' }}>⚡ {t('pacman.power')}</div>
-                                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#60b5fa' }}>{frightenedTimer}</div>
+                            <div className="gp-card" style={{ textAlign: 'center', border: '1px solid rgba(29,78,216,0.5)', background: 'rgba(29,78,216,0.1)', flexShrink: 0 }}>
+                                <div className="gp-label" style={{ color: '#93c5fd' }}>⚡ {t('pacman.power')}</div>
+                                <div className="gp-score" style={{ color: '#60b5fa' }}>{frightenedTimer}</div>
                             </div>
                         )}
 
                         {/* GHOST BESTIARY */}
-                        <div style={{ display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', gap: '10px' }}>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', letterSpacing: '1px', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Hồ Sơ Ma</div>
+                        <div className="gp-card" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <div className="gp-label" style={{ textAlign: 'center' }}>Hồ Sơ Ma</div>
                             
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <div style={{ width: '28px', height: '28px' }}><GhostArt color="#ef4444" state="chase" size="100%" /></div>
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ef4444' }}>Blinky</div>
-                                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Kẻ truy đuổi</div>
+                                    <div className="gp-ui" style={{ color: '#ef4444' }}>Blinky</div>
+                                    <div className="gp-caption">Kẻ truy đuổi</div>
                                 </div>
                             </div>
                             
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <div style={{ width: '28px', height: '28px' }}><GhostArt color="#f472b6" state="chase" size="100%" /></div>
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f472b6' }}>Pinky</div>
-                                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Kẻ mai phục</div>
+                                    <div className="gp-ui" style={{ color: '#f472b6' }}>Pinky</div>
+                                    <div className="gp-caption">Kẻ mai phục</div>
                                 </div>
                             </div>
                             
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <div style={{ width: '28px', height: '28px' }}><GhostArt color="#38bdf8" state="chase" size="100%" /></div>
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#38bdf8' }}>Inky</div>
-                                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Kẻ khó đoán</div>
+                                    <div className="gp-ui" style={{ color: '#38bdf8' }}>Inky</div>
+                                    <div className="gp-caption">Kẻ khó đoán</div>
                                 </div>
                             </div>
                             
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <div style={{ width: '28px', height: '28px' }}><GhostArt color="#fb923c" state="chase" size="100%" /></div>
                                 <div style={{ flex: 1 }}>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fb923c' }}>Clyde</div>
-                                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Kẻ lang thang</div>
+                                    <div className="gp-ui" style={{ color: '#fb923c' }}>Clyde</div>
+                                    <div className="gp-caption">Kẻ lang thang</div>
                                 </div>
                             </div>
                         </div>
 
                         {/* SCORE LEGEND */}
-                        <div style={{ display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', gap: '10px' }}>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textAlign: 'center', letterSpacing: '1px', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>Bảng Tính Điểm</div>
+                        <div className="gp-card" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <div className="gp-label" style={{ textAlign: 'center' }}>Bảng Tính Điểm</div>
                             
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <div style={{ width: '16px', height: '16px', background: '#fbbf24', borderRadius: '50%', margin: '0 6px' }} />
-                                    <span style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Thức ăn nhỏ</span>
+                                    <span className="gp-caption" style={{ color: '#cbd5e1' }}>Thức ăn nhỏ</span>
                                 </div>
-                                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fbbf24' }}>10</span>
+                                <span className="gp-ui" style={{ color: '#fbbf24' }}>10</span>
                             </div>
 
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -461,17 +461,17 @@ export default function PacmanGame() {
                                     <div style={{ width: '20px', height: '20px', background: '#ef4444', borderRadius: '50%', margin: '0 4px', position: 'relative' }}>
                                         <div style={{ position: 'absolute', top: '-2px', left: '4px', width: '6px', height: '8px', background: '#22c55e', borderRadius: '2px', transform: 'rotate(20deg)' }} />
                                     </div>
-                                    <span style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Sức mạnh</span>
+                                    <span className="gp-caption" style={{ color: '#cbd5e1' }}>Sức mạnh</span>
                                 </div>
-                                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ef4444' }}>50</span>
+                                <span className="gp-ui" style={{ color: '#ef4444' }}>50</span>
                             </div>
 
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <div style={{ width: '28px', height: '28px' }}><GhostArt color="#1d4ed8" state="frightened" size="100%" /></div>
-                                    <span style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Ăn Ma</span>
+                                    <span className="gp-caption" style={{ color: '#cbd5e1' }}>Ăn Ma</span>
                                 </div>
-                                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#60b5fa' }}>200+</span>
+                                <span className="gp-ui" style={{ color: '#60b5fa' }}>200+</span>
                             </div>
                         </div>
                     </div>
@@ -483,7 +483,7 @@ export default function PacmanGame() {
                                 <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
                                     <ZoomOut size={16} />
                                 </button>
-                                <span style={{ color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 600, minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
+                                <span className="gp-ui" style={{ minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
                                     {zoomLevel}%
                                 </span>
                                 <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>

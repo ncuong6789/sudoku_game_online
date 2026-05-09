@@ -89,49 +89,49 @@ export default function SudokuGameSolo() {
                 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         {/* Difficulty Card */}
-                        <div style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', padding: '15px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div className="gp-card" style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', padding: '15px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div style={{ background: 'rgba(59,130,246,0.2)', padding: '8px', borderRadius: '8px' }}>
                                 <Target size={20} color="#60a5fa" />
                             </div>
                             <div>
-                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Độ khó</div>
-                                <div style={{ fontSize: '1.1rem', color: '#f8fafc', fontWeight: 800 }}>{difficulty}</div>
+                                <div className="gp-micro" style={{ color: '#94a3b8' }}>Độ khó</div>
+                                <div className="gp-score" style={{ color: '#f8fafc', fontSize: '1.1rem' }}>{difficulty}</div>
                             </div>
                         </div>
 
                         {/* Mistakes Card */}
-                        <div style={{ background: errorCount >= 2 ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${errorCount >= 2 ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.05)'}`, padding: '15px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px', transition: 'all 0.3s' }}>
+                        <div className="gp-card" style={{ background: errorCount >= 2 ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${errorCount >= 2 ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.05)'}`, padding: '15px', display: 'flex', alignItems: 'center', gap: '12px', transition: 'all 0.3s' }}>
                             <div style={{ background: errorCount >= 2 ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '8px' }}>
                                 <ShieldAlert size={20} color={errorCount >= 2 ? "#ef4444" : "#94a3b8"} />
                             </div>
                             <div>
-                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Lỗi sai</div>
-                                <div style={{ fontSize: '1.1rem', color: errorCount >= 2 ? '#ef4444' : '#f8fafc', fontWeight: 800 }}>{errorCount} / 3</div>
+                                <div className="gp-micro" style={{ color: '#94a3b8' }}>Lỗi sai</div>
+                                <div className="gp-score" style={{ color: errorCount >= 2 ? '#ef4444' : '#f8fafc', fontSize: '1.1rem' }}>{errorCount} / 3</div>
                             </div>
                         </div>
 
                         {/* Time Card */}
-                        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', padding: '15px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div className="gp-card" style={{ padding: '15px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div style={{ background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '8px' }}>
                                 <Clock size={20} color="#fcd34d" />
                             </div>
                             <div>
-                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Thời gian</div>
-                                <div style={{ fontSize: '1.1rem', color: '#fcd34d', fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>{formatTime(time)}</div>
+                                <div className="gp-micro" style={{ color: '#94a3b8' }}>Thời gian</div>
+                                <div className="gp-score" style={{ color: '#fcd34d', fontSize: '1.1rem', fontVariantNumeric: 'tabular-nums' }}>{formatTime(time)}</div>
                             </div>
                         </div>
 
                         {/* Hints Metric */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px', marginTop: '10px' }}>
-                            <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Gợi ý đã dùng</span>
-                            <span style={{ fontSize: '0.8rem', color: '#f8fafc', fontWeight: 700 }}>{hintsUsed}</span>
+                        <div className="gp-ui" style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px', marginTop: '10px' }}>
+                            <span style={{ color: '#64748b' }}>Gợi ý đã dùng</span>
+                            <span style={{ color: '#f8fafc', fontWeight: 700 }}>{hintsUsed}</span>
                         </div>
                         
                         <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: '10px', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <button onClick={() => startNewGame()} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background='rgba(255,255,255,0.05)'} onMouseLeave={(e) => e.currentTarget.style.background='transparent'}>
+                            <button className="gp-btn" onClick={() => startNewGame()}>
                                 <RotateCcw size={16} /> Bắt đầu ván mới
                             </button>
-                            <button onClick={() => navigate('/sudoku')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
+                            <button className="gp-btn" onClick={() => navigate('/sudoku')}>
                                 <ArrowLeft size={16} /> Thoát khỏi phòng
                             </button>
                         </div>
@@ -151,18 +151,18 @@ export default function SudokuGameSolo() {
                         />
 
                         {isGameOver && (
-                            <div style={{ position: 'absolute', inset: -8, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '16px', zIndex: 10, border: `1px solid ${won ? 'rgba(74,222,128,0.3)' : 'rgba(239,68,68,0.3)'}`, boxShadow: `0 0 40px ${won ? 'rgba(74,222,128,0.15)' : 'rgba(239,68,68,0.15)'}`, animation: 'fadeIn 0.4s ease' }}>
+                            <div className="gp-card" style={{ position: 'absolute', inset: -8, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 10, border: `1px solid ${won ? 'rgba(74,222,128,0.3)' : 'rgba(239,68,68,0.3)'}`, boxShadow: `0 0 40px ${won ? 'rgba(74,222,128,0.15)' : 'rgba(239,68,68,0.15)'}`, animation: 'fadeIn 0.4s ease' }}>
                                 <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: won ? 'rgba(74,222,128,0.2)' : 'rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
                                     {won ? <Award size={40} color="#4ade80" /> : <ShieldAlert size={40} color="#ef4444" />}
                                 </div>
-                                <h2 style={{ color: won ? '#4ade80' : '#ef4444', fontSize: '2.5rem', margin: '0 0 8px 0', fontWeight: 900, textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+                                <div className="gp-title" style={{ color: won ? '#4ade80' : '#ef4444', fontSize: '2.5rem', margin: '0 0 8px 0', fontWeight: 900, textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
                                     {won ? 'HOÀN THÀNH!' : 'THẤT BẠI'}
-                                </h2>
-                                <p style={{ color: '#cbd5e1', fontSize: '1rem', margin: '0 0 24px 0', textAlign: 'center', maxWidth: '80%' }}>
+                                </div>
+                                <div className="gp-body" style={{ margin: '0 0 24px 0', textAlign: 'center', maxWidth: '80%' }}>
                                     {won ? `Bạn đã giải quyết mức độ ${difficulty} trong ${Math.floor(time/60)} phút ${String(time%60).padStart(2,'0')} giây.` : `Bạn đã mắc quá 3 lỗi sai cho phép. Đừng nản chí!`}
-                                </p>
+                                </div>
                                 <div style={{ display: 'flex', gap: '12px' }}>
-                                    <button onClick={() => startNewGame()} style={{ padding: '12px 28px', fontSize: '1.05rem', fontWeight: 700, background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '12px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(59,130,246,0.4)', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.transform='scale(1.05)'} onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}>
+                                    <button className="gp-btn gp-btn-primary" onClick={() => startNewGame()} style={{ width: 'auto' }}>
                                         CHƠI LẠI
                                     </button>
                                 </div>

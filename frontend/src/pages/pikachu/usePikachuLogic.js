@@ -367,20 +367,25 @@ export function usePikachuLogic(gameMode = 'classic', timeLimitEnabled = true, r
     }, []);
 
     useEffect(() => {
+        let intervalId = null;
         if (status === 'playing' && timeLimitEnabled && !isPaused) {
-            timerRef.current = setInterval(() => {
+            intervalId = setInterval(() => {
                 setTimeLeft(prev => {
                     if (prev <= 0) {
                         setStatus('gameover');
                         playSound(noMoveSound, sfxMutedRef.current);
-                        clearInterval(timerRef.current);
+                        if (intervalId) clearInterval(intervalId);
                         return 0;
                     }
                     return prev - 0.05; 
                 });
             }, 100);
+            timerRef.current = intervalId;
         }
-        return () => clearInterval(timerRef.current);
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+            if (timerRef.current) clearInterval(timerRef.current);
+        };
     }, [status, timeLimitEnabled, isPaused]);
 
     const handleTileClick = useCallback((r, c) => {

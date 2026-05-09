@@ -146,71 +146,69 @@ function SnakeCanvas({ gameRef, mapSize }) {
 function LeftPanel({ gameRef, gameOver, accentColor, resultEmoji, resultTitle, resultDetail, t }) {
     const [cdRemain, setCdRemain] = useState(0);
     useEffect(() => {
-        const t = setInterval(() => {
+        const timer = setInterval(() => {
             const g = gameRef.current;
             if (!g) return;
             const end = g.dashCooldownEnd || 0;
             setCdRemain(Math.max(0, end - performance.now()));
         }, 100);
-        return () => clearInterval(t);
+        return () => clearInterval(timer);
     }, [gameRef]);
 
     const score = gameRef.current?.score || 0;
     const ready = cdRemain <= 0;
     const hasPoints = score >= 5;
     const canDash = ready && hasPoints;
-
     const pct = ready ? 1 : 1 - cdRemain / DASH_COOLDOWN;
-    const cardStyle = { borderRadius: '10px', padding: '12px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '10px' };
-    const labelStyle = { fontSize: '0.72rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' };
-    const rowStyle = { display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.82rem', color: '#cbd5e1', marginBottom: '5px', lineHeight: 1.4 };
-    const kbdStyle = { background: '#1e293b', border: '1px solid #334155', borderRadius: '5px', padding: '2px 7px', fontSize: '0.78rem', whiteSpace: 'nowrap', flexShrink: 0 };
 
     return (
-        <div style={{ width: '100%', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ ...cardStyle, background: 'rgba(96,165,250,0.04)', border: '1px solid rgba(96,165,250,0.2)' }}>
-                <div style={{ ...labelStyle, color: '#60a5fa' }}>🎮 {t('snake.controls')}</div>
-                <div style={rowStyle}>
-                    <kbd style={kbdStyle}>W</kbd><kbd style={kbdStyle}>A</kbd><kbd style={kbdStyle}>S</kbd><kbd style={kbdStyle}>D</kbd>
-                    <span style={{ marginLeft: '4px' }}>{t('snake.move')}</span>
+        <div style={{ width: '100%', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '0' }}>
+            {/* Controls */}
+            <div className="gp-card" style={{ background: 'rgba(96,165,250,0.04)', border: '1px solid rgba(96,165,250,0.2)', marginBottom: '8px' }}>
+                <div className="gp-label" style={{ color: '#60a5fa' }}>🎮 {t('snake.controls')}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '3px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                    {['W','A','S','D','↑','↓','←','→'].map(k => <kbd key={k} className="gp-kbd">{k}</kbd>)}
+                    <span className="gp-caption" style={{ marginLeft: '4px' }}>{t('snake.move')}</span>
                 </div>
-                <div style={{ ...rowStyle, marginTop: '8px' }}>
-                    <kbd style={kbdStyle}>↑</kbd><kbd style={kbdStyle}>↓</kbd><kbd style={kbdStyle}>←</kbd><kbd style={kbdStyle}>→</kbd>
-                    <span style={{ marginLeft: '4px' }}>{t('snake.move')}</span>
-                </div>
-                <div style={{
-                    ...rowStyle, background: 'rgba(250,204,21,0.06)', borderRadius: '8px', padding: '8px 10px', marginTop: '10px',
-                    border: `1px solid ${canDash ? 'rgba(250,204,21,0.35)' : 'rgba(255,255,255,0.07)'}`, transition: 'all 0.3s'
-                }}>
-                    <kbd style={{ ...kbdStyle, background: canDash ? 'rgba(250,204,21,0.15)' : '#1e293b', color: canDash ? '#fbbf24' : '#64748b', border: `1px solid ${canDash ? '#fbbf24' : '#334155'}`, fontSize: '0.82rem', opacity: hasPoints ? 1 : 0.5 }}>SPACE</kbd>
-                    <div>
-                        <div style={{ color: canDash ? '#fbbf24' : (ready ? '#94a3b8' : '#cbd5e1'), fontWeight: 700 }}>{t('snake.dash')}</div>
-                        <div style={{ fontSize: '0.74rem', color: canDash ? '#fbbf24' : '#64748b', marginTop: '1px' }}>
-                            {!ready ? `${t('snake.cooldown')} ${(cdRemain / 1000).toFixed(1)}s` : (!hasPoints ? `${t('snake.needPoints')} (${score})` : '✓ ' + t('snake.ready'))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(250,204,21,0.06)', borderRadius: '6px', padding: '6px 8px', border: `1px solid ${canDash ? 'rgba(250,204,21,0.3)' : 'rgba(255,255,255,0.07)'}` }}>
+                    <kbd className="gp-kbd" style={{ color: canDash ? '#fbbf24' : '#64748b', border: `1px solid ${canDash ? '#fbbf24' : '#334155'}` }}>SPC</kbd>
+                    <div style={{ flex: 1 }}>
+                        <div className="gp-ui" style={{ color: canDash ? '#fbbf24' : '#94a3b8' }}>{t('snake.dash')}</div>
+                        <div className="gp-caption">
+                            {!ready ? `⏳${(cdRemain/1000).toFixed(1)}s` : !hasPoints ? '≥5pts' : '✓'}
                         </div>
                     </div>
                 </div>
-                <div style={{ background: '#1e293b', borderRadius: '6px', height: '5px', overflow: 'hidden', marginTop: '8px' }}>
-                    <div style={{ height: '100%', width: `${pct * 100}%`, background: canDash ? 'linear-gradient(90deg,#4ade80,#22c55e)' : (ready ? '#334155' : 'linear-gradient(90deg,#f59e0b,#fbbf24)'), borderRadius: '6px', transition: 'width 0.15s' }} />
+                <div style={{ background: '#1e293b', borderRadius: '3px', height: '3px', overflow: 'hidden', marginTop: '5px' }}>
+                    <div style={{ height: '100%', width: `${pct * 100}%`, background: canDash ? '#4ade80' : '#f59e0b', borderRadius: '3px', transition: 'width 0.15s' }} />
                 </div>
             </div>
-            <div style={cardStyle}>
-                <div style={labelStyle}>⚡ {t('snake.dashMechanism')}</div>
-                <div style={rowStyle}><span style={{ color: '#fbbf24', flexShrink: 0 }}>➤</span>{t('snake.move3')}</div>
-                <div style={rowStyle}><span style={{ color: '#f87171', flexShrink: 0 }}>☠</span>{t('snake.tailTrap')}</div>
-                <div style={rowStyle}><span style={{ color: '#f87171', flexShrink: 0 }}>−</span>{t('snake.resetScore')}</div>
-                <div style={rowStyle}><span style={{ color: '#94a3b8', flexShrink: 0 }}>!</span>{t('snake.needPoints')}</div>
-                <div style={rowStyle}><span style={{ color: '#60a5fa', flexShrink: 0 }}>⏱</span>{t('snake.cooldown')}</div>
+            
+            {/* Dash tips - 2-col grid */}
+            <div className="gp-card" style={{ marginBottom: '8px' }}>
+                <div className="gp-label">⚡ Dash</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px 8px' }}>
+                    {[
+                        ['➤','#fbbf24', t('snake.move3')],
+                        ['☠','#f87171', t('snake.tailTrap')],
+                        ['−','#f87171', t('snake.resetScore')],
+                        ['⏱','#60a5fa', t('snake.cooldown')],
+                    ].map(([icon, color, text], i) => (
+                        <div key={i} className="gp-caption" style={{ display: 'flex', gap: '4px', alignItems: 'flex-start' }}>
+                            <span style={{ color, flexShrink: 0 }}>{icon}</span><span>{text}</span>
+                        </div>
+                    ))}
+                </div>
             </div>
+            
             {gameOver && (
-                <div style={{ marginTop: 'auto', borderRadius: '12px', overflow: 'hidden', border: `2px solid ${accentColor}66`, background: `linear-gradient(160deg, ${accentColor}18 0%, rgba(10,14,22,0.9) 100%)`, boxShadow: `0 0 24px ${accentColor}22` }}>
-                    <div style={{ height: '3px', background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }} />
-                    <div style={{ padding: '16px 14px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '3rem', lineHeight: 1, marginBottom: '8px', filter: `drop-shadow(0 0 14px ${accentColor})` }}>{resultEmoji}</div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: 900, color: accentColor, letterSpacing: '0.02em', textShadow: `0 0 16px ${accentColor}88`, marginBottom: '4px' }}>{resultTitle}</div>
-                        {resultDetail && <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '4px', lineHeight: 1.5 }}>{resultDetail}</div>}
+                <div style={{ marginTop: 'auto', borderRadius: '10px', overflow: 'hidden', border: `2px solid ${accentColor}55`, background: `linear-gradient(160deg, ${accentColor}12 0%, rgba(10,14,22,0.9) 100%)` }}>
+                    <div style={{ height: '2px', background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }} />
+                    <div style={{ padding: '12px', textAlign: 'center' }}>
+                        <div style={{ fontSize: 'var(--fs-hero)', lineHeight: 1, marginBottom: '5px' }}>{resultEmoji}</div>
+                        <div className="gp-title" style={{ color: accentColor }}>{resultTitle}</div>
+                        {resultDetail && <div className="gp-caption" style={{ marginTop: '4px' }}>{resultDetail}</div>}
                     </div>
-                    <div style={{ height: '2px', background: `linear-gradient(90deg, transparent, ${accentColor}55, transparent)` }} />
                 </div>
             )}
         </div>
@@ -218,62 +216,73 @@ function LeftPanel({ gameRef, gameOver, accentColor, resultEmoji, resultTitle, r
 }
 
 // ─── RIGHT PANEL ─────────────────────────────────────────────────────────────
+// ─── RIGHT PANEL ─────────────────────────────────────────────────────────────
 function RightPanel({ mode, gameOver, handleRestart, navigate, playerColor, muted, toggleMute, t, zoomLevel, handleZoomIn, handleZoomOut }) {
-    const cardStyle = { borderRadius: '10px', padding: '12px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '10px' };
-    const labelStyle = { fontSize: '0.72rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' };
-    const rowStyle = { display: 'flex', alignItems: 'flex-start', gap: '9px', fontSize: '0.82rem', color: '#cbd5e1', marginBottom: '6px', lineHeight: 1.4 };
+    const myC = playerColor === 'blue' ? '#60a5fa' : '#4ade80';
+    const oppC = playerColor === 'blue' ? '#4ade80' : '#60a5fa';
 
     return (
-        <div style={{ width: '100%', flexShrink: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={cardStyle}>
-                <div style={labelStyle}>🎯 {t('snake.items')}</div>
-                <div style={{ background: 'rgba(239,68,68,0.08)', borderRadius: '8px', padding: '8px 10px', marginBottom: '8px', border: '1px solid rgba(239,68,68,0.2)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                        <div style={{ width: 13, height: 13, borderRadius: '50%', background: 'radial-gradient(circle,#f87171,#dc2626)', boxShadow: '0 0 6px #f87171', flexShrink: 0 }} />
-                        <span style={{ color: '#f87171', fontWeight: 700, fontSize: '0.85rem' }}>{t('snake.redBait')}</span>
+        <div style={{ width: '100%', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '0' }}>
+            {/* Items - compact 2-col */}
+            <div className="gp-card" style={{ marginBottom: '8px' }}>
+                <div className="gp-label">🎯 {t('snake.items')}</div>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                    <div style={{ flex: 1, background: 'rgba(239,68,68,0.08)', borderRadius: '7px', padding: '7px 8px', border: '1px solid rgba(239,68,68,0.2)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
+                            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#dc2626', boxShadow: '0 0 5px #f87171', flexShrink: 0 }} />
+                            <span className="gp-ui" style={{ color: '#f87171' }}>{t('snake.redBait')}</span>
+                        </div>
+                        <div className="gp-caption">{t('snake.redDesc')}</div>
                     </div>
-                    <div style={{ fontSize: '0.76rem', color: '#94a3b8' }}>{t('snake.redDesc')}</div>
-                </div>
-                <div style={{ background: 'rgba(251,191,36,0.08)', borderRadius: '8px', padding: '8px 10px', border: '1px solid rgba(251,191,36,0.2)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                        <div style={{ width: 13, height: 13, borderRadius: '50%', background: 'radial-gradient(circle,#fbbf24,#d97706)', boxShadow: '0 0 8px #fbbf24', flexShrink: 0 }} />
-                        <span style={{ color: '#fbbf24', fontWeight: 700, fontSize: '0.85rem' }}>{t('snake.goldBait')}</span>
+                    <div style={{ flex: 1, background: 'rgba(251,191,36,0.08)', borderRadius: '7px', padding: '7px 8px', border: '1px solid rgba(251,191,36,0.2)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
+                            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#d97706', boxShadow: '0 0 6px #fbbf24', flexShrink: 0 }} />
+                            <span className="gp-ui" style={{ color: '#fbbf24' }}>{t('snake.goldBait')}</span>
+                        </div>
+                        <div className="gp-caption">{t('snake.shorten')} · {t('snake.slow')}</div>
                     </div>
-                    <div style={{ fontSize: '0.76rem', color: '#94a3b8', lineHeight: 1.6 }}>{t('snake.shorten')}<br />{t('snake.disappear')}<br />{t('snake.slow')}</div>
                 </div>
             </div>
-            <div style={cardStyle}>
-                <div style={labelStyle}>🗺 {t('snake.legend')}</div>
-                <div style={rowStyle}><div style={{ width: 14, height: 14, background: '#3f3f46', borderRadius: '3px', flexShrink: 0, marginTop: '2px' }} /><span>{t('snake.deadSnake')}</span></div>
-                <div style={rowStyle}><div style={{ width: 14, height: 14, background: 'rgba(40,40,55,0.9)', borderRadius: '3px', flexShrink: 0, marginTop: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: '9px', color: 'rgba(120,120,150,0.9)', lineHeight: 1, fontWeight: 700 }}>✕</span></div><span>{t('snake.isolated')}</span></div>
-                <div style={rowStyle}><div style={{ width: 14, height: 14, background: playerColor === 'blue' ? '#60a5fa' : '#4ade80', borderRadius: '50%', flexShrink: 0, marginTop: '2px' }} /><span>{t('snake.yourSnake')}</span></div>
-                <div style={rowStyle}><div style={{ width: 14, height: 14, background: playerColor === 'blue' ? '#4ade80' : '#60a5fa', borderRadius: '50%', flexShrink: 0, marginTop: '2px' }} /><span>{mode === 'solo' ? t('snake.cpuSnake') : t('snake.enemySnake')}</span></div>
+            
+            {/* Legend - 2x2 grid */}
+            <div className="gp-card" style={{ marginBottom: '12px' }}>
+                <div className="gp-label">🗺 {t('snake.legend')}</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
+                    {[
+                        { dot: { width:12, height:12, borderRadius:'50%', background: myC, flexShrink:0 }, label: t('snake.yourSnake') },
+                        { dot: { width:12, height:12, borderRadius:'50%', background: oppC, flexShrink:0 }, label: mode === 'solo' ? t('snake.cpuSnake') : t('snake.enemySnake') },
+                        { dot: { width:12, height:12, borderRadius:'3px', background:'#3f3f46', flexShrink:0 }, label: t('snake.deadSnake') },
+                        { dot: { width:12, height:12, borderRadius:'3px', background:'rgba(40,40,55,0.9)', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'8px', color:'rgba(150,150,180,0.9)', fontWeight:700 }, label: t('snake.isolated'), inner:'✕' },
+                    ].map((item, i) => (
+                        <div key={i} className="gp-caption" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <div style={item.dot}>{item.inner}</div>
+                            <span>{item.label}</span>
+                        </div>
+                    ))}
+                </div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', marginTop: '2px' }}>
+            
+            {/* Action buttons */}
+            <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
                 {mode === 'solo' && (
-                    <button className={gameOver ? 'btn-primary' : 'btn-secondary'} onClick={handleRestart} style={{ width: '100%', padding: '9px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', fontSize: '0.9rem', fontWeight: 700 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}><RotateCcw size={15} /> {t('snake.restart')}</div>
-                        {gameOver && <span style={{ fontSize: '0.65rem', opacity: 0.8, fontWeight: 400 }}>(Phím Space)</span>}
+                    <button className={`gp-btn ${gameOver ? 'gp-btn-primary' : ''}`} onClick={handleRestart} style={{ flex: 1, padding: '8px' }}>
+                        <RotateCcw size={13} /> {t('snake.restart')}
                     </button>
                 )}
-                <button onClick={toggleMute} style={{ width: '100%', padding: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.9rem', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: muted ? '#ef4444' : '#4ade80', cursor: 'pointer' }}>
-                    {muted ? <VolumeX size={15} /> : <Volume2 size={15} />} {muted ? t('snake.musicOn') : t('snake.musicOff')}
+                <button className="gp-btn" onClick={toggleMute} style={{ flex: 1, padding: '8px', color: muted ? '#ef4444' : '#4ade80' }}>
+                    {muted ? <VolumeX size={13} /> : <Volume2 size={13} />} {muted ? t('snake.musicOn') : t('snake.musicOff')}
                 </button>
             </div>
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 'auto', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.04)', padding: '8px 10px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                    <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
-                        <ZoomOut size={16} />
-                    </button>
-                    <span style={{ color: '#cbd5e1', fontSize: '0.8rem', fontWeight: 600, minWidth: '38px', textAlign: 'center', userSelect: 'none' }}>
-                        {zoomLevel}%
-                    </span>
-                    <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
-                        <ZoomIn size={16} />
-                    </button>
+            
+            {/* Bottom: zoom + exit */}
+            <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '7px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.04)', padding: '6px 10px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <button onClick={handleZoomOut} disabled={zoomLevel <= 60} style={{ background: 'transparent', border: 'none', color: zoomLevel <= 60 ? '#64748b' : '#fff', cursor: zoomLevel <= 60 ? 'not-allowed' : 'pointer', display: 'flex', padding: '3px' }}><ZoomOut size={14} /></button>
+                    <span className="gp-ui" style={{ minWidth: '36px', textAlign: 'center', userSelect: 'none' }}>{zoomLevel}%</span>
+                    <button onClick={handleZoomIn} disabled={zoomLevel >= 200} style={{ background: 'transparent', border: 'none', color: zoomLevel >= 200 ? '#64748b' : '#fff', cursor: zoomLevel >= 200 ? 'not-allowed' : 'pointer', display: 'flex', padding: '3px' }}><ZoomIn size={14} /></button>
                 </div>
-                <button onClick={() => navigate(mode === 'multiplayer' ? '/snake/multiplayer' : '/snake')} style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#fff'; }} onMouseLeave={(e) => { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#94a3b8'; }}>
-                    <ArrowLeft size={16} /> Thoát khỏi phòng
+                <button className="gp-btn" onClick={() => navigate(mode === 'multiplayer' ? '/snake/multiplayer' : '/snake')} style={{ padding: '9px' }}>
+                    <ArrowLeft size={14} /> {t('common.exit', 'Thoát')}
                 </button>
             </div>
         </div>
@@ -346,31 +355,39 @@ export default function SnakeGame() {
                     gap: '1rem', overflowY: 'auto', padding: '1.5rem',
                     borderRight: '1px solid rgba(255,255,255,0.06)', background: 'rgba(15,23,42,0.6)'
                 }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div className="gp-card" style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                             <Activity size={18} color="var(--primary-color)" />
-                            <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-primary)' }}>Snake {mapSize}</span>
+                            <span className="gp-title" style={{ fontSize: '1.1rem' }}>Snake {mapSize}</span>
                         </div>
-                        <div style={{ textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                        <div className="gp-caption" style={{ textAlign: 'center' }}>
                             {mode === 'solo' ? `${t('snake.vs')} (${difficulty})` : `${roomId}`}
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Trophy size={14} color="#fbbf24" /><span style={{ fontSize: '0.9rem' }}>{t('snake.you')}</span></div>
-                            <span style={{ fontWeight: 'bold', color: '#4ade80', fontSize: '1.1rem' }}>{uiState.score}</span>
+                    <div className="gp-card" style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '10px 12px', background: 'rgba(0,0,0,0.3)' }}>
+                        <div className="gp-player-row" style={{ padding: '4px' }}>
+                            <Trophy size={14} color="#fbbf24" style={{ flexShrink: 0 }} />
+                            <span className="gp-ui" style={{ flex: 1 }}>{t('snake.you')}</span>
+                            <span className="gp-score" style={{ color: '#4ade80' }}>{uiState.score}</span>
                         </div>
                         {(hasBot || mode === 'multiplayer') && (
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: 10, height: 10, borderRadius: '50%', background: '#60a5fa' }} /><span style={{ fontSize: '0.9rem' }}>{mode === 'solo' ? `${t('snake.cpu')}` : t('snake.opp')}</span></div>
-                                <span style={{ fontWeight: 'bold', color: '#60a5fa', fontSize: '1.1rem' }}>{oppScore}</span>
+                            <div className="gp-player-row" style={{ padding: '4px', borderTop: '1px solid rgba(255,255,255,0.05)', borderRadius: 0 }}>
+                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#60a5fa', flexShrink: 0 }} />
+                                <span className="gp-ui" style={{ flex: 1 }}>{mode === 'solo' ? `${t('snake.cpu')}` : t('snake.opp')}</span>
+                                <span className="gp-score" style={{ color: '#60a5fa' }}>{oppScore}</span>
                             </div>
                         )}
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        {hasBot && gameRef.current?.botDead && !uiState.gameOver ? <span style={{ fontSize: '0.85rem', color: '#f59e0b', fontWeight: 700 }}>💀 {t('snake.cpuDead')}</span> : <span style={{ fontSize: '0.85rem', fontWeight: 700, color: uiState.gameOver ? accentColor : 'var(--text-secondary)' }}>{uiState.gameOver ? `${resultEmoji} ${resultTitle}` : t('snake.playing')}</span>}
+                        {hasBot && gameRef.current?.botDead && !uiState.gameOver ? (
+                            <span className="gp-title" style={{ color: '#f59e0b' }}>💀 {t('snake.cpuDead')}</span>
+                        ) : (
+                            <span className="gp-title" style={{ color: uiState.gameOver ? accentColor : 'var(--text-secondary)' }}>
+                                {uiState.gameOver ? `${resultEmoji} ${resultTitle}` : t('snake.playing')}
+                            </span>
+                        )}
                     </div>
 
                     <LeftPanel gameRef={canvasRef2use} gameOver={uiState.gameOver} accentColor={accentColor} resultEmoji={resultEmoji} resultTitle={resultTitle} resultDetail={resultDetail} t={t} />
@@ -383,15 +400,19 @@ export default function SnakeGame() {
                     overflow: 'hidden', alignItems: 'center', position: 'relative'
                 }}>
 
-
                     <div style={{ position: 'relative', width: '100%', maxWidth: '85vh', aspectRatio: '1/1', border: '4px solid rgba(255,255,255,0.1)', borderRadius: '8px', boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5),0 10px 30px rgba(0,0,0,0.3)', overflow: 'hidden', transform: `scale(${zoomLevel/100})`, transition: 'transform 0.2s', transformOrigin: 'center center' }}>
                         <SnakeCanvas gameRef={canvasRef2use} mapSize={mapSize} />
 
                         {mode === 'multiplayer' && countdown !== null && (
                             <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 60, gap: '16px' }}>
-                                <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-secondary)' }}>{t('snake.ready')}</p>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><div style={{ width: 20, height: 20, borderRadius: '50%', background: myColor, boxShadow: `0 0 10px ${myColor}` }} /><span style={{ fontWeight: 700, fontSize: '1.2rem', color: myColor }}>{myColorLabel}</span></div>
-                                <div style={{ fontSize: countdown === 0 ? '2.5rem' : '6rem', fontWeight: 900, color: countdown === 0 ? '#4ade80' : '#fff', textShadow: '0 0 20px currentColor', transition: 'all 0.3s' }}>{countdown === 0 ? t('snake.start') : countdown}</div>
+                                <div className="gp-ui" style={{ margin: 0, color: 'var(--text-secondary)' }}>{t('snake.ready')}</div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <div style={{ width: 20, height: 20, borderRadius: '50%', background: myColor, boxShadow: `0 0 10px ${myColor}` }} />
+                                    <span style={{ fontWeight: 700, fontSize: '1.2rem', color: myColor }}>{myColorLabel}</span>
+                                </div>
+                                <div style={{ fontSize: countdown === 0 ? '2.5rem' : '6rem', fontWeight: 900, color: countdown === 0 ? '#4ade80' : '#fff', textShadow: '0 0 20px currentColor', transition: 'all 0.3s' }}>
+                                    {countdown === 0 ? t('snake.start') : countdown}
+                                </div>
                             </div>
                         )}
 
