@@ -10,6 +10,7 @@ export default function JungleLobby() {
     const [myRoom, setMyRoom] = useState('');
     const [playerCount, setPlayerCount] = useState(1);
     const [isConnected, setIsConnected] = useState(socket.connected);
+    const [isHost, setIsHost] = useState(location.state?.isHost || false);
 
     const handleCreateRoom = useCallback(() => {
         if (!socket.connected) return;
@@ -17,6 +18,7 @@ export default function JungleLobby() {
             setMyRoom(res.roomId);
             setInRoom(true);
             setPlayerCount(1);
+            setIsHost(true);
         });
     }, [difficulty]);
 
@@ -65,7 +67,7 @@ export default function JungleLobby() {
     useEffect(() => {
         const handlePlayerJoined = ({ players }) => {
             setPlayerCount(players);
-            if (players === 2) {
+            if (players === 2 && isHost) {
                 // Host initiates game start
                 socket.emit('startJungleGame', { roomId: myRoom, mode: 'multiplayer', difficulty });
             }

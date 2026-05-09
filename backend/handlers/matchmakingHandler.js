@@ -54,12 +54,17 @@ module.exports = (io, socket, roomManager) => {
                         [socket.id]: { id: socket.id, positions: [{x: mapSize-6, y: mapSize-6}, {x: mapSize-5, y: mapSize-6}, {x: mapSize-4, y: mapSize-6}], direction: {x: -1, y: 0}, nextDir: {x: -1, y: 0}, directionsQueue: [], score: 0, isDead: false, color: 'blue' }
                     }
                 };
-                io.to(opponent.socket.id).emit(EVENTS.MATCH_FOUND, { ...matchData, mapSize, color: 'green' });
-                io.to(socket.id).emit(EVENTS.MATCH_FOUND, { ...matchData, mapSize, color: 'blue' });
+                io.to(opponent.socket.id).emit(EVENTS.MATCH_FOUND, { ...matchData, mapSize, color: 'green', isHost: true });
+                io.to(socket.id).emit(EVENTS.MATCH_FOUND, { ...matchData, mapSize, color: 'blue', isHost: false });
                 setTimeout(() => startSnakeGameLoop(roomId, io, roomManager), 2000);
             } else {
-                io.to(roomId).emit(EVENTS.MATCH_FOUND, matchData);
+                io.to(opponent.socket.id).emit(EVENTS.MATCH_FOUND, { ...matchData, color: 'green', isHost: true });
+                io.to(socket.id).emit(EVENTS.MATCH_FOUND, { ...matchData, color: 'blue', isHost: false });
             }
+
+            setTimeout(() => {
+                io.to(roomId).emit('playerJoined', { players: 2 });
+            }, 1500);
 
             roomManager.broadcastStats();
         } else {

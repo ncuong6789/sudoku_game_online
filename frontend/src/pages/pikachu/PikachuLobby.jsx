@@ -9,6 +9,7 @@ export default function PikachuLobby() {
     const [inRoom, setInRoom] = useState(false);
     const [myRoom, setMyRoom] = useState('');
     const [isConnected, setIsConnected] = useState(socket.connected);
+    const [isHost, setIsHost] = useState(location.state?.isHost || false);
 
     const handleCreateRoom = useCallback(() => {
         if (!socket.connected) return;
@@ -16,6 +17,7 @@ export default function PikachuLobby() {
             if (res?.roomId) {
                 setMyRoom(res.roomId);
                 setInRoom(true);
+                setIsHost(true);
             }
         });
     }, []);
@@ -62,7 +64,7 @@ export default function PikachuLobby() {
     useEffect(() => {
         const handlePlayerJoined = ({ players }) => {
             if (players === 2) {
-                navigate('/pikachu/online-game', { state: { roomId: myRoom, isHost: true } });
+                navigate('/pikachu/online-game', { state: { roomId: myRoom, isHost } });
             }
         };
 

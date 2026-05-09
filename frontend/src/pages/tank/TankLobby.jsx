@@ -55,7 +55,7 @@ export default function TankLobby() {
         // Handle matched from Matchmaking
         if (location.state?.matchedRoom && lobbyState === 'idle') {
             setMyRoom(location.state.matchedRoom);
-            setLobbyState('guest');
+            setLobbyState(location.state?.isHost ? 'hosting' : 'guest');
             setStatus('Đã tìm thấy đối thủ! Trận đấu sắp bắt đầu...');
         }
 
@@ -89,7 +89,7 @@ export default function TankLobby() {
 
         const handleMatchFound = (data) => {
             setMyRoom(data.roomId);
-            setLobbyState('guest');
+            setLobbyState(data.isHost ? 'hosting' : 'guest');
             setStatus('Đã tìm thấy đối thủ! Trận đấu sẽ bắt đầu ngay...');
         };
 

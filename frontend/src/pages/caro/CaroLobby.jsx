@@ -15,12 +15,14 @@ export default function CaroLobby() {
     const [inRoom, setInRoom] = useState(false);
     const [myRoom, setMyRoom] = useState('');
     const [isConnected, setIsConnected] = useState(socket.connected);
+    const [isHost, setIsHost] = useState(location.state?.isHost || false);
 
     const handleCreateRoom = useCallback(() => {
         if (!socket.connected) return;
         socket.emit('createRoom', { difficulty: 'Medium', gameType: 'caro', gridSize }, (res) => {
             setMyRoom(res.roomId);
             setInRoom(true);
+            setIsHost(true);
         });
     }, [gridSize]);
 
@@ -65,7 +67,7 @@ export default function CaroLobby() {
 
     useEffect(() => {
         const handlePlayerJoined = ({ players }) => {
-            if (players === 2) {
+            if (players === 2 && isHost) {
                 socket.emit('startCaroGame', { roomId: myRoom });
             }
         };

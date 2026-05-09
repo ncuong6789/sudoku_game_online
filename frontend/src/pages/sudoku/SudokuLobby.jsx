@@ -12,6 +12,7 @@ export default function SudokuLobby() {
     const [myRoom, setMyRoom] = useState('');
     const [playerCount, setPlayerCount] = useState(1);
     const [isConnected, setIsConnected] = useState(socket.connected);
+    const [isHost, setIsHost] = useState(location.state?.isHost || false);
 
     const handleCreateRoom = useCallback(() => {
         if (!socket.connected) return;
@@ -19,6 +20,7 @@ export default function SudokuLobby() {
             setMyRoom(res.roomId);
             setInRoom(true);
             setPlayerCount(1);
+            setIsHost(true);
         });
     }, [difficulty]);
 
@@ -67,7 +69,7 @@ export default function SudokuLobby() {
     useEffect(() => {
         const handlePlayerJoined = ({ players }) => {
             setPlayerCount(players);
-            if (players === 2) {
+            if (players === 2 && isHost) {
                 // Host generates the board
                 const { puzzle, solution } = generateSudoku(difficulty);
                 socket.emit('startGame', { puzzle, solution });

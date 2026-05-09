@@ -189,7 +189,7 @@ export default function Home() {
         };
         socket.on('statsUpdate', handleStats);
 
-        socket.on('matchFound', ({ roomId, gameType, mapSize, color }) => {
+        socket.on('matchFound', ({ roomId, gameType, mapSize, color, isHost }) => {
             setIsSearching(false);
             const gt = gameType === 'tic-tac-toe' ? 'caro' : gameType;
             
@@ -206,9 +206,9 @@ export default function Home() {
             };
 
             if (lobbyRoutes[gt]) {
-                navigate(lobbyRoutes[gt], { state: { matchedRoom: roomId, mapSize, color } });
+                navigate(lobbyRoutes[gt], { state: { matchedRoom: roomId, mapSize, color, isHost } });
             } else {
-                navigate(`/${gt}/game`, { state: { roomId, mode: 'multiplayer', mapSize, playerColor: color, isHost: true } });
+                navigate(`/${gt}/game`, { state: { roomId, mode: 'multiplayer', mapSize, playerColor: color, isHost } });
             }
         });
 
